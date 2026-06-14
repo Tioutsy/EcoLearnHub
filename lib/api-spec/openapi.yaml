@@ -1,22 +1,34 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: EcoLearn Mauritius API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: courses
+  - name: categories
+  - name: enrollments
+  - name: progress
+  - name: quizzes
+  - name: certificates
+  - name: companies
+  - name: employees
+  - name: plans
+  - name: subscriptions
+  - name: dashboard
+  - name: impact
+  - name: blog
+  - name: testimonials
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +36,1331 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── COURSES ──────────────────────────────────────────────────────────────────
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: List all published courses
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: featured
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+    post:
+      operationId: createCourse
+      tags: [courses]
+      summary: Create a course (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+  /courses/{id}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get a single course with lessons and objectives
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseDetail"
+    patch:
+      operationId: updateCourse
+      tags: [courses]
+      summary: Update a course (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+    delete:
+      operationId: deleteCourse
+      tags: [courses]
+      summary: Delete a course (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /courses/featured:
+    get:
+      operationId: getFeaturedCourses
+      tags: [courses]
+      summary: Get featured courses for the homepage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+  # ── CATEGORIES ────────────────────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all course categories
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  # ── ENROLLMENTS ───────────────────────────────────────────────────────────────
+  /enrollments:
+    get:
+      operationId: listEnrollments
+      tags: [enrollments]
+      summary: List enrollments for the current user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Enrollment"
+    post:
+      operationId: createEnrollment
+      tags: [enrollments]
+      summary: Enroll in a course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnrollmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enrollment"
+
+  /enrollments/{id}:
+    get:
+      operationId: getEnrollment
+      tags: [enrollments]
+      summary: Get a single enrollment with progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enrollment"
+
+  # ── PROGRESS ──────────────────────────────────────────────────────────────────
+  /progress/{enrollmentId}:
+    get:
+      operationId: getProgress
+      tags: [progress]
+      summary: Get lesson-by-lesson progress for an enrollment
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LessonProgress"
+    patch:
+      operationId: updateProgress
+      tags: [progress]
+      summary: Mark a lesson complete / update progress
+      parameters:
+        - name: enrollmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgressUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonProgress"
+
+  # ── QUIZZES ───────────────────────────────────────────────────────────────────
+  /courses/{courseId}/quiz:
+    get:
+      operationId: getCourseQuiz
+      tags: [quizzes]
+      summary: Get quiz questions for a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quiz"
+
+  /courses/{courseId}/quiz/submit:
+    post:
+      operationId: submitQuiz
+      tags: [quizzes]
+      summary: Submit quiz answers
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizSubmission"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuizResult"
+
+  # ── CERTIFICATES ──────────────────────────────────────────────────────────────
+  /certificates:
+    get:
+      operationId: listCertificates
+      tags: [certificates]
+      summary: List certificates for the current user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Certificate"
+
+  /certificates/{id}:
+    get:
+      operationId: getCertificate
+      tags: [certificates]
+      summary: Get a certificate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+
+  /certificates/verify/{code}:
+    get:
+      operationId: verifyCertificate
+      tags: [certificates]
+      summary: Publicly verify a certificate by its unique code
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+
+  # ── COMPANY ───────────────────────────────────────────────────────────────────
+  /company:
+    get:
+      operationId: getMyCompany
+      tags: [companies]
+      summary: Get the current user's company profile
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+    patch:
+      operationId: updateMyCompany
+      tags: [companies]
+      summary: Update company profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      summary: List all companies (admin)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+    post:
+      operationId: createCompany
+      tags: [companies]
+      summary: Create a company (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  # ── EMPLOYEES ─────────────────────────────────────────────────────────────────
+  /company/employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      summary: List employees in the current user's company
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+    post:
+      operationId: addEmployee
+      tags: [employees]
+      summary: Add an employee to the company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+
+  /company/employees/{id}:
+    patch:
+      operationId: updateEmployee
+      tags: [employees]
+      summary: Update an employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+    delete:
+      operationId: removeEmployee
+      tags: [employees]
+      summary: Remove an employee from the company
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  # ── PLANS ─────────────────────────────────────────────────────────────────────
+  /plans:
+    get:
+      operationId: listPlans
+      tags: [plans]
+      summary: List all subscription plans
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plan"
+
+  # ── SUBSCRIPTIONS ─────────────────────────────────────────────────────────────
+  /subscriptions/current:
+    get:
+      operationId: getCurrentSubscription
+      tags: [subscriptions]
+      summary: Get the current company subscription
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+
+  /subscriptions/checkout:
+    post:
+      operationId: createCheckoutSession
+      tags: [subscriptions]
+      summary: Create a Stripe checkout session for a plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+
+  /subscriptions/portal:
+    post:
+      operationId: createCustomerPortalSession
+      tags: [subscriptions]
+      summary: Create a Stripe customer portal session
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalSession"
+
+  # ── DASHBOARD ─────────────────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get company training dashboard statistics
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/employee-progress:
+    get:
+      operationId: getEmployeeProgress
+      tags: [dashboard]
+      summary: Get per-employee training progress for HR view
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmployeeProgressRow"
+
+  /dashboard/completion-trend:
+    get:
+      operationId: getCompletionTrend
+      tags: [dashboard]
+      summary: Monthly completion trend for the last 12 months
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrendPoint"
+
+  # ── ENVIRONMENTAL IMPACT ──────────────────────────────────────────────────────
+  /impact:
+    get:
+      operationId: getImpactMetrics
+      tags: [impact]
+      summary: Get environmental impact metrics for the company
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImpactMetrics"
+
+  /impact/badges:
+    get:
+      operationId: listBadges
+      tags: [impact]
+      summary: List earned sustainability badges for the company
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Badge"
+
+  /impact/department-breakdown:
+    get:
+      operationId: getDepartmentBreakdown
+      tags: [impact]
+      summary: Training completion breakdown by department
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepartmentStat"
+
+  # ── BLOG ──────────────────────────────────────────────────────────────────────
+  /blog:
+    get:
+      operationId: listBlogPosts
+      tags: [blog]
+      summary: List published blog posts
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlogPost"
+
+  /blog/{slug}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a blog post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  # ── TESTIMONIALS ──────────────────────────────────────────────────────────────
+  /testimonials:
+    get:
+      operationId: listTestimonials
+      tags: [testimonials]
+      summary: List published testimonials for homepage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Testimonial"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ── COURSE ────────────────────────────────────────────────────────────────
+    Course:
+      type: object
+      required: [id, title, description, categoryId, durationMinutes, priceUsd, level, isFeatured, thumbnailUrl]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: ["string", "null"]
+        durationMinutes:
+          type: integer
+        priceUsd:
+          type: number
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        isFeatured:
+          type: boolean
+        thumbnailUrl:
+          type: ["string", "null"]
+        previewVideoUrl:
+          type: ["string", "null"]
+        learningObjectives:
+          type: array
+          items:
+            type: string
+        enrollmentCount:
+          type: ["integer", "null"]
+        rating:
+          type: ["number", "null"]
+        includesCertificate:
+          type: boolean
+        createdAt:
+          type: string
+
+    CourseDetail:
+      allOf:
+        - $ref: "#/components/schemas/Course"
+        - type: object
+          properties:
+            lessons:
+              type: array
+              items:
+                $ref: "#/components/schemas/Lesson"
+
+    CourseInput:
+      type: object
+      required: [title, description, categoryId, durationMinutes, priceUsd, level]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: integer
+        durationMinutes:
+          type: integer
+        priceUsd:
+          type: number
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        isFeatured:
+          type: boolean
+        thumbnailUrl:
+          type: ["string", "null"]
+        previewVideoUrl:
+          type: ["string", "null"]
+        learningObjectives:
+          type: array
+          items:
+            type: string
+        includesCertificate:
+          type: boolean
+
+    CourseUpdate:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        categoryId:
+          type: ["integer", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        priceUsd:
+          type: ["number", "null"]
+        level:
+          type: ["string", "null"]
+        isFeatured:
+          type: ["boolean", "null"]
+        thumbnailUrl:
+          type: ["string", "null"]
+        previewVideoUrl:
+          type: ["string", "null"]
+        learningObjectives:
+          type: array
+          items:
+            type: string
+        includesCertificate:
+          type: ["boolean", "null"]
+
+    Lesson:
+      type: object
+      required: [id, courseId, title, orderIndex, durationMinutes]
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        title:
+          type: string
+        orderIndex:
+          type: integer
+        durationMinutes:
+          type: integer
+        videoUrl:
+          type: ["string", "null"]
+        pdfUrl:
+          type: ["string", "null"]
+        content:
+          type: ["string", "null"]
+
+    # ── CATEGORY ──────────────────────────────────────────────────────────────
+    Category:
+      type: object
+      required: [id, name, slug, courseCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: ["string", "null"]
+        iconName:
+          type: ["string", "null"]
+        courseCount:
+          type: integer
+
+    # ── ENROLLMENT ────────────────────────────────────────────────────────────
+    Enrollment:
+      type: object
+      required: [id, userId, courseId, status, progressPct, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        courseId:
+          type: integer
+        courseName:
+          type: ["string", "null"]
+        courseThumbnail:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, completed, expired]
+        progressPct:
+          type: integer
+        lastAccessedAt:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    EnrollmentInput:
+      type: object
+      required: [courseId]
+      properties:
+        courseId:
+          type: integer
+
+    # ── PROGRESS ──────────────────────────────────────────────────────────────
+    LessonProgress:
+      type: object
+      required: [id, enrollmentId, lessonId, completed]
+      properties:
+        id:
+          type: integer
+        enrollmentId:
+          type: integer
+        lessonId:
+          type: integer
+        lessonTitle:
+          type: ["string", "null"]
+        completed:
+          type: boolean
+        watchedSeconds:
+          type: integer
+        completedAt:
+          type: ["string", "null"]
+
+    ProgressUpdate:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId:
+          type: integer
+        completed:
+          type: boolean
+        watchedSeconds:
+          type: ["integer", "null"]
+
+    # ── QUIZ ──────────────────────────────────────────────────────────────────
+    Quiz:
+      type: object
+      required: [courseId, questions]
+      properties:
+        courseId:
+          type: integer
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizQuestion"
+
+    QuizQuestion:
+      type: object
+      required: [id, question, options]
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    QuizSubmission:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizAnswer"
+
+    QuizAnswer:
+      type: object
+      required: [questionId, selectedOption]
+      properties:
+        questionId:
+          type: integer
+        selectedOption:
+          type: integer
+
+    QuizResult:
+      type: object
+      required: [score, passed, totalQuestions, correctAnswers]
+      properties:
+        score:
+          type: integer
+        passed:
+          type: boolean
+        totalQuestions:
+          type: integer
+        correctAnswers:
+          type: integer
+        certificateId:
+          type: ["integer", "null"]
+
+    # ── CERTIFICATE ───────────────────────────────────────────────────────────
+    Certificate:
+      type: object
+      required: [id, userId, courseId, uniqueCode, issuedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        employeeName:
+          type: ["string", "null"]
+        companyName:
+          type: ["string", "null"]
+        courseId:
+          type: integer
+        courseName:
+          type: ["string", "null"]
+        uniqueCode:
+          type: string
+        issuedAt:
+          type: string
+        pdfUrl:
+          type: ["string", "null"]
+
+    # ── COMPANY ───────────────────────────────────────────────────────────────
+    Company:
+      type: object
+      required: [id, name, slug, planId, employeeCount, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        industry:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        planId:
+          type: ["integer", "null"]
+        planName:
+          type: ["string", "null"]
+        employeeCount:
+          type: integer
+        maxEmployees:
+          type: ["integer", "null"]
+        completionRate:
+          type: ["number", "null"]
+        certificatesIssued:
+          type: ["integer", "null"]
+        badges:
+          type: array
+          items:
+            type: string
+        isPublicProfile:
+          type: boolean
+        createdAt:
+          type: string
+
+    CompanyInput:
+      type: object
+      required: [name, industry]
+      properties:
+        name:
+          type: string
+        industry:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+
+    CompanyUpdate:
+      type: object
+      properties:
+        name:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        isPublicProfile:
+          type: ["boolean", "null"]
+
+    # ── EMPLOYEE ──────────────────────────────────────────────────────────────
+    Employee:
+      type: object
+      required: [id, companyId, email, name, role, createdAt]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+        clerkUserId:
+          type: ["string", "null"]
+        email:
+          type: string
+        name:
+          type: string
+        department:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [employee, manager, admin]
+        enrolledCourses:
+          type: ["integer", "null"]
+        completedCourses:
+          type: ["integer", "null"]
+        certificates:
+          type: ["integer", "null"]
+        lastActiveAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    EmployeeInput:
+      type: object
+      required: [email, name]
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        department:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [employee, manager, admin]
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        name:
+          type: ["string", "null"]
+        department:
+          type: ["string", "null"]
+        role:
+          type: ["string", "null"]
+
+    # ── PLANS ─────────────────────────────────────────────────────────────────
+    Plan:
+      type: object
+      required: [id, name, maxEmployees, priceMonthly, priceAnnual, features]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        maxEmployees:
+          type: ["integer", "null"]
+        priceMonthly:
+          type: number
+        priceAnnual:
+          type: number
+        features:
+          type: array
+          items:
+            type: string
+        isPopular:
+          type: boolean
+        stripePriceIdMonthly:
+          type: ["string", "null"]
+        stripePriceIdAnnual:
+          type: ["string", "null"]
+
+    # ── SUBSCRIPTION ──────────────────────────────────────────────────────────
+    Subscription:
+      type: object
+      required: [id, companyId, planId, status, currentPeriodEnd]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+        planId:
+          type: integer
+        planName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, trialing, past_due, canceled, incomplete]
+        currentPeriodStart:
+          type: ["string", "null"]
+        currentPeriodEnd:
+          type: string
+        stripeSubscriptionId:
+          type: ["string", "null"]
+        cancelAtPeriodEnd:
+          type: boolean
+
+    CheckoutInput:
+      type: object
+      required: [planId, billingInterval]
+      properties:
+        planId:
+          type: integer
+        billingInterval:
+          type: string
+          enum: [monthly, annual]
+
+    CheckoutSession:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+
+    PortalSession:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+
+    # ── DASHBOARD ─────────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalEmployees, activeEmployees, completionRate, certificatesIssued, coursesAssigned, avgScore]
+      properties:
+        totalEmployees:
+          type: integer
+        activeEmployees:
+          type: integer
+        completionRate:
+          type: number
+        certificatesIssued:
+          type: integer
+        coursesAssigned:
+          type: integer
+        avgScore:
+          type: number
+        employeesNeedingRetraining:
+          type: integer
+        onboardingCompletion:
+          type: number
+
+    EmployeeProgressRow:
+      type: object
+      required: [employeeId, employeeName, email, department, coursesCompleted, totalCourses, completionRate, lastActiveAt]
+      properties:
+        employeeId:
+          type: integer
+        employeeName:
+          type: string
+        email:
+          type: string
+        department:
+          type: ["string", "null"]
+        coursesCompleted:
+          type: integer
+        totalCourses:
+          type: integer
+        completionRate:
+          type: number
+        certificates:
+          type: integer
+        lastActiveAt:
+          type: ["string", "null"]
+        needsRetraining:
+          type: boolean
+
+    TrendPoint:
+      type: object
+      required: [month, completions, enrollments]
+      properties:
+        month:
+          type: string
+        completions:
+          type: integer
+        enrollments:
+          type: integer
+
+    # ── ENVIRONMENTAL IMPACT ──────────────────────────────────────────────────
+    ImpactMetrics:
+      type: object
+      required: [employeesTrained, certificatesIssued, completionRate, activeLearners, departmentsTrained, kgWasteDiverted, plasticReductionPct, recyclingParticipationPct, co2AvoidedKg, environmentalScore]
+      properties:
+        employeesTrained:
+          type: integer
+        certificatesIssued:
+          type: integer
+        completionRate:
+          type: number
+        activeLearners:
+          type: integer
+        departmentsTrained:
+          type: integer
+        kgWasteDiverted:
+          type: number
+        wastContaminationReductionPct:
+          type: number
+        plasticReductionPct:
+          type: number
+        recyclingParticipationPct:
+          type: number
+        co2AvoidedKg:
+          type: number
+        environmentalScore:
+          type: integer
+        monthlyTrend:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendPoint"
+        annualComparison:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendPoint"
+
+    Badge:
+      type: object
+      required: [id, name, slug, description, awardedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        iconUrl:
+          type: ["string", "null"]
+        awardedAt:
+          type: string
+
+    DepartmentStat:
+      type: object
+      required: [department, employeeCount, completionRate, certificates]
+      properties:
+        department:
+          type: string
+        employeeCount:
+          type: integer
+        completionRate:
+          type: number
+        certificates:
+          type: integer
+
+    # ── BLOG ──────────────────────────────────────────────────────────────────
+    BlogPost:
+      type: object
+      required: [id, title, slug, excerpt, content, authorName, publishedAt, tags]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        authorName:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    # ── TESTIMONIAL ───────────────────────────────────────────────────────────
+    Testimonial:
+      type: object
+      required: [id, authorName, authorTitle, company, text, rating]
+      properties:
+        id:
+          type: integer
+        authorName:
+          type: string
+        authorTitle:
+          type: string
+        company:
+          type: string
+        text:
+          type: string
+        rating:
+          type: integer
+        avatarUrl:
+          type: ["string", "null"]

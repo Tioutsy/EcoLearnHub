@@ -1,0 +1,114 @@
+import { Layout } from "@/components/layout/Layout";
+import { useListPlans } from "@workspace/api-client-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Building2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Link } from "wouter";
+
+export default function Pricing() {
+  const { data: plans, isLoading } = useListPlans();
+  const [isAnnual, setIsAnnual] = useState(true);
+
+  return (
+    <Layout>
+      <div className="bg-primary/5 pt-20 pb-16 border-b">
+        <div className="container mx-auto px-4 text-center max-w-3xl">
+          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6 text-foreground">
+            Corporate ESG Training Plans
+          </h1>
+          <p className="text-xl text-muted-foreground mb-10">
+            Equip your entire workforce with the knowledge to drive your company's sustainability goals forward.
+          </p>
+          
+          <div className="flex items-center justify-center gap-3">
+            <Label htmlFor="billing-toggle" className={!isAnnual ? "font-semibold text-foreground" : "text-muted-foreground"}>Monthly</Label>
+            <Switch 
+              id="billing-toggle" 
+              checked={isAnnual} 
+              onCheckedChange={setIsAnnual} 
+            />
+            <Label htmlFor="billing-toggle" className={isAnnual ? "font-semibold text-foreground" : "text-muted-foreground"}>
+              Annually <span className="text-primary text-xs font-bold ml-1 bg-primary/10 px-2 py-0.5 rounded-full">Save 20%</span>
+            </Label>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-20">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {isLoading ? (
+            Array(3).fill(0).map((_, i) => (
+              <div key={i} className="border rounded-2xl p-8 flex flex-col gap-4">
+                <Skeleton className="h-8 w-1/2" />
+                <Skeleton className="h-16 w-3/4" />
+                <Skeleton className="h-10 w-full mt-4" />
+                <div className="space-y-3 mt-8">
+                  {Array(5).fill(0).map((_, j) => <Skeleton key={j} className="h-4 w-full" />)}
+                </div>
+              </div>
+            ))
+          ) : plans?.map((plan) => (
+            <div 
+              key={plan.id} 
+              className={`relative bg-card border rounded-2xl p-8 flex flex-col shadow-sm transition-all ${
+                plan.isPopular ? 'border-primary shadow-md lg:-translate-y-4 lg:pb-12' : ''
+              }`}
+            >
+              {plan.isPopular && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  Most Popular
+                </div>
+              )}
+              
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold font-serif mb-2">{plan.name}</h3>
+                <div className="text-muted-foreground text-sm mb-6 h-10">
+                  {plan.maxEmployees ? `Up to ${plan.maxEmployees} employees` : 'Unlimited employees'}
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold">${isAnnual ? plan.priceAnnual : plan.priceMonthly}</span>
+                  <span className="text-muted-foreground font-medium">/{isAnnual ? 'yr' : 'mo'}</span>
+                </div>
+              </div>
+
+              <Button 
+                asChild
+                className={`w-full mb-8 h-12 text-base ${plan.isPopular ? '' : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'}`}
+              >
+                <Link href="/sign-up">Get Started</Link>
+              </Button>
+
+              <div className="flex-1">
+                <p className="font-semibold text-sm mb-4 uppercase tracking-wider text-muted-foreground">What's included</p>
+                <ul className="space-y-4">
+                  {plan.features?.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                      <span className="leading-snug">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-24 max-w-3xl mx-auto text-center border-t pt-16">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-secondary/10 text-secondary mb-6">
+            <Building2 className="h-8 w-8" />
+          </div>
+          <h2 className="text-3xl font-bold font-serif mb-4">Need a custom enterprise solution?</h2>
+          <p className="text-muted-foreground text-lg mb-8">
+            For organizations with over 500 employees, we offer tailored curriculum development, custom LMS integrations, and dedicated account management.
+          </p>
+          <Button variant="outline" size="lg" className="h-12 px-8">
+            Contact Enterprise Sales
+          </Button>
+        </div>
+      </div>
+    </Layout>
+  );
+}

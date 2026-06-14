@@ -1,0 +1,233 @@
+Create a professional e-learning web platform called “EcoLearn Mauritius” dedicated to waste sorting, recycling, sustainability, environmental awareness, and corporate environmental responsibility in Mauritius.
+
+The platform’s objective is to allow companies to train employees quickly, efficiently, and remotely without requiring physical workshops or travel.
+
+Target clients include:
+
+* Hotels and resorts
+* Offices and corporate businesses
+* Property management companies
+* Co-ownership management companies (syndics)
+* Shopping centres
+* Manufacturing companies
+* Schools and educational institutions
+* ESG-conscious businesses
+
+The platform must include:
+
+1. Homepage
+
+* Modern, professional and environmentally focused design.
+* Highlight the benefits of online training:
+    * Train employees anytime and anywhere.
+    * No travel required.
+    * Reduced training costs.
+    * Standardized training quality.
+    * Automatic certification.
+    * Compliance and ESG support.
+* Call-to-action buttons:
+    * Browse Courses
+    * Purchase Training
+    * Corporate Packages
+    * Contact Us
+
+2. Course Marketplace
+    Display all available courses with:
+
+* Course title
+* Description
+* Learning objectives
+* Duration
+* Preview lesson
+* Price
+* Certificate included
+
+3. Course Categories
+    Create courses within:
+
+* Introduction to Sustainability
+* Waste Sorting in Mauritius
+* Recycling Best Practices
+* Plastic Reduction Strategies
+* Office Sustainability
+* Environmental Responsibilities of Employees
+* Sustainable Hospitality Practices
+* Green Building and Property Management
+* Corporate Environmental Policies
+* ESG Awareness
+* Green Workplace Certification
+
+4. Hybrid Business Model
+
+A. Individual Course Purchase
+Allow companies or individuals to purchase a course once.
+
+Examples:
+
+* Basic Waste Sorting Course
+* Recycling Awareness Course
+* Sustainability Essentials Course
+
+Each purchase includes:
+
+* Online access
+* Downloadable resources
+* Quiz assessments
+* Certificate of completion
+
+B. Corporate Annual Subscription Packages
+
+Starter Package
+
+* Up to 10 employees
+
+Business Package
+
+* Up to 50 employees
+
+Corporate Package
+
+* Up to 200 employees
+
+Enterprise Package
+
+* Unlimited employees
+* Custom pricing
+
+Subscription benefits:
+
+* Unlimited access to all courses
+* Add new employees at any time
+* Access to future course updates
+* Unlimited certificates
+* Company training dashboard
+* Annual compliance reports
+
+5. Learning Management System (LMS)
+
+Each company account must include:
+
+* Company profile
+* Employee management
+* Add/remove employees
+* Training assignments
+* Progress tracking
+* Completion monitoring
+* Quiz scores
+* Certification records
+
+6. HR and Management Dashboard
+
+Managers can:
+
+* View employee training status
+* Track completion rates
+* Generate training reports
+* Export reports to PDF and Excel
+* Identify employees requiring retraining
+* Monitor onboarding training completion
+
+7. Course Player
+
+Users can:
+
+* Watch training videos online
+* Download PDF materials
+* Complete quizzes
+* Save progress automatically
+* Resume training from any device
+
+8. Certification System
+
+Generate professional certificates automatically:
+
+* Employee name
+* Company name
+* Course completed
+* Date completed
+* Unique certificate number
+* QR code verification
+* Downloadable PDF
+
+9. Administration Panel
+
+Administrator can:
+
+* Create and edit courses
+* Upload videos
+* Upload documents
+* Create quizzes
+* Manage companies
+* Manage subscriptions
+* Track sales
+* View analytics
+* Monitor course performance
+
+10. Compliance and ESG Reporting
+
+Create a dedicated reporting module that allows companies to:
+
+* Demonstrate employee environmental training completion
+* Generate ESG-support reports
+* Generate sustainability training summaries
+* Produce audit-ready documentation
+* Download annual environmental training reports
+
+11. Marketing Features
+
+Include:
+
+* Testimonials
+* Success stories
+* FAQ section
+* Blog about recycling and sustainability in Mauritius
+* Lead capture forms
+* Newsletter signup
+* Free demo request form
+
+12. Payment System
+
+Support:
+
+* Stripe
+* Credit cards
+* Subscription billing
+* One-time purchases
+* Automatic renewal management
+* Invoice generation
+
+13. Technical Requirements
+
+* Mobile responsive design
+* Tablet responsive design
+* Desktop responsive design
+* Secure authentication
+* User roles and permissions
+* SEO optimization
+* Fast loading speed
+* Professional UI/UX
+* Green and blue environmental branding
+
+14. Future AI Features
+
+Design the architecture to support future additions:
+
+* AI-generated quizzes
+* AI tutor for learners
+* Personalized learning paths
+* AI-generated sustainability recommendations
+* Automated compliance reminders
+
+15. Multilingual Support
+
+Prepare the platform for:
+
+* English
+* French
+* Future Creole language support
+
+16. Overall Design Inspiration
+
+The platform should feel as professional as Udemy, Coursera, or LinkedIn Learning, but specialized for environmental training, waste management, sustainability, and ESG compliance in Mauritius.
+
+The platform must be scalable and capable of serving thousands of users across multiple companies simultaneously.

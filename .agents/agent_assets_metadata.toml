@@ -1,0 +1,32 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "pRkF39OU-Tk7KY7qNjY5C"
+uri = "file://artifacts/ecolearn/public/images/hero.png"
+type = "image"
+title = "Hero corporate sustainability training"
+
+[[generated]]
+id = "mhe7Ig7_xb-61SY9PQd6J"
+uri = "file://artifacts/ecolearn/public/images/course-waste.png"
+type = "image"
+title = "Waste sorting course thumbnail"
+
+[[generated]]
+id = "-TvZPxIqzaptZj1wGZlUV"
+uri = "file://artifacts/ecolearn/public/images/course-esg.png"
+type = "image"
+title = "ESG compliance course thumbnail"
+
+[[generated]]
+id = "7ySICCwfnuxF64bD_rDpO"
+uri = "file://artifacts/ecolearn/public/images/course-recycling.png"
+type = "image"
+title = "Recycling strategies thumbnail"
+
+[[generated]]
+id = "8sihUa_cnlwLwKbkhocC6"
+uri = "file://artifacts/ecolearn/public/images/course-hospitality.png"
+type = "image"
+title = "Hospitality sustainability thumbnail"
