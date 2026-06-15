@@ -32,6 +32,7 @@ export * from './employeeProgressRow';
 export * from './employeeRole';
 export * from './employeeUpdate';
 export * from './enrollment';
+export * from './enrollmentDetail';
 export * from './enrollmentInput';
 export * from './enrollmentStatus';
 export * from './healthStatus';

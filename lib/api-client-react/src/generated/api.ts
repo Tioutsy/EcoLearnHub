@@ -40,6 +40,7 @@ import type {
   EmployeeProgressRow,
   EmployeeUpdate,
   Enrollment,
+  EnrollmentDetail,
   EnrollmentInput,
   HealthStatus,
   ImpactMetrics,
@@ -832,9 +833,9 @@ export const getGetEnrollmentUrl = (id: number,) => {
 /**
  * @summary Get a single enrollment with progress
  */
-export const getEnrollment = async (id: number, options?: RequestInit): Promise<Enrollment> => {
+export const getEnrollment = async (id: number, options?: RequestInit): Promise<EnrollmentDetail> => {
 
-  return customFetch<Enrollment>(getGetEnrollmentUrl(id),
+  return customFetch<EnrollmentDetail>(getGetEnrollmentUrl(id),
   {
     ...options,
     method: 'GET'

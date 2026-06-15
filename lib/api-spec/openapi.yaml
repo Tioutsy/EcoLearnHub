@@ -219,7 +219,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Enrollment"
+                $ref: "#/components/schemas/EnrollmentDetail"
 
   # ── PROGRESS ──────────────────────────────────────────────────────────────────
   /progress/{enrollmentId}:
@@ -883,6 +883,16 @@ components:
           type: ["string", "null"]
         createdAt:
           type: string
+
+    EnrollmentDetail:
+      allOf:
+        - $ref: "#/components/schemas/Enrollment"
+        - type: object
+          properties:
+            course:
+              nullable: true
+              allOf:
+                - $ref: "#/components/schemas/CourseDetail"
 
     EnrollmentInput:
       type: object

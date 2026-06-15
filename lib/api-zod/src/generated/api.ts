@@ -233,7 +233,37 @@ export const GetEnrollmentResponse = zod.object({
   "lastAccessedAt": zod.string().nullish(),
   "completedAt": zod.string().nullish(),
   "createdAt": zod.string()
-})
+}).and(zod.object({
+  "course": zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "categoryId": zod.number(),
+  "categoryName": zod.string().nullish(),
+  "durationMinutes": zod.number(),
+  "priceUsd": zod.number(),
+  "level": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "isFeatured": zod.boolean(),
+  "thumbnailUrl": zod.string().nullable(),
+  "previewVideoUrl": zod.string().nullish(),
+  "learningObjectives": zod.array(zod.string()).optional(),
+  "enrollmentCount": zod.number().nullish(),
+  "rating": zod.number().nullish(),
+  "includesCertificate": zod.boolean().optional(),
+  "createdAt": zod.string().optional()
+}).and(zod.object({
+  "lessons": zod.array(zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "title": zod.string(),
+  "orderIndex": zod.number(),
+  "durationMinutes": zod.number(),
+  "videoUrl": zod.string().nullish(),
+  "pdfUrl": zod.string().nullish(),
+  "content": zod.string().nullish()
+})).optional()
+})).nullish()
+}))
 
 
 /**

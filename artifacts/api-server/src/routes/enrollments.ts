@@ -81,7 +81,29 @@ router.get("/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Enrollment not found" });
     return;
   }
-  res.json(enrollment);
+
+  const [course] = await db
+    .select()
+    .from(coursesTable)
+    .where(eq(coursesTable.id, enrollment.courseId));
+
+  const lessons = await db
+    .select()
+    .from(lessonsTable)
+    .where(eq(lessonsTable.courseId, enrollment.courseId))
+    .orderBy(lessonsTable.orderIndex);
+
+  res.json({
+    ...enrollment,
+    course: course
+      ? {
+          ...course,
+          priceUsd: parseFloat(course.priceUsd),
+          rating: course.rating != null ? parseFloat(course.rating) : null,
+          lessons,
+        }
+      : null,
+  });
 });
 
 // Progress sub-routes

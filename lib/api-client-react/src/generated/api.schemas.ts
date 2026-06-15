@@ -146,6 +146,10 @@ export interface Enrollment {
   createdAt: string;
 }
 
+export type EnrollmentDetail = Enrollment & ({
+  course?: CourseDetail | null;
+});
+
 export interface EnrollmentInput {
   courseId: number;
 }
