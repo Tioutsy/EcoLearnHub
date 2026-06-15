@@ -1,0 +1,401 @@
+PROJECT: EVOLVE ECOLEARN INTO MAURITIUS' LEADING CORPORATE SUSTAINABILITY & ESG TRAINING PLATFORM
+
+CONTEXT
+
+EcoLearn is no longer simply an e-learning platform. It must evolve into a complete corporate sustainability training and reporting solution for Mauritian businesses.
+
+Our target customers are:
+
+* SMEs
+* Hotels
+* Property Management Companies
+* Syndics / Co-Ownership Managers
+* Real Estate Developers
+* Manufacturing Companies
+* Corporate Offices
+* Educational Institutions
+
+The primary buyer is NOT the employee.
+
+The primary buyer is:
+
+* CEO
+* HR Manager
+* ESG Manager
+* Operations Manager
+* Compliance Manager
+
+The platform must therefore focus on:
+
+1. Employee training
+2. Progress tracking
+3. Reporting
+4. Compliance support
+5. ESG engagement
+6. Sustainability metrics
+
+The objective is to make EcoLearn indispensable for companies wanting to demonstrate sustainability engagement.
+
+---
+
+PHASE 1 - COMPANY DASHBOARD UPGRADE
+
+Improve the Company Dashboard.
+
+Current metrics:
+
+* Total Employees
+* Active Learners
+* Certificates Earned
+* Needs Retraining
+
+Keep these.
+
+Add:
+
+* Overall Training Completion Rate
+* Average Company Score
+* Courses Assigned
+* Courses Completed
+* Learning Hours Completed
+
+Create executive KPI cards.
+
+Add visual charts:
+
+* Monthly completion rate
+* Employee engagement trend
+* Training adoption rate
+* Department participation
+
+---
+
+PHASE 2 - ESG IMPACT DASHBOARD
+
+Create a new section called:
+
+"Sustainability Impact"
+
+Display estimated impact generated through training and employee engagement.
+
+Examples:
+
+* Waste diverted from landfill
+* Recycling participation
+* Plastic reduction score
+* Water savings awareness score
+* Carbon awareness score
+
+Include:
+
+* Trees equivalent saved
+* CO2 equivalent impact
+* Sustainability engagement score
+
+Even if values are calculated through predefined formulas and assumptions.
+
+Make the dashboard highly visual.
+
+The goal is to give companies meaningful ESG metrics.
+
+---
+
+PHASE 3 - COMPANY SUSTAINABILITY SCORE
+
+Create a company maturity score.
+
+Example:
+
+EcoLearn Sustainability Score:
+72 / 100
+
+Levels:
+
+0-25 = Starter
+
+26-50 = Bronze
+
+51-75 = Silver
+
+76-90 = Gold
+
+91-100 = Platinum
+
+Display badge prominently on dashboard.
+
+Show recommendations for improving score.
+
+---
+
+PHASE 4 - CERTIFICATION SYSTEM
+
+Implement automatic PDF certificate generation.
+
+Certificate should include:
+
+* Employee name
+* Company name
+* Course name
+* Completion date
+* Unique certificate ID
+* QR verification code
+* EcoLearn branding
+
+Allow:
+
+* Employee download
+* Company download
+* Bulk certificate export
+
+---
+
+PHASE 5 - ESG TRAINING REPORTS
+
+Create downloadable reports.
+
+Add button:
+
+"Download ESG Training Report"
+
+Generate PDF including:
+
+* Company details
+* Employee participation
+* Completion rates
+* Courses completed
+* Sustainability score
+* Certificates earned
+* ESG impact summary
+
+Report should look professional enough to be shared with:
+
+* Auditors
+* Clients
+* Investors
+* ESG consultants
+* Certification bodies
+
+---
+
+PHASE 6 - LEARNING PATHS
+
+Stop presenting only individual courses.
+
+Create structured learning journeys.
+
+Examples:
+
+GENERAL EMPLOYEE PATH
+
+* Sustainability Fundamentals
+* Waste Sorting
+* Plastic Reduction
+* Energy Efficiency
+* Water Conservation
+
+PROPERTY MANAGEMENT PATH
+
+* Sustainable Co-Ownership Management
+* Waste Management in Residential Estates
+* Resident Awareness
+* Green Building Practices
+* Sustainable Maintenance
+
+HOTEL & HOSPITALITY PATH
+
+* Waste Reduction
+* Water Management
+* Guest Sustainability Awareness
+* Responsible Procurement
+
+MANUFACTURING PATH
+
+* Circular Economy
+* Resource Efficiency
+* Waste Reduction
+* ESG Awareness
+
+Display journey progress.
+
+Example:
+
+4 of 10 modules completed
+
+40% complete
+
+---
+
+PHASE 7 - BADGES & GAMIFICATION
+
+Create achievement badges.
+
+Examples:
+
+* Sustainability Beginner
+* Recycling Champion
+* Plastic Reduction Advocate
+* ESG Ambassador
+* Sustainability Leader
+
+Employees earn badges automatically.
+
+Display badges on profile.
+
+---
+
+PHASE 8 - LEADERBOARDS
+
+Create optional company leaderboards.
+
+Examples:
+
+Top Learners
+
+Top Sustainability Champions
+
+Most Courses Completed
+
+Highest Assessment Score
+
+Allow company admins to disable leaderboard if desired.
+
+---
+
+PHASE 9 - MONTHLY CHALLENGES
+
+Create challenge system.
+
+Examples:
+
+Plastic Free Month
+
+Energy Saving Week
+
+Waste Reduction Challenge
+
+Water Conservation Challenge
+
+Allow participation tracking.
+
+Reward badges and points.
+
+---
+
+PHASE 10 - HR & COMPLIANCE TOOLS
+
+Add:
+
+Employee reminders
+
+Automatic retraining notifications
+
+Training expiration dates
+
+Course assignment by department
+
+Bulk employee import via Excel
+
+Bulk training assignment
+
+Training compliance dashboard
+
+---
+
+PHASE 11 - MARKETING POSITIONING
+
+Update platform messaging.
+
+Replace generic wording such as:
+
+"Online Sustainability Courses"
+
+With:
+
+"Train. Track. Certify. Demonstrate Sustainability."
+
+And:
+
+"Corporate Sustainability & ESG Training Platform for Mauritius"
+
+Focus messaging on:
+
+* employee engagement
+* measurable results
+* ESG readiness
+* reporting
+* compliance support
+
+---
+
+PHASE 12 - MAURITIUS DIFFERENTIATION
+
+This is critical.
+
+Do not become a generic sustainability LMS.
+
+Leverage local content:
+
+* Mauritian waste sorting system
+* Mauritian recycling ecosystem
+* Local regulations
+* Local case studies
+* Mauritian sustainability success stories
+
+Create a section:
+
+"Made for Mauritius"
+
+This should become a major competitive advantage.
+
+---
+
+PHASE 13 - FREE TRIAL FUNNEL
+
+Create a trial plan.
+
+Allow:
+
+* Up to 5 employees
+* Access to 1 course
+* 14-day trial
+
+Capture leads automatically.
+
+Add:
+
+Book a Demo
+
+Request Corporate Proposal
+
+---
+
+PHASE 14 - ADMIN ANALYTICS
+
+Create super admin dashboard.
+
+Track:
+
+* Companies registered
+* Active companies
+* Revenue
+* Trial conversions
+* Employee engagement
+* Most popular courses
+* Completion rates
+
+---
+
+ULTIMATE OBJECTIVE
+
+Transform EcoLearn from an e-learning platform into a complete Sustainability, ESG Engagement and Corporate Training Management System for Mauritian organizations.
+
+When a company subscribes, they should not feel they are purchasing courses.
+
+They should feel they are purchasing:
+
+* Sustainability engagement
+* Employee awareness
+* ESG reporting support
+* Corporate sustainability tracking
+* Compliance readiness
+* Measurable impact
