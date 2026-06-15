@@ -6,7 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ContributorStat } from './contributorStat';
-import type { TrendPoint } from './trendPoint';
+import type { MonthlyTrendPoint } from './monthlyTrendPoint';
 
 export interface ImpactMetrics {
   employeesTrained: number;
@@ -22,5 +22,5 @@ export interface ImpactMetrics {
   treeCost: number;
   partnerName: string;
   topContributors?: ContributorStat[];
-  monthlyTrend?: TrendPoint[];
+  monthlyTrend?: MonthlyTrendPoint[];
 }

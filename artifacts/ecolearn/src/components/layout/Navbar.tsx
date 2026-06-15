@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth, UserButton } from "@clerk/react";
-import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle } from "lucide-react";
+import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as RouteIcon, Target, MapPin } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,9 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/courses", label: "Courses", icon: BookOpen },
+    { href: "/learning-paths", label: "Paths", icon: RouteIcon },
+    { href: "/challenges", label: "Challenges", icon: Target },
+    { href: "/made-for-mauritius", label: "Made for Mauritius", icon: MapPin },
     { href: "/impact", label: "Impact", icon: BarChart3 },
     { href: "/pricing", label: "Pricing", icon: Building2 },
     { href: "/blog", label: "Insights", icon: Leaf },

@@ -8,3 +8,8 @@ export * from "./quizzes";
 export * from "./certificates";
 export * from "./impact";
 export * from "./blog";
+export * from "./learningPaths";
+export * from "./badgeDefinitions";
+export * from "./challenges";
+export * from "./compliance";
+export * from "./leads";

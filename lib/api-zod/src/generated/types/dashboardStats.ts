@@ -12,7 +12,9 @@ export interface DashboardStats {
   completionRate: number;
   certificatesIssued: number;
   coursesAssigned: number;
+  coursesCompleted: number;
   avgScore: number;
-  employeesNeedingRetraining?: number;
-  onboardingCompletion?: number;
+  learningHoursCompleted: number;
+  trainingAdoptionRate: number;
+  employeesNeedingRetraining: number;
 }

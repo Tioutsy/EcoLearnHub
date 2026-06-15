@@ -10,6 +10,13 @@ import companiesRouter from "./companies";
 import plansRouter from "./plans";
 import dashboardRouter from "./dashboard";
 import impactRouter from "./impact";
+import esgRouter from "./esg";
+import learningPathsRouter from "./learningPaths";
+import badgesRouter from "./badges";
+import leaderboardsRouter from "./leaderboards";
+import challengesRouter from "./challenges";
+import complianceRouter from "./compliance";
+import leadsRouter from "./leads";
 import blogRouter from "./blog";
 
 const router: IRouter = Router();
@@ -27,6 +34,13 @@ router.use("/plans", plansRouter);
 router.use("/subscriptions", plansRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/impact", impactRouter);
+router.use("/esg", esgRouter);
+router.use("/learning-paths", learningPathsRouter);
+router.use("/badges", badgesRouter);
+router.use("/leaderboards", leaderboardsRouter);
+router.use("/challenges", challengesRouter);
+router.use("/compliance", complianceRouter);
+router.use("/leads", leadsRouter);
 router.use(blogRouter);
 
 export default router;

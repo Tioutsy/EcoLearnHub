@@ -218,6 +218,222 @@ export interface Certificate {
   pdfUrl?: string | null;
 }
 
+export interface LearningPathModule {
+  courseId: number;
+  courseTitle: string;
+  durationMinutes: number;
+  level: string;
+  orderIndex: number;
+  completed: boolean;
+}
+
+export interface LearningPath {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  audience: string;
+  icon: string;
+  totalModules: number;
+  completedModules: number;
+  progressPct: number;
+  totalMinutes: number;
+  modules: LearningPathModule[];
+}
+
+export interface AchievementBadge {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  /** @nullable */
+  earnedAt: string | null;
+  progressCurrent: number;
+  progressTarget: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  employeeId: number;
+  name: string;
+  /** @nullable */
+  department?: string | null;
+  value: number;
+  valueLabel: string;
+}
+
+export interface Leaderboard {
+  key: string;
+  title: string;
+  description: string;
+  unit: string;
+  entries: LeaderboardEntry[];
+}
+
+export interface LeaderboardResponse {
+  enabled: boolean;
+  boards: Leaderboard[];
+}
+
+export type ChallengeStatus = typeof ChallengeStatus[keyof typeof ChallengeStatus];
+
+
+export const ChallengeStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  ended: 'ended',
+} as const;
+
+export interface Challenge {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  icon: string;
+  theme: string;
+  focus: string;
+  unit: string;
+  goalTarget: number;
+  points: number;
+  /** @nullable */
+  badgeName?: string | null;
+  startDate: string;
+  endDate: string;
+  status: ChallengeStatus;
+  joined: boolean;
+  progress: number;
+  completed: boolean;
+  pointsEarned: number;
+  progressPct: number;
+}
+
+export interface ChallengeListResponse {
+  totalPoints: number;
+  completedCount: number;
+  challenges: Challenge[];
+}
+
+export interface ChallengeProgressInput {
+  /** @minimum 1 */
+  amount?: number;
+}
+
+export type ComplianceAssignmentStatus = typeof ComplianceAssignmentStatus[keyof typeof ComplianceAssignmentStatus];
+
+
+export const ComplianceAssignmentStatus = {
+  compliant: 'compliant',
+  expiring_soon: 'expiring_soon',
+  expired: 'expired',
+  overdue: 'overdue',
+  not_started: 'not_started',
+} as const;
+
+export interface ComplianceAssignment {
+  id: number;
+  employeeId: number;
+  employeeName: string;
+  /** @nullable */
+  department?: string | null;
+  courseId: number;
+  courseTitle: string;
+  isMandatory: boolean;
+  assignedAt: string;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  completedAt?: string | null;
+  /** @nullable */
+  expiresAt?: string | null;
+  status: ComplianceAssignmentStatus;
+}
+
+export interface ComplianceSummary {
+  total: number;
+  compliant: number;
+  expiringSoon: number;
+  expired: number;
+  overdue: number;
+  notStarted: number;
+  complianceRate: number;
+}
+
+export interface ComplianceCourseStat {
+  courseId: number;
+  title: string;
+  total: number;
+  compliant: number;
+  complianceRate: number;
+}
+
+export interface ComplianceOverview {
+  summary: ComplianceSummary;
+  assignments: ComplianceAssignment[];
+  courses: ComplianceCourseStat[];
+}
+
+export interface AssignCourseInput {
+  courseId: number;
+  employeeIds?: number[];
+  department?: string;
+  dueDate?: string;
+}
+
+export interface AssignCourseResult {
+  assigned: number;
+  skipped: number;
+}
+
+export interface TrainingReminder {
+  id: number;
+  companyId: number;
+  employeeId: number;
+  /** @nullable */
+  courseId?: number | null;
+  type: string;
+  message: string;
+  createdAt: string;
+}
+
+export type SendReminderInputType = typeof SendReminderInputType[keyof typeof SendReminderInputType];
+
+
+export const SendReminderInputType = {
+  reminder: 'reminder',
+  retraining: 'retraining',
+} as const;
+
+export interface SendReminderInput {
+  employeeId: number;
+  courseId?: number;
+  type?: SendReminderInputType;
+  message?: string;
+}
+
+export interface BulkImportRow {
+  name: string;
+  email: string;
+  department?: string;
+  role?: string;
+}
+
+export interface BulkImportInput {
+  employees: BulkImportRow[];
+}
+
+export interface BulkImportResult {
+  created: number;
+  skipped: number;
+  errors: string[];
+}
+
+export interface RetrainingScanResult {
+  notified: number;
+  skipped: number;
+}
+
 export interface Company {
   id: number;
   name: string;
@@ -239,6 +455,7 @@ export interface Company {
   certificatesIssued?: number | null;
   badges?: string[];
   isPublicProfile?: boolean;
+  leaderboardEnabled?: boolean;
   createdAt: string;
 }
 
@@ -258,6 +475,8 @@ export interface CompanyUpdate {
   logoUrl?: string | null;
   /** @nullable */
   isPublicProfile?: boolean | null;
+  /** @nullable */
+  leaderboardEnabled?: boolean | null;
 }
 
 export type EmployeeRole = typeof EmployeeRole[keyof typeof EmployeeRole];
@@ -385,9 +604,11 @@ export interface DashboardStats {
   completionRate: number;
   certificatesIssued: number;
   coursesAssigned: number;
+  coursesCompleted: number;
   avgScore: number;
-  employeesNeedingRetraining?: number;
-  onboardingCompletion?: number;
+  learningHoursCompleted: number;
+  trainingAdoptionRate: number;
+  employeesNeedingRetraining: number;
 }
 
 export interface EmployeeProgressRow {
@@ -400,6 +621,7 @@ export interface EmployeeProgressRow {
   totalCourses: number;
   completionRate: number;
   certificates?: number;
+  avgScore?: number;
   /** @nullable */
   lastActiveAt: string | null;
   needsRetraining?: boolean;
@@ -407,8 +629,22 @@ export interface EmployeeProgressRow {
 
 export interface TrendPoint {
   month: string;
+  completionRate: number;
+  adoptionRate: number;
+  activeLearners: number;
+}
+
+export interface MonthlyTrendPoint {
+  month: string;
   completions: number;
   enrollments: number;
+}
+
+export interface DepartmentParticipation {
+  department: string;
+  employees: number;
+  participationRate: number;
+  completionRate: number;
 }
 
 export interface ContributorStat {
@@ -431,7 +667,7 @@ export interface ImpactMetrics {
   treeCost: number;
   partnerName: string;
   topContributors?: ContributorStat[];
-  monthlyTrend?: TrendPoint[];
+  monthlyTrend?: MonthlyTrendPoint[];
 }
 
 export interface Badge {
@@ -449,6 +685,32 @@ export interface DepartmentStat {
   employeeCount: number;
   completionRate: number;
   certificates: number;
+}
+
+export interface EsgImpact {
+  co2EquivalentKg: number;
+  treesEquivalent: number;
+  wasteDivertedKg: number;
+  recyclingParticipation: number;
+  plasticReductionScore: number;
+  waterSavingsScore: number;
+  carbonAwarenessScore: number;
+  sustainabilityEngagementScore: number;
+}
+
+export interface ScoreComponent {
+  label: string;
+  value: number;
+}
+
+export interface SustainabilityScore {
+  score: number;
+  level: string;
+  /** @nullable */
+  nextLevel?: string | null;
+  pointsToNextLevel: number;
+  components: ScoreComponent[];
+  recommendations: string[];
 }
 
 export interface BlogPost {
@@ -473,6 +735,56 @@ export interface Testimonial {
   rating: number;
   /** @nullable */
   avatarUrl?: string | null;
+}
+
+export type LeadInterest = typeof LeadInterest[keyof typeof LeadInterest];
+
+
+export const LeadInterest = {
+  trial: 'trial',
+  demo: 'demo',
+  proposal: 'proposal',
+} as const;
+
+export interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  companyName: string;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  industry?: string | null;
+  /** @nullable */
+  employeeRange?: string | null;
+  interest: LeadInterest;
+  /** @nullable */
+  message?: string | null;
+  /** @nullable */
+  planId?: number | null;
+  status: string;
+  createdAt: string;
+}
+
+export type CreateLeadInputInterest = typeof CreateLeadInputInterest[keyof typeof CreateLeadInputInterest];
+
+
+export const CreateLeadInputInterest = {
+  trial: 'trial',
+  demo: 'demo',
+  proposal: 'proposal',
+} as const;
+
+export interface CreateLeadInput {
+  name: string;
+  email: string;
+  companyName: string;
+  phone?: string;
+  industry?: string;
+  employeeRange?: string;
+  interest: CreateLeadInputInterest;
+  message?: string;
+  planId?: number;
 }
 
 export type ListCoursesParams = {

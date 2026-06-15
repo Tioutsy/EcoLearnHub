@@ -1,16 +1,40 @@
 import { Layout } from "@/components/layout/Layout";
-import { useGetDashboardStats, useListEnrollments } from "@workspace/api-client-react";
+import { useGetDashboardStats, useListEnrollments, useListAchievementBadges } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
-import { BookOpen, Award, TrendingUp, Clock, PlayCircle } from "lucide-react";
+import {
+  BookOpen,
+  Award,
+  TrendingUp,
+  Clock,
+  PlayCircle,
+  Sprout,
+  Recycle,
+  Leaf,
+  Globe,
+  Trophy,
+  Lock,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+
+const BADGE_ICONS: Record<string, LucideIcon> = {
+  sprout: Sprout,
+  recycle: Recycle,
+  leaf: Leaf,
+  globe: Globe,
+  trophy: Trophy,
+  award: Award,
+};
 
 export default function Dashboard() {
   const { data: stats, isLoading: isLoadingStats } = useGetDashboardStats();
   const { data: enrollments, isLoading: isLoadingEnrollments } = useListEnrollments();
+  const { data: badges, isLoading: isLoadingBadges } = useListAchievementBadges();
 
   const activeEnrollments = enrollments?.filter(e => e.status === 'active') || [];
   const completedEnrollments = enrollments?.filter(e => e.status === 'completed') || [];
+  const earnedBadgeCount = badges?.filter(b => b.earned).length ?? 0;
 
   return (
     <Layout>
@@ -130,6 +154,82 @@ export default function Dashboard() {
                 </div>
               </Link>
             ))
+          )}
+        </div>
+
+        {/* Achievement Badges */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold font-serif">Achievements</h2>
+          {!isLoadingBadges && badges && badges.length > 0 && (
+            <span className="text-sm font-medium text-muted-foreground">
+              {earnedBadgeCount} of {badges.length} badges earned
+            </span>
+          )}
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
+          {isLoadingBadges ? (
+            Array(5).fill(0).map((_, i) => (
+              <div key={i} className="border rounded-xl p-6 flex flex-col items-center text-center">
+                <Skeleton className="h-16 w-16 rounded-full mb-4" />
+                <Skeleton className="h-5 w-3/4 mb-2" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            ))
+          ) : (
+            badges?.map((badge) => {
+              const Icon = BADGE_ICONS[badge.icon] ?? Award;
+              const pct = badge.progressTarget > 0
+                ? Math.round((badge.progressCurrent / badge.progressTarget) * 100)
+                : 0;
+              return (
+                <div
+                  key={badge.id}
+                  className={`border rounded-xl p-6 flex flex-col items-center text-center transition-colors ${
+                    badge.earned ? "bg-card border-primary/30" : "bg-muted/20"
+                  }`}
+                >
+                  <div
+                    className={`h-16 w-16 rounded-full flex items-center justify-center mb-4 relative ${
+                      badge.earned
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground/50"
+                    }`}
+                  >
+                    <Icon className="h-8 w-8" />
+                    {!badge.earned && (
+                      <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-muted border flex items-center justify-center">
+                        <Lock className="h-3 w-3 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className={`font-semibold mb-1 ${badge.earned ? "" : "text-muted-foreground"}`}>
+                    {badge.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3 line-clamp-3">
+                    {badge.description}
+                  </p>
+                  <div className="mt-auto w-full">
+                    {badge.earned ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+                        <Award className="h-3.5 w-3.5" /> Earned
+                      </span>
+                    ) : (
+                      <div className="w-full">
+                        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-primary/60"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground mt-1.5 block">
+                          {badge.progressCurrent} / {badge.progressTarget}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
 

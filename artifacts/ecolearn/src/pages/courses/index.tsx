@@ -24,7 +24,7 @@ export default function Courses() {
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold font-serif mb-4">Course Catalog</h1>
           <p className="text-muted-foreground text-lg max-w-2xl">
-            Discover strategic environmental training designed for the modern Mauritian workforce.
+            Practical sustainability and ESG training that engages your team and builds measurable ESG readiness, designed for the Mauritian workforce.
           </p>
         </div>
       </div>

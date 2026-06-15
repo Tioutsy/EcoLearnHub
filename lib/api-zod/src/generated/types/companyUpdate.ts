@@ -15,4 +15,6 @@ export interface CompanyUpdate {
   logoUrl?: string | null;
   /** @nullable */
   isPublicProfile?: boolean | null;
+  /** @nullable */
+  leaderboardEnabled?: boolean | null;
 }

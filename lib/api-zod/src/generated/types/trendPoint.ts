@@ -8,6 +8,7 @@
 
 export interface TrendPoint {
   month: string;
-  completions: number;
-  enrollments: number;
+  completionRate: number;
+  adoptionRate: number;
+  activeLearners: number;
 }

@@ -17,7 +17,7 @@ export default function Pricing() {
             Corporate ESG Training Plans
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Equip your entire workforce with the knowledge to drive your company's sustainability goals forward.
+            Train your workforce, track engagement, and certify ESG readiness. Every plan includes reporting and compliance support for Mauritian organisations.
           </p>
           <p className="text-sm text-muted-foreground mb-8">
             Every plan is billed once a year. The monthly figure shows what each plan works out to per month.

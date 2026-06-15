@@ -10,6 +10,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/courses/detail";
+import LearningPaths from "@/pages/learning-paths";
+import Challenges from "@/pages/challenges";
 import Learn from "@/pages/learn";
 import Quiz from "@/pages/quiz";
 import Dashboard from "@/pages/dashboard";
@@ -21,6 +23,11 @@ import Certificates from "@/pages/certificates";
 import VerifyCertificate from "@/pages/certificates/verify";
 import CompanyDashboard from "@/pages/company";
 import CompanyEmployees from "@/pages/company/employees";
+import CompanyCertificates from "@/pages/company/certificates";
+import CompanyLeaderboards from "@/pages/company/leaderboards";
+import CompanyCompliance from "@/pages/company/compliance";
+import SustainabilityImpact from "@/pages/sustainability";
+import MadeForMauritius from "@/pages/made-for-mauritius";
 import AdminPanel from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -156,6 +163,8 @@ function ClerkProviderWithRoutes() {
             <Route path="/sign-up/*?" component={SignUpPage} />
             <Route path="/courses" component={Courses} />
             <Route path="/courses/:id" component={CourseDetail} />
+            <Route path="/learning-paths" component={LearningPaths} />
+            <Route path="/challenges" component={Challenges} />
             <Route path="/learn/:enrollmentId" component={Learn} />
             <Route path="/quiz/:courseId" component={Quiz} />
             <Route path="/certificates" component={Certificates} />
@@ -163,10 +172,15 @@ function ClerkProviderWithRoutes() {
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/impact" component={ImpactDashboard} />
             <Route path="/pricing" component={Pricing} />
+            <Route path="/made-for-mauritius" component={MadeForMauritius} />
             <Route path="/blog" component={BlogList} />
             <Route path="/blog/:slug" component={BlogPost} />
             <Route path="/company" component={CompanyDashboard} />
             <Route path="/company/employees" component={CompanyEmployees} />
+            <Route path="/company/certificates" component={CompanyCertificates} />
+            <Route path="/company/leaderboards" component={CompanyLeaderboards} />
+            <Route path="/company/compliance" component={CompanyCompliance} />
+            <Route path="/company/sustainability" component={SustainabilityImpact} />
             <Route path="/admin" component={AdminPanel} />
             <Route component={NotFound} />
           </Switch>

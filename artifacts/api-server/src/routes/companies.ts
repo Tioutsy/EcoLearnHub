@@ -22,6 +22,7 @@ const getCompanyWithPlan = async (id: number) => {
       certificatesIssued: companiesTable.certificatesIssued,
       badges: companiesTable.badges,
       isPublicProfile: companiesTable.isPublicProfile,
+      leaderboardEnabled: companiesTable.leaderboardEnabled,
       createdAt: companiesTable.createdAt,
     })
     .from(companiesTable)
@@ -81,6 +82,7 @@ router.get("/all", async (_req, res): Promise<void> => {
       certificatesIssued: companiesTable.certificatesIssued,
       badges: companiesTable.badges,
       isPublicProfile: companiesTable.isPublicProfile,
+      leaderboardEnabled: companiesTable.leaderboardEnabled,
       createdAt: companiesTable.createdAt,
     })
     .from(companiesTable)

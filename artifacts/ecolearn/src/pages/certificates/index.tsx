@@ -59,7 +59,7 @@ export default function Certificates() {
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" className="flex-1" asChild>
-                        <a href={cert.pdfUrl || '#'} target="_blank" rel="noopener noreferrer">
+                        <a href={`/api/certificates/${cert.id}/pdf`} target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-4 w-4" /> PDF
                         </a>
                       </Button>

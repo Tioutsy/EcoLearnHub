@@ -1,1 +1,2 @@
 - [EcoLearn prod/dev data split](ecolearn-prod-data-sync.md) — prod is a SEPARATE DB with no seed file; dev edits reach prod only via Publish "Overwrite data".
+- [EcoLearn gamification/compliance domains](ecolearn-gamification-compliance.md) — live-computed status pattern (no stored progress) for leaderboards/challenges/compliance; key schema + codegen-collision gotchas.

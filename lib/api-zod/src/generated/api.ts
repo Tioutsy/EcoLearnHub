@@ -367,6 +367,23 @@ export const ListCertificatesResponse = zod.array(ListCertificatesResponseItem)
 
 
 /**
+ * @summary List all certificates issued across the company
+ */
+export const ListCompanyCertificatesResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "employeeName": zod.string().nullish(),
+  "companyName": zod.string().nullish(),
+  "courseId": zod.number(),
+  "courseName": zod.string().nullish(),
+  "uniqueCode": zod.string(),
+  "issuedAt": zod.string(),
+  "pdfUrl": zod.string().nullish()
+})
+export const ListCompanyCertificatesResponse = zod.array(ListCompanyCertificatesResponseItem)
+
+
+/**
  * @summary Get a certificate
  */
 export const GetCertificateParams = zod.object({
@@ -407,6 +424,247 @@ export const VerifyCertificateResponse = zod.object({
 
 
 /**
+ * @summary List structured learning paths with the current user's progress
+ */
+export const ListLearningPathsResponseItem = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "audience": zod.string(),
+  "icon": zod.string(),
+  "totalModules": zod.number(),
+  "completedModules": zod.number(),
+  "progressPct": zod.number(),
+  "totalMinutes": zod.number(),
+  "modules": zod.array(zod.object({
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "durationMinutes": zod.number(),
+  "level": zod.string(),
+  "orderIndex": zod.number(),
+  "completed": zod.boolean()
+}))
+})
+export const ListLearningPathsResponse = zod.array(ListLearningPathsResponseItem)
+
+
+/**
+ * @summary List achievement badges with the current user's earned status
+ */
+export const ListAchievementBadgesResponseItem = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "earned": zod.boolean(),
+  "earnedAt": zod.string().nullable(),
+  "progressCurrent": zod.number(),
+  "progressTarget": zod.number()
+})
+export const ListAchievementBadgesResponse = zod.array(ListAchievementBadgesResponseItem)
+
+
+/**
+ * @summary Company leaderboards (top learners, champions, courses, scores)
+ */
+export const ListLeaderboardsResponse = zod.object({
+  "enabled": zod.boolean(),
+  "boards": zod.array(zod.object({
+  "key": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "unit": zod.string(),
+  "entries": zod.array(zod.object({
+  "rank": zod.number(),
+  "employeeId": zod.number(),
+  "name": zod.string(),
+  "department": zod.string().nullish(),
+  "value": zod.number(),
+  "valueLabel": zod.string()
+}))
+}))
+})
+
+
+/**
+ * @summary Monthly sustainability challenges with the current user's participation
+ */
+export const ListChallengesResponse = zod.object({
+  "totalPoints": zod.number(),
+  "completedCount": zod.number(),
+  "challenges": zod.array(zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "theme": zod.string(),
+  "focus": zod.string(),
+  "unit": zod.string(),
+  "goalTarget": zod.number(),
+  "points": zod.number(),
+  "badgeName": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "joined": zod.boolean(),
+  "progress": zod.number(),
+  "completed": zod.boolean(),
+  "pointsEarned": zod.number(),
+  "progressPct": zod.number()
+}))
+})
+
+
+/**
+ * @summary Join a challenge
+ */
+export const JoinChallengeParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Log progress towards a challenge goal
+ */
+export const LogChallengeProgressParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const LogChallengeProgressBody = zod.object({
+  "amount": zod.number().min(1).optional()
+})
+
+
+/**
+ * @summary Training compliance dashboard data
+ */
+export const GetComplianceOverviewResponse = zod.object({
+  "summary": zod.object({
+  "total": zod.number(),
+  "compliant": zod.number(),
+  "expiringSoon": zod.number(),
+  "expired": zod.number(),
+  "overdue": zod.number(),
+  "notStarted": zod.number(),
+  "complianceRate": zod.number()
+}),
+  "assignments": zod.array(zod.object({
+  "id": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string(),
+  "department": zod.string().nullish(),
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "isMandatory": zod.boolean(),
+  "assignedAt": zod.string(),
+  "dueDate": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "expiresAt": zod.string().nullish(),
+  "status": zod.enum(['compliant', 'expiring_soon', 'expired', 'overdue', 'not_started'])
+})),
+  "courses": zod.array(zod.object({
+  "courseId": zod.number(),
+  "title": zod.string(),
+  "total": zod.number(),
+  "compliant": zod.number(),
+  "complianceRate": zod.number()
+}))
+})
+
+
+/**
+ * @summary Assign a course to employees or a whole department
+ */
+export const AssignCourseBody = zod.object({
+  "courseId": zod.number(),
+  "employeeIds": zod.array(zod.number()).optional(),
+  "department": zod.string().optional(),
+  "dueDate": zod.string().optional()
+})
+
+
+/**
+ * @summary Recent training reminders
+ */
+export const ListRemindersResponseItem = zod.object({
+  "id": zod.number(),
+  "companyId": zod.number(),
+  "employeeId": zod.number(),
+  "courseId": zod.number().nullish(),
+  "type": zod.string(),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListRemindersResponse = zod.array(ListRemindersResponseItem)
+
+
+/**
+ * @summary Send a reminder or retraining notification to an employee
+ */
+export const SendReminderBody = zod.object({
+  "employeeId": zod.number(),
+  "courseId": zod.number().optional(),
+  "type": zod.enum(['reminder', 'retraining']).optional(),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary Bulk import employees from parsed spreadsheet rows
+ */
+export const BulkImportEmployeesBody = zod.object({
+  "employees": zod.array(zod.object({
+  "name": zod.string(),
+  "email": zod.string(),
+  "department": zod.string().optional(),
+  "role": zod.string().optional()
+}))
+})
+
+
+/**
+ * @summary List captured leads (admin)
+ */
+export const ListLeadsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "companyName": zod.string(),
+  "phone": zod.string().nullish(),
+  "industry": zod.string().nullish(),
+  "employeeRange": zod.string().nullish(),
+  "interest": zod.enum(['trial', 'demo', 'proposal']),
+  "message": zod.string().nullish(),
+  "planId": zod.number().nullish(),
+  "status": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListLeadsResponse = zod.array(ListLeadsResponseItem)
+
+
+/**
+ * @summary Capture a lead from a trial signup, demo request, or proposal request
+ */
+export const CreateLeadBody = zod.object({
+  "name": zod.string(),
+  "email": zod.string(),
+  "companyName": zod.string(),
+  "phone": zod.string().optional(),
+  "industry": zod.string().optional(),
+  "employeeRange": zod.string().optional(),
+  "interest": zod.enum(['trial', 'demo', 'proposal']),
+  "message": zod.string().optional(),
+  "planId": zod.number().optional()
+})
+
+
+/**
  * @summary Get the current user's company profile
  */
 export const GetMyCompanyResponse = zod.object({
@@ -423,6 +681,7 @@ export const GetMyCompanyResponse = zod.object({
   "certificatesIssued": zod.number().nullish(),
   "badges": zod.array(zod.string()).optional(),
   "isPublicProfile": zod.boolean().optional(),
+  "leaderboardEnabled": zod.boolean().optional(),
   "createdAt": zod.string()
 })
 
@@ -434,7 +693,8 @@ export const UpdateMyCompanyBody = zod.object({
   "name": zod.string().nullish(),
   "industry": zod.string().nullish(),
   "logoUrl": zod.string().nullish(),
-  "isPublicProfile": zod.boolean().nullish()
+  "isPublicProfile": zod.boolean().nullish(),
+  "leaderboardEnabled": zod.boolean().nullish()
 })
 
 export const UpdateMyCompanyResponse = zod.object({
@@ -451,6 +711,7 @@ export const UpdateMyCompanyResponse = zod.object({
   "certificatesIssued": zod.number().nullish(),
   "badges": zod.array(zod.string()).optional(),
   "isPublicProfile": zod.boolean().optional(),
+  "leaderboardEnabled": zod.boolean().optional(),
   "createdAt": zod.string()
 })
 
@@ -472,6 +733,7 @@ export const ListCompaniesResponseItem = zod.object({
   "certificatesIssued": zod.number().nullish(),
   "badges": zod.array(zod.string()).optional(),
   "isPublicProfile": zod.boolean().optional(),
+  "leaderboardEnabled": zod.boolean().optional(),
   "createdAt": zod.string()
 })
 export const ListCompaniesResponse = zod.array(ListCompaniesResponseItem)
@@ -619,9 +881,11 @@ export const GetDashboardStatsResponse = zod.object({
   "completionRate": zod.number(),
   "certificatesIssued": zod.number(),
   "coursesAssigned": zod.number(),
+  "coursesCompleted": zod.number(),
   "avgScore": zod.number(),
-  "employeesNeedingRetraining": zod.number().optional(),
-  "onboardingCompletion": zod.number().optional()
+  "learningHoursCompleted": zod.number(),
+  "trainingAdoptionRate": zod.number(),
+  "employeesNeedingRetraining": zod.number()
 })
 
 
@@ -637,6 +901,7 @@ export const GetEmployeeProgressResponseItem = zod.object({
   "totalCourses": zod.number(),
   "completionRate": zod.number(),
   "certificates": zod.number().optional(),
+  "avgScore": zod.number().optional(),
   "lastActiveAt": zod.string().nullable(),
   "needsRetraining": zod.boolean().optional()
 })
@@ -648,10 +913,23 @@ export const GetEmployeeProgressResponse = zod.array(GetEmployeeProgressResponse
  */
 export const GetCompletionTrendResponseItem = zod.object({
   "month": zod.string(),
-  "completions": zod.number(),
-  "enrollments": zod.number()
+  "completionRate": zod.number(),
+  "adoptionRate": zod.number(),
+  "activeLearners": zod.number()
 })
 export const GetCompletionTrendResponse = zod.array(GetCompletionTrendResponseItem)
+
+
+/**
+ * @summary Training participation and completion by department
+ */
+export const GetDepartmentParticipationResponseItem = zod.object({
+  "department": zod.string(),
+  "employees": zod.number(),
+  "participationRate": zod.number(),
+  "completionRate": zod.number()
+})
+export const GetDepartmentParticipationResponse = zod.array(GetDepartmentParticipationResponseItem)
 
 
 /**
@@ -707,6 +985,37 @@ export const GetDepartmentBreakdownResponseItem = zod.object({
   "certificates": zod.number()
 })
 export const GetDepartmentBreakdownResponse = zod.array(GetDepartmentBreakdownResponseItem)
+
+
+/**
+ * @summary Company ESG impact estimated from training engagement
+ */
+export const GetEsgImpactResponse = zod.object({
+  "co2EquivalentKg": zod.number(),
+  "treesEquivalent": zod.number(),
+  "wasteDivertedKg": zod.number(),
+  "recyclingParticipation": zod.number(),
+  "plasticReductionScore": zod.number(),
+  "waterSavingsScore": zod.number(),
+  "carbonAwarenessScore": zod.number(),
+  "sustainabilityEngagementScore": zod.number()
+})
+
+
+/**
+ * @summary Company sustainability score, level and recommendations
+ */
+export const GetSustainabilityScoreResponse = zod.object({
+  "score": zod.number(),
+  "level": zod.string(),
+  "nextLevel": zod.string().nullish(),
+  "pointsToNextLevel": zod.number(),
+  "components": zod.array(zod.object({
+  "label": zod.string(),
+  "value": zod.number()
+})),
+  "recommendations": zod.array(zod.string())
+})
 
 
 /**

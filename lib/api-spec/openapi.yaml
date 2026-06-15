@@ -327,6 +327,21 @@ paths:
                 items:
                   $ref: "#/components/schemas/Certificate"
 
+  /certificates/company/list:
+    get:
+      operationId: listCompanyCertificates
+      tags: [certificates]
+      summary: List all certificates issued across the company
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Certificate"
+
   /certificates/{id}:
     get:
       operationId: getCertificate
@@ -364,6 +379,232 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Certificate"
+
+  # ── LEARNING PATHS ────────────────────────────────────────────────────────────
+  /learning-paths:
+    get:
+      operationId: listLearningPaths
+      tags: [learning-paths]
+      summary: List structured learning paths with the current user's progress
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LearningPath"
+
+  # ── BADGES ────────────────────────────────────────────────────────────────────
+  /badges:
+    get:
+      operationId: listAchievementBadges
+      tags: [badges]
+      summary: List achievement badges with the current user's earned status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AchievementBadge"
+
+  /leaderboards:
+    get:
+      operationId: listLeaderboards
+      tags: [leaderboards]
+      summary: Company leaderboards (top learners, champions, courses, scores)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+
+  /challenges:
+    get:
+      operationId: listChallenges
+      tags: [challenges]
+      summary: Monthly sustainability challenges with the current user's participation
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChallengeListResponse"
+
+  /challenges/{id}/join:
+    post:
+      operationId: joinChallenge
+      tags: [challenges]
+      summary: Join a challenge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+        "201":
+          description: Joined
+
+  /challenges/{id}/progress:
+    post:
+      operationId: logChallengeProgress
+      tags: [challenges]
+      summary: Log progress towards a challenge goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeProgressInput"
+      responses:
+        "200":
+          description: OK
+
+  # ── COMPLIANCE ────────────────────────────────────────────────────────────────
+  /compliance/overview:
+    get:
+      operationId: getComplianceOverview
+      tags: [compliance]
+      summary: Training compliance dashboard data
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComplianceOverview"
+
+  /compliance/assignments:
+    post:
+      operationId: assignCourse
+      tags: [compliance]
+      summary: Assign a course to employees or a whole department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignCourseInput"
+      responses:
+        "201":
+          description: Assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssignCourseResult"
+
+  /compliance/reminders:
+    get:
+      operationId: listReminders
+      tags: [compliance]
+      summary: Recent training reminders
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrainingReminder"
+    post:
+      operationId: sendReminder
+      tags: [compliance]
+      summary: Send a reminder or retraining notification to an employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendReminderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingReminder"
+
+  /compliance/employees/bulk-import:
+    post:
+      operationId: bulkImportEmployees
+      tags: [compliance]
+      summary: Bulk import employees from parsed spreadsheet rows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkImportInput"
+      responses:
+        "201":
+          description: Imported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkImportResult"
+
+  /compliance/run-retraining-scan:
+    post:
+      operationId: runRetrainingScan
+      tags: [compliance]
+      summary: Automatically generate retraining notices for all expired training
+      responses:
+        "201":
+          description: Notices generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrainingScanResult"
+
+  # ── LEADS ─────────────────────────────────────────────────────────────────────
+  /leads:
+    get:
+      operationId: listLeads
+      tags: [leads]
+      summary: List captured leads (admin)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Capture a lead from a trial signup, demo request, or proposal request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLeadInput"
+      responses:
+        "201":
+          description: Lead captured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
 
   # ── COMPANY ───────────────────────────────────────────────────────────────────
   /company:
@@ -605,6 +846,21 @@ paths:
                 items:
                   $ref: "#/components/schemas/TrendPoint"
 
+  /dashboard/department-participation:
+    get:
+      operationId: getDepartmentParticipation
+      tags: [dashboard]
+      summary: Training participation and completion by department
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepartmentParticipation"
+
   # ── ENVIRONMENTAL IMPACT ──────────────────────────────────────────────────────
   /impact:
     get:
@@ -648,6 +904,33 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DepartmentStat"
+
+  # ── ESG (company sustainability) ──────────────────────────────────────────────
+  /esg/impact:
+    get:
+      operationId: getEsgImpact
+      tags: [esg]
+      summary: Company ESG impact estimated from training engagement
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EsgImpact"
+
+  /esg/score:
+    get:
+      operationId: getSustainabilityScore
+      tags: [esg]
+      summary: Company sustainability score, level and recommendations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SustainabilityScore"
 
   # ── BLOG ──────────────────────────────────────────────────────────────────────
   /blog:
@@ -1014,6 +1297,369 @@ components:
         pdfUrl:
           type: ["string", "null"]
 
+    # ── LEARNING PATHS ──────────────────────────────────────────────────────────
+    LearningPathModule:
+      type: object
+      required: [courseId, courseTitle, durationMinutes, level, orderIndex, completed]
+      properties:
+        courseId:
+          type: integer
+        courseTitle:
+          type: string
+        durationMinutes:
+          type: integer
+        level:
+          type: string
+        orderIndex:
+          type: integer
+        completed:
+          type: boolean
+    LearningPath:
+      type: object
+      required: [id, slug, title, description, audience, icon, totalModules, completedModules, progressPct, totalMinutes, modules]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        audience:
+          type: string
+        icon:
+          type: string
+        totalModules:
+          type: integer
+        completedModules:
+          type: integer
+        progressPct:
+          type: integer
+        totalMinutes:
+          type: integer
+        modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/LearningPathModule"
+
+    # ── BADGES ──────────────────────────────────────────────────────────────────
+    AchievementBadge:
+      type: object
+      required: [id, slug, name, description, icon, earned, earnedAt, progressCurrent, progressTarget]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        earned:
+          type: boolean
+        earnedAt:
+          type: ["string", "null"]
+        progressCurrent:
+          type: integer
+        progressTarget:
+          type: integer
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, employeeId, name, value, valueLabel]
+      properties:
+        rank:
+          type: integer
+        employeeId:
+          type: integer
+        name:
+          type: string
+        department:
+          type: ["string", "null"]
+        value:
+          type: integer
+        valueLabel:
+          type: string
+
+    Leaderboard:
+      type: object
+      required: [key, title, description, unit, entries]
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        unit:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+
+    LeaderboardResponse:
+      type: object
+      required: [enabled, boards]
+      properties:
+        enabled:
+          type: boolean
+        boards:
+          type: array
+          items:
+            $ref: "#/components/schemas/Leaderboard"
+
+    Challenge:
+      type: object
+      required:
+        [id, slug, title, description, icon, theme, focus, unit, goalTarget, points, startDate, endDate, status, joined, progress, completed, pointsEarned, progressPct]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        theme:
+          type: string
+        focus:
+          type: string
+        unit:
+          type: string
+        goalTarget:
+          type: integer
+        points:
+          type: integer
+        badgeName:
+          type: ["string", "null"]
+        startDate:
+          type: string
+        endDate:
+          type: string
+        status:
+          type: string
+          enum: [upcoming, active, ended]
+        joined:
+          type: boolean
+        progress:
+          type: integer
+        completed:
+          type: boolean
+        pointsEarned:
+          type: integer
+        progressPct:
+          type: integer
+
+    ChallengeListResponse:
+      type: object
+      required: [totalPoints, completedCount, challenges]
+      properties:
+        totalPoints:
+          type: integer
+        completedCount:
+          type: integer
+        challenges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Challenge"
+
+    ChallengeProgressInput:
+      type: object
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+
+    # ── COMPLIANCE ─────────────────────────────────────────────────────────────
+    ComplianceAssignment:
+      type: object
+      required:
+        [id, employeeId, employeeName, courseId, courseTitle, isMandatory, assignedAt, status]
+      properties:
+        id:
+          type: integer
+        employeeId:
+          type: integer
+        employeeName:
+          type: string
+        department:
+          type: ["string", "null"]
+        courseId:
+          type: integer
+        courseTitle:
+          type: string
+        isMandatory:
+          type: boolean
+        assignedAt:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [compliant, expiring_soon, expired, overdue, not_started]
+
+    ComplianceSummary:
+      type: object
+      required:
+        [total, compliant, expiringSoon, expired, overdue, notStarted, complianceRate]
+      properties:
+        total:
+          type: integer
+        compliant:
+          type: integer
+        expiringSoon:
+          type: integer
+        expired:
+          type: integer
+        overdue:
+          type: integer
+        notStarted:
+          type: integer
+        complianceRate:
+          type: integer
+
+    ComplianceCourseStat:
+      type: object
+      required: [courseId, title, total, compliant, complianceRate]
+      properties:
+        courseId:
+          type: integer
+        title:
+          type: string
+        total:
+          type: integer
+        compliant:
+          type: integer
+        complianceRate:
+          type: integer
+
+    ComplianceOverview:
+      type: object
+      required: [summary, assignments, courses]
+      properties:
+        summary:
+          $ref: "#/components/schemas/ComplianceSummary"
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComplianceAssignment"
+        courses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComplianceCourseStat"
+
+    AssignCourseInput:
+      type: object
+      required: [courseId]
+      properties:
+        courseId:
+          type: integer
+        employeeIds:
+          type: array
+          items:
+            type: integer
+        department:
+          type: string
+        dueDate:
+          type: string
+
+    AssignCourseResult:
+      type: object
+      required: [assigned, skipped]
+      properties:
+        assigned:
+          type: integer
+        skipped:
+          type: integer
+
+    TrainingReminder:
+      type: object
+      required: [id, companyId, employeeId, type, message, createdAt]
+      properties:
+        id:
+          type: integer
+        companyId:
+          type: integer
+        employeeId:
+          type: integer
+        courseId:
+          type: ["integer", "null"]
+        type:
+          type: string
+        message:
+          type: string
+        createdAt:
+          type: string
+
+    SendReminderInput:
+      type: object
+      required: [employeeId]
+      properties:
+        employeeId:
+          type: integer
+        courseId:
+          type: integer
+        type:
+          type: string
+          enum: [reminder, retraining]
+        message:
+          type: string
+
+    BulkImportRow:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        department:
+          type: string
+        role:
+          type: string
+
+    BulkImportInput:
+      type: object
+      required: [employees]
+      properties:
+        employees:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkImportRow"
+
+    BulkImportResult:
+      type: object
+      required: [created, skipped, errors]
+      properties:
+        created:
+          type: integer
+        skipped:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+
+    RetrainingScanResult:
+      type: object
+      required: [notified, skipped]
+      properties:
+        notified:
+          type: integer
+        skipped:
+          type: integer
+
     # ── COMPANY ───────────────────────────────────────────────────────────────
     Company:
       type: object
@@ -1047,6 +1693,8 @@ components:
             type: string
         isPublicProfile:
           type: boolean
+        leaderboardEnabled:
+          type: boolean
         createdAt:
           type: string
 
@@ -1071,6 +1719,8 @@ components:
         logoUrl:
           type: ["string", "null"]
         isPublicProfile:
+          type: ["boolean", "null"]
+        leaderboardEnabled:
           type: ["boolean", "null"]
 
     # ── EMPLOYEE ──────────────────────────────────────────────────────────────
@@ -1208,7 +1858,7 @@ components:
     # ── DASHBOARD ─────────────────────────────────────────────────────────────
     DashboardStats:
       type: object
-      required: [totalEmployees, activeEmployees, completionRate, certificatesIssued, coursesAssigned, avgScore]
+      required: [totalEmployees, activeEmployees, completionRate, certificatesIssued, coursesAssigned, coursesCompleted, avgScore, learningHoursCompleted, trainingAdoptionRate, employeesNeedingRetraining]
       properties:
         totalEmployees:
           type: integer
@@ -1220,12 +1870,16 @@ components:
           type: integer
         coursesAssigned:
           type: integer
+        coursesCompleted:
+          type: integer
         avgScore:
+          type: number
+        learningHoursCompleted:
+          type: number
+        trainingAdoptionRate:
           type: number
         employeesNeedingRetraining:
           type: integer
-        onboardingCompletion:
-          type: number
 
     EmployeeProgressRow:
       type: object
@@ -1247,12 +1901,27 @@ components:
           type: number
         certificates:
           type: integer
+        avgScore:
+          type: integer
         lastActiveAt:
           type: ["string", "null"]
         needsRetraining:
           type: boolean
 
     TrendPoint:
+      type: object
+      required: [month, completionRate, adoptionRate, activeLearners]
+      properties:
+        month:
+          type: string
+        completionRate:
+          type: integer
+        adoptionRate:
+          type: integer
+        activeLearners:
+          type: integer
+
+    MonthlyTrendPoint:
       type: object
       required: [month, completions, enrollments]
       properties:
@@ -1261,6 +1930,19 @@ components:
         completions:
           type: integer
         enrollments:
+          type: integer
+
+    DepartmentParticipation:
+      type: object
+      required: [department, employees, participationRate, completionRate]
+      properties:
+        department:
+          type: string
+        employees:
+          type: integer
+        participationRate:
+          type: integer
+        completionRate:
           type: integer
 
     # ── ENVIRONMENTAL IMPACT ──────────────────────────────────────────────────
@@ -1299,7 +1981,7 @@ components:
         monthlyTrend:
           type: array
           items:
-            $ref: "#/components/schemas/TrendPoint"
+            $ref: "#/components/schemas/MonthlyTrendPoint"
 
     ContributorStat:
       type: object
@@ -1341,6 +2023,58 @@ components:
           type: number
         certificates:
           type: integer
+
+    # ── ESG (company sustainability) ──────────────────────────────────────────
+    EsgImpact:
+      type: object
+      required: [co2EquivalentKg, treesEquivalent, wasteDivertedKg, recyclingParticipation, plasticReductionScore, waterSavingsScore, carbonAwarenessScore, sustainabilityEngagementScore]
+      properties:
+        co2EquivalentKg:
+          type: integer
+        treesEquivalent:
+          type: integer
+        wasteDivertedKg:
+          type: integer
+        recyclingParticipation:
+          type: integer
+        plasticReductionScore:
+          type: integer
+        waterSavingsScore:
+          type: integer
+        carbonAwarenessScore:
+          type: integer
+        sustainabilityEngagementScore:
+          type: integer
+
+    ScoreComponent:
+      type: object
+      required: [label, value]
+      properties:
+        label:
+          type: string
+        value:
+          type: integer
+
+    SustainabilityScore:
+      type: object
+      required: [score, level, pointsToNextLevel, components, recommendations]
+      properties:
+        score:
+          type: integer
+        level:
+          type: string
+        nextLevel:
+          type: ["string", "null"]
+        pointsToNextLevel:
+          type: integer
+        components:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoreComponent"
+        recommendations:
+          type: array
+          items:
+            type: string
 
     # ── BLOG ──────────────────────────────────────────────────────────────────
     BlogPost:
@@ -1387,3 +2121,58 @@ components:
           type: integer
         avatarUrl:
           type: ["string", "null"]
+
+    # ── LEADS ─────────────────────────────────────────────────────────────────
+    Lead:
+      type: object
+      required: [id, name, email, companyName, interest, status, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        companyName:
+          type: string
+        phone:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        employeeRange:
+          type: ["string", "null"]
+        interest:
+          type: string
+          enum: [trial, demo, proposal]
+        message:
+          type: ["string", "null"]
+        planId:
+          type: ["integer", "null"]
+        status:
+          type: string
+        createdAt:
+          type: string
+
+    CreateLeadInput:
+      type: object
+      required: [name, email, companyName, interest]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        companyName:
+          type: string
+        phone:
+          type: string
+        industry:
+          type: string
+        employeeRange:
+          type: string
+        interest:
+          type: string
+          enum: [trial, demo, proposal]
+        message:
+          type: string
+        planId:
+          type: integer

@@ -27,5 +27,6 @@ export interface Company {
   certificatesIssued?: number | null;
   badges?: string[];
   isPublicProfile?: boolean;
+  leaderboardEnabled?: boolean;
   createdAt: string;
 }

@@ -16,7 +16,7 @@ export function Footer() {
               <span className="text-xl font-bold font-serif">EcoLearn</span>
             </div>
             <p className="text-secondary-foreground/80 text-sm leading-relaxed">
-              Empowering Mauritius businesses with strategic environmental education and ESG compliance training.
+              The Corporate Sustainability & ESG Training Platform for Mauritius. Train, track, certify, and demonstrate sustainability.
             </p>
           </div>
 

@@ -15,6 +15,7 @@ export const companiesTable = pgTable("companies", {
   certificatesIssued: integer("certificates_issued").notNull().default(0),
   badges: text("badges").array().notNull().default([]),
   isPublicProfile: boolean("is_public_profile").notNull().default(false),
+  leaderboardEnabled: boolean("leaderboard_enabled").notNull().default(true),
   stripeCustomerId: text("stripe_customer_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),

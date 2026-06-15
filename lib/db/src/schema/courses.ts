@@ -18,6 +18,8 @@ export const coursesTable = pgTable("courses", {
   rating: numeric("rating", { precision: 3, scale: 1 }),
   includesCertificate: boolean("includes_certificate").notNull().default(true),
   isPublished: boolean("is_published").notNull().default(true),
+  isMandatory: boolean("is_mandatory").notNull().default(false),
+  validityMonths: integer("validity_months"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

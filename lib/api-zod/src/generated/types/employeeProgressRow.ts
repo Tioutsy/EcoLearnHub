@@ -16,6 +16,7 @@ export interface EmployeeProgressRow {
   totalCourses: number;
   completionRate: number;
   certificates?: number;
+  avgScore?: number;
   /** @nullable */
   lastActiveAt: string | null;
   needsRetraining?: boolean;
