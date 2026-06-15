@@ -28,7 +28,7 @@ export default function ImpactDashboard() {
           <p className="text-muted-foreground text-lg">
             Every course completed and every company that joins EcoLearn adds to a single,
             growing record of environmental and social impact across Mauritius. These numbers
-            start at zero and reflect real action — nothing is simulated.
+            start at zero and reflect real action. Nothing here is simulated.
           </p>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function ImpactDashboard() {
                     For every <strong>Rs {fmt(metrics.treeCost)}</strong> donated, one endemic Mauritian
                     tree is planted with <strong>{partner}</strong>. When your organisation subscribes,
                     {" "}<strong>{metrics.donationRatePct}%</strong> of what you pay goes directly to restoring
-                    native forest — turning workforce training into measurable ecological recovery.
+                    native forest, turning workforce training into measurable ecological recovery.
                   </>
                 ) : (
                   "A portion of every subscription funds native tree planting in Mauritius."
@@ -206,7 +206,7 @@ export default function ImpactDashboard() {
 
         {!hasActivity && !isLoading && (
           <p className="text-center text-sm text-muted-foreground">
-            EcoLearn is just getting started — these figures grow with every learner and every company that joins.
+            EcoLearn is just getting started. These figures grow with every learner and every company that joins.
           </p>
         )}
       </div>

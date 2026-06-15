@@ -39,7 +39,7 @@ export default function Pricing() {
             <TreePine className="h-4 w-4 text-primary shrink-0" />
             <span>
               <strong>5%</strong> of every subscription plants native trees with{" "}
-              <strong>Ebony Forest, Chamarel</strong> — see it on our{" "}
+              <strong>Ebony Forest, Chamarel</strong>. See it on our{" "}
               <Link href="/impact" className="text-primary font-semibold underline underline-offset-2">Impact</Link> page.
             </span>
           </div>
