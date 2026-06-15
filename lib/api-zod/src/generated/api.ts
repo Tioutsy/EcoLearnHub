@@ -629,22 +629,23 @@ export const GetCompletionTrendResponse = zod.array(GetCompletionTrendResponseIt
  */
 export const GetImpactMetricsResponse = zod.object({
   "employeesTrained": zod.number(),
+  "coursesCompleted": zod.number(),
   "certificatesIssued": zod.number(),
-  "completionRate": zod.number(),
-  "activeLearners": zod.number(),
-  "departmentsTrained": zod.number(),
-  "kgWasteDiverted": zod.number(),
-  "wastContaminationReductionPct": zod.number().optional(),
-  "plasticReductionPct": zod.number(),
-  "recyclingParticipationPct": zod.number(),
-  "co2AvoidedKg": zod.number(),
-  "environmentalScore": zod.number(),
-  "monthlyTrend": zod.array(zod.object({
-  "month": zod.string(),
-  "completions": zod.number(),
-  "enrollments": zod.number()
+  "companiesParticipating": zod.number(),
+  "lessonsCompleted": zod.number(),
+  "treesPlanted": zod.number(),
+  "totalDonated": zod.number(),
+  "co2SequesteredKg": zod.number(),
+  "areaReforestedM2": zod.number(),
+  "donationRatePct": zod.number(),
+  "treeCost": zod.number(),
+  "partnerName": zod.string(),
+  "topContributors": zod.array(zod.object({
+  "company": zod.string(),
+  "trees": zod.number(),
+  "donated": zod.number()
 })).optional(),
-  "annualComparison": zod.array(zod.object({
+  "monthlyTrend": zod.array(zod.object({
   "month": zod.string(),
   "completions": zod.number(),
   "enrollments": zod.number()

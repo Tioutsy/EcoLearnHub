@@ -1256,38 +1256,51 @@ components:
     # ── ENVIRONMENTAL IMPACT ──────────────────────────────────────────────────
     ImpactMetrics:
       type: object
-      required: [employeesTrained, certificatesIssued, completionRate, activeLearners, departmentsTrained, kgWasteDiverted, plasticReductionPct, recyclingParticipationPct, co2AvoidedKg, environmentalScore]
+      required: [employeesTrained, coursesCompleted, certificatesIssued, companiesParticipating, lessonsCompleted, treesPlanted, totalDonated, co2SequesteredKg, areaReforestedM2, donationRatePct, treeCost, partnerName]
       properties:
         employeesTrained:
           type: integer
+        coursesCompleted:
+          type: integer
         certificatesIssued:
           type: integer
-        completionRate:
-          type: number
-        activeLearners:
+        companiesParticipating:
           type: integer
-        departmentsTrained:
+        lessonsCompleted:
           type: integer
-        kgWasteDiverted:
-          type: number
-        wastContaminationReductionPct:
-          type: number
-        plasticReductionPct:
-          type: number
-        recyclingParticipationPct:
-          type: number
-        co2AvoidedKg:
-          type: number
-        environmentalScore:
+        treesPlanted:
           type: integer
+        totalDonated:
+          type: number
+        co2SequesteredKg:
+          type: number
+        areaReforestedM2:
+          type: number
+        donationRatePct:
+          type: number
+        treeCost:
+          type: number
+        partnerName:
+          type: string
+        topContributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContributorStat"
         monthlyTrend:
           type: array
           items:
             $ref: "#/components/schemas/TrendPoint"
-        annualComparison:
-          type: array
-          items:
-            $ref: "#/components/schemas/TrendPoint"
+
+    ContributorStat:
+      type: object
+      required: [company, trees, donated]
+      properties:
+        company:
+          type: string
+        trees:
+          type: integer
+        donated:
+          type: number
 
     Badge:
       type: object

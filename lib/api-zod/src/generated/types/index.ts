@@ -16,6 +16,7 @@ export * from './checkoutSession';
 export * from './company';
 export * from './companyInput';
 export * from './companyUpdate';
+export * from './contributorStat';
 export * from './course';
 export * from './courseDetail';
 export * from './courseInput';

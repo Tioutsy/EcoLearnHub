@@ -5,20 +5,22 @@
  * EcoLearn Mauritius API
  * OpenAPI spec version: 0.1.0
  */
+import type { ContributorStat } from './contributorStat';
 import type { TrendPoint } from './trendPoint';
 
 export interface ImpactMetrics {
   employeesTrained: number;
+  coursesCompleted: number;
   certificatesIssued: number;
-  completionRate: number;
-  activeLearners: number;
-  departmentsTrained: number;
-  kgWasteDiverted: number;
-  wastContaminationReductionPct?: number;
-  plasticReductionPct: number;
-  recyclingParticipationPct: number;
-  co2AvoidedKg: number;
-  environmentalScore: number;
+  companiesParticipating: number;
+  lessonsCompleted: number;
+  treesPlanted: number;
+  totalDonated: number;
+  co2SequesteredKg: number;
+  areaReforestedM2: number;
+  donationRatePct: number;
+  treeCost: number;
+  partnerName: string;
+  topContributors?: ContributorStat[];
   monthlyTrend?: TrendPoint[];
-  annualComparison?: TrendPoint[];
 }

@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { useListPlans } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Building2 } from "lucide-react";
+import { CheckCircle2, Building2, TreePine } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
@@ -33,6 +33,15 @@ export default function Pricing() {
             <Label htmlFor="billing-toggle" className={isAnnual ? "font-semibold text-foreground" : "text-muted-foreground"}>
               Annually <span className="text-primary text-xs font-bold ml-1 bg-primary/10 px-2 py-0.5 rounded-full">Save 20%</span>
             </Label>
+          </div>
+
+          <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2.5 text-sm text-foreground">
+            <TreePine className="h-4 w-4 text-primary shrink-0" />
+            <span>
+              <strong>5%</strong> of every subscription plants native trees with{" "}
+              <strong>Ebony Forest, Chamarel</strong> — see it on our{" "}
+              <Link href="/impact" className="text-primary font-semibold underline underline-offset-2">Impact</Link> page.
+            </span>
           </div>
         </div>
       </div>
