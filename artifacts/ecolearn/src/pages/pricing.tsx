@@ -3,14 +3,11 @@ import { useListPlans } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Building2, TreePine } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 
 export default function Pricing() {
   const { data: plans, isLoading } = useListPlans();
-  const [isAnnual, setIsAnnual] = useState(true);
+  const paidPlans = plans?.filter((p) => (p.priceAnnual ?? 0) > 0);
 
   return (
     <Layout>
@@ -19,23 +16,14 @@ export default function Pricing() {
           <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6 text-foreground">
             Corporate ESG Training Plans
           </h1>
-          <p className="text-xl text-muted-foreground mb-10">
+          <p className="text-xl text-muted-foreground mb-6">
             Equip your entire workforce with the knowledge to drive your company's sustainability goals forward.
           </p>
-          
-          <div className="flex items-center justify-center gap-3">
-            <Label htmlFor="billing-toggle" className={!isAnnual ? "font-semibold text-foreground" : "text-muted-foreground"}>Monthly</Label>
-            <Switch 
-              id="billing-toggle" 
-              checked={isAnnual} 
-              onCheckedChange={setIsAnnual} 
-            />
-            <Label htmlFor="billing-toggle" className={isAnnual ? "font-semibold text-foreground" : "text-muted-foreground"}>
-              Annually <span className="text-primary text-xs font-bold ml-1 bg-primary/10 px-2 py-0.5 rounded-full">Save 20%</span>
-            </Label>
-          </div>
+          <p className="text-sm text-muted-foreground mb-8">
+            Every plan is billed once a year. The monthly figure shows what each plan works out to per month.
+          </p>
 
-          <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2.5 text-sm text-foreground">
+          <div className="mt-2 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2.5 text-sm text-foreground">
             <TreePine className="h-4 w-4 text-primary shrink-0" />
             <span>
               <strong>5%</strong> of every subscription plants native trees with{" "}
@@ -59,7 +47,7 @@ export default function Pricing() {
                 </div>
               </div>
             ))
-          ) : plans?.map((plan) => (
+          ) : paidPlans?.map((plan) => (
             <div 
               key={plan.id} 
               className={`relative bg-card border rounded-2xl p-8 flex flex-col shadow-sm transition-all ${
@@ -78,9 +66,12 @@ export default function Pricing() {
                   {plan.maxEmployees ? `Up to ${plan.maxEmployees} employees` : 'Unlimited employees'}
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">Rs {(isAnnual ? plan.priceAnnual : plan.priceMonthly)?.toLocaleString()}</span>
-                  <span className="text-muted-foreground font-medium">/{isAnnual ? 'yr' : 'mo'}</span>
+                  <span className="text-4xl font-bold">Rs {plan.priceAnnual?.toLocaleString()}</span>
+                  <span className="text-muted-foreground font-medium">/year</span>
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Works out to <strong className="text-foreground">Rs {Math.round((plan.priceAnnual ?? 0) / 12).toLocaleString()}</strong> per month
+                </p>
               </div>
 
               <Button 
