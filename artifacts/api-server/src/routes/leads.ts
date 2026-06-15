@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { getAuth, clerkClient } from "@clerk/express";
 import { db } from "@workspace/db";
 import { leadsTable, insertLeadSchema } from "@workspace/db";
 import { desc } from "drizzle-orm";
@@ -57,9 +58,22 @@ router.post("/", async (req, res): Promise<void> => {
   }
 });
 
-// List captured leads (admin)
-router.get("/", async (_req, res): Promise<void> => {
+// List captured leads (admin only, contains contact PII)
+router.get("/", async (req, res): Promise<void> => {
   try {
+    const { userId } = getAuth(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    // Lead records contain contact PII, so restrict to super admins.
+    const user = await clerkClient.users.getUser(userId);
+    if (user.publicMetadata?.role !== "super_admin") {
+      res.status(403).json({ error: "Super admin access required" });
+      return;
+    }
+
     const leads = await db
       .select()
       .from(leadsTable)

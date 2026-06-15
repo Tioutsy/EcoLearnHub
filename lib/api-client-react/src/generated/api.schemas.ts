@@ -787,6 +787,39 @@ export interface CreateLeadInput {
   planId?: number;
 }
 
+export interface LeadsByInterest {
+  trial: number;
+  demo: number;
+  proposal: number;
+}
+
+export interface PopularCourse {
+  /** @nullable */
+  courseId: number | null;
+  title: string;
+  enrollments: number;
+  completionRate: number;
+}
+
+export interface AdminAnalytics {
+  companiesRegistered: number;
+  activeCompanies: number;
+  annualRevenue: number;
+  currency: string;
+  trialSignups: number;
+  convertedTrials: number;
+  trialConversionRate: number;
+  leadsByInterest: LeadsByInterest;
+  totalEmployees: number;
+  activeEmployees: number;
+  engagementRate: number;
+  certificatesIssued: number;
+  totalEnrollments: number;
+  completedEnrollments: number;
+  overallCompletionRate: number;
+  popularCourses: PopularCourse[];
+}
+
 export type ListCoursesParams = {
 /**
  * @nullable

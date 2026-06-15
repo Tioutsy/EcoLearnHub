@@ -1,13 +1,15 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth, UserButton } from "@clerk/react";
-import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as RouteIcon, Target, MapPin } from "lucide-react";
+import { useAuth, useUser, UserButton } from "@clerk/react";
+import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as RouteIcon, Target, MapPin, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [location] = useLocation();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const isSuperAdmin = user?.publicMetadata?.role === "super_admin";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -24,6 +26,9 @@ export function Navbar() {
     ? [
         { href: "/dashboard", label: "My Learning", icon: UserCircle },
         { href: "/company", label: "Company", icon: Building2 },
+        ...(isSuperAdmin
+          ? [{ href: "/admin", label: "Admin", icon: ShieldCheck }]
+          : []),
       ]
     : [];
 

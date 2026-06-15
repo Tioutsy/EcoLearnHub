@@ -22,6 +22,8 @@ tags:
   - name: impact
   - name: blog
   - name: testimonials
+  - name: leads
+  - name: admin
 
 paths:
   /healthz:
@@ -573,12 +575,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/RetrainingScanResult"
 
+  # ── ADMIN ─────────────────────────────────────────────────────────────────────
+  /admin/analytics:
+    get:
+      operationId: getAdminAnalytics
+      tags: [admin]
+      summary: Platform-wide analytics for the super admin dashboard
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminAnalytics"
+        "401":
+          description: Authentication required
+        "403":
+          description: Super admin access required
+
   # ── LEADS ─────────────────────────────────────────────────────────────────────
   /leads:
     get:
       operationId: listLeads
       tags: [leads]
-      summary: List captured leads (admin)
+      summary: List captured leads (super admin)
       responses:
         "200":
           description: OK
@@ -588,6 +608,10 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Lead"
+        "401":
+          description: Authentication required
+        "403":
+          description: Super admin access required
     post:
       operationId: createLead
       tags: [leads]
@@ -2175,4 +2199,68 @@ components:
         message:
           type: string
         planId:
+          type: integer
+
+    # ── ADMIN ANALYTICS ─────────────────────────────────────────────────────────
+    AdminAnalytics:
+      type: object
+      required: [companiesRegistered, activeCompanies, annualRevenue, currency, trialSignups, convertedTrials, trialConversionRate, leadsByInterest, totalEmployees, activeEmployees, engagementRate, certificatesIssued, totalEnrollments, completedEnrollments, overallCompletionRate, popularCourses]
+      properties:
+        companiesRegistered:
+          type: integer
+        activeCompanies:
+          type: integer
+        annualRevenue:
+          type: number
+        currency:
+          type: string
+        trialSignups:
+          type: integer
+        convertedTrials:
+          type: integer
+        trialConversionRate:
+          type: integer
+        leadsByInterest:
+          $ref: "#/components/schemas/LeadsByInterest"
+        totalEmployees:
+          type: integer
+        activeEmployees:
+          type: integer
+        engagementRate:
+          type: integer
+        certificatesIssued:
+          type: integer
+        totalEnrollments:
+          type: integer
+        completedEnrollments:
+          type: integer
+        overallCompletionRate:
+          type: integer
+        popularCourses:
+          type: array
+          items:
+            $ref: "#/components/schemas/PopularCourse"
+
+    LeadsByInterest:
+      type: object
+      required: [trial, demo, proposal]
+      properties:
+        trial:
+          type: integer
+        demo:
+          type: integer
+        proposal:
+          type: integer
+
+    PopularCourse:
+      type: object
+      required: [courseId, title, enrollments, completionRate]
+      properties:
+        courseId:
+          type: ["integer", "null"]
+        title:
+          type: string
+        enrollments:
+          type: integer
+        completionRate:
           type: integer

@@ -17,6 +17,7 @@ import leaderboardsRouter from "./leaderboards";
 import challengesRouter from "./challenges";
 import complianceRouter from "./compliance";
 import leadsRouter from "./leads";
+import adminRouter from "./admin";
 import blogRouter from "./blog";
 
 const router: IRouter = Router();
@@ -41,6 +42,7 @@ router.use("/leaderboards", leaderboardsRouter);
 router.use("/challenges", challengesRouter);
 router.use("/compliance", complianceRouter);
 router.use("/leads", leadsRouter);
+router.use("/admin", adminRouter);
 router.use(blogRouter);
 
 export default router;

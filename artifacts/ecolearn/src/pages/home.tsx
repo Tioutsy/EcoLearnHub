@@ -5,6 +5,7 @@ import { ArrowRight, Leaf, ShieldCheck, TrendingUp, PlayCircle, BookOpen, Award,
 import { useGetFeaturedCourses } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 
 export default function Home() {
   const { data: featuredCourses, isLoading } = useGetFeaturedCourses();
@@ -250,12 +251,22 @@ export default function Home() {
             Join Mauritian companies who train their teams, track engagement, and certify ESG readiness with reporting their stakeholders can trust.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-secondary hover:bg-white/90 h-12 px-8 text-base">
-              Get Started Today
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 h-12 px-8 text-base">
-              Schedule a Demo
-            </Button>
+            <LeadCaptureDialog
+              interest="trial"
+              trigger={
+                <Button size="lg" className="bg-white text-secondary hover:bg-white/90 h-12 px-8 text-base">
+                  Start Free Trial
+                </Button>
+              }
+            />
+            <LeadCaptureDialog
+              interest="demo"
+              trigger={
+                <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 h-12 px-8 text-base">
+                  Book a Demo
+                </Button>
+              }
+            />
           </div>
         </div>
       </section>

@@ -629,7 +629,39 @@ export const BulkImportEmployeesBody = zod.object({
 
 
 /**
- * @summary List captured leads (admin)
+ * @summary Platform-wide analytics for the super admin dashboard
+ */
+export const GetAdminAnalyticsResponse = zod.object({
+  "companiesRegistered": zod.number(),
+  "activeCompanies": zod.number(),
+  "annualRevenue": zod.number(),
+  "currency": zod.string(),
+  "trialSignups": zod.number(),
+  "convertedTrials": zod.number(),
+  "trialConversionRate": zod.number(),
+  "leadsByInterest": zod.object({
+  "trial": zod.number(),
+  "demo": zod.number(),
+  "proposal": zod.number()
+}),
+  "totalEmployees": zod.number(),
+  "activeEmployees": zod.number(),
+  "engagementRate": zod.number(),
+  "certificatesIssued": zod.number(),
+  "totalEnrollments": zod.number(),
+  "completedEnrollments": zod.number(),
+  "overallCompletionRate": zod.number(),
+  "popularCourses": zod.array(zod.object({
+  "courseId": zod.number().nullable(),
+  "title": zod.string(),
+  "enrollments": zod.number(),
+  "completionRate": zod.number()
+}))
+})
+
+
+/**
+ * @summary List captured leads (super admin)
  */
 export const ListLeadsResponseItem = zod.object({
   "id": zod.number(),

@@ -7,6 +7,7 @@
  */
 
 export * from './achievementBadge';
+export * from './adminAnalytics';
 export * from './assignCourseInput';
 export * from './assignCourseResult';
 export * from './badge';
@@ -61,6 +62,7 @@ export * from './leaderboard';
 export * from './leaderboardEntry';
 export * from './leaderboardResponse';
 export * from './leadInterest';
+export * from './leadsByInterest';
 export * from './learningPath';
 export * from './learningPathModule';
 export * from './lesson';
@@ -68,6 +70,7 @@ export * from './lessonProgress';
 export * from './listCoursesParams';
 export * from './monthlyTrendPoint';
 export * from './plan';
+export * from './popularCourse';
 export * from './portalSession';
 export * from './progressUpdate';
 export * from './quiz';

@@ -1,2 +1,2 @@
-- [EcoLearn prod/dev data split](ecolearn-prod-data-sync.md) — prod is a SEPARATE DB with no seed file; dev edits reach prod only via Publish "Overwrite data".
-- [EcoLearn gamification/compliance domains](ecolearn-gamification-compliance.md) — live-computed status pattern (no stored progress) for leaderboards/challenges/compliance; key schema + codegen-collision gotchas.
+- [Super admin authorization](admin-authz.md) — privileged endpoints gated by Clerk publicMetadata.role === 'super_admin', enforced server-side + mirrored in UI.
+- [Orval query hooks](orval-query-hooks.md) — passing query options to generated useGet*/useList* hooks requires an explicit queryKey or tsc TS2741.
