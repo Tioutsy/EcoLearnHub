@@ -14,7 +14,7 @@ export default function Quiz() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { data: course } = useGetCourse(id, { query: { enabled: !!id } });
+  const { data: course } = useGetCourse(id, { query: { enabled: !!id, queryKey: ['course', id] } });
   const { data: quiz, isLoading } = useGetCourseQuiz(id, { query: { enabled: !!id, queryKey: ['quiz', id] } });
   const submitQuiz = useSubmitQuiz();
 
@@ -104,7 +104,7 @@ export default function Quiz() {
               <h2 className="text-4xl font-bold font-serif mb-4">Not quite there yet.</h2>
               <p className="text-xl text-muted-foreground mb-2">You didn't pass the quiz this time.</p>
               <p className="text-lg font-medium">Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})</p>
-              <p className="text-sm text-muted-foreground mt-4">You need 80% to pass. Please review the material and try again.</p>
+              <p className="text-sm text-muted-foreground mt-4">You need 70% to pass. Please review the material and try again.</p>
             </div>
           )}
 
