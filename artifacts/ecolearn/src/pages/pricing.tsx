@@ -69,7 +69,7 @@ export default function Pricing() {
                   {plan.maxEmployees ? `Up to ${plan.maxEmployees} employees` : 'Unlimited employees'}
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">${isAnnual ? plan.priceAnnual : plan.priceMonthly}</span>
+                  <span className="text-4xl font-bold">Rs {(isAnnual ? plan.priceAnnual : plan.priceMonthly)?.toLocaleString()}</span>
                   <span className="text-muted-foreground font-medium">/{isAnnual ? 'yr' : 'mo'}</span>
                 </div>
               </div>

@@ -15,7 +15,10 @@ import {
 const router = Router();
 
 router.get("/", async (req, res): Promise<void> => {
-  const params = ListCoursesQueryParams.safeParse(req.query);
+  const cleanQuery = Object.fromEntries(
+    Object.entries(req.query).filter(([, v]) => v !== "null" && v !== "undefined" && v !== "")
+  );
+  const params = ListCoursesQueryParams.safeParse(cleanQuery);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;

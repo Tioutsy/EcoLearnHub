@@ -146,7 +146,7 @@ export default function Courses() {
                           {course.description}
                         </p>
                         <div className="pt-4 border-t flex items-center justify-between mt-auto">
-                          <span className="font-semibold text-lg">${course.priceUsd}</span>
+                          <span className="font-semibold text-lg">Rs {course.priceUsd?.toLocaleString()}</span>
                           <span className="text-sm font-medium text-primary">Details &rarr;</span>
                         </div>
                       </div>

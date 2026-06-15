@@ -142,7 +142,7 @@ export default function CourseDetail() {
                 </div>
               )}
               <div className="p-6">
-                <div className="text-3xl font-bold mb-6">${course.priceUsd}</div>
+                <div className="text-3xl font-bold mb-6">Rs {course.priceUsd?.toLocaleString()}</div>
                 <Button 
                   size="lg" 
                   className="w-full h-12 text-base font-semibold shadow-md"

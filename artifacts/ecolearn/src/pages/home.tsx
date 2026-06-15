@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowRight, Leaf, ShieldCheck, TrendingUp, Users, PlayCircle, BookOpen, Award, BarChart3 } from "lucide-react";
+import { ArrowRight, Leaf, ShieldCheck, TrendingUp, PlayCircle, BookOpen, Award, BarChart3 } from "lucide-react";
 import { useGetFeaturedCourses } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -36,20 +36,6 @@ export default function Home() {
                 </Button>
               </div>
               
-              <div className="mt-10 flex items-center gap-6 text-sm text-muted-foreground font-medium">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                  <span>ESG Compliant</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span>500+ Professionals</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-primary" />
-                  <span>Certified Courses</span>
-                </div>
-              </div>
             </div>
             
             <div className="relative lg:ml-auto">
@@ -121,30 +107,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Counter */}
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-primary-foreground/10 text-center">
-            <div>
-              <p className="text-4xl font-bold font-serif mb-2">15+</p>
-              <p className="text-primary-foreground/80 font-medium">Corporate Partners</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold font-serif mb-2">2.5k</p>
-              <p className="text-primary-foreground/80 font-medium">Employees Trained</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold font-serif mb-2">45k</p>
-              <p className="text-primary-foreground/80 font-medium">Kg Waste Diverted</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold font-serif mb-2">100%</p>
-              <p className="text-primary-foreground/80 font-medium">Local Context</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Courses */}
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -195,7 +157,7 @@ export default function Home() {
                       {course.description}
                     </p>
                     <div className="pt-4 border-t flex items-center justify-between mt-auto">
-                      <span className="font-semibold">${course.priceUsd}</span>
+                      <span className="font-semibold">Rs {course.priceUsd?.toLocaleString()}</span>
                       <span className="text-sm font-medium text-primary flex items-center">
                         View details <ArrowRight className="ml-1 h-3.5 w-3.5" />
                       </span>

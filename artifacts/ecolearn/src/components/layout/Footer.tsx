@@ -47,15 +47,15 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-secondary-foreground/80">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>Ebene Cybercity, Mauritius</span>
+                <span>Black River, Mauritius</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
-                <a href="mailto:hello@ecolearn.mu" className="hover:text-white transition-colors">hello@ecolearn.mu</a>
+                <a href="mailto:ecolearn@gmail.com" className="hover:text-white transition-colors">ecolearn@gmail.com</a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
-                <span>+230 460 0000</span>
+                <span>+230 5743 4349</span>
               </li>
             </ul>
           </div>
