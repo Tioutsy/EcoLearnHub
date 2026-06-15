@@ -145,8 +145,7 @@ export default function Courses() {
                         <p className="text-muted-foreground text-sm line-clamp-2 mb-4 flex-1">
                           {course.description}
                         </p>
-                        <div className="pt-4 border-t flex items-center justify-between mt-auto">
-                          <span className="font-semibold text-lg">Rs {course.priceUsd?.toLocaleString()}</span>
+                        <div className="pt-4 border-t flex items-center justify-end mt-auto">
                           <span className="text-sm font-medium text-primary">Details &rarr;</span>
                         </div>
                       </div>

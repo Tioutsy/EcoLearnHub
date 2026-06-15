@@ -156,8 +156,7 @@ export default function Home() {
                     <p className="text-muted-foreground text-sm line-clamp-2 mb-6 flex-1">
                       {course.description}
                     </p>
-                    <div className="pt-4 border-t flex items-center justify-between mt-auto">
-                      <span className="font-semibold">Rs {course.priceUsd?.toLocaleString()}</span>
+                    <div className="pt-4 border-t flex items-center justify-end mt-auto">
                       <span className="text-sm font-medium text-primary flex items-center">
                         View details <ArrowRight className="ml-1 h-3.5 w-3.5" />
                       </span>
