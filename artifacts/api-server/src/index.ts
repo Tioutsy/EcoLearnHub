@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureFoundationsCourse } from "./lib/ensureFoundationsCourse";
+import { ensureWasteSortingCourse } from "./lib/ensureWasteSortingCourse";
 
 const rawPort = process.env["PORT"];
 
@@ -20,6 +21,7 @@ async function start(): Promise<void> {
   // Ensure required course content exists before accepting traffic so the first
   // requests after a deploy deterministically see the seeded course.
   await ensureFoundationsCourse();
+  await ensureWasteSortingCourse();
 
   app.listen(port, (err) => {
     if (err) {

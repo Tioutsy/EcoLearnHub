@@ -1,3 +1,4 @@
+- [Bespoke interactive course pattern](bespoke-course-pattern.md) — per-course frontend folder + slug-router dispatch + idempotent startup seed that adopts/converges course rows via onConflictDoUpdate.
 - [Super admin authorization](admin-authz.md) — privileged endpoints gated by Clerk publicMetadata.role === 'super_admin', enforced server-side + mirrored in UI.
 - [Orval query hooks](orval-query-hooks.md) — passing query options to generated useGet*/useList* hooks requires an explicit queryKey or tsc TS2741.
 - [Production data parity](prod-data-parity.md) — Replit publish migrates schema not data; ensure required content via an idempotent, race-safe startup seed (DML), not prod DDL.

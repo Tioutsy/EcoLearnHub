@@ -1,0 +1,360 @@
+If you're following the same structure and level of detail as your Sustainability Foundations course prompt for Replit, you can use something like this:
+
+---
+
+# Waste Sorting and the Mauritian Bin System
+
+Build a professional, mobile-first e-learning web application called **"Waste Sorting and the Mauritian Bin System"** designed for employees, students, and members of the public in Mauritius. The platform should teach users how to correctly sort waste using the Mauritian waste segregation system and develop practical waste management habits that support recycling, resource recovery, and environmental sustainability.
+
+The course should be interactive, visually engaging, SCORM-inspired, and suitable for self-paced learning. Users should progress through modules, complete knowledge checks, earn a certificate upon completion, and have their progress saved automatically.
+
+## Design Requirements
+
+* Modern, clean, professional interface
+* Mobile-first responsive design
+* Mauritian-inspired color palette:
+
+  * Green (#2E7D32)
+  * Blue (#1565C0)
+  * Yellow (#F9A825)
+  * White (#FFFFFF)
+* Smooth animations and transitions
+* Accessible design with clear typography
+* Dashboard showing progress and completion status
+* Gamified learning experience with badges and achievements
+* Progress tracking stored locally
+
+---
+
+# Course Overview
+
+## Learning Objectives
+
+By the end of this course, learners should be able to:
+
+* Understand why waste sorting is important.
+* Identify different waste categories.
+* Correctly use the Mauritian bin system.
+* Recognize recyclable and non-recyclable materials.
+* Reduce contamination of recyclable waste streams.
+* Apply waste sorting practices at home, work, and in public spaces.
+* Contribute to national sustainability and circular economy goals.
+
+---
+
+# Course Structure
+
+## Module 1: Why Waste Sorting Matters
+
+### Topics
+
+* The growing waste challenge in Mauritius
+* Environmental impacts of poorly managed waste
+* Landfill limitations
+* Benefits of recycling and resource recovery
+* Circular economy principles
+* Individual responsibility
+
+### Interactive Elements
+
+* Animated infographic showing waste generation
+* Before-and-after environmental scenarios
+* Click-to-reveal statistics
+* Reflection activity
+
+### Knowledge Check
+
+5-question quiz
+
+---
+
+## Module 2: Understanding Waste Categories
+
+### Topics
+
+#### Recyclable Waste
+
+* Paper and cardboard
+* Plastic containers
+* Metal cans
+* Glass bottles and jars
+
+#### Organic Waste
+
+* Food scraps
+* Fruit and vegetable peels
+* Garden waste
+
+#### Residual Waste
+
+* Contaminated packaging
+* Non-recyclable materials
+* Certain hygiene products
+
+#### Special Waste
+
+* Batteries
+* Electronic waste
+* Chemicals
+* Paints
+* Light bulbs
+
+### Interactive Elements
+
+* Drag-and-drop waste classification game
+* Waste identification flashcards
+* Sorting challenge
+
+### Knowledge Check
+
+Match waste items to correct categories
+
+---
+
+## Module 3: The Mauritian Bin System
+
+### Topics
+
+Explain the national bin color system using clear visual examples.
+
+### Green Bin
+
+* Organic waste
+* Food waste
+* Garden waste
+
+### Yellow Bin
+
+* Recyclable materials
+* Paper
+* Plastic
+* Metal
+* Clean recyclable packaging
+
+### Black Bin
+
+* General waste
+* Non-recyclable items
+* Contaminated materials
+
+### Special Collection Points
+
+* E-waste
+* Batteries
+* Hazardous materials
+
+### Interactive Elements
+
+* Clickable bin explorer
+* 3D-style bin illustrations
+* Waste-to-bin matching game
+
+### Scenario Exercises
+
+Users must decide which bin each item belongs in.
+
+Examples:
+
+* Banana peel
+* Plastic water bottle
+* Used tissue
+* Newspaper
+* Glass bottle
+* Battery
+* Food-soiled pizza box
+
+Immediate feedback should be provided.
+
+### Knowledge Check
+
+10-question assessment
+
+---
+
+## Module 4: Common Sorting Mistakes
+
+### Topics
+
+* Contamination of recycling streams
+* Food residue in recyclables
+* Incorrect disposal of batteries
+* Mixing waste categories
+* Overfilled bins
+
+### Interactive Elements
+
+Spot-the-mistake activities
+
+Users inspect a virtual bin and identify incorrect items.
+
+### Knowledge Check
+
+Multiple-choice quiz
+
+---
+
+## Module 5: Waste Sorting at Home and Work
+
+### Topics
+
+#### Home
+
+* Kitchen waste management
+* Family participation
+* Storage of recyclables
+
+#### Workplace
+
+* Office recycling stations
+* Shared responsibility
+* Waste reduction practices
+
+#### Public Spaces
+
+* Using public bins correctly
+* Responsible disposal habits
+
+### Interactive Elements
+
+Real-life scenarios
+
+Examples:
+
+* Office lunch waste
+* Household clean-up
+* Community event waste management
+
+### Knowledge Check
+
+Scenario-based decision making
+
+---
+
+## Module 6: Reducing Waste Before Sorting
+
+### Topics
+
+Waste hierarchy:
+
+1. Refuse
+2. Reduce
+3. Reuse
+4. Repair
+5. Recycle
+6. Recover
+7. Dispose
+
+### Topics Covered
+
+* Avoiding single-use plastics
+* Choosing reusable products
+* Composting organic waste
+* Sustainable purchasing
+* Circular economy thinking
+
+### Interactive Elements
+
+Waste reduction calculator
+
+Users receive a sustainability score based on choices.
+
+### Knowledge Check
+
+Short quiz
+
+---
+
+# Final Assessment
+
+## Requirements
+
+* 20 randomized questions
+* Multiple choice
+* Drag-and-drop sorting exercises
+* Scenario-based questions
+
+### Passing Score
+
+80%
+
+### Retake Option
+
+Available immediately with randomized questions.
+
+---
+
+# Certificate of Completion
+
+Upon successful completion:
+
+Generate a downloadable certificate containing:
+
+* Learner name
+* Course title
+* Completion date
+* Unique certificate number
+* Digital signature placeholder
+
+Certificate title:
+
+**Certificate of Completion – Waste Sorting and the Mauritian Bin System**
+
+---
+
+# Gamification Features
+
+### Badges
+
+* Waste Sorting Beginner
+* Recycling Champion
+* Bin Expert
+* Waste Reduction Advocate
+* Sustainability Ambassador
+
+### Points System
+
+* Complete module: 50 points
+* Pass quiz: 25 points
+* Perfect quiz score: bonus 25 points
+* Complete final assessment: 100 points
+
+---
+
+# Administrative Features
+
+Provide:
+
+### Learner Dashboard
+
+* Progress percentage
+* Modules completed
+* Quiz scores
+* Certificates earned
+* Badge collection
+
+### Reporting
+
+* Completion status
+* Assessment results
+* Time spent learning
+* Learning analytics
+
+---
+
+# Technical Requirements
+
+* Built as a modern React application
+* Mobile-first responsive design
+* Local storage persistence
+* Fast loading performance
+* Modular architecture
+* Reusable components
+* Accessibility compliance
+* Interactive animations
+* Clean and maintainable code
+
+---
+
+# Desired Outcome
+
+Create an engaging, professional, and practical learning experience that enables learners in Mauritius to confidently sort waste using the Mauritian bin system, reduce contamination of recycling streams, and adopt sustainable waste management habits in everyday life.

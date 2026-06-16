@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import FoundationsPlayer from "./foundations/FoundationsPlayer";
 import { FOUNDATIONS_COURSE_ID, FOUNDATIONS_COURSE_SLUG } from "./foundations/content";
+import WasteSortingPlayer from "./waste-sorting/WasteSortingPlayer";
+import { WASTE_SORTING_COURSE_ID, WASTE_SORTING_COURSE_SLUG } from "./waste-sorting/content";
 
 export default function Learn() {
   const { enrollmentId } = useParams();
@@ -71,6 +73,13 @@ export default function Learn() {
     enrollment.course.id === FOUNDATIONS_COURSE_ID
   ) {
     return <FoundationsPlayer enrollmentId={id} />;
+  }
+
+  if (
+    enrollment.course.slug === WASTE_SORTING_COURSE_SLUG ||
+    enrollment.course.id === WASTE_SORTING_COURSE_ID
+  ) {
+    return <WasteSortingPlayer enrollmentId={id} />;
   }
 
   const course = enrollment.course;
