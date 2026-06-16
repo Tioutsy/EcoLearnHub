@@ -7,7 +7,7 @@ import { ArrowLeft, PlayCircle, FileText, CheckCircle2, ChevronRight, Award, Gra
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import FoundationsPlayer from "./foundations/FoundationsPlayer";
-import { FOUNDATIONS_COURSE_ID } from "./foundations/content";
+import { FOUNDATIONS_COURSE_ID, FOUNDATIONS_COURSE_SLUG } from "./foundations/content";
 
 export default function Learn() {
   const { enrollmentId } = useParams();
@@ -65,7 +65,11 @@ export default function Learn() {
     );
   }
 
-  if (enrollment.course.id === FOUNDATIONS_COURSE_ID) {
+  // Activate the bespoke player by durable slug (falls back to id for legacy rows).
+  if (
+    enrollment.course.slug === FOUNDATIONS_COURSE_SLUG ||
+    enrollment.course.id === FOUNDATIONS_COURSE_ID
+  ) {
     return <FoundationsPlayer enrollmentId={id} />;
   }
 

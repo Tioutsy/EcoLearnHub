@@ -1,21 +1,21 @@
 ---
-name: Multi-module course player state isolation
-description: Why interactive blocks in a step/module player must remount per module, and the badge-lookup trap in progression summaries.
+name: Course player and progression gotchas
+description: Durable rules for multi-module interactive course players and progression/badge computation.
 ---
 
-# Multi-module player: force remount per module
+# Remount interactive blocks per module
 
-When a single React player renders a list of interactive "blocks" per module and advances by changing a `moduleIndex`, do NOT rely on index-based child keys alone. If two modules render the same component type at the same block index (e.g. both have a `CheckView` at index 3), React reuses the instance and its internal `useState` (e.g. "already answered") leaks into the next module, leaving inputs disabled and any "gate" (continue-button) permanently stuck.
+A single player that renders a list of interactive blocks per module must remount the block subtree when the module changes (key it on the module identity), not just reset a separate "resolved" set. Index-based child keys alone let two modules share a component instance at the same index, so internal state (e.g. "already answered") leaks forward and any continue-button gate can lock permanently.
+**Why:** found via E2E — a later module's continue button stayed disabled because its first knowledge-check reused an earlier module's answered instance.
 
-**Rule:** key the blocks container on the module identity (`key={module.key}`) so the whole subtree remounts on module change. Resetting a separate `resolved` set on `moduleIndex` change is NOT enough — the children keep their own state.
+# Badge lookup must filter by course, and be pass-gated
 
-**Why:** found via E2E test — Module 2's continue button stayed disabled forever because its first knowledge-check reused Module 1's answered instance.
-**How to apply:** any step/wizard/module player in this repo (e.g. `artifacts/ecolearn/src/pages/learn/foundations/FoundationsPlayer.tsx`).
+`badge_definitions` holds many rows with the same `criteria_type` (e.g. `all_courses`), each scoped to different course ids. Never take the first matching row; select the one whose course-id array includes the target course. A course badge should be marked earned only on true completion (all modules done AND final quiz passed), not merely when all lessons are flagged complete.
 
-# Badge lookup in progression summary
+# Count DISTINCT lessons for points/progress
 
-`badge_definitions` has MANY rows with `criteria_type = 'all_courses'`, each scoped to different `course_ids`. Selecting `[badge] = ... where criteriaType='all_courses'` returns an arbitrary first row, so the wrong badge (or none) matches. Always filter to the badge whose `courseIds` array includes the target courseId: `rows.find(b => b.courseIds.includes(courseId))`.
+Lesson-progress rows have no uniqueness guarantee and the shared writer is non-atomic, so duplicates are possible. Any points/progress computation must dedupe by lesson id and clamp counts to the course's lesson total rather than trusting row counts.
 
-# Points must count DISTINCT lessons
+# Activate bespoke players by a durable identifier
 
-`lesson_progress` has no unique constraint on `(enrollment_id, lesson_id)` and the shared PATCH writer (`artifacts/api-server/src/routes/progress.ts`) does non-atomic select-then-insert, so duplicate completion rows are possible. Any points/summary computation must count `new Set(rows.map(r => r.lessonId)).size` and clamp module counts to the course's lesson total, not `rows.length`.
+Gate a special-cased course experience on a stable identifier (a course slug/flag), not a hard-coded numeric id, so it survives reseeds and environment drift. Keep authored quiz/lesson/badge data in an idempotent seed keyed by that slug so fresh environments are reproducible.

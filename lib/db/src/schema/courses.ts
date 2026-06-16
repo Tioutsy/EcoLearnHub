@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 export const coursesTable = pgTable("courses", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
+  slug: text("slug"),
   description: text("description").notNull(),
   categoryId: integer("category_id").notNull(),
   durationMinutes: integer("duration_minutes").notNull().default(60),

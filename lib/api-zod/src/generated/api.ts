@@ -28,6 +28,7 @@ export const ListCoursesQueryParams = zod.object({
 export const ListCoursesResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
+  "slug": zod.string().nullish(),
   "description": zod.string(),
   "categoryId": zod.number(),
   "categoryName": zod.string().nullish(),
@@ -75,6 +76,7 @@ export const GetCourseParams = zod.object({
 export const GetCourseResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
+  "slug": zod.string().nullish(),
   "description": zod.string(),
   "categoryId": zod.number(),
   "categoryName": zod.string().nullish(),
@@ -128,6 +130,7 @@ export const UpdateCourseBody = zod.object({
 export const UpdateCourseResponse = zod.object({
   "id": zod.number(),
   "title": zod.string(),
+  "slug": zod.string().nullish(),
   "description": zod.string(),
   "categoryId": zod.number(),
   "categoryName": zod.string().nullish(),
@@ -160,6 +163,7 @@ export const DeleteCourseParams = zod.object({
 export const GetFeaturedCoursesResponseItem = zod.object({
   "id": zod.number(),
   "title": zod.string(),
+  "slug": zod.string().nullish(),
   "description": zod.string(),
   "categoryId": zod.number(),
   "categoryName": zod.string().nullish(),
@@ -241,6 +245,7 @@ export const GetEnrollmentResponse = zod.object({
   "course": zod.object({
   "id": zod.number(),
   "title": zod.string(),
+  "slug": zod.string().nullish(),
   "description": zod.string(),
   "categoryId": zod.number(),
   "categoryName": zod.string().nullish(),

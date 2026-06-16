@@ -10,6 +10,8 @@ import type { CourseLevel } from './courseLevel';
 export interface Course {
   id: number;
   title: string;
+  /** @nullable */
+  slug?: string | null;
   description: string;
   categoryId: number;
   /** @nullable */

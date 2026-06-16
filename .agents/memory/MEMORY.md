@@ -1,3 +1,3 @@
 - [Super admin authorization](admin-authz.md) — privileged endpoints gated by Clerk publicMetadata.role === 'super_admin', enforced server-side + mirrored in UI.
 - [Orval query hooks](orval-query-hooks.md) — passing query options to generated useGet*/useList* hooks requires an explicit queryKey or tsc TS2741.
-- [Module player state](module-player-state.md) — per-module interactive players must remount on module change (key the blocks wrapper); badge summary must filter all_courses badges by courseId; count DISTINCT lessons for points.
+- [Course player & progression](module-player-state.md) — remount interactive blocks per module; badges filter-by-course + pass-gated; count DISTINCT lessons; activate bespoke players by durable slug with idempotent seed.

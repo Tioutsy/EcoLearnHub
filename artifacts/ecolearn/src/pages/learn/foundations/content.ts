@@ -1,3 +1,4 @@
+export const FOUNDATIONS_COURSE_SLUG = "sustainability-foundations";
 export const FOUNDATIONS_COURSE_ID = 23;
 export const NEXT_COURSE_ID = 12;
 export const NEXT_COURSE_TITLE = "Waste Sorting and the Mauritian Bin System";

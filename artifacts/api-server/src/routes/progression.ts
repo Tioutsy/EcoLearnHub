@@ -167,7 +167,9 @@ router.get("/courses/:courseId/summary", async (req, res): Promise<void> => {
     let badgeEarned = false;
     if (badge) {
       badgeName = badge.name;
-      badgeEarned = courseCompleted;
+      // The badge is only earned once the learner has both finished every
+      // module and passed the final quiz (pass-gated completion).
+      badgeEarned = courseCompleted && quizPassed;
     }
 
     const modulePoints = modulesCompleted * MODULE_POINTS;
