@@ -1,3 +1,4 @@
 - [Super admin authorization](admin-authz.md) — privileged endpoints gated by Clerk publicMetadata.role === 'super_admin', enforced server-side + mirrored in UI.
 - [Orval query hooks](orval-query-hooks.md) — passing query options to generated useGet*/useList* hooks requires an explicit queryKey or tsc TS2741.
+- [Production data parity](prod-data-parity.md) — Replit publish migrates schema not data; ensure required content via an idempotent, race-safe startup seed (DML), not prod DDL.
 - [Course player & progression](module-player-state.md) — remount interactive blocks per module; badges filter-by-course + pass-gated; count DISTINCT lessons; activate bespoke players by durable slug with idempotent seed.
