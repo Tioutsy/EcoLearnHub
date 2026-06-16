@@ -1,0 +1,231 @@
+PROJECT: ECOLEARN COURSE CREATOR
+
+Create a complete interactive course inside EcoLearn called:
+
+"Sustainability Foundations"
+
+The course should be designed for all employee types regardless of role, industry or education level.
+
+Target completion time:
+15-20 minutes.
+
+Primary objective:
+Help employees understand sustainability and identify practical actions they can implement immediately in the workplace.
+
+The course should be engaging, visual, interactive and built using micro-learning principles.
+
+---
+
+COURSE STRUCTURE
+
+Module 1: Welcome to Sustainability
+
+Learning Objective:
+Understand what sustainability means.
+
+Content:
+
+* Short introduction
+* Interactive scenario
+* Visual illustrations
+* One knowledge check
+
+Quiz:
+1 multiple choice question.
+
+---
+
+Module 2: Why Sustainability Matters
+
+Learning Objective:
+Understand business and environmental benefits.
+
+Content:
+
+* Short explainer
+* Interactive matching exercise
+
+Topics:
+
+* Waste reduction
+* Energy savings
+* Water conservation
+* Corporate responsibility
+
+Quiz:
+2 questions.
+
+---
+
+Module 3: Sustainability in Mauritius
+
+Learning Objective:
+Connect sustainability to local realities.
+
+Topics:
+
+* Waste management
+* Plastic pollution
+* Water scarcity
+* Environmental challenges
+
+Add:
+
+* Mauritian case study section
+* Visual storytelling
+
+Quiz:
+2 questions.
+
+---
+
+Module 4: Your Role as an Employee
+
+Learning Objective:
+Understand personal responsibility.
+
+Content:
+Role-specific examples:
+
+* Office employee
+* Receptionist
+* Technician
+* Housekeeper
+* Manager
+
+Interactive activity:
+Select actions you can implement.
+
+---
+
+Module 5: Everyday Sustainability Actions
+
+Learning Objective:
+Learn practical workplace actions.
+
+Topics:
+
+* Energy
+* Water
+* Waste
+* Paper
+* Transport
+
+Create:
+Interactive decision-making scenarios.
+
+Example:
+"What would you do if you noticed recyclables being placed in the wrong bin?"
+
+---
+
+Module 6: Sustainability Commitment
+
+Learning Objective:
+Convert learning into action.
+
+Employee selects:
+
+* Reduce waste
+* Save water
+* Save energy
+* Recycle correctly
+* Encourage colleagues
+
+Store selections in database.
+
+Allow future tracking.
+
+---
+
+FINAL QUIZ
+
+10 questions maximum.
+
+Passing score:
+80%
+
+Allow retakes.
+
+Display results immediately.
+
+---
+
+CERTIFICATE SYSTEM
+
+Generate PDF certificate automatically upon successful completion.
+
+Certificate must include:
+
+* Employee name
+* Company name
+* Course name
+* Completion date
+* Unique certificate number
+* QR verification code
+
+---
+
+BADGE SYSTEM
+
+Award:
+
+"Sustainability Starter"
+
+Display badge on employee profile.
+
+Store badge in database.
+
+---
+
+PROGRESSION SYSTEM
+
+Display:
+
+Course completion percentage
+
+Modules completed
+
+Quiz score
+
+Certificate earned
+
+Badge earned
+
+---
+
+NEXT COURSE RECOMMENDATION
+
+After completion show:
+
+"Recommended Next Course:
+Waste Sorting & The Mauritian Bin System"
+
+---
+
+GAMIFICATION
+
+Award:
+
+* Points per module
+* Bonus points for perfect quiz scores
+* Completion badge
+
+Display points in employee dashboard.
+
+---
+
+USER EXPERIENCE REQUIREMENTS
+
+* Mobile-friendly
+* Modern visual design
+* Short content blocks
+* Maximum 3 minutes reading per section
+* Progress indicators
+* Interactive learning
+* No large text walls
+* High completion rate focus
+
+The course should feel like an engaging learning experience rather than corporate compliance training.
+
+The tone should be practical, positive and action-oriented.
