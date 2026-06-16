@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { badgeDefinitionsTable, enrollmentsTable } from "@workspace/db";
+import {
+  badgeDefinitionsTable,
+  enrollmentsTable,
+  quizAttemptsTable,
+} from "@workspace/db";
 import { eq, and, asc } from "drizzle-orm";
 
 const router = Router();
@@ -14,7 +18,7 @@ router.get("/", async (req, res): Promise<void> => {
       .from(badgeDefinitionsTable)
       .orderBy(asc(badgeDefinitionsTable.orderIndex));
 
-    const completed = await db
+    const completedEnrollments = await db
       .select({
         courseId: enrollmentsTable.courseId,
         completedAt: enrollmentsTable.completedAt,
@@ -26,6 +30,25 @@ router.get("/", async (req, res): Promise<void> => {
           eq(enrollmentsTable.status, "completed"),
         ),
       );
+
+    // A course only counts toward achievement badges when the learner has both
+    // finished every module (enrollment completed) AND passed the final quiz.
+    // This mirrors the pass-gated completion used in routes/progression.ts so a
+    // badge can never appear earned before the required quiz is passed.
+    const passedAttempts = await db
+      .select({ courseId: quizAttemptsTable.courseId })
+      .from(quizAttemptsTable)
+      .where(
+        and(
+          eq(quizAttemptsTable.userId, userId),
+          eq(quizAttemptsTable.passed, true),
+        ),
+      );
+    const passedCourseIds = new Set(passedAttempts.map((a) => a.courseId));
+
+    const completed = completedEnrollments.filter((c) =>
+      passedCourseIds.has(c.courseId),
+    );
 
     const completedCourseIds = new Set(completed.map((c) => c.courseId));
     const completedDateByCourse = new Map<number, Date | null>(
