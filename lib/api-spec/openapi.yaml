@@ -313,6 +313,82 @@ paths:
               schema:
                 $ref: "#/components/schemas/QuizResult"
 
+  # ── COMMITMENTS ───────────────────────────────────────────────────────────────
+  /courses/{courseId}/commitments:
+    get:
+      operationId: getCommitments
+      tags: [commitments]
+      summary: Get the current user's saved commitments for a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitmentList"
+    post:
+      operationId: saveCommitments
+      tags: [commitments]
+      summary: Save the current user's commitments for a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveCommitmentsInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitmentList"
+
+  # ── PROGRESSION ───────────────────────────────────────────────────────────────
+  /progression/points:
+    get:
+      operationId: getMyPoints
+      tags: [progression]
+      summary: Get the current user's total learning points
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointsBreakdown"
+
+  /progression/courses/{courseId}/summary:
+    get:
+      operationId: getCourseProgressSummary
+      tags: [progression]
+      summary: Get the current user's progression summary for a course
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseProgressSummary"
+
   # ── CERTIFICATES ──────────────────────────────────────────────────────────────
   /certificates:
     get:
@@ -1054,6 +1130,8 @@ components:
           type: ["number", "null"]
         includesCertificate:
           type: boolean
+        passingScore:
+          type: integer
         createdAt:
           type: string
 
@@ -1296,6 +1374,67 @@ components:
           type: integer
         certificateId:
           type: ["integer", "null"]
+
+    # ── COMMITMENTS ───────────────────────────────────────────────────────────
+    CommitmentList:
+      type: object
+      required: [courseId, commitments]
+      properties:
+        courseId:
+          type: integer
+        commitments:
+          type: array
+          items:
+            type: string
+
+    SaveCommitmentsInput:
+      type: object
+      required: [commitments]
+      properties:
+        commitments:
+          type: array
+          items:
+            type: string
+
+    # ── PROGRESSION ───────────────────────────────────────────────────────────
+    PointsBreakdown:
+      type: object
+      required: [modulePoints, quizPoints, bonusPoints, totalPoints]
+      properties:
+        modulePoints:
+          type: integer
+        quizPoints:
+          type: integer
+        bonusPoints:
+          type: integer
+        totalPoints:
+          type: integer
+
+    CourseProgressSummary:
+      type: object
+      required:
+        [courseId, modulesCompleted, totalModules, completionPct, quizPassed, badgeEarned, points]
+      properties:
+        courseId:
+          type: integer
+        modulesCompleted:
+          type: integer
+        totalModules:
+          type: integer
+        completionPct:
+          type: integer
+        bestScore:
+          type: ["integer", "null"]
+        quizPassed:
+          type: boolean
+        certificateId:
+          type: ["integer", "null"]
+        badgeName:
+          type: ["string", "null"]
+        badgeEarned:
+          type: boolean
+        points:
+          $ref: "#/components/schemas/PointsBreakdown"
 
     # ── CERTIFICATE ───────────────────────────────────────────────────────────
     Certificate:

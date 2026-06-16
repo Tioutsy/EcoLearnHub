@@ -28,5 +28,6 @@ export interface Course {
   /** @nullable */
   rating?: number | null;
   includesCertificate?: boolean;
+  passingScore?: number;
   createdAt?: string;
 }

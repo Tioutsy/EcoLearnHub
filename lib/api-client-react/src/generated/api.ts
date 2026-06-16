@@ -34,6 +34,7 @@ import type {
   ChallengeProgressInput,
   CheckoutInput,
   CheckoutSession,
+  CommitmentList,
   Company,
   CompanyInput,
   CompanyUpdate,
@@ -41,6 +42,7 @@ import type {
   Course,
   CourseDetail,
   CourseInput,
+  CourseProgressSummary,
   CourseUpdate,
   CreateLeadInput,
   DashboardStats,
@@ -62,12 +64,14 @@ import type {
   LessonProgress,
   ListCoursesParams,
   Plan,
+  PointsBreakdown,
   PortalSession,
   ProgressUpdate,
   Quiz,
   QuizResult,
   QuizSubmission,
   RetrainingScanResult,
+  SaveCommitmentsInput,
   SendReminderInput,
   Subscription,
   SustainabilityScore,
@@ -1215,6 +1219,309 @@ export const useSubmitQuiz = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getSubmitQuizMutationOptions(options));
     }
+
+export const getGetCommitmentsUrl = (courseId: number,) => {
+
+
+
+
+  return `/api/courses/${courseId}/commitments`
+}
+
+/**
+ * @summary Get the current user's saved commitments for a course
+ */
+export const getCommitments = async (courseId: number, options?: RequestInit): Promise<CommitmentList> => {
+
+  return customFetch<CommitmentList>(getGetCommitmentsUrl(courseId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCommitmentsQueryKey = (courseId: number,) => {
+    return [
+    `/api/courses/${courseId}/commitments`
+    ] as const;
+    }
+
+
+export const getGetCommitmentsQueryOptions = <TData = Awaited<ReturnType<typeof getCommitments>>, TError = ErrorType<unknown>>(courseId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCommitments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommitmentsQueryKey(courseId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommitments>>> = ({ signal }) => getCommitments(courseId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(courseId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommitments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCommitmentsQueryResult = NonNullable<Awaited<ReturnType<typeof getCommitments>>>
+export type GetCommitmentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the current user's saved commitments for a course
+ */
+
+export function useGetCommitments<TData = Awaited<ReturnType<typeof getCommitments>>, TError = ErrorType<unknown>>(
+ courseId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCommitments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCommitmentsQueryOptions(courseId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSaveCommitmentsUrl = (courseId: number,) => {
+
+
+
+
+  return `/api/courses/${courseId}/commitments`
+}
+
+/**
+ * @summary Save the current user's commitments for a course
+ */
+export const saveCommitments = async (courseId: number,
+    saveCommitmentsInput: SaveCommitmentsInput, options?: RequestInit): Promise<CommitmentList> => {
+
+  return customFetch<CommitmentList>(getSaveCommitmentsUrl(courseId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      saveCommitmentsInput,)
+  }
+);}
+
+
+
+
+export const getSaveCommitmentsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveCommitments>>, TError,{courseId: number;data: BodyType<SaveCommitmentsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveCommitments>>, TError,{courseId: number;data: BodyType<SaveCommitmentsInput>}, TContext> => {
+
+const mutationKey = ['saveCommitments'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveCommitments>>, {courseId: number;data: BodyType<SaveCommitmentsInput>}> = (props) => {
+          const {courseId,data} = props ?? {};
+
+          return  saveCommitments(courseId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveCommitmentsMutationResult = NonNullable<Awaited<ReturnType<typeof saveCommitments>>>
+    export type SaveCommitmentsMutationBody = BodyType<SaveCommitmentsInput>
+    export type SaveCommitmentsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Save the current user's commitments for a course
+ */
+export const useSaveCommitments = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveCommitments>>, TError,{courseId: number;data: BodyType<SaveCommitmentsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveCommitments>>,
+        TError,
+        {courseId: number;data: BodyType<SaveCommitmentsInput>},
+        TContext
+      > => {
+      return useMutation(getSaveCommitmentsMutationOptions(options));
+    }
+
+export const getGetMyPointsUrl = () => {
+
+
+
+
+  return `/api/progression/points`
+}
+
+/**
+ * @summary Get the current user's total learning points
+ */
+export const getMyPoints = async ( options?: RequestInit): Promise<PointsBreakdown> => {
+
+  return customFetch<PointsBreakdown>(getGetMyPointsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyPointsQueryKey = () => {
+    return [
+    `/api/progression/points`
+    ] as const;
+    }
+
+
+export const getGetMyPointsQueryOptions = <TData = Awaited<ReturnType<typeof getMyPoints>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyPoints>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyPointsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyPoints>>> = ({ signal }) => getMyPoints({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyPoints>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyPointsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyPoints>>>
+export type GetMyPointsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the current user's total learning points
+ */
+
+export function useGetMyPoints<TData = Awaited<ReturnType<typeof getMyPoints>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyPoints>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyPointsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetCourseProgressSummaryUrl = (courseId: number,) => {
+
+
+
+
+  return `/api/progression/courses/${courseId}/summary`
+}
+
+/**
+ * @summary Get the current user's progression summary for a course
+ */
+export const getCourseProgressSummary = async (courseId: number, options?: RequestInit): Promise<CourseProgressSummary> => {
+
+  return customFetch<CourseProgressSummary>(getGetCourseProgressSummaryUrl(courseId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCourseProgressSummaryQueryKey = (courseId: number,) => {
+    return [
+    `/api/progression/courses/${courseId}/summary`
+    ] as const;
+    }
+
+
+export const getGetCourseProgressSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getCourseProgressSummary>>, TError = ErrorType<unknown>>(courseId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCourseProgressSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCourseProgressSummaryQueryKey(courseId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCourseProgressSummary>>> = ({ signal }) => getCourseProgressSummary(courseId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(courseId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCourseProgressSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCourseProgressSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getCourseProgressSummary>>>
+export type GetCourseProgressSummaryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the current user's progression summary for a course
+ */
+
+export function useGetCourseProgressSummary<TData = Awaited<ReturnType<typeof getCourseProgressSummary>>, TError = ErrorType<unknown>>(
+ courseId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCourseProgressSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCourseProgressSummaryQueryOptions(courseId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getListCertificatesUrl = () => {
 

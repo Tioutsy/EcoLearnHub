@@ -39,6 +39,7 @@ export interface Course {
   /** @nullable */
   rating?: number | null;
   includesCertificate?: boolean;
+  passingScore?: number;
   createdAt?: string;
 }
 
@@ -200,6 +201,38 @@ export interface QuizResult {
   correctAnswers: number;
   /** @nullable */
   certificateId?: number | null;
+}
+
+export interface CommitmentList {
+  courseId: number;
+  commitments: string[];
+}
+
+export interface SaveCommitmentsInput {
+  commitments: string[];
+}
+
+export interface PointsBreakdown {
+  modulePoints: number;
+  quizPoints: number;
+  bonusPoints: number;
+  totalPoints: number;
+}
+
+export interface CourseProgressSummary {
+  courseId: number;
+  modulesCompleted: number;
+  totalModules: number;
+  completionPct: number;
+  /** @nullable */
+  bestScore?: number | null;
+  quizPassed: boolean;
+  /** @nullable */
+  certificateId?: number | null;
+  /** @nullable */
+  badgeName?: string | null;
+  badgeEarned: boolean;
+  points: PointsBreakdown;
 }
 
 export interface Certificate {

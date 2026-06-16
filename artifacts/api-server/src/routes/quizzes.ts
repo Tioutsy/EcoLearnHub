@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { quizQuestionsTable, quizAttemptsTable, certificatesTable } from "@workspace/db";
+import { quizQuestionsTable, quizAttemptsTable, certificatesTable, coursesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { SubmitQuizBody } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
@@ -53,9 +53,15 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
     }
   }
 
+  const [course] = await db
+    .select({ passingScore: coursesTable.passingScore })
+    .from(coursesTable)
+    .where(eq(coursesTable.id, courseId));
+  const passingScore = course?.passingScore ?? 70;
+
   const totalQuestions = questions.length;
   const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-  const passed = score >= 70;
+  const passed = score >= passingScore;
 
   await db.insert(quizAttemptsTable).values({
     userId,

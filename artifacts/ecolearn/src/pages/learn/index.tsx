@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, PlayCircle, FileText, CheckCircle2, ChevronRight, Award, GraduationCap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import FoundationsPlayer from "./foundations/FoundationsPlayer";
+import { FOUNDATIONS_COURSE_ID } from "./foundations/content";
 
 export default function Learn() {
   const { enrollmentId } = useParams();
@@ -61,6 +63,10 @@ export default function Learn() {
         </div>
       </div>
     );
+  }
+
+  if (enrollment.course.id === FOUNDATIONS_COURSE_ID) {
+    return <FoundationsPlayer enrollmentId={id} />;
   }
 
   const course = enrollment.course;

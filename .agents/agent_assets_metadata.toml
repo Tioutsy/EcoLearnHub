@@ -150,3 +150,33 @@ id = "hx0rxDfN3Vfmtaze442ok"
 uri = "file://artifacts/ecolearn/public/images/blog/renewable-energy.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "1a0OdHAYZCO4ZEPV3Z9Ns"
+uri = "file://artifacts/ecolearn/public/images/courses/sustainability-foundations.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "UHl69ga69ejJWzge7bW4O"
+uri = "file://artifacts/ecolearn/public/images/courses/foundations/welcome.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "f5iu9T2Q-wfKStHoGWwF4"
+uri = "file://artifacts/ecolearn/public/images/courses/foundations/mauritius.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "8TIIYDfvwxLdx-DISm8Wi"
+uri = "file://artifacts/ecolearn/public/images/courses/foundations/roles.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "i_Tju_5O_riD2v4DHpo81"
+uri = "file://artifacts/ecolearn/public/images/courses/foundations/actions.png"
+type = "image"
+title = "generated_image"

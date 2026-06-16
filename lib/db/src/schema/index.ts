@@ -13,3 +13,4 @@ export * from "./badgeDefinitions";
 export * from "./challenges";
 export * from "./compliance";
 export * from "./leads";
+export * from "./commitments";

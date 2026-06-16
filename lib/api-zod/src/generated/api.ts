@@ -41,6 +41,7 @@ export const ListCoursesResponseItem = zod.object({
   "enrollmentCount": zod.number().nullish(),
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
   "createdAt": zod.string().optional()
 })
 export const ListCoursesResponse = zod.array(ListCoursesResponseItem)
@@ -87,6 +88,7 @@ export const GetCourseResponse = zod.object({
   "enrollmentCount": zod.number().nullish(),
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
   "createdAt": zod.string().optional()
 }).and(zod.object({
   "lessons": zod.array(zod.object({
@@ -139,6 +141,7 @@ export const UpdateCourseResponse = zod.object({
   "enrollmentCount": zod.number().nullish(),
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
   "createdAt": zod.string().optional()
 })
 
@@ -170,6 +173,7 @@ export const GetFeaturedCoursesResponseItem = zod.object({
   "enrollmentCount": zod.number().nullish(),
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
   "createdAt": zod.string().optional()
 })
 export const GetFeaturedCoursesResponse = zod.array(GetFeaturedCoursesResponseItem)
@@ -250,6 +254,7 @@ export const GetEnrollmentResponse = zod.object({
   "enrollmentCount": zod.number().nullish(),
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
   "createdAt": zod.string().optional()
 }).and(zod.object({
   "lessons": zod.array(zod.object({
@@ -346,6 +351,73 @@ export const SubmitQuizResponse = zod.object({
   "totalQuestions": zod.number(),
   "correctAnswers": zod.number(),
   "certificateId": zod.number().nullish()
+})
+
+
+/**
+ * @summary Get the current user's saved commitments for a course
+ */
+export const GetCommitmentsParams = zod.object({
+  "courseId": zod.coerce.number()
+})
+
+export const GetCommitmentsResponse = zod.object({
+  "courseId": zod.number(),
+  "commitments": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Save the current user's commitments for a course
+ */
+export const SaveCommitmentsParams = zod.object({
+  "courseId": zod.coerce.number()
+})
+
+export const SaveCommitmentsBody = zod.object({
+  "commitments": zod.array(zod.string())
+})
+
+export const SaveCommitmentsResponse = zod.object({
+  "courseId": zod.number(),
+  "commitments": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Get the current user's total learning points
+ */
+export const GetMyPointsResponse = zod.object({
+  "modulePoints": zod.number(),
+  "quizPoints": zod.number(),
+  "bonusPoints": zod.number(),
+  "totalPoints": zod.number()
+})
+
+
+/**
+ * @summary Get the current user's progression summary for a course
+ */
+export const GetCourseProgressSummaryParams = zod.object({
+  "courseId": zod.coerce.number()
+})
+
+export const GetCourseProgressSummaryResponse = zod.object({
+  "courseId": zod.number(),
+  "modulesCompleted": zod.number(),
+  "totalModules": zod.number(),
+  "completionPct": zod.number(),
+  "bestScore": zod.number().nullish(),
+  "quizPassed": zod.boolean(),
+  "certificateId": zod.number().nullish(),
+  "badgeName": zod.string().nullish(),
+  "badgeEarned": zod.boolean(),
+  "points": zod.object({
+  "modulePoints": zod.number(),
+  "quizPoints": zod.number(),
+  "bonusPoints": zod.number(),
+  "totalPoints": zod.number()
+})
 })
 
 

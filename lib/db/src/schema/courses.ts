@@ -17,6 +17,7 @@ export const coursesTable = pgTable("courses", {
   enrollmentCount: integer("enrollment_count").notNull().default(0),
   rating: numeric("rating", { precision: 3, scale: 1 }),
   includesCertificate: boolean("includes_certificate").notNull().default(true),
+  passingScore: integer("passing_score").notNull().default(70),
   isPublished: boolean("is_published").notNull().default(true),
   isMandatory: boolean("is_mandatory").notNull().default(false),
   validityMonths: integer("validity_months"),

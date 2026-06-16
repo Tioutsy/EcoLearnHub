@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { useGetDashboardStats, useListEnrollments, useListAchievementBadges } from "@workspace/api-client-react";
+import { useGetDashboardStats, useListEnrollments, useListAchievementBadges, useGetMyPoints } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import {
@@ -14,6 +14,7 @@ import {
   Globe,
   Trophy,
   Lock,
+  Star,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const { data: stats, isLoading: isLoadingStats } = useGetDashboardStats();
   const { data: enrollments, isLoading: isLoadingEnrollments } = useListEnrollments();
   const { data: badges, isLoading: isLoadingBadges } = useListAchievementBadges();
+  const { data: points, isLoading: isLoadingPoints } = useGetMyPoints();
 
   const activeEnrollments = enrollments?.filter(e => e.status === 'active') || [];
   const completedEnrollments = enrollments?.filter(e => e.status === 'completed') || [];
@@ -47,7 +49,7 @@ export default function Dashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* KPI Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
           <div className="bg-card border rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -99,6 +101,20 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
                 {isLoadingStats ? <Skeleton className="h-7 w-16 mt-1" /> : (
                   <h3 className="text-2xl font-bold">{stats?.completionRate || 0}%</h3>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                <Star className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Points</p>
+                {isLoadingPoints ? <Skeleton className="h-7 w-16 mt-1" /> : (
+                  <h3 className="text-2xl font-bold">{points?.totalPoints ?? 0}</h3>
                 )}
               </div>
             </div>

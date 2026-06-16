@@ -42,6 +42,7 @@ router.get("/", async (req, res): Promise<void> => {
       enrollmentCount: coursesTable.enrollmentCount,
       rating: coursesTable.rating,
       includesCertificate: coursesTable.includesCertificate,
+      passingScore: coursesTable.passingScore,
       createdAt: coursesTable.createdAt,
     })
     .from(coursesTable)
@@ -84,6 +85,7 @@ router.get("/featured", async (_req, res): Promise<void> => {
       enrollmentCount: coursesTable.enrollmentCount,
       rating: coursesTable.rating,
       includesCertificate: coursesTable.includesCertificate,
+      passingScore: coursesTable.passingScore,
       createdAt: coursesTable.createdAt,
     })
     .from(coursesTable)
@@ -126,6 +128,7 @@ router.get("/:id", async (req, res): Promise<void> => {
       enrollmentCount: coursesTable.enrollmentCount,
       rating: coursesTable.rating,
       includesCertificate: coursesTable.includesCertificate,
+      passingScore: coursesTable.passingScore,
       createdAt: coursesTable.createdAt,
     })
     .from(coursesTable)
