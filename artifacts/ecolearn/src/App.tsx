@@ -26,6 +26,7 @@ import CompanyEmployees from "@/pages/company/employees";
 import CompanyCertificates from "@/pages/company/certificates";
 import CompanyLeaderboards from "@/pages/company/leaderboards";
 import CompanyCompliance from "@/pages/company/compliance";
+import CompanyReports from "@/pages/company/reports";
 import SustainabilityImpact from "@/pages/sustainability";
 import MadeForMauritius from "@/pages/made-for-mauritius";
 import AdminPanel from "@/pages/admin";
@@ -180,6 +181,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/company/certificates" component={CompanyCertificates} />
             <Route path="/company/leaderboards" component={CompanyLeaderboards} />
             <Route path="/company/compliance" component={CompanyCompliance} />
+            <Route path="/company/reports" component={CompanyReports} />
             <Route path="/company/sustainability" component={SustainabilityImpact} />
             <Route path="/admin" component={AdminPanel} />
             <Route component={NotFound} />

@@ -131,11 +131,17 @@ export default function Learn() {
           <div className="text-sm font-medium text-muted-foreground hidden sm:block">
             {Math.round(enrollment.progressPct || 0)}% Complete
           </div>
-          <Button size="lg" asChild className="shadow-sm">
-            <Link href={`/quiz/${course.id}`}>
-              <GraduationCap className="mr-2 h-5 w-5" /> Take Final Quiz
-            </Link>
-          </Button>
+          {allComplete ? (
+            <Button size="lg" asChild className="shadow-sm">
+              <Link href={`/quiz/${course.id}`}>
+                <GraduationCap className="mr-2 h-5 w-5" /> Take Final Quiz
+              </Link>
+            </Button>
+          ) : (
+            <Button size="lg" disabled className="shadow-sm">
+              <GraduationCap className="mr-2 h-5 w-5" /> Finish Lessons First
+            </Button>
+          )}
         </div>
       </header>
 
@@ -238,6 +244,11 @@ export default function Learn() {
                       <GraduationCap className="mr-2 h-5 w-5" /> Start Final Quiz
                     </Link>
                   </Button>
+                </div>
+              )}
+              {isLastLesson && !allComplete && (
+                <div className="p-4 border rounded-xl bg-muted/20 text-sm text-muted-foreground">
+                  Complete every lesson to unlock the final quiz and certificate.
                 </div>
               )}
 

@@ -5,7 +5,12 @@ import { z } from "zod/v4";
 export const enrollmentsTable = pgTable("enrollments", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull(),
+  companyId: integer("company_id"),
+  employeeId: integer("employee_id"),
   courseId: integer("course_id").notNull(),
+  assignedByUserId: text("assigned_by_user_id"),
+  assignmentSource: text("assignment_source").notNull().default("self"),
+  dueDate: timestamp("due_date", { withTimezone: true }),
   status: text("status").notNull().default("active"),
   progressPct: integer("progress_pct").notNull().default(0),
   lastAccessedAt: timestamp("last_accessed_at", { withTimezone: true }),

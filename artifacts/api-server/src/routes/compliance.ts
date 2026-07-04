@@ -7,7 +7,9 @@ import {
   coursesTable,
   companiesTable,
 } from "@workspace/db";
-import { eq, and, desc, gte } from "drizzle-orm";
+import { eq, and, desc, gte, inArray } from "drizzle-orm";
+import { requireCompanyAdmin, sendHttpError } from "../lib/access";
+import { assignCoursesToEmployees } from "../lib/lmsData";
 
 const router = Router();
 
@@ -63,6 +65,11 @@ function parseId(raw: string | string[]): number | null {
   if (!/^\d+$/.test(value)) return null;
   const id = parseInt(value, 10);
   return Number.isNaN(id) ? null : id;
+}
+
+function parseNumberArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => Number(item)).filter(Number.isInteger);
 }
 
 // Training compliance dashboard data
@@ -189,39 +196,48 @@ router.get("/overview", async (req, res): Promise<void> => {
 // Assign a course to employees (by ids and/or whole department)
 router.post("/assignments", async (req, res): Promise<void> => {
   try {
-    const companyId = await getCompanyId();
-    if (companyId === null) {
-      res.status(404).json({ error: "No company found" });
+    const access = await requireCompanyAdmin(req);
+    const companyId = access.companyId;
+
+    const body = req.body && typeof req.body === "object" ? (req.body as Record<string, unknown>) : {};
+    const parsedCourseIds = parseNumberArray(body["courseIds"]);
+    const fallbackCourseId = Number(body["courseId"]);
+    const courseIds: number[] = Array.from(
+      new Set(
+        parsedCourseIds.length > 0
+          ? parsedCourseIds
+          : Number.isInteger(fallbackCourseId)
+            ? [fallbackCourseId]
+            : [],
+      ),
+    );
+    if (courseIds.length === 0) {
+      res.status(400).json({ error: "At least one valid courseId is required" });
       return;
     }
 
-    const body = req.body ?? {};
-    const courseId = Number(body.courseId);
-    if (!Number.isInteger(courseId)) {
-      res.status(400).json({ error: "A valid courseId is required" });
-      return;
-    }
-
-    const [course] = await db
-      .select()
+    const courses = await db
+      .select({ id: coursesTable.id })
       .from(coursesTable)
-      .where(eq(coursesTable.id, courseId));
-    if (!course) {
-      res.status(404).json({ error: "Course not found" });
+      .where(
+        courseIds.length === 1
+          ? eq(coursesTable.id, courseIds[0])
+          : inArray(coursesTable.id, courseIds),
+      );
+    if (courses.length !== courseIds.length) {
+      res.status(404).json({ error: "One or more courses were not found" });
       return;
     }
 
-    const employeeIds: number[] = Array.isArray(body.employeeIds)
-      ? body.employeeIds.map((n: unknown) => Number(n)).filter(Number.isInteger)
-      : [];
+    const employeeIds = parseNumberArray(body["employeeIds"]);
     const department: string | undefined =
-      typeof body.department === "string" && body.department.trim()
-        ? body.department.trim()
+      typeof body["department"] === "string" && body["department"].trim()
+        ? body["department"].trim()
         : undefined;
 
     let dueDate: Date | null = null;
-    if (body.dueDate) {
-      const parsed = new Date(body.dueDate);
+    if (typeof body["dueDate"] === "string" && body["dueDate"]) {
+      const parsed = new Date(body["dueDate"]);
       if (Number.isNaN(parsed.getTime())) {
         res.status(400).json({ error: "Invalid dueDate" });
         return;
@@ -253,26 +269,20 @@ router.post("/assignments", async (req, res): Promise<void> => {
       return;
     }
 
-    const values = Array.from(targetIds).map((employeeId) => ({
+    const targets = companyEmployees.filter((employee) => targetIds.has(employee.id));
+    const result = await assignCoursesToEmployees({
       companyId,
-      employeeId,
-      courseId,
+      employees: targets,
+      courseIds,
       dueDate,
-    }));
-
-    const inserted = await db
-      .insert(courseAssignmentsTable)
-      .values(values)
-      .onConflictDoNothing()
-      .returning();
-
-    res.status(201).json({
-      assigned: inserted.length,
-      skipped: targetIds.size - inserted.length,
+      assignedByUserId: access.userId,
     });
+    res.status(201).json(result);
   } catch (err) {
-    (req as any).log?.error?.({ err }, "Failed to assign course");
-    res.status(500).json({ error: "Failed to assign course" });
+    if (!sendHttpError(res, err)) {
+      (req as any).log?.error?.({ err }, "Failed to assign course");
+      res.status(500).json({ error: "Failed to assign course" });
+    }
   }
 });
 

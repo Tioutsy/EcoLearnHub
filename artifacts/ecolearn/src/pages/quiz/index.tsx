@@ -1,11 +1,11 @@
 import { Layout } from "@/components/layout/Layout";
-import { useGetCourseQuiz, useSubmitQuiz, useGetCourse } from "@workspace/api-client-react";
+import { useGetCourseQuiz, useSubmitQuiz, useGetCourse, useListEnrollments } from "@workspace/api-client-react";
 import { useParams, Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, ArrowLeft, Award } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowLeft, Award, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Quiz() {
@@ -16,6 +16,7 @@ export default function Quiz() {
 
   const { data: course } = useGetCourse(id, { query: { enabled: !!id, queryKey: ['course', id] } });
   const { data: quiz, isLoading } = useGetCourseQuiz(id, { query: { enabled: !!id, queryKey: ['quiz', id] } });
+  const { data: enrollments } = useListEnrollments();
   const submitQuiz = useSubmitQuiz();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -54,6 +55,7 @@ export default function Quiz() {
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex) / quiz.questions.length) * 100;
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
+  const enrollment = enrollments?.find((item) => item.courseId === id);
 
   const handleSelectOption = (optionIndex: number) => {
     setAnswers({ ...answers, [currentQuestion.id]: optionIndex });
@@ -104,7 +106,7 @@ export default function Quiz() {
               <h2 className="text-4xl font-bold font-serif mb-4">Not quite there yet.</h2>
               <p className="text-xl text-muted-foreground mb-2">You didn't pass the quiz this time.</p>
               <p className="text-lg font-medium">Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})</p>
-              <p className="text-sm text-muted-foreground mt-4">You need 70% to pass. Please review the material and try again.</p>
+              <p className="text-sm text-muted-foreground mt-4">You need {course?.passingScore ?? 70}% to pass. Please review the material and try again.</p>
             </div>
           )}
 
@@ -112,6 +114,13 @@ export default function Quiz() {
             {result.passed && result.certificateId && (
               <Button asChild size="lg">
                 <Link href="/certificates"><Award className="mr-2 h-5 w-5" /> View Certificate</Link>
+              </Button>
+            )}
+            {result.passed && result.certificateId && (
+              <Button asChild size="lg" variant="outline">
+                <a href={`/api/certificates/${result.certificateId}/pdf`} target="_blank" rel="noopener noreferrer">
+                  <Download className="mr-2 h-5 w-5" /> Download PDF
+                </a>
               </Button>
             )}
             {!result.passed && (
@@ -138,7 +147,7 @@ export default function Quiz() {
     <Layout>
       <div className="bg-primary/5 border-b py-8">
         <div className="container mx-auto px-4 max-w-3xl">
-          <Link href={`/learn/${id}`} className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-6 transition-colors">
+          <Link href={enrollment ? `/learn/${enrollment.id}` : "/dashboard"} className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-6 transition-colors">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to course
           </Link>
           <h1 className="text-3xl font-bold font-serif mb-2">Final Quiz</h1>

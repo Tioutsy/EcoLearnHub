@@ -1,6 +1,8 @@
 import { Layout } from "@/components/layout/Layout";
-import { useGetDashboardStats, useListEnrollments, useListAchievementBadges, useGetMyPoints } from "@workspace/api-client-react";
+import { useListEnrollments, useListAchievementBadges, useGetMyPoints, useListCertificates } from "@workspace/api-client-react";
+import type { Enrollment } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import {
   BookOpen,
@@ -15,9 +17,12 @@ import {
   Trophy,
   Lock,
   Star,
+  CalendarDays,
+  AlertTriangle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 const BADGE_ICONS: Record<string, LucideIcon> = {
   sprout: Sprout,
@@ -28,15 +33,39 @@ const BADGE_ICONS: Record<string, LucideIcon> = {
   award: Award,
 };
 
+type LmsEnrollment = Enrollment & {
+  dueDate?: string | null;
+  assignmentStatus?: "not_started" | "in_progress" | "completed" | "overdue";
+};
+
 export default function Dashboard() {
-  const { data: stats, isLoading: isLoadingStats } = useGetDashboardStats();
   const { data: enrollments, isLoading: isLoadingEnrollments } = useListEnrollments();
+  const { data: certificates, isLoading: isLoadingCertificates } = useListCertificates();
   const { data: badges, isLoading: isLoadingBadges } = useListAchievementBadges();
   const { data: points, isLoading: isLoadingPoints } = useGetMyPoints();
 
-  const activeEnrollments = enrollments?.filter(e => e.status === 'active') || [];
-  const completedEnrollments = enrollments?.filter(e => e.status === 'completed') || [];
+  const lmsEnrollments = (enrollments ?? []) as LmsEnrollment[];
+  const activeEnrollments = lmsEnrollments.filter(e => e.status !== 'completed');
+  const completedEnrollments = lmsEnrollments.filter(e => e.status === 'completed');
   const earnedBadgeCount = badges?.filter(b => b.earned).length ?? 0;
+  const averageProgress = lmsEnrollments.length
+    ? Math.round(lmsEnrollments.reduce((total, item) => total + item.progressPct, 0) / lmsEnrollments.length)
+    : 0;
+  const completionRate = lmsEnrollments.length
+    ? Math.round((completedEnrollments.length / lmsEnrollments.length) * 100)
+    : 0;
+  const nextRecommended = [...activeEnrollments].sort((a, b) => {
+    const aDue = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+    const bDue = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+    return aDue - bDue || a.progressPct - b.progressPct;
+  })[0];
+
+  const statusMeta: Record<string, { label: string; className: string }> = {
+    not_started: { label: "Not Started", className: "bg-slate-400/10 text-slate-700 border-slate-400/30" },
+    in_progress: { label: "In Progress", className: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
+    completed: { label: "Completed", className: "bg-green-500/10 text-green-700 border-green-500/30" },
+    overdue: { label: "Overdue", className: "bg-red-500/10 text-red-700 border-red-500/30" },
+  };
 
   return (
     <Layout>
@@ -49,7 +78,7 @@ export default function Dashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* KPI Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
           <div className="bg-card border rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
@@ -57,7 +86,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Courses</p>
-                {isLoadingStats ? <Skeleton className="h-7 w-16 mt-1" /> : (
+                {isLoadingEnrollments ? <Skeleton className="h-7 w-16 mt-1" /> : (
                   <h3 className="text-2xl font-bold">{activeEnrollments.length}</h3>
                 )}
               </div>
@@ -71,8 +100,8 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Certificates Earned</p>
-                {isLoadingStats ? <Skeleton className="h-7 w-16 mt-1" /> : (
-                  <h3 className="text-2xl font-bold">{stats?.certificatesIssued || 0}</h3>
+                {isLoadingCertificates ? <Skeleton className="h-7 w-16 mt-1" /> : (
+                  <h3 className="text-2xl font-bold">{certificates?.length || 0}</h3>
                 )}
               </div>
             </div>
@@ -84,9 +113,9 @@ export default function Dashboard() {
                 <TrendingUp className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg. Score</p>
-                {isLoadingStats ? <Skeleton className="h-7 w-16 mt-1" /> : (
-                  <h3 className="text-2xl font-bold">{stats?.avgScore || 0}%</h3>
+                <p className="text-sm font-medium text-muted-foreground">Avg. Progress</p>
+                {isLoadingEnrollments ? <Skeleton className="h-7 w-16 mt-1" /> : (
+                  <h3 className="text-2xl font-bold">{averageProgress}%</h3>
                 )}
               </div>
             </div>
@@ -99,8 +128,8 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
-                {isLoadingStats ? <Skeleton className="h-7 w-16 mt-1" /> : (
-                  <h3 className="text-2xl font-bold">{stats?.completionRate || 0}%</h3>
+                {isLoadingEnrollments ? <Skeleton className="h-7 w-16 mt-1" /> : (
+                  <h3 className="text-2xl font-bold">{completionRate}%</h3>
                 )}
               </div>
             </div>
@@ -121,6 +150,30 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {nextRecommended && (
+          <div className="mb-12 rounded-xl border bg-primary/5 p-5 flex flex-col md:flex-row md:items-center gap-4">
+            <div className="h-11 w-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              {nextRecommended.assignmentStatus === "overdue" ? (
+                <AlertTriangle className="h-5 w-5" />
+              ) : (
+                <BookOpen className="h-5 w-5" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-primary mb-1">Next recommended course</p>
+              <h2 className="font-serif font-bold text-xl truncate">{nextRecommended.courseName}</h2>
+              <p className="text-sm text-muted-foreground">
+                {nextRecommended.dueDate
+                  ? `Due ${new Date(nextRecommended.dueDate).toLocaleDateString()}`
+                  : "No due date set"} • {nextRecommended.progressPct}% complete
+              </p>
+            </div>
+            <Button asChild>
+              <Link href={`/learn/${nextRecommended.id}`}>Continue</Link>
+            </Button>
+          </div>
+        )}
+
         {/* Continue Learning */}
         <h2 className="text-2xl font-bold font-serif mb-6">Continue Learning</h2>
         <div className="grid lg:grid-cols-2 gap-6 mb-12">
@@ -137,10 +190,7 @@ export default function Dashboard() {
             ))
           ) : activeEnrollments.length === 0 ? (
             <div className="col-span-full py-12 text-center border rounded-xl bg-muted/20">
-              <p className="text-muted-foreground mb-4">You have no active courses.</p>
-              <Link href="/courses" className="text-primary font-medium hover:underline">
-                Browse course catalog
-              </Link>
+              <p className="text-muted-foreground">No training is currently assigned to you.</p>
             </div>
           ) : (
             activeEnrollments.map((enrollment) => (
@@ -158,10 +208,15 @@ export default function Dashboard() {
                     <h3 className="font-semibold text-lg truncate mb-1 group-hover:text-primary transition-colors">
                       {enrollment.courseName}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" /> 
-                      Last accessed {enrollment.lastAccessedAt ? new Date(enrollment.lastAccessedAt).toLocaleDateString() : 'Never'}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <Badge variant="outline" className={statusMeta[enrollment.assignmentStatus ?? "not_started"]?.className}>
+                        {statusMeta[enrollment.assignmentStatus ?? "not_started"]?.label}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        {enrollment.dueDate ? `Due ${new Date(enrollment.dueDate).toLocaleDateString()}` : "No due date"}
+                      </p>
+                    </div>
                     <div className="flex items-center gap-3">
                       <Progress value={enrollment.progressPct} className="flex-1 h-2" />
                       <span className="text-xs font-medium w-9">{Math.round(enrollment.progressPct)}%</span>

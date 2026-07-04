@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { useVerifyCertificate } from "@workspace/api-client-react";
+import { getVerifyCertificateQueryKey, useVerifyCertificate } from "@workspace/api-client-react";
 import { useParams, Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,14 @@ import { format } from "date-fns";
 
 export default function VerifyCertificate() {
   const { code } = useParams();
-  const { data: cert, isLoading, isError } = useVerifyCertificate(code || "", { query: { enabled: !!code, retry: false } });
+  const certificateCode = code || "";
+  const { data: cert, isLoading, isError } = useVerifyCertificate(certificateCode, {
+    query: {
+      queryKey: getVerifyCertificateQueryKey(certificateCode),
+      enabled: !!code,
+      retry: false,
+    },
+  });
 
   return (
     <Layout>

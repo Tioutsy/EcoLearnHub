@@ -16,6 +16,8 @@ tags:
   - name: certificates
   - name: companies
   - name: employees
+  - name: assignments
+  - name: reports
   - name: plans
   - name: subscriptions
   - name: dashboard
@@ -840,6 +842,90 @@ paths:
         "204":
           description: Removed
 
+  /company/employees/{id}/invite:
+    post:
+      operationId: createEmployeeInvitation
+      tags: [employees]
+      summary: Create an invitation link for an employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeInvitation"
+
+  /company/assignments:
+    post:
+      operationId: assignCompanyCourses
+      tags: [assignments]
+      summary: Assign one or several courses to employees or a department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignCompanyCoursesInput"
+      responses:
+        "201":
+          description: Assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssignCourseResult"
+
+  /company/lms-overview:
+    get:
+      operationId: getCompanyLmsOverview
+      tags: [dashboard]
+      summary: Get company learning-management overview
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyLmsOverview"
+
+  /company/reports/training:
+    get:
+      operationId: getTrainingReport
+      tags: [reports]
+      summary: Get filterable company training report rows
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: integer
+        - name: department
+          in: query
+          schema:
+            type: string
+        - name: courseId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [all, not_started, in_progress, completed, overdue]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrainingReportRow"
+
   # ── PLANS ─────────────────────────────────────────────────────────────────────
   /plans:
     get:
@@ -1253,6 +1339,10 @@ components:
           type: integer
         userId:
           type: string
+        companyId:
+          type: ["integer", "null"]
+        employeeId:
+          type: ["integer", "null"]
         courseId:
           type: integer
         courseName:
@@ -1264,6 +1354,10 @@ components:
           enum: [active, completed, expired]
         progressPct:
           type: integer
+        dueDate:
+          type: ["string", "null"]
+        assignmentStatus:
+          $ref: "#/components/schemas/AssignmentStatus"
         lastAccessedAt:
           type: ["string", "null"]
         completedAt:
@@ -1447,6 +1541,10 @@ components:
           type: integer
         userId:
           type: string
+        companyId:
+          type: ["integer", "null"]
+        employeeId:
+          type: ["integer", "null"]
         employeeName:
           type: ["string", "null"]
         companyName:
@@ -1726,10 +1824,13 @@ components:
 
     AssignCourseInput:
       type: object
-      required: [courseId]
       properties:
         courseId:
           type: integer
+        courseIds:
+          type: array
+          items:
+            type: integer
         employeeIds:
           type: array
           items:
@@ -1744,6 +1845,8 @@ components:
       required: [assigned, skipped]
       properties:
         assigned:
+          type: integer
+        updated:
           type: integer
         skipped:
           type: integer
@@ -1905,9 +2008,20 @@ components:
           type: string
         department:
           type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
         role:
           type: string
           enum: [employee, manager, admin]
+        invitationStatus:
+          type: string
+          enum: [not_invited, invited, accepted]
+        invitationToken:
+          type: ["string", "null"]
+        invitationSentAt:
+          type: ["string", "null"]
+        invitationAcceptedAt:
+          type: ["string", "null"]
         enrolledCourses:
           type: ["integer", "null"]
         completedCourses:
@@ -1929,6 +2043,8 @@ components:
           type: string
         department:
           type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
         role:
           type: string
           enum: [employee, manager, admin]
@@ -1936,12 +2052,158 @@ components:
     EmployeeUpdate:
       type: object
       properties:
+        email:
+          type: ["string", "null"]
         name:
           type: ["string", "null"]
         department:
           type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
         role:
           type: ["string", "null"]
+
+    EmployeeInvitation:
+      type: object
+      required: [employeeId, email, invitationLink, emailSent, message]
+      properties:
+        employeeId:
+          type: integer
+        email:
+          type: string
+        invitationLink:
+          type: string
+        emailSent:
+          type: boolean
+        message:
+          type: string
+
+    AssignmentStatus:
+      type: string
+      enum: [not_started, in_progress, completed, overdue]
+
+    EmployeeTrainingStatus:
+      type: string
+      enum: [not_started, in_progress, completed]
+
+    AssignCompanyCoursesInput:
+      type: object
+      required: [courseIds]
+      properties:
+        courseIds:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+        employeeIds:
+          type: array
+          items:
+            type: integer
+        department:
+          type: string
+        dueDate:
+          type: string
+
+    CompanyLmsStats:
+      type: object
+      required:
+        [totalEmployees, activeLearners, coursesAssigned, coursesCompleted, averageCompletionRate, certificatesEarned]
+      properties:
+        totalEmployees:
+          type: integer
+        activeLearners:
+          type: integer
+        coursesAssigned:
+          type: integer
+        coursesCompleted:
+          type: integer
+        averageCompletionRate:
+          type: integer
+        certificatesEarned:
+          type: integer
+
+    EmployeeTrainingSummary:
+      type: object
+      required:
+        [employeeId, employeeName, email, assignedCourses, completedCourses, overdueCourses, completionRate, status]
+      properties:
+        employeeId:
+          type: integer
+        employeeName:
+          type: string
+        email:
+          type: string
+        department:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        assignedCourses:
+          type: integer
+        completedCourses:
+          type: integer
+        overdueCourses:
+          type: integer
+        completionRate:
+          type: integer
+        status:
+          $ref: "#/components/schemas/EmployeeTrainingStatus"
+
+    TrainingReportRow:
+      type: object
+      required:
+        [assignmentId, employeeId, employeeName, email, courseId, courseTitle, assignedAt, progressPct, status]
+      properties:
+        assignmentId:
+          type: integer
+        employeeId:
+          type: integer
+        employeeName:
+          type: string
+        email:
+          type: string
+        department:
+          type: ["string", "null"]
+        jobTitle:
+          type: ["string", "null"]
+        courseId:
+          type: integer
+        courseTitle:
+          type: string
+        assignedAt:
+          type: string
+        dueDate:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        progressPct:
+          type: integer
+        status:
+          $ref: "#/components/schemas/AssignmentStatus"
+        certificateId:
+          type: ["integer", "null"]
+        certificateCode:
+          type: ["string", "null"]
+        certificateIssuedAt:
+          type: ["string", "null"]
+        lastAccessedAt:
+          type: ["string", "null"]
+
+    CompanyLmsOverview:
+      type: object
+      required: [companyName, stats, employeeTraining, actionNeeded]
+      properties:
+        companyName:
+          type: string
+        stats:
+          $ref: "#/components/schemas/CompanyLmsStats"
+        employeeTraining:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmployeeTrainingSummary"
+        actionNeeded:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainingReportRow"
 
     # ── PLANS ─────────────────────────────────────────────────────────────────
     Plan:

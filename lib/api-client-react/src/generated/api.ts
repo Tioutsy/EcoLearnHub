@@ -22,6 +22,7 @@ import type {
 import type {
   AchievementBadge,
   AdminAnalytics,
+  AssignCompanyCoursesInput,
   AssignCourseInput,
   AssignCourseResult,
   Badge,
@@ -37,6 +38,7 @@ import type {
   CommitmentList,
   Company,
   CompanyInput,
+  CompanyLmsOverview,
   CompanyUpdate,
   ComplianceOverview,
   Course,
@@ -50,12 +52,14 @@ import type {
   DepartmentStat,
   Employee,
   EmployeeInput,
+  EmployeeInvitation,
   EmployeeProgressRow,
   EmployeeUpdate,
   Enrollment,
   EnrollmentDetail,
   EnrollmentInput,
   EsgImpact,
+  GetTrainingReportParams,
   HealthStatus,
   ImpactMetrics,
   Lead,
@@ -77,6 +81,7 @@ import type {
   SustainabilityScore,
   Testimonial,
   TrainingReminder,
+  TrainingReportRow,
   TrendPoint
 } from './api.schemas';
 
@@ -3528,6 +3533,308 @@ export const useRemoveEmployee = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getRemoveEmployeeMutationOptions(options));
     }
+
+export const getCreateEmployeeInvitationUrl = (id: number,) => {
+
+
+
+
+  return `/api/company/employees/${id}/invite`
+}
+
+/**
+ * @summary Create an invitation link for an employee
+ */
+export const createEmployeeInvitation = async (id: number, options?: RequestInit): Promise<EmployeeInvitation> => {
+
+  return customFetch<EmployeeInvitation>(getCreateEmployeeInvitationUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getCreateEmployeeInvitationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEmployeeInvitation>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createEmployeeInvitation>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['createEmployeeInvitation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEmployeeInvitation>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  createEmployeeInvitation(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateEmployeeInvitationMutationResult = NonNullable<Awaited<ReturnType<typeof createEmployeeInvitation>>>
+
+    export type CreateEmployeeInvitationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create an invitation link for an employee
+ */
+export const useCreateEmployeeInvitation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEmployeeInvitation>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createEmployeeInvitation>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getCreateEmployeeInvitationMutationOptions(options));
+    }
+
+export const getAssignCompanyCoursesUrl = () => {
+
+
+
+
+  return `/api/company/assignments`
+}
+
+/**
+ * @summary Assign one or several courses to employees or a department
+ */
+export const assignCompanyCourses = async (assignCompanyCoursesInput: AssignCompanyCoursesInput, options?: RequestInit): Promise<AssignCourseResult> => {
+
+  return customFetch<AssignCourseResult>(getAssignCompanyCoursesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      assignCompanyCoursesInput,)
+  }
+);}
+
+
+
+
+export const getAssignCompanyCoursesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignCompanyCourses>>, TError,{data: BodyType<AssignCompanyCoursesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof assignCompanyCourses>>, TError,{data: BodyType<AssignCompanyCoursesInput>}, TContext> => {
+
+const mutationKey = ['assignCompanyCourses'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof assignCompanyCourses>>, {data: BodyType<AssignCompanyCoursesInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  assignCompanyCourses(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AssignCompanyCoursesMutationResult = NonNullable<Awaited<ReturnType<typeof assignCompanyCourses>>>
+    export type AssignCompanyCoursesMutationBody = BodyType<AssignCompanyCoursesInput>
+    export type AssignCompanyCoursesMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Assign one or several courses to employees or a department
+ */
+export const useAssignCompanyCourses = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignCompanyCourses>>, TError,{data: BodyType<AssignCompanyCoursesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof assignCompanyCourses>>,
+        TError,
+        {data: BodyType<AssignCompanyCoursesInput>},
+        TContext
+      > => {
+      return useMutation(getAssignCompanyCoursesMutationOptions(options));
+    }
+
+export const getGetCompanyLmsOverviewUrl = () => {
+
+
+
+
+  return `/api/company/lms-overview`
+}
+
+/**
+ * @summary Get company learning-management overview
+ */
+export const getCompanyLmsOverview = async ( options?: RequestInit): Promise<CompanyLmsOverview> => {
+
+  return customFetch<CompanyLmsOverview>(getGetCompanyLmsOverviewUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCompanyLmsOverviewQueryKey = () => {
+    return [
+    `/api/company/lms-overview`
+    ] as const;
+    }
+
+
+export const getGetCompanyLmsOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getCompanyLmsOverview>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyLmsOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCompanyLmsOverviewQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCompanyLmsOverview>>> = ({ signal }) => getCompanyLmsOverview({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCompanyLmsOverview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCompanyLmsOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getCompanyLmsOverview>>>
+export type GetCompanyLmsOverviewQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get company learning-management overview
+ */
+
+export function useGetCompanyLmsOverview<TData = Awaited<ReturnType<typeof getCompanyLmsOverview>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCompanyLmsOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCompanyLmsOverviewQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetTrainingReportUrl = (params?: GetTrainingReportParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/company/reports/training?${stringifiedParams}` : `/api/company/reports/training`
+}
+
+/**
+ * @summary Get filterable company training report rows
+ */
+export const getTrainingReport = async (params?: GetTrainingReportParams, options?: RequestInit): Promise<TrainingReportRow[]> => {
+
+  return customFetch<TrainingReportRow[]>(getGetTrainingReportUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTrainingReportQueryKey = (params?: GetTrainingReportParams,) => {
+    return [
+    `/api/company/reports/training`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTrainingReportQueryOptions = <TData = Awaited<ReturnType<typeof getTrainingReport>>, TError = ErrorType<unknown>>(params?: GetTrainingReportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTrainingReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTrainingReportQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTrainingReport>>> = ({ signal }) => getTrainingReport(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTrainingReport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTrainingReportQueryResult = NonNullable<Awaited<ReturnType<typeof getTrainingReport>>>
+export type GetTrainingReportQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get filterable company training report rows
+ */
+
+export function useGetTrainingReport<TData = Awaited<ReturnType<typeof getTrainingReport>>, TError = ErrorType<unknown>>(
+ params?: GetTrainingReportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTrainingReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTrainingReportQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 
 export const getListPlansUrl = () => {
 

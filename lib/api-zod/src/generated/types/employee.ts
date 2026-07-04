@@ -5,6 +5,7 @@
  * EcoLearn Mauritius API
  * OpenAPI spec version: 0.1.0
  */
+import type { EmployeeInvitationStatus } from './employeeInvitationStatus';
 import type { EmployeeRole } from './employeeRole';
 
 export interface Employee {
@@ -16,7 +17,16 @@ export interface Employee {
   name: string;
   /** @nullable */
   department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
   role: EmployeeRole;
+  invitationStatus?: EmployeeInvitationStatus;
+  /** @nullable */
+  invitationToken?: string | null;
+  /** @nullable */
+  invitationSentAt?: string | null;
+  /** @nullable */
+  invitationAcceptedAt?: string | null;
   /** @nullable */
   enrolledCourses?: number | null;
   /** @nullable */
