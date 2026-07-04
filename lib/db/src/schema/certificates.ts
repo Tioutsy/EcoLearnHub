@@ -5,6 +5,8 @@ import { z } from "zod/v4";
 export const certificatesTable = pgTable("certificates", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull(),
+  companyId: integer("company_id"),
+  employeeId: integer("employee_id"),
   employeeName: text("employee_name"),
   companyName: text("company_name"),
   courseId: integer("course_id").notNull(),

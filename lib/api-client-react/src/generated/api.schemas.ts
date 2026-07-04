@@ -132,9 +132,23 @@ export const EnrollmentStatus = {
   expired: 'expired',
 } as const;
 
+export type AssignmentStatus = typeof AssignmentStatus[keyof typeof AssignmentStatus];
+
+
+export const AssignmentStatus = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  overdue: 'overdue',
+} as const;
+
 export interface Enrollment {
   id: number;
   userId: string;
+  /** @nullable */
+  companyId?: number | null;
+  /** @nullable */
+  employeeId?: number | null;
   courseId: number;
   /** @nullable */
   courseName?: string | null;
@@ -142,6 +156,9 @@ export interface Enrollment {
   courseThumbnail?: string | null;
   status: EnrollmentStatus;
   progressPct: number;
+  /** @nullable */
+  dueDate?: string | null;
+  assignmentStatus?: AssignmentStatus;
   /** @nullable */
   lastAccessedAt?: string | null;
   /** @nullable */
@@ -240,6 +257,10 @@ export interface CourseProgressSummary {
 export interface Certificate {
   id: number;
   userId: string;
+  /** @nullable */
+  companyId?: number | null;
+  /** @nullable */
+  employeeId?: number | null;
   /** @nullable */
   employeeName?: string | null;
   /** @nullable */
@@ -410,7 +431,8 @@ export interface ComplianceOverview {
 }
 
 export interface AssignCourseInput {
-  courseId: number;
+  courseId?: number;
+  courseIds?: number[];
   employeeIds?: number[];
   department?: string;
   dueDate?: string;
@@ -418,6 +440,7 @@ export interface AssignCourseInput {
 
 export interface AssignCourseResult {
   assigned: number;
+  updated?: number;
   skipped: number;
 }
 
@@ -523,6 +546,15 @@ export const EmployeeRole = {
   admin: 'admin',
 } as const;
 
+export type EmployeeInvitationStatus = typeof EmployeeInvitationStatus[keyof typeof EmployeeInvitationStatus];
+
+
+export const EmployeeInvitationStatus = {
+  not_invited: 'not_invited',
+  invited: 'invited',
+  accepted: 'accepted',
+} as const;
+
 export interface Employee {
   id: number;
   companyId: number;
@@ -532,7 +564,16 @@ export interface Employee {
   name: string;
   /** @nullable */
   department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
   role: EmployeeRole;
+  invitationStatus?: EmployeeInvitationStatus;
+  /** @nullable */
+  invitationToken?: string | null;
+  /** @nullable */
+  invitationSentAt?: string | null;
+  /** @nullable */
+  invitationAcceptedAt?: string | null;
   /** @nullable */
   enrolledCourses?: number | null;
   /** @nullable */
@@ -558,16 +599,106 @@ export interface EmployeeInput {
   name: string;
   /** @nullable */
   department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
   role?: EmployeeInputRole;
 }
 
 export interface EmployeeUpdate {
   /** @nullable */
+  email?: string | null;
+  /** @nullable */
   name?: string | null;
   /** @nullable */
   department?: string | null;
   /** @nullable */
+  jobTitle?: string | null;
+  /** @nullable */
   role?: string | null;
+}
+
+export interface EmployeeInvitation {
+  employeeId: number;
+  email: string;
+  invitationLink: string;
+  emailSent: boolean;
+  message: string;
+}
+
+export type EmployeeTrainingStatus = typeof EmployeeTrainingStatus[keyof typeof EmployeeTrainingStatus];
+
+
+export const EmployeeTrainingStatus = {
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+} as const;
+
+export interface AssignCompanyCoursesInput {
+  /** @minItems 1 */
+  courseIds: number[];
+  employeeIds?: number[];
+  department?: string;
+  dueDate?: string;
+}
+
+export interface CompanyLmsStats {
+  totalEmployees: number;
+  activeLearners: number;
+  coursesAssigned: number;
+  coursesCompleted: number;
+  averageCompletionRate: number;
+  certificatesEarned: number;
+}
+
+export interface EmployeeTrainingSummary {
+  employeeId: number;
+  employeeName: string;
+  email: string;
+  /** @nullable */
+  department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
+  assignedCourses: number;
+  completedCourses: number;
+  overdueCourses: number;
+  completionRate: number;
+  status: EmployeeTrainingStatus;
+}
+
+export interface TrainingReportRow {
+  assignmentId: number;
+  employeeId: number;
+  employeeName: string;
+  email: string;
+  /** @nullable */
+  department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
+  courseId: number;
+  courseTitle: string;
+  assignedAt: string;
+  /** @nullable */
+  dueDate?: string | null;
+  /** @nullable */
+  completedAt?: string | null;
+  progressPct: number;
+  status: AssignmentStatus;
+  /** @nullable */
+  certificateId?: number | null;
+  /** @nullable */
+  certificateCode?: string | null;
+  /** @nullable */
+  certificateIssuedAt?: string | null;
+  /** @nullable */
+  lastAccessedAt?: string | null;
+}
+
+export interface CompanyLmsOverview {
+  companyName: string;
+  stats: CompanyLmsStats;
+  employeeTraining: EmployeeTrainingSummary[];
+  actionNeeded: TrainingReportRow[];
 }
 
 export interface Plan {
@@ -869,4 +1000,22 @@ search?: string | null;
  */
 featured?: boolean | null;
 };
+
+export type GetTrainingReportParams = {
+employeeId?: number;
+department?: string;
+courseId?: number;
+status?: GetTrainingReportStatus;
+};
+
+export type GetTrainingReportStatus = typeof GetTrainingReportStatus[keyof typeof GetTrainingReportStatus];
+
+
+export const GetTrainingReportStatus = {
+  all: 'all',
+  not_started: 'not_started',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  overdue: 'overdue',
+} as const;
 

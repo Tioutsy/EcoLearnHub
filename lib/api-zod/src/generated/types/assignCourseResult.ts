@@ -8,5 +8,6 @@
 
 export interface AssignCourseResult {
   assigned: number;
+  updated?: number;
   skipped: number;
 }

@@ -119,7 +119,7 @@ export default function CourseDetail() {
                     <span>Certificate of Completion</span>
                   </div>
                 )}
-                {course.enrollmentCount !== undefined && course.enrollmentCount > 0 && (
+                {(course.enrollmentCount ?? 0) > 0 && (
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary" />
                     <span>{course.enrollmentCount} enrolled</span>

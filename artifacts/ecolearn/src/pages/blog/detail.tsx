@@ -7,7 +7,7 @@ import { format } from "date-fns";
 
 export default function BlogPost() {
   const { slug } = useParams();
-  const { data: post, isLoading } = useGetBlogPost(slug || "", { query: { enabled: !!slug } });
+  const { data: post, isLoading } = useGetBlogPost(slug || "");
 
   if (isLoading) {
     return (

@@ -6,9 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface AssignCourseInput {
-  courseId?: number;
-  courseIds?: number[];
+export interface AssignCompanyCoursesInput {
+  /** @minItems 1 */
+  courseIds: number[];
   employeeIds?: number[];
   department?: string;
   dueDate?: string;

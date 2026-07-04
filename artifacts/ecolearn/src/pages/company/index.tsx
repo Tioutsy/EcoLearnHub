@@ -6,6 +6,7 @@ import {
   useGetDepartmentParticipation,
   useGetSustainabilityScore,
 } from "@workspace/api-client-react";
+import { useCompanyLmsOverview } from "@/lib/lms-api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import {
@@ -26,6 +27,7 @@ import {
   Leaf,
   FileText,
   Trophy,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,12 +113,20 @@ function ChartCard({
 export default function CompanyDashboard() {
   const { data: company, isLoading: isLoadingCompany } = useGetMyCompany();
   const { data: stats, isLoading: isLoadingStats } = useGetDashboardStats();
+  const { data: lmsOverview, isLoading: isLoadingLms } = useCompanyLmsOverview();
   const { data: trend, isLoading: isLoadingTrend } = useGetCompletionTrend();
   const { data: departments, isLoading: isLoadingDepts } = useGetDepartmentParticipation();
   const { data: score, isLoading: isLoadingScore } = useGetSustainabilityScore();
 
   const trendData = trend ?? [];
   const deptData = departments ?? [];
+  const lmsStats = lmsOverview?.stats;
+  const statusMeta = {
+    not_started: { label: "Not Started", className: "bg-slate-400/10 text-slate-700 border-slate-400/30" },
+    in_progress: { label: "In Progress", className: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
+    completed: { label: "Completed", className: "bg-green-500/10 text-green-700 border-green-500/30" },
+    overdue: { label: "Overdue", className: "bg-red-500/10 text-red-700 border-red-500/30" },
+  };
 
   const levelTone: Record<string, string> = {
     Starter: "bg-slate-100 text-slate-700",
@@ -174,25 +184,25 @@ export default function CompanyDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-10">
           <KpiCard
             label="Total Employees"
-            value={stats?.totalEmployees ?? 0}
+            value={lmsStats?.totalEmployees ?? stats?.totalEmployees ?? 0}
             suffix={company?.maxEmployees ? `/ ${company.maxEmployees}` : undefined}
             icon={<Users className="h-5 w-5" />}
             tone="bg-primary/10 text-primary"
-            loading={isLoadingStats}
+            loading={isLoadingLms || isLoadingStats}
           />
           <KpiCard
             label="Active Learners"
-            value={stats?.activeEmployees ?? 0}
+            value={lmsStats?.activeLearners ?? stats?.activeEmployees ?? 0}
             icon={<GraduationCap className="h-5 w-5" />}
             tone="bg-secondary/10 text-secondary"
-            loading={isLoadingStats}
+            loading={isLoadingLms || isLoadingStats}
           />
           <KpiCard
             label="Certificates Earned"
-            value={stats?.certificatesIssued ?? 0}
+            value={lmsStats?.certificatesEarned ?? stats?.certificatesIssued ?? 0}
             icon={<Award className="h-5 w-5" />}
             tone="bg-green-500/10 text-green-600"
-            loading={isLoadingStats}
+            loading={isLoadingLms || isLoadingStats}
           />
           <KpiCard
             label="Needs Retraining"
@@ -202,12 +212,12 @@ export default function CompanyDashboard() {
             loading={isLoadingStats}
           />
           <KpiCard
-            label="Completion Rate"
-            value={stats?.completionRate ?? 0}
+            label="Avg. Completion"
+            value={lmsStats?.averageCompletionRate ?? stats?.completionRate ?? 0}
             suffix="%"
             icon={<Target className="h-5 w-5" />}
             tone="bg-blue-500/10 text-blue-600"
-            loading={isLoadingStats}
+            loading={isLoadingLms || isLoadingStats}
           />
           <KpiCard
             label="Average Score"
@@ -219,17 +229,17 @@ export default function CompanyDashboard() {
           />
           <KpiCard
             label="Courses Assigned"
-            value={stats?.coursesAssigned ?? 0}
+            value={lmsStats?.coursesAssigned ?? stats?.coursesAssigned ?? 0}
             icon={<ClipboardList className="h-5 w-5" />}
             tone="bg-sky-500/10 text-sky-600"
-            loading={isLoadingStats}
+            loading={isLoadingLms || isLoadingStats}
           />
           <KpiCard
             label="Courses Completed"
-            value={stats?.coursesCompleted ?? 0}
+            value={lmsStats?.coursesCompleted ?? stats?.coursesCompleted ?? 0}
             icon={<CheckCircle2 className="h-5 w-5" />}
             tone="bg-emerald-500/10 text-emerald-600"
-            loading={isLoadingStats}
+            loading={isLoadingLms || isLoadingStats}
           />
           <KpiCard
             label="Learning Hours"
@@ -247,6 +257,92 @@ export default function CompanyDashboard() {
             tone="bg-teal-500/10 text-teal-600"
             loading={isLoadingStats}
           />
+        </div>
+
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 mb-10">
+          <div className="bg-card border rounded-xl p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+              <div>
+                <h2 className="text-xl font-bold font-serif">Employee Training Status</h2>
+                <p className="text-sm text-muted-foreground">Assigned course progress by learner.</p>
+              </div>
+              <Button variant="outline" asChild>
+                <Link href="/company/reports"><FileSpreadsheet className="mr-2 h-4 w-4" /> Reports</Link>
+              </Button>
+            </div>
+            {isLoadingLms ? (
+              <div className="space-y-3">
+                {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+              </div>
+            ) : !lmsOverview?.employeeTraining.length ? (
+              <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
+                No employees have assigned courses yet.
+              </div>
+            ) : (
+              <div className="divide-y">
+                {lmsOverview.employeeTraining.slice(0, 8).map((row) => {
+                  const meta = statusMeta[row.status];
+                  return (
+                    <div key={row.employeeId} className="py-4 flex flex-col md:flex-row md:items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">{row.employeeName}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {[row.department, row.jobTitle].filter(Boolean).join(" • ") || row.email}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-sm">
+                        <span className="text-muted-foreground">
+                          {row.completedCourses}/{row.assignedCourses} completed
+                        </span>
+                        <span className="font-medium text-primary">{row.completionRate}%</span>
+                        <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${meta.className}`}>
+                          {meta.label}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card border rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <h2 className="text-xl font-bold font-serif">Action Needed</h2>
+            </div>
+            {isLoadingLms ? (
+              <div className="space-y-3">
+                {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+              </div>
+            ) : !lmsOverview?.actionNeeded.length ? (
+              <div className="rounded-xl border border-dashed p-8 text-center">
+                <CheckCircle2 className="h-9 w-9 text-green-600 mx-auto mb-3" />
+                <p className="font-medium">No overdue or incomplete priority items.</p>
+                <p className="text-sm text-muted-foreground mt-1">Training is on track.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {lmsOverview.actionNeeded.map((row) => {
+                  const meta = statusMeta[row.status];
+                  return (
+                    <div key={row.assignmentId} className="rounded-lg border p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-medium text-sm truncate">{row.employeeName}</p>
+                        <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${meta.className}`}>
+                          {meta.label}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{row.courseTitle}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Due {row.dueDate ? new Date(row.dueDate).toLocaleDateString() : "not set"} • {row.progressPct}% complete
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Charts */}
@@ -354,6 +450,16 @@ export default function CompanyDashboard() {
                   <h3 className="font-semibold mb-1">Certificates</h3>
                   <p className="text-sm text-muted-foreground flex-1">Download or bulk export employee certificates.</p>
                   <ArrowRight className="h-4 w-4 text-amber-600 mt-2" />
+                </div>
+              </Link>
+              <Link href="/company/reports">
+                <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors h-full cursor-pointer flex flex-col items-start text-left">
+                  <div className="h-8 w-8 bg-sky-500/10 rounded flex items-center justify-center text-sky-600 mb-3">
+                    <FileSpreadsheet className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold mb-1">Reports</h3>
+                  <p className="text-sm text-muted-foreground flex-1">Filter training records and export CSV for ESG reporting.</p>
+                  <ArrowRight className="h-4 w-4 text-sky-600 mt-2" />
                 </div>
               </Link>
               <Link href="/company/sustainability">

@@ -8,9 +8,13 @@
 
 export interface EmployeeUpdate {
   /** @nullable */
+  email?: string | null;
+  /** @nullable */
   name?: string | null;
   /** @nullable */
   department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
   /** @nullable */
   role?: string | null;
 }

@@ -203,11 +203,15 @@ export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem)
 export const ListEnrollmentsResponseItem = zod.object({
   "id": zod.number(),
   "userId": zod.string(),
+  "companyId": zod.number().nullish(),
+  "employeeId": zod.number().nullish(),
   "courseId": zod.number(),
   "courseName": zod.string().nullish(),
   "courseThumbnail": zod.string().nullish(),
   "status": zod.enum(['active', 'completed', 'expired']),
   "progressPct": zod.number(),
+  "dueDate": zod.string().nullish(),
+  "assignmentStatus": zod.enum(['not_started', 'in_progress', 'completed', 'overdue']).optional(),
   "lastAccessedAt": zod.string().nullish(),
   "completedAt": zod.string().nullish(),
   "createdAt": zod.string()
@@ -233,11 +237,15 @@ export const GetEnrollmentParams = zod.object({
 export const GetEnrollmentResponse = zod.object({
   "id": zod.number(),
   "userId": zod.string(),
+  "companyId": zod.number().nullish(),
+  "employeeId": zod.number().nullish(),
   "courseId": zod.number(),
   "courseName": zod.string().nullish(),
   "courseThumbnail": zod.string().nullish(),
   "status": zod.enum(['active', 'completed', 'expired']),
   "progressPct": zod.number(),
+  "dueDate": zod.string().nullish(),
+  "assignmentStatus": zod.enum(['not_started', 'in_progress', 'completed', 'overdue']).optional(),
   "lastAccessedAt": zod.string().nullish(),
   "completedAt": zod.string().nullish(),
   "createdAt": zod.string()
@@ -432,6 +440,8 @@ export const GetCourseProgressSummaryResponse = zod.object({
 export const ListCertificatesResponseItem = zod.object({
   "id": zod.number(),
   "userId": zod.string(),
+  "companyId": zod.number().nullish(),
+  "employeeId": zod.number().nullish(),
   "employeeName": zod.string().nullish(),
   "companyName": zod.string().nullish(),
   "courseId": zod.number(),
@@ -449,6 +459,8 @@ export const ListCertificatesResponse = zod.array(ListCertificatesResponseItem)
 export const ListCompanyCertificatesResponseItem = zod.object({
   "id": zod.number(),
   "userId": zod.string(),
+  "companyId": zod.number().nullish(),
+  "employeeId": zod.number().nullish(),
   "employeeName": zod.string().nullish(),
   "companyName": zod.string().nullish(),
   "courseId": zod.number(),
@@ -470,6 +482,8 @@ export const GetCertificateParams = zod.object({
 export const GetCertificateResponse = zod.object({
   "id": zod.number(),
   "userId": zod.string(),
+  "companyId": zod.number().nullish(),
+  "employeeId": zod.number().nullish(),
   "employeeName": zod.string().nullish(),
   "companyName": zod.string().nullish(),
   "courseId": zod.number(),
@@ -490,6 +504,8 @@ export const VerifyCertificateParams = zod.object({
 export const VerifyCertificateResponse = zod.object({
   "id": zod.number(),
   "userId": zod.string(),
+  "companyId": zod.number().nullish(),
+  "employeeId": zod.number().nullish(),
   "employeeName": zod.string().nullish(),
   "companyName": zod.string().nullish(),
   "courseId": zod.number(),
@@ -659,7 +675,8 @@ export const GetComplianceOverviewResponse = zod.object({
  * @summary Assign a course to employees or a whole department
  */
 export const AssignCourseBody = zod.object({
-  "courseId": zod.number(),
+  "courseId": zod.number().optional(),
+  "courseIds": zod.array(zod.number()).optional(),
   "employeeIds": zod.array(zod.number()).optional(),
   "department": zod.string().optional(),
   "dueDate": zod.string().optional()
@@ -868,7 +885,12 @@ export const ListEmployeesResponseItem = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
   "role": zod.enum(['employee', 'manager', 'admin']),
+  "invitationStatus": zod.enum(['not_invited', 'invited', 'accepted']).optional(),
+  "invitationToken": zod.string().nullish(),
+  "invitationSentAt": zod.string().nullish(),
+  "invitationAcceptedAt": zod.string().nullish(),
   "enrolledCourses": zod.number().nullish(),
   "completedCourses": zod.number().nullish(),
   "certificates": zod.number().nullish(),
@@ -885,6 +907,7 @@ export const AddEmployeeBody = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
   "role": zod.enum(['employee', 'manager', 'admin']).optional()
 })
 
@@ -897,8 +920,10 @@ export const UpdateEmployeeParams = zod.object({
 })
 
 export const UpdateEmployeeBody = zod.object({
+  "email": zod.string().nullish(),
   "name": zod.string().nullish(),
   "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
   "role": zod.string().nullish()
 })
 
@@ -909,7 +934,12 @@ export const UpdateEmployeeResponse = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
   "role": zod.enum(['employee', 'manager', 'admin']),
+  "invitationStatus": zod.enum(['not_invited', 'invited', 'accepted']).optional(),
+  "invitationToken": zod.string().nullish(),
+  "invitationSentAt": zod.string().nullish(),
+  "invitationAcceptedAt": zod.string().nullish(),
   "enrolledCourses": zod.number().nullish(),
   "completedCourses": zod.number().nullish(),
   "certificates": zod.number().nullish(),
@@ -924,6 +954,107 @@ export const UpdateEmployeeResponse = zod.object({
 export const RemoveEmployeeParams = zod.object({
   "id": zod.coerce.number()
 })
+
+
+/**
+ * @summary Create an invitation link for an employee
+ */
+export const CreateEmployeeInvitationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Assign one or several courses to employees or a department
+ */
+
+
+
+export const AssignCompanyCoursesBody = zod.object({
+  "courseIds": zod.array(zod.number()).min(1),
+  "employeeIds": zod.array(zod.number()).optional(),
+  "department": zod.string().optional(),
+  "dueDate": zod.string().optional()
+})
+
+
+/**
+ * @summary Get company learning-management overview
+ */
+export const GetCompanyLmsOverviewResponse = zod.object({
+  "companyName": zod.string(),
+  "stats": zod.object({
+  "totalEmployees": zod.number(),
+  "activeLearners": zod.number(),
+  "coursesAssigned": zod.number(),
+  "coursesCompleted": zod.number(),
+  "averageCompletionRate": zod.number(),
+  "certificatesEarned": zod.number()
+}),
+  "employeeTraining": zod.array(zod.object({
+  "employeeId": zod.number(),
+  "employeeName": zod.string(),
+  "email": zod.string(),
+  "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
+  "assignedCourses": zod.number(),
+  "completedCourses": zod.number(),
+  "overdueCourses": zod.number(),
+  "completionRate": zod.number(),
+  "status": zod.enum(['not_started', 'in_progress', 'completed'])
+})),
+  "actionNeeded": zod.array(zod.object({
+  "assignmentId": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string(),
+  "email": zod.string(),
+  "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "assignedAt": zod.string(),
+  "dueDate": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "progressPct": zod.number(),
+  "status": zod.enum(['not_started', 'in_progress', 'completed', 'overdue']),
+  "certificateId": zod.number().nullish(),
+  "certificateCode": zod.string().nullish(),
+  "certificateIssuedAt": zod.string().nullish(),
+  "lastAccessedAt": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Get filterable company training report rows
+ */
+export const GetTrainingReportQueryParams = zod.object({
+  "employeeId": zod.coerce.number().optional(),
+  "department": zod.coerce.string().optional(),
+  "courseId": zod.coerce.number().optional(),
+  "status": zod.enum(['all', 'not_started', 'in_progress', 'completed', 'overdue']).optional()
+})
+
+export const GetTrainingReportResponseItem = zod.object({
+  "assignmentId": zod.number(),
+  "employeeId": zod.number(),
+  "employeeName": zod.string(),
+  "email": zod.string(),
+  "department": zod.string().nullish(),
+  "jobTitle": zod.string().nullish(),
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "assignedAt": zod.string(),
+  "dueDate": zod.string().nullish(),
+  "completedAt": zod.string().nullish(),
+  "progressPct": zod.number(),
+  "status": zod.enum(['not_started', 'in_progress', 'completed', 'overdue']),
+  "certificateId": zod.number().nullish(),
+  "certificateCode": zod.string().nullish(),
+  "certificateIssuedAt": zod.string().nullish(),
+  "lastAccessedAt": zod.string().nullish()
+})
+export const GetTrainingReportResponse = zod.array(GetTrainingReportResponseItem)
 
 
 /**

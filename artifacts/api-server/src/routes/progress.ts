@@ -92,8 +92,8 @@ router.patch("/:enrollmentId", async (req, res): Promise<void> => {
       .set({
         progressPct: pct,
         lastAccessedAt: new Date(),
-        status: pct === 100 ? "completed" : "active",
-        completedAt: pct === 100 ? new Date() : null,
+        status: enrollment.status === "completed" ? "completed" : "active",
+        completedAt: enrollment.status === "completed" ? enrollment.completedAt : null,
       })
       .where(eq(enrollmentsTable.id, enrollmentId));
   }

@@ -10,6 +10,10 @@ export interface Certificate {
   id: number;
   userId: string;
   /** @nullable */
+  companyId?: number | null;
+  /** @nullable */
+  employeeId?: number | null;
+  /** @nullable */
   employeeName?: string | null;
   /** @nullable */
   companyName?: string | null;

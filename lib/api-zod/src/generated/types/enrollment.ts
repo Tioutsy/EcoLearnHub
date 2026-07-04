@@ -5,11 +5,16 @@
  * EcoLearn Mauritius API
  * OpenAPI spec version: 0.1.0
  */
+import type { AssignmentStatus } from './assignmentStatus';
 import type { EnrollmentStatus } from './enrollmentStatus';
 
 export interface Enrollment {
   id: number;
   userId: string;
+  /** @nullable */
+  companyId?: number | null;
+  /** @nullable */
+  employeeId?: number | null;
   courseId: number;
   /** @nullable */
   courseName?: string | null;
@@ -17,6 +22,9 @@ export interface Enrollment {
   courseThumbnail?: string | null;
   status: EnrollmentStatus;
   progressPct: number;
+  /** @nullable */
+  dueDate?: string | null;
+  assignmentStatus?: AssignmentStatus;
   /** @nullable */
   lastAccessedAt?: string | null;
   /** @nullable */

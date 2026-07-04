@@ -12,5 +12,7 @@ export interface EmployeeInput {
   name: string;
   /** @nullable */
   department?: string | null;
+  /** @nullable */
+  jobTitle?: string | null;
   role?: EmployeeInputRole;
 }

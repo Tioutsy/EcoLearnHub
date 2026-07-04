@@ -76,7 +76,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-4 border-l pl-6 ml-2">
             {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             ) : (
               <>
                 <Button variant="ghost" asChild className="hidden lg:flex">
@@ -136,7 +136,7 @@ export function Navbar() {
             <div className="pt-4 border-t flex flex-col gap-2">
               {isSignedIn ? (
                 <div className="flex items-center gap-2 p-2">
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton />
                   <span className="text-sm font-medium">Account Settings</span>
                 </div>
               ) : (
