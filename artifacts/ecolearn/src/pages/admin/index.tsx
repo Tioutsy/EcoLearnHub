@@ -14,6 +14,7 @@ import {
   BookOpen,
   ArrowRight,
   ShieldAlert,
+  Recycle,
 } from "lucide-react";
 import {
   Bar,
@@ -148,6 +149,12 @@ export default function AdminPanel() {
             </p>
           </div>
           <div className="flex gap-3">
+            <Link
+              href="/admin/recycling"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              Recyclean collections <Recycle className="h-4 w-4" />
+            </Link>
             <Link
               href="/company"
               className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"

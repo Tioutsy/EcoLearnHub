@@ -7,6 +7,7 @@ import {
   useGetSustainabilityScore,
 } from "@workspace/api-client-react";
 import { useCompanyLmsOverview } from "@/lib/lms-api";
+import { RecyclingImpactSection } from "@/components/recycling/RecyclingImpactSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import {
@@ -28,6 +29,7 @@ import {
   FileText,
   Trophy,
   FileSpreadsheet,
+  Recycle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -259,6 +261,8 @@ export default function CompanyDashboard() {
           />
         </div>
 
+        <RecyclingImpactSection />
+
         <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 mb-10">
           <div className="bg-card border rounded-xl p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
@@ -470,6 +474,16 @@ export default function CompanyDashboard() {
                   <h3 className="font-semibold mb-1">Sustainability Impact</h3>
                   <p className="text-sm text-muted-foreground flex-1">View your ESG metrics and score.</p>
                   <ArrowRight className="h-4 w-4 text-green-600 mt-2" />
+                </div>
+              </Link>
+              <Link href="/company/recycling">
+                <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors h-full cursor-pointer flex flex-col items-start text-left">
+                  <div className="h-8 w-8 bg-emerald-500/10 rounded flex items-center justify-center text-emerald-600 mb-3">
+                    <Recycle className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold mb-1">Recycling Impact</h3>
+                  <p className="text-sm text-muted-foreground flex-1">Track Recyclean collections and export verified kg data.</p>
+                  <ArrowRight className="h-4 w-4 text-emerald-600 mt-2" />
                 </div>
               </Link>
               <Link href="/company/leaderboards">

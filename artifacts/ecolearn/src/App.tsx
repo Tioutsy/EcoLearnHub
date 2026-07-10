@@ -30,6 +30,8 @@ import CompanyReports from "@/pages/company/reports";
 import SustainabilityImpact from "@/pages/sustainability";
 import MadeForMauritius from "@/pages/made-for-mauritius";
 import AdminPanel from "@/pages/admin";
+import AdminRecycling from "@/pages/admin/recycling";
+import CompanyRecycling from "@/pages/company/recycling";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -182,8 +184,10 @@ function ClerkProviderWithRoutes() {
             <Route path="/company/leaderboards" component={CompanyLeaderboards} />
             <Route path="/company/compliance" component={CompanyCompliance} />
             <Route path="/company/reports" component={CompanyReports} />
+            <Route path="/company/recycling" component={CompanyRecycling} />
             <Route path="/company/sustainability" component={SustainabilityImpact} />
             <Route path="/admin" component={AdminPanel} />
+            <Route path="/admin/recycling" component={AdminRecycling} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />

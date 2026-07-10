@@ -4,8 +4,11 @@ import {
   useListEmployees,
 } from "@workspace/api-client-react";
 import { useTrainingReport, type TrainingReportParams } from "@/lib/lms-api";
+import { useCompanyRecyclingReport } from "@/lib/recycling-api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -27,6 +30,8 @@ import {
   Download,
   FileSpreadsheet,
   Filter,
+  Recycle,
+  Scale,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useMemo, useState } from "react";
@@ -71,6 +76,9 @@ export default function CompanyReports() {
   const [department, setDepartment] = useState(ALL);
   const [courseId, setCourseId] = useState(ALL);
   const [status, setStatus] = useState(ALL);
+  const [recyclingFromMonth, setRecyclingFromMonth] = useState("");
+  const [recyclingToMonth, setRecyclingToMonth] = useState("");
+  const [recyclingSite, setRecyclingSite] = useState("");
 
   const { data: employees } = useListEmployees();
   const { data: courses } = useListCourses();
@@ -81,6 +89,16 @@ export default function CompanyReports() {
     status: status === ALL ? undefined : status as TrainingReportParams["status"],
   };
   const { data: rows, isLoading } = useTrainingReport(params);
+  const recyclingParams = useMemo(
+    () => ({
+      fromMonth: recyclingFromMonth || undefined,
+      toMonth: recyclingToMonth || undefined,
+      site: recyclingSite.trim() || undefined,
+    }),
+    [recyclingFromMonth, recyclingToMonth, recyclingSite],
+  );
+  const { data: recyclingReport, isLoading: isLoadingRecycling } =
+    useCompanyRecyclingReport(recyclingParams);
 
   const departments = useMemo(() => {
     const set = new Set<string>();
@@ -126,6 +144,55 @@ export default function CompanyReports() {
     const link = document.createElement("a");
     link.href = url;
     link.download = `ecolearn-training-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportRecyclingCsv = () => {
+    if (!recyclingReport) return;
+    const summary = [
+      ["Generated", recyclingReport.generatedAt],
+      ["Company", recyclingReport.profile.name],
+      ["Service status", recyclingReport.profile.recyclingServiceStatus],
+      ["Period total kg", recyclingReport.period.totalKg],
+      ["Collections", recyclingReport.period.collectionsCount],
+      ["Paper/cardboard kg", recyclingReport.period.materialTotals.paperCardboardKg],
+      ["Plastic kg", recyclingReport.period.materialTotals.plasticKg],
+      ["Glass kg", recyclingReport.period.materialTotals.glassKg],
+      ["Aluminium/metal kg", recyclingReport.period.materialTotals.aluminiumMetalKg],
+      ["Other kg", recyclingReport.period.materialTotals.otherKg],
+      [],
+    ];
+    const header = [
+      "Reporting month",
+      "Collection date",
+      "Site",
+      "Paper/cardboard kg",
+      "Plastic kg",
+      "Glass kg",
+      "Aluminium/metal kg",
+      "Other kg",
+      "Total kg",
+    ];
+    const body = recyclingReport.records.map((record) => [
+      record.reportingMonth,
+      fmtDate(record.collectionDate),
+      record.siteName,
+      record.paperCardboardKg,
+      record.plasticKg,
+      record.glassKg,
+      record.aluminiumMetalKg,
+      record.otherKg,
+      record.totalKg,
+    ]);
+    const csv = [...summary, header, ...body]
+      .map((line) => line.map(csvValue).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ecolearn-recycling-summary-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -270,6 +337,111 @@ export default function CompanyReports() {
               </TableBody>
             </Table>
           </div>
+        </div>
+
+        <div className="bg-card border rounded-xl p-5 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-primary mb-2">
+                <Recycle className="h-4 w-4" />
+                Recyclean collection summary
+              </div>
+              <h2 className="text-xl font-bold font-serif">
+                Recycling Report
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Separate exportable collection weights for ESG working papers.
+                This does not claim regulatory compliance by itself.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={exportRecyclingCsv}
+              disabled={!recyclingReport?.records.length}
+            >
+              <Download className="mr-2 h-4 w-4" /> Export recycling CSV
+            </Button>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-3 mb-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="recycling-from">From month</Label>
+              <Input
+                id="recycling-from"
+                type="month"
+                value={recyclingFromMonth}
+                onChange={(event) => setRecyclingFromMonth(event.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="recycling-to">To month</Label>
+              <Input
+                id="recycling-to"
+                type="month"
+                value={recyclingToMonth}
+                onChange={(event) => setRecyclingToMonth(event.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="recycling-site">Site</Label>
+              <Input
+                id="recycling-site"
+                value={recyclingSite}
+                onChange={(event) => setRecyclingSite(event.target.value)}
+                placeholder="All sites"
+              />
+            </div>
+          </div>
+
+          {isLoadingRecycling ? (
+            <div className="grid sm:grid-cols-3 gap-3">
+              {Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <Skeleton key={index} className="h-24 w-full" />
+                ))}
+            </div>
+          ) : recyclingReport?.profile.recyclingServiceStatus !== "ACTIVE_CLIENT" ? (
+            <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
+              Recyclean collection reporting is available once this company is
+              marked as an active collection client.
+            </div>
+          ) : (
+            <>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div className="rounded-lg border p-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Scale className="h-4 w-4" />
+                    Period total
+                  </div>
+                  <p className="text-2xl font-bold mt-1">
+                    {(recyclingReport?.period.totalKg ?? 0).toLocaleString("en-GB", {
+                      maximumFractionDigits: 3,
+                    })} kg
+                  </p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">Collections</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {recyclingReport?.period.collectionsCount ?? 0}
+                  </p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Latest collection
+                  </p>
+                  <p className="text-2xl font-bold mt-1">
+                    {fmtDate(recyclingReport?.period.latestCollectionDate)}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                {recyclingReport?.equivalents.length
+                  ? "Estimated equivalents are shown only when an active sourced conversion factor exists."
+                  : recyclingReport?.equivalentsNote}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </Layout>

@@ -14,3 +14,4 @@ export * from "./challenges";
 export * from "./compliance";
 export * from "./leads";
 export * from "./commitments";
+export * from "./recycling";

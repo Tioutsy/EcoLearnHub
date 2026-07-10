@@ -149,7 +149,11 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
   }
 
   const employee = await findEmployeeForUser(userId, email);
-  const companyId = claimCompanyId ?? employee?.companyId ?? primaryCompany?.id;
+  const companyId =
+    claimCompanyId ??
+    employee?.companyId ??
+    primaryCompany?.id ??
+    (isPlatformRole(claimRole) ? 0 : null);
   if (!companyId) throw new HttpError(404, "No company found");
 
   let role: AccessRole = "employee";
@@ -176,6 +180,14 @@ export async function requireCompanyAdmin(req: Request): Promise<CompanyAccess> 
   const access = await getCompanyAccess(req);
   if (access.role === "employee") {
     throw new HttpError(403, "Company administrator access required");
+  }
+  return access;
+}
+
+export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess> {
+  const access = await getCompanyAccess(req);
+  if (access.role !== "platform_admin") {
+    throw new HttpError(403, "Platform administrator access required");
   }
   return access;
 }

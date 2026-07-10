@@ -21,6 +21,7 @@ import complianceRouter from "./compliance";
 import leadsRouter from "./leads";
 import adminRouter from "./admin";
 import blogRouter from "./blog";
+import recyclingRouter from "./recycling";
 
 const router: IRouter = Router();
 
@@ -47,6 +48,7 @@ router.use("/challenges", challengesRouter);
 router.use("/compliance", complianceRouter);
 router.use("/leads", leadsRouter);
 router.use("/admin", adminRouter);
+router.use("/recycling", recyclingRouter);
 router.use(blogRouter);
 
 export default router;
