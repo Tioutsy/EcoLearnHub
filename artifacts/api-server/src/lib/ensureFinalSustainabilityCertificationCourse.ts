@@ -101,7 +101,7 @@ export async function ensureFinalSustainabilityCertificationCourse() {
   const [existingSeed] = await db
     .select()
     .from(systemSeedsTable)
-    .where(eq(systemSeedsTable.seedName, SEED_NAME));
+    .where(eq(systemSeedsTable.name, SEED_NAME));
 
   if (existingSeed) {
     logger.info(`[SEED] ${SEED_NAME} already applied.`);
@@ -109,79 +109,82 @@ export async function ensureFinalSustainabilityCertificationCourse() {
   }
 
   // Find or create course 12
-  let [course] = await db
-    .select()
-    .from(coursesTable)
-    .where(eq(coursesTable.id, COURSE_ID));
+  let existingCourse = await db.query.coursesTable.findFirst({
+    where: eq(coursesTable.slug, COURSE_SLUG)
+  });
 
-  if (!course) {
-    [course] = await db.insert(coursesTable).values({
-      id: COURSE_ID,
+  if (!existingCourse) {
+    const byId = await db.query.coursesTable.findFirst({
+      where: eq(coursesTable.id, COURSE_ID)
+    });
+    if (byId && byId.slug === COURSE_SLUG) {
+      existingCourse = byId;
+    } else if (byId && byId.slug.includes('certification')) {
+      existingCourse = byId;
+    }
+  }
+
+  let actualCourseId = existingCourse ? existingCourse.id : COURSE_ID;
+
+  let course;
+  if (!existingCourse) {
+    const [inserted] = await db.insert(coursesTable).values({
       slug: COURSE_SLUG,
       title: COURSE_TITLE,
       ...COURSE_META,
-      isPublished: true, // we can publish since it's fully formed
+      isPublished: true, 
     }).returning();
+    course = inserted;
+    actualCourseId = inserted.id;
     logger.info(`[SEED] Inserted new Course 12: ${COURSE_TITLE}`);
   } else {
-    [course] = await db.update(coursesTable).set({
+    const [updated] = await db.update(coursesTable).set({
       slug: COURSE_SLUG,
       title: COURSE_TITLE,
       ...COURSE_META,
       isPublished: true,
-    }).where(eq(coursesTable.id, COURSE_ID)).returning();
+    }).where(eq(coursesTable.id, actualCourseId)).returning();
+    course = updated;
     logger.info(`[SEED] Updated existing Course 12: ${COURSE_TITLE}`);
   }
 
   // Ensure exactly 11 prerequisite links exist
-  await db.delete(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.courseId, COURSE_ID));
+  await db.delete(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.courseId, actualCourseId));
   const prereqInserts = Array.from({ length: 11 }).map((_, i) => ({
-    courseId: COURSE_ID,
+    courseId: actualCourseId,
     prerequisiteCourseId: i + 1,
   }));
   await db.insert(coursePrerequisitesTable).values(prereqInserts).onConflictDoNothing();
 
-  // Handle lessons
-  const existingLessons = await db
-    .select({ id: lessonsTable.id })
-    .from(lessonsTable)
-    .where(eq(lessonsTable.courseId, COURSE_ID));
-
-  if (existingLessons.length === 0) {
-    for (const l of NEW_LESSONS) {
-      await db.insert(lessonsTable).values({
-        courseId: COURSE_ID,
-        title: l.title,
-        orderIndex: l.order,
-        durationMinutes: l.minutes,
-        content: l.content,
-        contentBlocks: l.blocks,
-      });
-    }
+  // If the seed marker wasn't found, we assume any existing lessons and questions are skeletons and we wipe them.
+  await db.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
+  for (const l of NEW_LESSONS) {
+    await db.insert(lessonsTable).values({
+      courseId: actualCourseId,
+      title: l.title,
+      orderIndex: l.order,
+      durationMinutes: l.minutes,
+      content: l.content,
+      contentBlocks: l.blocks,
+    });
   }
 
-  // Handle quiz questions
-  const existingQuestions = await db
-    .select({ id: quizQuestionsTable.id })
-    .from(quizQuestionsTable)
-    .where(eq(quizQuestionsTable.courseId, COURSE_ID));
-
-  if (existingQuestions.length === 0) {
-    let orderIndex = 0;
-    for (const q of CERTIFICATION_QUESTIONS) {
-      await db.insert(quizQuestionsTable).values({
-        courseId: COURSE_ID,
-        question: q.question,
-        options: q.options,
-        correctOption: q.correctOption,
-        orderIndex: orderIndex++,
-        correctExplanation: q.correctExplanation,
-        incorrectExplanation: q.incorrectExplanation,
-        competencyArea: q.competencyArea,
-        sourceCourseId: q.sourceCourseId,
-        learningOutcome: q.learningOutcome,
-      });
-    }
+  // Wipe skeleton questions
+  await db.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
+  let orderIndex = 0;
+  for (const q of CERTIFICATION_QUESTIONS) {
+    await db.insert(quizQuestionsTable).values({
+      courseId: actualCourseId,
+      question: q.question,
+      options: q.options,
+      correctOption: q.correctOption,
+      orderIndex: orderIndex++,
+      correctExplanation: q.correctExplanation,
+      incorrectExplanation: q.incorrectExplanation,
+      competencyArea: q.competencyArea,
+      sourceCourseId: q.sourceCourseId,
+      learningOutcome: q.learningOutcome,
+    });
   }
 
   // Ensure badge
@@ -195,8 +198,10 @@ export async function ensureFinalSustainabilityCertificationCourse() {
       slug: BADGE_SLUG,
       name: COURSE_META.badgeName,
       description: COURSE_META.badgeDescription,
-      imageUrl: "/images/badges/core-sustainability.png",
-      courseId: COURSE_ID,
+      icon: "award",
+      courseIds: [actualCourseId],
+      criteriaType: "all_courses",
+      orderIndex: 16,
     }).returning();
   }
 
@@ -205,6 +210,6 @@ export async function ensureFinalSustainabilityCertificationCourse() {
   await db.delete(badgeDefinitionsTable).where(eq(badgeDefinitionsTable.slug, skeletonBadgeSlug));
 
   // Mark as seeded
-  await db.insert(systemSeedsTable).values({ seedName: SEED_NAME });
+  await db.insert(systemSeedsTable).values({ name: SEED_NAME });
   logger.info(`[SEED] ${SEED_NAME} fully applied.`);
 }

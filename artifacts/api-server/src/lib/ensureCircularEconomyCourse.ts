@@ -506,14 +506,22 @@ export async function ensureCircularEconomyCourse() {
 
     await db.transaction(async (tx) => {
       // 1. Ensure Course Exists (resolve skeleton dynamically)
-      const existingCourse = await tx.query.coursesTable.findFirst({
-        where: or(
-          eq(coursesTable.id, COURSE_ID),
-          eq(coursesTable.slug, COURSE_SLUG)
-        ),
+      let existingCourse = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.slug, COURSE_SLUG),
       });
 
-      const actualCourseId = existingCourse ? existingCourse.id : COURSE_ID;
+      if (!existingCourse) {
+        const byId = await tx.query.coursesTable.findFirst({
+          where: eq(coursesTable.id, COURSE_ID),
+        });
+        if (byId && byId.slug === COURSE_SLUG) {
+          existingCourse = byId;
+        } else if (byId && byId.slug.includes('circular')) {
+          existingCourse = byId;
+        }
+      }
+
+      let actualCourseId = existingCourse ? existingCourse.id : COURSE_ID;
 
       // 2. Ensure the Badge Definition exists
       const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
@@ -554,8 +562,7 @@ export async function ensureCircularEconomyCourse() {
       }
 
       if (!existingCourse) {
-        await tx.insert(coursesTable).values({
-          id: COURSE_ID,
+        const [inserted] = await tx.insert(coursesTable).values({
           slug: COURSE_SLUG,
           title: COURSE_TITLE,
           description: COURSE_META.description,
@@ -573,7 +580,13 @@ export async function ensureCircularEconomyCourse() {
           recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
           status: "published",
           isPublished: true,
-        });
+        }).returning();
+        
+        actualCourseId = inserted.id;
+
+        await tx.update(badgeDefinitionsTable).set({
+            courseIds: [actualCourseId]
+        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
       } else {
         await tx
           .update(coursesTable)
