@@ -29,6 +29,13 @@
       "when": 1784466941806,
       "tag": "0003_production_tables_gap",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784466941807,
+      "tag": "0004_production_columns_gap",
+      "breakpoints": true
     }
   ]
 }
