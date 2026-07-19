@@ -2,7 +2,13 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureFoundationsCourse } from "./lib/ensureFoundationsCourse";
 import { ensureWasteSortingCourse } from "./lib/ensureWasteSortingCourse";
+import { ensureEnergyEfficiencyCourse } from "./lib/ensureEnergyEfficiencyCourse";
+import { ensureWaterConservationCourse } from "./lib/ensureWaterConservationCourse";
+import { ensureSustainableProcurementCourse } from "./lib/ensureSustainableProcurementCourse";
+import { ensureGreenOfficePracticesCourse } from "./lib/ensureGreenOfficePracticesCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
+import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
+import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
 
 const rawPort = process.env["PORT"];
 
@@ -18,22 +24,30 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
+
 async function start(): Promise<void> {
   // Ensure required course content exists before accepting traffic so the first
   // requests after a deploy deterministically see the seeded course.
   await ensureFoundationsCourse();
   await ensureWasteSortingCourse();
+  await ensureEnergyEfficiencyCourse();
+  await ensureWaterConservationCourse();
+  await ensureSustainableProcurementCourse();
+  await ensureGreenOfficePracticesCourse();
   await seedInitialSectors();
+  await ensureCatalogueSkeletons();
+  await ensureInsightsMigrated();
 
 
-  app.listen(port, (err) => {
-    if (err) {
-      logger.error({ err }, "Error listening on port");
-      process.exit(1);
-    }
+  const server = app.listen(port, "0.0.0.0", () => {
+    logger.info({ port }, "Server listening on 0.0.0.0");
+  });
 
-    logger.info({ port }, "Server listening");
+  server.on("error", (err) => {
+    logger.error({ err }, "Error listening on port");
+    process.exit(1);
   });
 }
 
 void start();
+
