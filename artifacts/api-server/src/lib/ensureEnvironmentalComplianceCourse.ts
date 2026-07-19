@@ -634,7 +634,6 @@ export async function ensureEnvironmentalComplianceCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          badgeId: badgeRecord.id,
           recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
           status: "published", // Publish immediately since all content is seeded in this tx
         });
@@ -658,7 +657,6 @@ export async function ensureEnvironmentalComplianceCourse() {
             includesCertificate: COURSE_META.includesCertificate,
             passingScore: COURSE_META.passingScore,
             completionMessage: COURSE_META.completionMessage,
-            badgeId: badgeRecord.id,
             recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
             status: "published",
           })
@@ -685,7 +683,7 @@ export async function ensureEnvironmentalComplianceCourse() {
           await tx.insert(lessonsTable).values({
             courseId: COURSE_ID,
             title: lesson.title,
-            order: lesson.order,
+            orderIndex: lesson.order,
             minutes: lesson.minutes,
             content: lesson.content,
             contentBlocks: lesson.blocks,

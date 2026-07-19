@@ -514,7 +514,7 @@ export async function ensureCarbonFootprintCourse(): Promise<void> {
       // 5. Mark successful completion
       await tx.insert(systemSeedsTable).values({
         name: SEED_NAME,
-        executedAt: new Date(),
+        runAt: new Date(),
       });
 
       txHasFinished = true;
