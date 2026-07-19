@@ -11,7 +11,8 @@ import {
   CreateCourseBody,
   UpdateCourseBody,
 } from "@workspace/api-zod";
-import { getCompanyAccess } from "../lib/access";
+import { getCompanyAccess, AccessContext } from "../lib/access";
+import { checkCourseEligibility } from "../lib/prerequisites";
 
 const router = Router();
 
@@ -114,9 +115,11 @@ router.get("/:id", async (req, res): Promise<void> => {
   }
 
   // Load access context if present to allow platform admins to preview unpublished courses
+  let accessContext: AccessContext | null = null;
   let bypassFilter = false;
   try {
     const access = await getCompanyAccess(req);
+    accessContext = access;
     if (access && access.role === "platform_admin") {
       bypassFilter = true;
     }
@@ -164,11 +167,14 @@ router.get("/:id", async (req, res): Promise<void> => {
     .where(eq(lessonsTable.courseId, id))
     .orderBy(lessonsTable.orderIndex);
 
+  const eligibility = await checkCourseEligibility(id, accessContext);
+
   res.json({
     ...course,
     priceUsd: parseFloat(course.priceUsd),
     rating: course.rating ? parseFloat(course.rating) : null,
     lessons,
+    prerequisites: eligibility.prerequisites,
   });
 });
 

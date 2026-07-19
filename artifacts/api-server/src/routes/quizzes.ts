@@ -36,9 +36,11 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
     return;
   }
 
+  let accessContext = null;
   let bypassFilter = false;
   try {
     const access = await getCompanyAccess(req);
+    accessContext = access;
     if (access && access.role === "platform_admin") {
       bypassFilter = true;
     }
@@ -49,6 +51,21 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
   if (!course.isPublished && !bypassFilter) {
     res.status(403).json({ error: "Cannot access quiz for an unpublished course" });
     return;
+  }
+
+  if (!bypassFilter) {
+    const { checkCourseEligibility } = await import("../lib/prerequisites");
+    const eligibility = await checkCourseEligibility(courseId, accessContext);
+    if (!eligibility.eligible) {
+      res.status(403).json({ 
+        error: "PREREQUISITES_INCOMPLETE",
+        message: "You must complete all prerequisite courses before accessing this quiz.",
+        completedCount: eligibility.completedCount,
+        totalCount: eligibility.totalCount,
+        prerequisites: eligibility.prerequisites,
+      });
+      return;
+    }
   }
 
   const questions = await db
@@ -100,13 +117,54 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
       return;
     }
 
+    let bypassFilter = false;
+    if (access && access.role === "platform_admin") {
+      bypassFilter = true;
+    }
+
+    if (!bypassFilter) {
+      const { checkCourseEligibility } = await import("../lib/prerequisites");
+      const eligibility = await checkCourseEligibility(courseId, access);
+      if (!eligibility.eligible) {
+        res.status(403).json({ 
+          error: "PREREQUISITES_INCOMPLETE",
+          message: "You must complete all prerequisite courses before submitting this quiz."
+        });
+        return;
+      }
+    }
+
     const questions = await db.select().from(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
 
+    const competencyScores: Record<string, { correct: number, total: number, percentage: number, passed: boolean }> = {};
+    let isCertification = false;
+    for (const q of questions) {
+      if (q.competencyArea) {
+        isCertification = true;
+        if (!competencyScores[q.competencyArea]) {
+          competencyScores[q.competencyArea] = { correct: 0, total: 0, percentage: 0, passed: false };
+        }
+        competencyScores[q.competencyArea].total++;
+      }
+    }
+
     let correctAnswers = 0;
+    const incorrectSourceCourseIds: Record<number, number> = {};
+
     for (const answer of parsed.data.answers) {
       const question = questions.find((q) => q.id === answer.questionId);
-      if (question && question.correctOption === answer.selectedOption) {
-        correctAnswers++;
+      if (question) {
+        const isCorrect = question.correctOption === answer.selectedOption;
+        if (isCorrect) {
+          correctAnswers++;
+          if (question.competencyArea) {
+            competencyScores[question.competencyArea].correct++;
+          }
+        } else {
+          if (question.sourceCourseId) {
+            incorrectSourceCourseIds[question.sourceCourseId] = (incorrectSourceCourseIds[question.sourceCourseId] || 0) + 1;
+          }
+        }
       }
     }
 
@@ -121,12 +179,26 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
     const passingScore = course?.passingScore ?? 70;
     const courseVersion = course?.version ?? 1;
 
+    let allCompetenciesPassed = true;
+    for (const key of Object.keys(competencyScores)) {
+       const comp = competencyScores[key];
+       comp.percentage = comp.total > 0 ? Math.round((comp.correct / comp.total) * 100) : 0;
+       // We use >= 7 for pass threshold for 10 questions. If total is not 10, use 70%
+       comp.passed = comp.percentage >= 70;
+       if (!comp.passed) allCompetenciesPassed = false;
+    }
+
     const totalQuestions = questions.length;
     const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-    const passed = score >= passingScore;
+    
+    let passed = score >= passingScore;
+    if (isCertification) {
+        // Enforce certification rules: overall >= 80 and all areas >= 70
+        passed = score >= 80 && allCompetenciesPassed;
+    }
 
     const userId = access.userId;
-    await db.insert(quizAttemptsTable).values({
+    const dbAttempt = await db.insert(quizAttemptsTable).values({
       userId,
       courseId,
       courseVersion,
@@ -134,7 +206,8 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
       totalQuestions,
       correctAnswers,
       passed,
-    });
+      competencyScores: isCertification ? competencyScores : null,
+    }).returning();
 
     let employee = access.employee;
     if (!employee && enrollment.employeeId) {
@@ -168,6 +241,7 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
         certificateId = existingCert.id;
       } else {
         const code = `ECO-${randomUUID().slice(0, 8).toUpperCase()}`;
+        const certificateTitle = isCertification ? "EcoLearnHub Core Sustainability Certificate" : null;
         const [cert] = await db
           .insert(certificatesTable)
           .values({
@@ -179,6 +253,7 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
             courseId,
             courseVersion,
             uniqueCode: code,
+            certificateTitle,
           })
           .returning();
         certificateId = cert.id;
@@ -222,11 +297,42 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
         incorrectExplanation: question?.incorrectExplanation ?? null,
         practicalTakeaway: question?.practicalTakeaway ?? null,
         optionFeedback: question?.optionFeedback ?? [],
-        options: question?.options ?? []
+        options: question?.options ?? [],
+        competencyArea: question?.competencyArea ?? null,
+        sourceCourseId: question?.sourceCourseId ?? null,
+        learningOutcome: question?.learningOutcome ?? null,
       };
     });
 
-    res.json({ score, passed, totalQuestions, correctAnswers, certificateId, feedback });
+    let recommendations: number[] = [];
+    let weakestCompetencyArea: string | null = null;
+
+    if (isCertification && !passed) {
+       recommendations = Object.entries(incorrectSourceCourseIds)
+           .sort((a, b) => b[1] - a[1])
+           .slice(0, 3)
+           .map(e => parseInt(e[0]));
+           
+       let lowestScore = 100;
+       for (const key of Object.keys(competencyScores)) {
+          if (competencyScores[key].percentage < lowestScore) {
+             lowestScore = competencyScores[key].percentage;
+             weakestCompetencyArea = key;
+          }
+       }
+    }
+
+    res.json({ 
+      score, 
+      passed, 
+      totalQuestions, 
+      correctAnswers, 
+      certificateId, 
+      feedback,
+      competencyScores: isCertification ? competencyScores : null,
+      recommendations: recommendations.length > 0 ? recommendations : null,
+      weakestCompetencyArea
+    });
   } catch (err) {
     if (!sendHttpError(res, err)) {
       req.log?.error({ err }, "Failed to submit quiz");

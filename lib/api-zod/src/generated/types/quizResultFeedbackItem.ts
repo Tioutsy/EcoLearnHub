@@ -20,4 +20,10 @@ export type QuizResultFeedbackItem = {
   practicalTakeaway?: string | null;
   optionFeedback?: (string | null)[];
   options: string[];
+  /** @nullable */
+  competencyArea?: string | null;
+  /** @nullable */
+  sourceCourseId?: number | null;
+  /** @nullable */
+  learningOutcome?: string | null;
 };

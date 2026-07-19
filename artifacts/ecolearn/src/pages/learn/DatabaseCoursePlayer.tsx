@@ -28,6 +28,7 @@ import {
   Trophy,
   Download,
   GraduationCap,
+  AlertCircle,
 } from "lucide-react";
 import {
   TextView,
@@ -541,6 +542,92 @@ function FinalQuiz({
   }
 
   if (result) {
+    if (result.competencyScores) {
+      const passed = result.passed;
+      return (
+        <Card className="p-8 text-center max-w-2xl mx-auto">
+          {passed ? (
+            <>
+              <div className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5">
+                <CheckCircle2 className="h-10 w-10" />
+              </div>
+              <h2 className="text-3xl font-bold font-serif mb-2">Certification Passed!</h2>
+              <p className="text-muted-foreground mb-6">
+                Overall Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-5">
+                <XCircle className="h-10 w-10" />
+              </div>
+              <h2 className="text-3xl font-bold font-serif mb-2">Certification Failed</h2>
+              <p className="text-muted-foreground mb-6">
+                Overall Score: {result.score}% (Requires {passingScore}%)
+              </p>
+            </>
+          )}
+
+          <div className="text-left space-y-4 mb-8">
+            <h3 className="font-semibold text-lg border-b pb-2">Competency Breakdown (Requires 70% each)</h3>
+            {Object.entries(result.competencyScores).map(([area, score]: [string, any]) => (
+              <div key={area} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <span className="font-medium capitalize">{area.replace(/_/g, ' ')}</span>
+                <div className="flex items-center gap-4 mt-2 sm:mt-0">
+                  <span className="text-sm text-muted-foreground">{score.correct}/{score.total}</span>
+                  <span className={`font-bold ${score.passed ? 'text-emerald-600' : 'text-destructive'}`}>
+                    {score.percentage}% {score.passed ? '(Pass)' : '(Fail)'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {!passed && result.recommendations && result.recommendations.length > 0 && (
+            <div className="text-left space-y-4 mb-8 bg-amber-50 dark:bg-amber-950/30 p-4 rounded-xl border border-amber-200 dark:border-amber-900">
+              <h3 className="font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" /> Recommended Review
+              </h3>
+              <p className="text-sm text-amber-800 dark:text-amber-300">Based on your incorrect answers, we recommend reviewing these courses before trying again:</p>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800 dark:text-amber-300">
+                {result.recommendations.map((courseId: number) => (
+                  <li key={courseId}>
+                    <Link href={`/courses/${courseId}`} className="underline hover:text-amber-900">
+                      Review Course {courseId}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-center pt-4 border-t">
+             {passed ? (
+               <Button size="lg" onClick={onPassed}>
+                 See your results
+               </Button>
+             ) : (
+               <>
+                 <Button
+                   size="lg"
+                   onClick={() => {
+                     setResult(null);
+                     setCurrent(0);
+                     setAnswers({});
+                   }}
+                 >
+                   Retry Certification
+                 </Button>
+                 <Button size="lg" variant="outline" onClick={onBackToModules}>
+                   Back to Briefing
+                 </Button>
+               </>
+             )}
+          </div>
+        </Card>
+      );
+    }
+
     return (
       <Card className="p-8 text-center">
         {result.passed ? (

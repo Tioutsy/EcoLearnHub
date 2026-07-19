@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, unique, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -14,6 +14,9 @@ export const quizQuestionsTable = pgTable("quiz_questions", {
   incorrectExplanation: text("incorrect_explanation"),
   optionFeedback: text("option_feedback").array(),
   practicalTakeaway: text("practical_takeaway"),
+  competencyArea: text("competency_area"),
+  sourceCourseId: integer("source_course_id"),
+  learningOutcome: text("learning_outcome"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   quizQuestionsCourseOrderUnique: unique("quiz_questions_course_order_unique").on(t.courseId, t.orderIndex),
@@ -28,6 +31,7 @@ export const quizAttemptsTable = pgTable("quiz_attempts", {
   totalQuestions: integer("total_questions").notNull().default(0),
   correctAnswers: integer("correct_answers").notNull().default(0),
   passed: boolean("passed").notNull().default(false),
+  competencyScores: jsonb("competency_scores"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

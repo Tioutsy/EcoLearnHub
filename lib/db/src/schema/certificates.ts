@@ -13,6 +13,7 @@ export const certificatesTable = pgTable("certificates", {
   courseVersion: integer("course_version").notNull().default(1),
   uniqueCode: text("unique_code").notNull().unique(),
   pdfUrl: text("pdf_url"),
+  certificateTitle: text("certificate_title"),
   issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

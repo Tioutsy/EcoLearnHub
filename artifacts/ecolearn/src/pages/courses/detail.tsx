@@ -3,7 +3,7 @@ import { useGetCourse, useCreateEnrollment } from "@workspace/api-client-react";
 import { useParams, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, CheckCircle2, PlayCircle, FileText, Award, AlertCircle } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, PlayCircle, FileText, Award, AlertCircle, Lock } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@clerk/react";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,11 @@ export default function CourseDetail() {
   const { data: course, isLoading } = useGetCourse(courseId, { query: { enabled: !!courseId, queryKey: ['course', courseId] } });
   
   const enrollMutation = useCreateEnrollment();
+
+  const hasPrerequisites = course?.prerequisites && course.prerequisites.length > 0;
+  const prereqsCompleted = course?.prerequisites?.filter((p: any) => p.completed).length || 0;
+  const prereqsTotal = course?.prerequisites?.length || 0;
+  const isLocked = hasPrerequisites && prereqsCompleted < prereqsTotal;
 
   const handleEnroll = () => {
     if (!isSignedIn) {
@@ -141,19 +146,51 @@ export default function CourseDetail() {
                   )}
                 </div>
               )}
-              <div className="p-6">
-                <Button 
-                  size="lg" 
-                  className="w-full h-12 text-base font-semibold shadow-md"
-                  onClick={handleEnroll}
-                  disabled={enrollMutation.isPending}
-                >
-                  {enrollMutation.isPending ? "Enrolling..." : "Enroll Now"}
-                </Button>
-                <p className="text-center text-xs text-muted-foreground mt-4">
-                  Corporate billing available for teams
-                </p>
-              </div>
+              {isLocked ? (
+                <div className="p-6">
+                  <div className="bg-muted/50 rounded-xl p-4 border border-border text-center mb-4">
+                    <Lock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <h3 className="font-semibold text-foreground mb-1">Course Locked</h3>
+                    <p className="text-sm text-muted-foreground">
+                      You must complete {prereqsTotal} prerequisite courses before enrolling.
+                    </p>
+                    <div className="mt-4">
+                      <div className="flex justify-between text-xs mb-1 font-medium">
+                        <span>{prereqsCompleted} of {prereqsTotal} completed</span>
+                        <span>{Math.round((prereqsCompleted / prereqsTotal) * 100)}%</span>
+                      </div>
+                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary" 
+                          style={{ width: `${Math.round((prereqsCompleted / prereqsTotal) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline"
+                    size="lg" 
+                    className="w-full h-12 text-base font-semibold"
+                    asChild
+                  >
+                    <Link href="/courses">Continue Prerequisites</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <Button 
+                    size="lg" 
+                    className="w-full h-12 text-base font-semibold shadow-md"
+                    onClick={handleEnroll}
+                    disabled={enrollMutation.isPending}
+                  >
+                    {enrollMutation.isPending ? "Enrolling..." : "Enroll Now"}
+                  </Button>
+                  <p className="text-center text-xs text-muted-foreground mt-4">
+                    Corporate billing available for teams
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -172,6 +209,32 @@ export default function CourseDetail() {
                     <div key={i} className="flex gap-3">
                       <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
                       <span className="text-muted-foreground">{obj}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Prerequisites */}
+            {hasPrerequisites && (
+              <section>
+                <h2 className="text-2xl font-bold font-serif mb-6">Prerequisite Courses</h2>
+                <div className="space-y-3">
+                  {course.prerequisites?.map((p: any) => (
+                    <div key={p.courseId} className="flex items-center justify-between p-4 border rounded-xl bg-card">
+                      <div className="flex items-center gap-3">
+                        {p.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />
+                        )}
+                        <span className={`font-medium ${p.completed ? '' : 'text-muted-foreground'}`}>{p.title}</span>
+                      </div>
+                      {!p.completed && (
+                         <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80" asChild>
+                           <Link href={`/courses/${p.courseId}`}>View Course</Link>
+                         </Button>
+                      )}
                     </div>
                   ))}
                 </div>

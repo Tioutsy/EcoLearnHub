@@ -84,6 +84,19 @@ router.post("/", async (req, res): Promise<void> => {
       return;
     }
 
+    const { checkCourseEligibility } = await import("../lib/prerequisites");
+    const eligibility = await checkCourseEligibility(parsed.data.courseId, access);
+    if (!eligibility.eligible) {
+      res.status(403).json({ 
+        error: "PREREQUISITES_INCOMPLETE",
+        message: "You must complete all prerequisite courses before enrolling.",
+        completedCount: eligibility.completedCount,
+        totalCount: eligibility.totalCount,
+        prerequisites: eligibility.prerequisites,
+      });
+      return;
+    }
+
     const existing = await db
       .select()
       .from(enrollmentsTable)

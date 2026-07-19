@@ -5,6 +5,8 @@
  * EcoLearn Mauritius API
  * OpenAPI spec version: 0.1.0
  */
+import type { QuizResultCompetencyScores } from './quizResultCompetencyScores';
+import type { QuizResultFeedbackItem } from './quizResultFeedbackItem';
 
 export interface QuizResult {
   score: number;
@@ -13,4 +15,11 @@ export interface QuizResult {
   correctAnswers: number;
   /** @nullable */
   certificateId?: number | null;
+  /** @nullable */
+  competencyScores?: QuizResultCompetencyScores;
+  /** @nullable */
+  recommendations?: number[] | null;
+  /** @nullable */
+  weakestCompetencyArea?: string | null;
+  feedback?: QuizResultFeedbackItem[];
 }

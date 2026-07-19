@@ -6,8 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Course } from './course';
+import type { CourseDetailPrerequisitesItem } from './courseDetailPrerequisitesItem';
 import type { Lesson } from './lesson';
 
 export type CourseDetail = Course & {
   lessons?: Lesson[];
+  prerequisites?: CourseDetailPrerequisitesItem[];
 };

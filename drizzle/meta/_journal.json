@@ -43,6 +43,13 @@
       "when": 1784466941808,
       "tag": "0005_production_columns_gap",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784489025136,
+      "tag": "0006_curious_absorbing_man",
+      "breakpoints": true
     }
   ]
 }

@@ -2198,6 +2198,19 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/Lesson"
+            prerequisites:
+              type: array
+              items:
+                type: object
+                properties:
+                  courseId:
+                    type: integer
+                  title:
+                    type: string
+                  slug:
+                    type: ["string", "null"]
+                  completed:
+                    type: boolean
 
     CourseInput:
       type: object
@@ -2442,6 +2455,25 @@ components:
           type: integer
         certificateId:
           type: ["integer", "null"]
+        competencyScores:
+          type: ["object", "null"]
+          additionalProperties:
+            type: object
+            properties:
+              correct:
+                type: integer
+              total:
+                type: integer
+              percentage:
+                type: integer
+              passed:
+                type: boolean
+        recommendations:
+          type: ["array", "null"]
+          items:
+            type: integer
+        weakestCompetencyArea:
+          type: ["string", "null"]
         feedback:
           type: array
           items:
@@ -2472,6 +2504,12 @@ components:
                 type: array
                 items:
                   type: string
+              competencyArea:
+                type: ["string", "null"]
+              sourceCourseId:
+                type: ["integer", "null"]
+              learningOutcome:
+                type: ["string", "null"]
 
     # ── COMMITMENTS ───────────────────────────────────────────────────────────
     CommitmentList:

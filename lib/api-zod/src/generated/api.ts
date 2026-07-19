@@ -143,6 +143,12 @@ export const GetCourseResponse = zod.object({
   "description": zod.string()
 })).optional()
 })).optional()
+})).optional(),
+  "prerequisites": zod.array(zod.object({
+  "courseId": zod.number().optional(),
+  "title": zod.string().optional(),
+  "slug": zod.string().nullish(),
+  "completed": zod.boolean().optional()
 })).optional()
 }))
 
@@ -366,6 +372,12 @@ export const GetEnrollmentResponse = zod.object({
   "description": zod.string()
 })).optional()
 })).optional()
+})).optional(),
+  "prerequisites": zod.array(zod.object({
+  "courseId": zod.number().optional(),
+  "title": zod.string().optional(),
+  "slug": zod.string().nullish(),
+  "completed": zod.boolean().optional()
 })).optional()
 })).nullish()
 }))
@@ -451,6 +463,14 @@ export const SubmitQuizResponse = zod.object({
   "totalQuestions": zod.number(),
   "correctAnswers": zod.number(),
   "certificateId": zod.number().nullish(),
+  "competencyScores": zod.record(zod.string(), zod.object({
+  "correct": zod.number().optional(),
+  "total": zod.number().optional(),
+  "percentage": zod.number().optional(),
+  "passed": zod.boolean().optional()
+})).nullish(),
+  "recommendations": zod.array(zod.number()).nullish(),
+  "weakestCompetencyArea": zod.string().nullish(),
   "feedback": zod.array(zod.object({
   "questionId": zod.number(),
   "question": zod.string(),
@@ -461,7 +481,10 @@ export const SubmitQuizResponse = zod.object({
   "incorrectExplanation": zod.string().nullish(),
   "practicalTakeaway": zod.string().nullish(),
   "optionFeedback": zod.array(zod.string().nullable()).optional(),
-  "options": zod.array(zod.string())
+  "options": zod.array(zod.string()),
+  "competencyArea": zod.string().nullish(),
+  "sourceCourseId": zod.number().nullish(),
+  "learningOutcome": zod.string().nullish()
 })).optional()
 })
 

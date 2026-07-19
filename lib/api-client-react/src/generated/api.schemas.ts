@@ -52,6 +52,14 @@ export interface Course {
   createdAt?: string;
 }
 
+export type CourseDetailPrerequisitesItem = {
+  courseId?: number;
+  title?: string;
+  /** @nullable */
+  slug?: string | null;
+  completed?: boolean;
+};
+
 export type ContentBlockType = typeof ContentBlockType[keyof typeof ContentBlockType];
 
 
@@ -123,6 +131,7 @@ export interface Lesson {
 
 export type CourseDetail = Course & {
   lessons?: Lesson[];
+  prerequisites?: CourseDetailPrerequisitesItem[];
 };
 
 export type CourseInputLevel = typeof CourseInputLevel[keyof typeof CourseInputLevel];
@@ -275,6 +284,16 @@ export interface QuizSubmission {
   answers: QuizAnswer[];
 }
 
+/**
+ * @nullable
+ */
+export type QuizResultCompetencyScores = {[key: string]: {
+  correct?: number;
+  total?: number;
+  percentage?: number;
+  passed?: boolean;
+}} | null;
+
 export type QuizResultFeedbackItem = {
   questionId: number;
   question: string;
@@ -289,6 +308,12 @@ export type QuizResultFeedbackItem = {
   practicalTakeaway?: string | null;
   optionFeedback?: (string | null)[];
   options: string[];
+  /** @nullable */
+  competencyArea?: string | null;
+  /** @nullable */
+  sourceCourseId?: number | null;
+  /** @nullable */
+  learningOutcome?: string | null;
 };
 
 export interface QuizResult {
@@ -298,6 +323,12 @@ export interface QuizResult {
   correctAnswers: number;
   /** @nullable */
   certificateId?: number | null;
+  /** @nullable */
+  competencyScores?: QuizResultCompetencyScores;
+  /** @nullable */
+  recommendations?: number[] | null;
+  /** @nullable */
+  weakestCompetencyArea?: string | null;
   feedback?: QuizResultFeedbackItem[];
 }
 
