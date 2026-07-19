@@ -22,7 +22,7 @@ import Quiz from "@/pages/quiz";
 import Dashboard from "@/pages/dashboard";
 import ImpactDashboard from "@/pages/impact";
 import Pricing from "@/pages/pricing";
-import InsightsLanding from "@/pages/insights";
+import InsightsLanding from "@/pages/insights/index";
 import InsightsArticlesList from "@/pages/insights/articles";
 import InsightsArticleDetail from "@/pages/insights/article-detail";
 import MauritiusResourcesList from "@/pages/insights/mauritius-resources";
