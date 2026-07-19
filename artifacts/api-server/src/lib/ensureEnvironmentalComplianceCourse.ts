@@ -573,7 +573,17 @@ export async function ensureEnvironmentalComplianceCourse() {
 
   try {
     await db.transaction(async (tx) => {
-      // 1. Ensure the Badge Definition exists
+      // 1. Ensure Course Exists
+      const existingCourse = await tx.query.coursesTable.findFirst({
+        where: or(
+          eq(coursesTable.id, COURSE_ID),
+          eq(coursesTable.slug, COURSE_SLUG)
+        ),
+      });
+
+      const actualCourseId = existingCourse ? existingCourse.id : COURSE_ID;
+
+      // 2. Ensure the Badge Definition exists
       const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
         where: eq(badgeDefinitionsTable.slug, BADGE_SLUG),
       });
@@ -593,7 +603,7 @@ export async function ensureEnvironmentalComplianceCourse() {
           icon: "award",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [COURSE_ID],
+          courseIds: [actualCourseId],
           orderIndex: 14,
         });
       } else {
@@ -611,11 +621,6 @@ export async function ensureEnvironmentalComplianceCourse() {
       if (!badgeRecord) {
         throw new Error(`Failed to create or retrieve badge ${BADGE_SLUG}`);
       }
-
-      // 2. Ensure Course Exists
-      const existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.id, COURSE_ID),
-      });
 
       if (!existingCourse) {
         await tx.insert(coursesTable).values({
@@ -660,12 +665,12 @@ export async function ensureEnvironmentalComplianceCourse() {
             recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
             status: "published",
           })
-          .where(eq(coursesTable.id, COURSE_ID));
+          .where(eq(coursesTable.id, actualCourseId));
       }
 
       // 3. Seed Lessons - with strict preservation logic
       const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, COURSE_ID),
+        where: eq(lessonsTable.courseId, actualCourseId),
       });
 
       const hasOnlySkeletonLessons =
@@ -676,12 +681,12 @@ export async function ensureEnvironmentalComplianceCourse() {
 
       if (existingLessons.length === 0 || hasOnlySkeletonLessons) {
         if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, COURSE_ID));
+          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
         }
 
         for (const lesson of NEW_LESSONS) {
           await tx.insert(lessonsTable).values({
-            courseId: COURSE_ID,
+            courseId: actualCourseId,
             title: lesson.title,
             orderIndex: lesson.order,
             durationMinutes: lesson.minutes,
@@ -695,7 +700,7 @@ export async function ensureEnvironmentalComplianceCourse() {
 
       // 4. Seed Quiz Questions - with strict preservation logic
       const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, COURSE_ID),
+        where: eq(quizQuestionsTable.courseId, actualCourseId),
       });
 
       const hasOnlySkeletonQuestions =
@@ -706,12 +711,12 @@ export async function ensureEnvironmentalComplianceCourse() {
 
       // Verify attempts before deleting
       const existingAttempts = await tx.query.quizAttemptsTable.findFirst({
-        where: eq(quizAttemptsTable.courseId, COURSE_ID),
+        where: eq(quizAttemptsTable.courseId, actualCourseId),
       });
 
       if ((existingQuestions.length === 0 || hasOnlySkeletonQuestions) && !existingAttempts) {
         if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, COURSE_ID));
+          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
         }
 
         for (const [index, q] of NEW_QUESTIONS.entries()) {
@@ -722,7 +727,7 @@ export async function ensureEnvironmentalComplianceCourse() {
           }
 
           await tx.insert(quizQuestionsTable).values({
-            courseId: COURSE_ID,
+            courseId: actualCourseId,
             question: q.question,
             options: q.options.map(o => o.text),
             optionFeedback: q.options.map(o => o.feedback),
