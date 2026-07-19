@@ -9,6 +9,7 @@ import { ensureGreenOfficePracticesCourse } from "./lib/ensureGreenOfficePractic
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
+import { syncSequences } from "./lib/syncSequences";
 
 const rawPort = process.env["PORT"];
 
@@ -26,6 +27,9 @@ if (Number.isNaN(port) || port <= 0) {
 
 
 async function start(): Promise<void> {
+  // Synchronize auto-increment sequences with actual table data
+  await syncSequences();
+
   // Ensure required course content exists before accepting traffic so the first
   // requests after a deploy deterministically see the seeded course.
   await ensureFoundationsCourse();
