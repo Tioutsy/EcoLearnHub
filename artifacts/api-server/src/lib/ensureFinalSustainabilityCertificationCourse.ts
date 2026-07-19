@@ -61,41 +61,61 @@ const NEW_LESSONS = [
   }
 ];
 
-const CERTIFICATION_QUESTIONS = [
-  // everyday_resource_management (10 questions)
-  ...Array.from({ length: 10 }).map((_, i) => ({
-    question: `Resource Management Scenario ${i + 1}`,
-    options: ["Option A", "Option B", "Option C", "Option D"],
-    correctOption: 0,
-    correctExplanation: "Option A is correct.",
-    incorrectExplanation: "Review resource management.",
-    competencyArea: "everyday_resource_management",
-    sourceCourseId: (i % 4) + 1,
-    learningOutcome: `Outcome ${i + 1}`
-  })),
-  // responsible_workplace_practice (10 questions)
-  ...Array.from({ length: 10 }).map((_, i) => ({
-    question: `Workplace Practice Scenario ${i + 1}`,
-    options: ["Option A", "Option B", "Option C", "Option D"],
-    correctOption: 0,
-    correctExplanation: "Option A is correct.",
-    incorrectExplanation: "Review workplace practices.",
-    competencyArea: "responsible_workplace_practice",
-    sourceCourseId: (i % 4) + 5,
-    learningOutcome: `Outcome ${i + 1}`
-  })),
-  // esg_compliance_circularity (10 questions)
-  ...Array.from({ length: 10 }).map((_, i) => ({
-    question: `ESG and Circularity Scenario ${i + 1}`,
-    options: ["Option A", "Option B", "Option C", "Option D"],
-    correctOption: 0,
-    correctExplanation: "Option A is correct.",
-    incorrectExplanation: "Review ESG and circularity.",
-    competencyArea: "esg_compliance_circularity",
-    sourceCourseId: (i % 3) + 9,
-    learningOutcome: `Outcome ${i + 1}`
-  })),
+const prerequisiteSlugs = [
+  "sustainability-foundations",
+  "waste-sorting",
+  "waste-sorting-mauritian-bin-system",
+  "energy-efficiency-at-work",
+  "water-conservation",
+  "sustainable-procurement",
+  "green-office-practices",
+  "carbon-footprint-awareness",
+  "biodiversity-in-mauritius",
+  "esg-basics",
+  "environmental-compliance",
+  "circular-economy"
 ];
+
+function getCertificationQuestions(courseMap: Record<string, number>) {
+  // Helper to safely resolve a course ID or fallback to 0 if not found (shouldn't happen)
+  const getCourseId = (slug: string) => courseMap[slug] || 0;
+
+  return [
+    // everyday_resource_management (10 questions)
+    ...Array.from({ length: 10 }).map((_, i) => ({
+      question: `Resource Management Scenario ${i + 1}`,
+      options: ["Option A", "Option B", "Option C", "Option D"],
+      correctOption: 0,
+      correctExplanation: "Option A is correct.",
+      incorrectExplanation: "Review resource management.",
+      competencyArea: "everyday_resource_management",
+      sourceCourseId: getCourseId(prerequisiteSlugs[i % 4]), // Maps to 0..3
+      learningOutcome: `Outcome ${i + 1}`
+    })),
+    // responsible_workplace_practice (10 questions)
+    ...Array.from({ length: 10 }).map((_, i) => ({
+      question: `Workplace Practice Scenario ${i + 1}`,
+      options: ["Option A", "Option B", "Option C", "Option D"],
+      correctOption: 0,
+      correctExplanation: "Option A is correct.",
+      incorrectExplanation: "Review workplace practices.",
+      competencyArea: "responsible_workplace_practice",
+      sourceCourseId: getCourseId(prerequisiteSlugs[(i % 4) + 4]), // Maps to 4..7
+      learningOutcome: `Outcome ${i + 1}`
+    })),
+    // esg_compliance_circularity (10 questions)
+    ...Array.from({ length: 10 }).map((_, i) => ({
+      question: `ESG and Circularity Scenario ${i + 1}`,
+      options: ["Option A", "Option B", "Option C", "Option D"],
+      correctOption: 0,
+      correctExplanation: "Option A is correct.",
+      incorrectExplanation: "Review ESG and circularity.",
+      competencyArea: "esg_compliance_circularity",
+      sourceCourseId: getCourseId(prerequisiteSlugs[(i % 3) + 8]), // Maps to 8..10
+      learningOutcome: `Outcome ${i + 1}`
+    })),
+  ];
+}
 
 export async function ensureFinalSustainabilityCertificationCourse() {
   const [existingSeed] = await db
@@ -148,13 +168,36 @@ export async function ensureFinalSustainabilityCertificationCourse() {
     logger.info(`[SEED] Updated existing Course 12: ${COURSE_TITLE}`);
   }
 
-  // Ensure exactly 11 prerequisite links exist
+  // Dynamically resolve actual prerequisite IDs by their known slugs (or legacy slugs)
+  const prerequisiteSlugs = [
+    "sustainability-foundations",
+    "waste-sorting",
+    "waste-sorting-mauritian-bin-system",
+    "energy-efficiency-at-work",
+    "water-conservation",
+    "sustainable-procurement",
+    "green-office-practices",
+    "carbon-footprint-awareness",
+    "biodiversity-in-mauritius",
+    "esg-basics",
+    "environmental-compliance",
+    "circular-economy"
+  ];
+
+  const prereqCourses = await db.query.coursesTable.findMany({
+    columns: { id: true, slug: true },
+    where: (courses, { inArray }) => inArray(courses.slug, prerequisiteSlugs)
+  });
+
   await db.delete(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.courseId, actualCourseId));
-  const prereqInserts = Array.from({ length: 11 }).map((_, i) => ({
-    courseId: actualCourseId,
-    prerequisiteCourseId: i + 1,
-  }));
-  await db.insert(coursePrerequisitesTable).values(prereqInserts).onConflictDoNothing();
+  
+  if (prereqCourses.length > 0) {
+    const prereqInserts = prereqCourses.map((c) => ({
+      courseId: actualCourseId,
+      prerequisiteCourseId: c.id,
+    }));
+    await db.insert(coursePrerequisitesTable).values(prereqInserts).onConflictDoNothing();
+  }
 
   // If the seed marker wasn't found, we assume any existing lessons and questions are skeletons and we wipe them.
   await db.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
@@ -169,10 +212,17 @@ export async function ensureFinalSustainabilityCertificationCourse() {
     });
   }
 
+  // Create a fast slug->ID lookup map
+  const courseMap: Record<string, number> = {};
+  for (const c of prereqCourses) {
+    courseMap[c.slug] = c.id;
+  }
+  const certificationQuestions = getCertificationQuestions(courseMap);
+
   // Wipe skeleton questions
   await db.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
   let orderIndex = 0;
-  for (const q of CERTIFICATION_QUESTIONS) {
+  for (const q of certificationQuestions) {
     await db.insert(quizQuestionsTable).values({
       courseId: actualCourseId,
       question: q.question,
