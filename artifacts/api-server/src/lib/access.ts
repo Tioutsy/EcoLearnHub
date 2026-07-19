@@ -134,8 +134,10 @@ function getAuthContext(req: Request): { userId?: string | null; sessionClaims?:
 export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
   const auth = getAuthContext(req);
   const fallbackAuth = (req as unknown as { auth?: { userId?: string } }).auth;
+  
   const userId = auth.userId ?? fallbackAuth?.userId ?? null;
   const claims = auth.sessionClaims ?? {};
+
   const claimRole = getClaimRole(claims);
   const claimCompanyId = getClaimCompanyId(claims);
   const email = getClaimEmail(claims);
@@ -242,5 +244,8 @@ export function sendHttpError(res: Response, err: unknown): boolean {
     res.status(err.status).json({ error: err.message });
     return true;
   }
+  
+  // Fallback for non-HttpError (e.g. ReferenceError, DB Error) to prevent hanging
+  res.status(500).json({ error: (err as Error).message || "Internal Server Error" });
   return false;
 }
