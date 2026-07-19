@@ -22,6 +22,8 @@ ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "insight_category_id" integer;
 --> statement-breakpoint
 ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "scheduled_at" timestamp with time zone;
 --> statement-breakpoint
+ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "published_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement-breakpoint
 ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "archived_at" timestamp with time zone;
 --> statement-breakpoint
 ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "review_date" timestamp with time zone;
@@ -30,6 +32,14 @@ ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "created_by" text;
 --> statement-breakpoint
 ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "updated_by" text;
 --> statement-breakpoint
+ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement-breakpoint
+ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement-breakpoint
 ALTER TABLE "insight_categories" ADD COLUMN IF NOT EXISTS "description" text;
 --> statement-breakpoint
 ALTER TABLE "insight_categories" ADD COLUMN IF NOT EXISTS "status" text DEFAULT 'active' NOT NULL;
+--> statement-breakpoint
+ALTER TABLE "insight_categories" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;
+--> statement-breakpoint
+ALTER TABLE "insight_categories" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;
