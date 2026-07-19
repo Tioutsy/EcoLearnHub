@@ -587,10 +587,14 @@ export async function ensureEnvironmentalComplianceCourse() {
         }
 
         await tx.insert(badgeDefinitionsTable).values({
-          name: COURSE_META.badgeName,
           slug: BADGE_SLUG,
+          name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          iconUrl: "/images/badges/compliance-aware.png",
+          icon: "award",
+          criteriaType: "all_courses",
+          threshold: 0,
+          courseIds: [COURSE_ID],
+          orderIndex: 14,
         });
       } else {
         // Update badge descriptions without overwriting user state
