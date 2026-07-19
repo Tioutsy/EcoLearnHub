@@ -641,6 +641,7 @@ export async function ensureEnvironmentalComplianceCourse() {
           completionMessage: COURSE_META.completionMessage,
           recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
           status: "published", // Publish immediately since all content is seeded in this tx
+          isPublished: true,
         });
       } else {
         // Only update metadata; preserve user/admin edits to core fields if possible,
@@ -664,6 +665,7 @@ export async function ensureEnvironmentalComplianceCourse() {
             completionMessage: COURSE_META.completionMessage,
             recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
             status: "published",
+            isPublished: true,
           })
           .where(eq(coursesTable.id, actualCourseId));
       }
