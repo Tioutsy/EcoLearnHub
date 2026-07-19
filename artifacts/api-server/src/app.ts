@@ -10,6 +10,7 @@ import {
 } from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { authBypassMiddleware } from "./middlewares/authBypass";
 
 const app: Express = express();
 
@@ -47,6 +48,8 @@ app.use(
     ),
   })),
 );
+
+app.use(authBypassMiddleware);
 
 app.use("/api", router);
 
