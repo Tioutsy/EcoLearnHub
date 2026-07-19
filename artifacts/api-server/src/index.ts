@@ -7,6 +7,7 @@ import { ensureWaterConservationCourse } from "./lib/ensureWaterConservationCour
 import { ensureSustainableProcurementCourse } from "./lib/ensureSustainableProcurementCourse";
 import { ensureGreenOfficePracticesCourse } from "./lib/ensureGreenOfficePracticesCourse";
 import { ensureCarbonFootprintCourse } from "./lib/ensureCarbonFootprintCourse";
+import { ensureBiodiversityCourse } from "./lib/ensureBiodiversityCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
@@ -40,6 +41,7 @@ async function start(): Promise<void> {
   await ensureSustainableProcurementCourse();
   await ensureGreenOfficePracticesCourse();
   await ensureCarbonFootprintCourse();
+  await ensureBiodiversityCourse();
   await seedInitialSectors();
   await ensureCatalogueSkeletons();
   await ensureInsightsMigrated();
