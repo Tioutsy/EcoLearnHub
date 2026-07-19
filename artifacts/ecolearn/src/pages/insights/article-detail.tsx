@@ -1,0 +1,145 @@
+import { Layout } from "@/components/layout/Layout";
+import { useParams, Link } from "wouter";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
+import { format } from "date-fns";
+import { useState, useEffect } from "react";
+
+interface ArticlePost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  thumbnailUrl?: string;
+  publishedAt: string;
+  authorName: string;
+  tags?: string[];
+}
+
+export default function InsightsArticleDetail() {
+  const { slug } = useParams();
+  const [post, setPost] = useState<ArticlePost | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/insights/articles/${slug}`)
+      .then((res) => {
+        if (res.status === 404) {
+          setPost(null);
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) setPost(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load article detail", err);
+        setIsLoading(false);
+      });
+  }, [slug]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12 max-w-4xl">
+          <Skeleton className="h-10 w-full mb-6" />
+          <Skeleton className="h-6 w-1/3 mb-12" />
+          <Skeleton className="h-96 w-full rounded-2xl mb-12" />
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!post) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h2 className="text-2xl font-bold mb-4 font-serif">Article not found</h2>
+          <Link href="/insights/articles" className="text-primary font-medium hover:underline cursor-pointer">
+            Back to articles
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <article className="pb-20">
+        {/* Header */}
+        <header className="bg-primary/5 pt-12 pb-10 border-b">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <Link href="/insights/articles" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-6 transition-colors cursor-pointer">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to articles
+            </Link>
+            
+            <h1 className="text-3xl md:text-5xl font-bold font-serif mb-6 leading-tight">
+              {post.title}
+            </h1>
+            
+            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span className="font-medium text-foreground">{post.authorName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>{format(new Date(post.publishedAt), 'MMMM d, yyyy')}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 max-w-4xl mt-12">
+          {post.thumbnailUrl && (
+            <div className="aspect-[21/9] rounded-2xl overflow-hidden mb-12 bg-muted shadow-md">
+              <img src={post.thumbnailUrl} alt={post.title} className="w-full h-full object-cover" />
+            </div>
+          )}
+
+          <div className="prose prose-emerald prose-lg prose-headings:font-serif prose-a:text-primary hover:prose-a:text-primary/80 max-w-none">
+            {post.content.split('\n\n').map((paragraph, i) => {
+              if (paragraph.startsWith('###')) {
+                return <h3 key={i} className="text-2xl font-bold font-serif mt-8 mb-4">{paragraph.replace('###', '').trim()}</h3>;
+              }
+              if (paragraph.startsWith('####')) {
+                return <h4 key={i} className="text-xl font-bold font-serif mt-6 mb-3">{paragraph.replace('####', '').trim()}</h4>;
+              }
+              if (paragraph.startsWith('*')) {
+                return (
+                  <ul key={i} className="list-disc pl-6 my-4 space-y-2">
+                    {paragraph.split('\n').map((li, idx) => (
+                      <li key={idx}>{li.replace('*', '').trim()}</li>
+                    ))}
+                  </ul>
+                );
+              }
+              return <p key={i} className="mb-6 leading-relaxed text-muted-foreground">{paragraph}</p>;
+            })}
+          </div>
+
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-12 pt-8 border-t flex flex-wrap gap-2 items-center">
+              <Tag className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
+              {post.tags.map((tag) => (
+                <span key={tag} className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-xs font-medium">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </article>
+    </Layout>
+  );
+}
