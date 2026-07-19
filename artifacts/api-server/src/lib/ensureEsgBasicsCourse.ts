@@ -833,13 +833,13 @@ export async function ensureEsgBasicsCourse() {
           await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
         }
         
-        const lessonsToInsert = NEW_LESSONS.map((l) => ({
+        const lessonsToInsert = NEW_LESSONS.map((l, idx) => ({
           courseId: actualCourseId,
           title: l.title,
-          orderIndex: l.order,
-          durationMinutes: l.minutes,
-          content: l.content,
-          contentBlocks: l.blocks,
+          orderIndex: idx,
+          durationMinutes: l.minutes || 10,
+          content: l.content || "",
+          contentBlocks: l.blocks || [],
         }));
         await tx.insert(lessonsTable).values(lessonsToInsert);
       } else {

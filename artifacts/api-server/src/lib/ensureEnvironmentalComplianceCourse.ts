@@ -684,7 +684,7 @@ export async function ensureEnvironmentalComplianceCourse() {
             courseId: COURSE_ID,
             title: lesson.title,
             orderIndex: lesson.order,
-            minutes: lesson.minutes,
+            durationMinutes: lesson.minutes,
             content: lesson.content,
             contentBlocks: lesson.blocks,
           });

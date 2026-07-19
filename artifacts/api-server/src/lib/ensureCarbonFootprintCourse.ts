@@ -481,12 +481,13 @@ export async function ensureCarbonFootprintCourse(): Promise<void> {
         .delete(lessonsTable)
         .where(eq(lessonsTable.courseId, actualCourseId));
 
-      const lessonsToInsert = NEW_LESSONS.map((l) => ({
+      const lessonsToInsert = NEW_LESSONS.map((lesson) => ({
         courseId: actualCourseId,
-        title: l.title,
-        orderIndex: l.order,
-        durationMinutes: l.minutes,
-        content: JSON.stringify(l),
+        title: lesson.title,
+        orderIndex: lesson.order,
+        durationMinutes: lesson.minutes,
+        content: JSON.stringify(lesson),
+        contentBlocks: [],
       }));
       await tx.insert(lessonsTable).values(lessonsToInsert);
 

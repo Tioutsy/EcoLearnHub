@@ -607,13 +607,13 @@ export async function ensureBiodiversityCourse() {
         .delete(lessonsTable)
         .where(eq(lessonsTable.courseId, actualCourseId));
 
-      const lessonsToInsert = NEW_LESSONS.map((l) => ({
+      const lessonsToInsert = NEW_LESSONS.map((lesson) => ({
         courseId: actualCourseId,
-        title: l.title,
-        orderIndex: l.order,
-        durationMinutes: l.minutes,
-        content: l.content,
-        contentBlocks: l.blocks,
+        title: lesson.title,
+        orderIndex: lesson.order,
+        durationMinutes: lesson.minutes,
+        content: lesson.content,
+        contentBlocks: lesson.blocks,
       }));
       await tx.insert(lessonsTable).values(lessonsToInsert);
 
