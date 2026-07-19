@@ -32,7 +32,12 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 
+import { ensureSchemaModifications } from "./lib/ensureSchemaModifications";
+
 async function start(): Promise<void> {
+  // Ensure any schema modifications that were missed by the remote migration runner are applied
+  await ensureSchemaModifications();
+
   // Synchronize auto-increment sequences with actual table data
   await syncSequences();
 
