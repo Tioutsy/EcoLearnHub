@@ -42,7 +42,67 @@ export interface Course {
   rating?: number | null;
   includesCertificate?: boolean;
   passingScore?: number;
+  isPublished?: boolean;
+  intendedRoles?: string[];
+  version?: number;
+  /** @nullable */
+  reviewDate?: string | null;
+  /** @nullable */
+  recommendedNextCourseId?: number | null;
   createdAt?: string;
+}
+
+export type ContentBlockType = typeof ContentBlockType[keyof typeof ContentBlockType];
+
+
+export const ContentBlockType = {
+  heading: 'heading',
+  short_text: 'short_text',
+  key_message: 'key_message',
+  workplace_example: 'workplace_example',
+  mauritian_example: 'mauritian_example',
+  practical_action: 'practical_action',
+  image: 'image',
+  expandable: 'expandable',
+  multiple_choice: 'multiple_choice',
+  decision_scenario: 'decision_scenario',
+  reflection: 'reflection',
+  commitment: 'commitment',
+} as const;
+
+export interface DecisionChoice {
+  label: string;
+  correct: boolean;
+  feedback: string;
+}
+
+export interface CommitmentOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export interface ContentBlock {
+  id: string;
+  type: ContentBlockType;
+  position: number;
+  accessibilityLabel?: string;
+  headingText?: string;
+  bodyText?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  expandableTitle?: string;
+  expandableContent?: string;
+  mcqQuestion?: string;
+  mcqOptions?: string[];
+  mcqCorrectIndex?: number;
+  mcqCorrectExplanation?: string;
+  mcqIncorrectExplanation?: string;
+  decisionIntro?: string;
+  decisionPrompt?: string;
+  decisionChoices?: DecisionChoice[];
+  commitmentInstruction?: string;
+  commitmentOptions?: CommitmentOption[];
 }
 
 export interface Lesson {
@@ -57,6 +117,8 @@ export interface Lesson {
   pdfUrl?: string | null;
   /** @nullable */
   content?: string | null;
+  isArchived?: boolean;
+  contentBlocks?: ContentBlock[];
 }
 
 export type CourseDetail = Course & {
@@ -283,6 +345,24 @@ export interface LearningPathModule {
   completed: boolean;
 }
 
+export type LearningPathDifficulty = typeof LearningPathDifficulty[keyof typeof LearningPathDifficulty];
+
+
+export const LearningPathDifficulty = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export type LearningPathStatus = typeof LearningPathStatus[keyof typeof LearningPathStatus];
+
+
+export const LearningPathStatus = {
+  draft: 'draft',
+  active: 'active',
+  archived: 'archived',
+} as const;
+
 export interface LearningPath {
   id: number;
   slug: string;
@@ -295,6 +375,16 @@ export interface LearningPath {
   progressPct: number;
   totalMinutes: number;
   modules: LearningPathModule[];
+  difficulty: LearningPathDifficulty;
+  intendedRoles: string[];
+  estimatedDurationMinutes: number;
+  status: LearningPathStatus;
+  version: number;
+  /** @nullable */
+  completionCriteria?: string | null;
+  certificateEligibility: boolean;
+  /** @nullable */
+  recommendedNextPathId?: number | null;
 }
 
 export interface AchievementBadge {
@@ -986,6 +1076,564 @@ export interface AdminAnalytics {
   popularCourses: PopularCourse[];
 }
 
+export type SectorStatus = typeof SectorStatus[keyof typeof SectorStatus];
+
+
+export const SectorStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface Sector {
+  id: number;
+  slug: string;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  status: SectorStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SectorInput {
+  slug: string;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+}
+
+export type InsightCategoryStatus = typeof InsightCategoryStatus[keyof typeof InsightCategoryStatus];
+
+
+export const InsightCategoryStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface InsightCategory {
+  id: number;
+  slug: string;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  status: InsightCategoryStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InsightCategoryInput {
+  slug: string;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+}
+
+export interface SourceReference {
+  title: string;
+  publisher?: string;
+  url?: string;
+  publicationDate?: string;
+  accessDate?: string;
+}
+
+export type InsightArticleStatus = typeof InsightArticleStatus[keyof typeof InsightArticleStatus];
+
+
+export const InsightArticleStatus = {
+  draft: 'draft',
+  review: 'review',
+  scheduled: 'scheduled',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface InsightArticle {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  authorName: string;
+  /** @nullable */
+  authorTitle?: string | null;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  /** @nullable */
+  imageAlt?: string | null;
+  sourceReferences: SourceReference[];
+  readingTimeMinutes: number;
+  /** @nullable */
+  seoTitle?: string | null;
+  /** @nullable */
+  seoDescription?: string | null;
+  tags?: string[];
+  status: InsightArticleStatus;
+  /** @nullable */
+  insightCategoryId?: number | null;
+  /** @nullable */
+  scheduledAt?: string | null;
+  publishedAt: string;
+  /** @nullable */
+  archivedAt?: string | null;
+  /** @nullable */
+  reviewDate?: string | null;
+  /** @nullable */
+  createdBy?: string | null;
+  /** @nullable */
+  updatedBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type InsightArticleInputStatus = typeof InsightArticleInputStatus[keyof typeof InsightArticleInputStatus];
+
+
+export const InsightArticleInputStatus = {
+  draft: 'draft',
+  review: 'review',
+  scheduled: 'scheduled',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface InsightArticleInput {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  authorName: string;
+  /** @nullable */
+  authorTitle?: string | null;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  /** @nullable */
+  imageAlt?: string | null;
+  sourceReferences?: SourceReference[];
+  readingTimeMinutes?: number;
+  /** @nullable */
+  seoTitle?: string | null;
+  /** @nullable */
+  seoDescription?: string | null;
+  tags?: string[];
+  status?: InsightArticleInputStatus;
+  /** @nullable */
+  insightCategoryId?: number | null;
+  /** @nullable */
+  scheduledAt?: string | null;
+  /** @nullable */
+  publishedAt?: string | null;
+  /** @nullable */
+  archivedAt?: string | null;
+  /** @nullable */
+  reviewDate?: string | null;
+}
+
+export type CourseMetadataInputLevel = typeof CourseMetadataInputLevel[keyof typeof CourseMetadataInputLevel];
+
+
+export const CourseMetadataInputLevel = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export type CourseMetadataInputStatus = typeof CourseMetadataInputStatus[keyof typeof CourseMetadataInputStatus];
+
+
+export const CourseMetadataInputStatus = {
+  draft: 'draft',
+  review: 'review',
+  published: 'published',
+} as const;
+
+export interface CourseMetadataInput {
+  title?: string;
+  slug?: string;
+  description?: string;
+  fullDescription?: string;
+  level?: CourseMetadataInputLevel;
+  durationMinutes?: number;
+  priceUsd?: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  learningObjectives?: string[];
+  includesCertificate?: boolean;
+  passingScore?: number;
+  status?: CourseMetadataInputStatus;
+  /** @nullable */
+  badgeName?: string | null;
+  /** @nullable */
+  badgeDescription?: string | null;
+  intendedRoles?: string[];
+  version?: number;
+  /** @nullable */
+  reviewDate?: string | null;
+  /** @nullable */
+  recommendedNextCourseId?: number | null;
+  prerequisites?: number[];
+  sectors?: number[];
+  sdgContributions?: number[];
+}
+
+export interface SdgGoal {
+  id: number;
+  goalNumber: number;
+  title: string;
+  /** @nullable */
+  officialReference?: string | null;
+  /** @nullable */
+  sourceVersion?: string | null;
+  /** @nullable */
+  reviewedAt?: string | null;
+  isActive: boolean;
+}
+
+export interface SdgTarget {
+  id: number;
+  sdgGoalId: number;
+  targetCode: string;
+  officialOrApprovedSummary: string;
+  /** @nullable */
+  officialReference?: string | null;
+  /** @nullable */
+  sourceVersion?: string | null;
+  /** @nullable */
+  reviewedAt?: string | null;
+  isActive: boolean;
+}
+
+export type SdgContributionContributionCategory = typeof SdgContributionContributionCategory[keyof typeof SdgContributionContributionCategory];
+
+
+export const SdgContributionContributionCategory = {
+  education_awareness: 'education_awareness',
+  capacity_building: 'capacity_building',
+  operational_output: 'operational_output',
+  operational_outcome: 'operational_outcome',
+  self_reported_action: 'self_reported_action',
+  calculated_estimate: 'calculated_estimate',
+} as const;
+
+export type SdgContributionEvidenceStrength = typeof SdgContributionEvidenceStrength[keyof typeof SdgContributionEvidenceStrength];
+
+
+export const SdgContributionEvidenceStrength = {
+  weak: 'weak',
+  medium: 'medium',
+  strong: 'strong',
+} as const;
+
+export type SdgContributionStatus = typeof SdgContributionStatus[keyof typeof SdgContributionStatus];
+
+
+export const SdgContributionStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  archived: 'archived',
+} as const;
+
+export interface SdgContribution {
+  id: number;
+  sdgTargetId: number;
+  contributionCategory: SdgContributionContributionCategory;
+  rationale: string;
+  /** @nullable */
+  evidenceRequired?: string | null;
+  evidenceStrength: SdgContributionEvidenceStrength;
+  isDirect: boolean;
+  /** @nullable */
+  sourceReference?: string | null;
+  /** @nullable */
+  methodologyVersion?: string | null;
+  /** @nullable */
+  limitations?: string | null;
+  status: SdgContributionStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type SdgContributionInputContributionCategory = typeof SdgContributionInputContributionCategory[keyof typeof SdgContributionInputContributionCategory];
+
+
+export const SdgContributionInputContributionCategory = {
+  education_awareness: 'education_awareness',
+  capacity_building: 'capacity_building',
+  operational_output: 'operational_output',
+  operational_outcome: 'operational_outcome',
+  self_reported_action: 'self_reported_action',
+  calculated_estimate: 'calculated_estimate',
+} as const;
+
+export type SdgContributionInputEvidenceStrength = typeof SdgContributionInputEvidenceStrength[keyof typeof SdgContributionInputEvidenceStrength];
+
+
+export const SdgContributionInputEvidenceStrength = {
+  weak: 'weak',
+  medium: 'medium',
+  strong: 'strong',
+} as const;
+
+export type SdgContributionInputStatus = typeof SdgContributionInputStatus[keyof typeof SdgContributionInputStatus];
+
+
+export const SdgContributionInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  archived: 'archived',
+} as const;
+
+export interface SdgContributionInput {
+  sdgTargetId: number;
+  contributionCategory: SdgContributionInputContributionCategory;
+  rationale: string;
+  /** @nullable */
+  evidenceRequired?: string | null;
+  evidenceStrength?: SdgContributionInputEvidenceStrength;
+  isDirect?: boolean;
+  /** @nullable */
+  sourceReference?: string | null;
+  /** @nullable */
+  methodologyVersion?: string | null;
+  /** @nullable */
+  limitations?: string | null;
+  status?: SdgContributionInputStatus;
+}
+
+export type PlatformAdminUpdateSectorStatusInputStatus = typeof PlatformAdminUpdateSectorStatusInputStatus[keyof typeof PlatformAdminUpdateSectorStatusInputStatus];
+
+
+export const PlatformAdminUpdateSectorStatusInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface PlatformAdminUpdateSectorStatusInput {
+  status: PlatformAdminUpdateSectorStatusInputStatus;
+}
+
+export type PlatformAdminUpdateInsightCategoryStatusInputStatus = typeof PlatformAdminUpdateInsightCategoryStatusInputStatus[keyof typeof PlatformAdminUpdateInsightCategoryStatusInputStatus];
+
+
+export const PlatformAdminUpdateInsightCategoryStatusInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface PlatformAdminUpdateInsightCategoryStatusInput {
+  status: PlatformAdminUpdateInsightCategoryStatusInputStatus;
+}
+
+export type PlatformAdminUpdateInsightArticleStatusInputStatus = typeof PlatformAdminUpdateInsightArticleStatusInputStatus[keyof typeof PlatformAdminUpdateInsightArticleStatusInputStatus];
+
+
+export const PlatformAdminUpdateInsightArticleStatusInputStatus = {
+  draft: 'draft',
+  review: 'review',
+  scheduled: 'scheduled',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface PlatformAdminUpdateInsightArticleStatusInput {
+  status: PlatformAdminUpdateInsightArticleStatusInputStatus;
+}
+
+export type PlatformAdminCreateLearningPathInputDifficulty = typeof PlatformAdminCreateLearningPathInputDifficulty[keyof typeof PlatformAdminCreateLearningPathInputDifficulty];
+
+
+export const PlatformAdminCreateLearningPathInputDifficulty = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export type PlatformAdminCreateLearningPathInputStatus = typeof PlatformAdminCreateLearningPathInputStatus[keyof typeof PlatformAdminCreateLearningPathInputStatus];
+
+
+export const PlatformAdminCreateLearningPathInputStatus = {
+  draft: 'draft',
+  active: 'active',
+  archived: 'archived',
+} as const;
+
+export interface PlatformAdminCreateLearningPathInput {
+  slug: string;
+  title: string;
+  description: string;
+  audience: string;
+  icon?: string;
+  difficulty?: PlatformAdminCreateLearningPathInputDifficulty;
+  intendedRoles?: string[];
+  estimatedDurationMinutes?: number;
+  status?: PlatformAdminCreateLearningPathInputStatus;
+  completionCriteria?: string;
+  certificateEligibility?: boolean;
+  recommendedNextPathId?: number;
+}
+
+export type PlatformAdminUpdateLearningPathInputDifficulty = typeof PlatformAdminUpdateLearningPathInputDifficulty[keyof typeof PlatformAdminUpdateLearningPathInputDifficulty];
+
+
+export const PlatformAdminUpdateLearningPathInputDifficulty = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export type PlatformAdminUpdateLearningPathInputStatus = typeof PlatformAdminUpdateLearningPathInputStatus[keyof typeof PlatformAdminUpdateLearningPathInputStatus];
+
+
+export const PlatformAdminUpdateLearningPathInputStatus = {
+  draft: 'draft',
+  active: 'active',
+  archived: 'archived',
+} as const;
+
+export interface PlatformAdminUpdateLearningPathInput {
+  title?: string;
+  description?: string;
+  audience?: string;
+  icon?: string;
+  difficulty?: PlatformAdminUpdateLearningPathInputDifficulty;
+  intendedRoles?: string[];
+  estimatedDurationMinutes?: number;
+  status?: PlatformAdminUpdateLearningPathInputStatus;
+  completionCriteria?: string;
+  certificateEligibility?: boolean;
+  recommendedNextPathId?: number;
+  sectors?: number[];
+}
+
+export type PlatformAdminUpdateLearningPathStatusInputStatus = typeof PlatformAdminUpdateLearningPathStatusInputStatus[keyof typeof PlatformAdminUpdateLearningPathStatusInputStatus];
+
+
+export const PlatformAdminUpdateLearningPathStatusInputStatus = {
+  draft: 'draft',
+  active: 'active',
+  archived: 'archived',
+} as const;
+
+export interface PlatformAdminUpdateLearningPathStatusInput {
+  status: PlatformAdminUpdateLearningPathStatusInputStatus;
+}
+
+export type PlatformAdminUpdateLearningPathCoursesInputCoursesItem = {
+  courseId: number;
+  position: number;
+  isRequired?: boolean;
+};
+
+export interface PlatformAdminUpdateLearningPathCoursesInput {
+  courses: PlatformAdminUpdateLearningPathCoursesInputCoursesItem[];
+}
+
+export interface PlatformAdminCreateSdgGoalInput {
+  goalNumber: number;
+  title: string;
+  officialReference?: string;
+  sourceVersion?: string;
+  isActive?: boolean;
+}
+
+export interface PlatformAdminUpdateSdgGoalInput {
+  title?: string;
+  officialReference?: string;
+  sourceVersion?: string;
+}
+
+export type PlatformAdminUpdateSdgGoalStatusInputStatus = typeof PlatformAdminUpdateSdgGoalStatusInputStatus[keyof typeof PlatformAdminUpdateSdgGoalStatusInputStatus];
+
+
+export const PlatformAdminUpdateSdgGoalStatusInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface PlatformAdminUpdateSdgGoalStatusInput {
+  status: PlatformAdminUpdateSdgGoalStatusInputStatus;
+}
+
+export interface PlatformAdminCreateSdgTargetInput {
+  sdgGoalId: number;
+  targetCode: string;
+  officialOrApprovedSummary: string;
+  officialReference?: string;
+  sourceVersion?: string;
+  isActive?: boolean;
+}
+
+export interface PlatformAdminUpdateSdgTargetInput {
+  targetCode?: string;
+  officialOrApprovedSummary?: string;
+  officialReference?: string;
+  sourceVersion?: string;
+}
+
+export type PlatformAdminUpdateSdgTargetStatusInputStatus = typeof PlatformAdminUpdateSdgTargetStatusInputStatus[keyof typeof PlatformAdminUpdateSdgTargetStatusInputStatus];
+
+
+export const PlatformAdminUpdateSdgTargetStatusInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+} as const;
+
+export interface PlatformAdminUpdateSdgTargetStatusInput {
+  status: PlatformAdminUpdateSdgTargetStatusInputStatus;
+}
+
+export type PlatformAdminUpdateSdgContributionStatusInputStatus = typeof PlatformAdminUpdateSdgContributionStatusInputStatus[keyof typeof PlatformAdminUpdateSdgContributionStatusInputStatus];
+
+
+export const PlatformAdminUpdateSdgContributionStatusInputStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  archived: 'archived',
+} as const;
+
+export interface PlatformAdminUpdateSdgContributionStatusInput {
+  status: PlatformAdminUpdateSdgContributionStatusInputStatus;
+}
+
+export interface PlatformAdminLessonInput {
+  title: string;
+  durationMinutes: number;
+  /** @nullable */
+  videoUrl?: string | null;
+  /** @nullable */
+  pdfUrl?: string | null;
+  /** @nullable */
+  content?: string | null;
+  isArchived?: boolean;
+  contentBlocks?: ContentBlock[];
+}
+
+export interface PlatformAdminQuizQuestion {
+  id: number;
+  courseId: number;
+  question: string;
+  options: string[];
+  correctOption: number;
+  orderIndex: number;
+  isArchived: boolean;
+  /** @nullable */
+  correctExplanation?: string | null;
+  /** @nullable */
+  incorrectExplanation?: string | null;
+  optionFeedback?: (string | null)[];
+}
+
+export interface PlatformAdminQuizQuestionInput {
+  question: string;
+  options: string[];
+  correctOption: number;
+  isArchived?: boolean;
+  /** @nullable */
+  correctExplanation?: string | null;
+  /** @nullable */
+  incorrectExplanation?: string | null;
+  optionFeedback?: (string | null)[];
+}
+
 export type ListCoursesParams = {
 /**
  * @nullable
@@ -1018,4 +1666,8 @@ export const GetTrainingReportStatus = {
   completed: 'completed',
   overdue: 'overdue',
 } as const;
+
+export type PlatformAdminUpdateLearningPathCourses200 = {
+  success?: boolean;
+};
 

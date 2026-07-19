@@ -1,19 +1,53 @@
-import { pgTable, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+
+export const insightCategoriesTable = pgTable("insight_categories", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("active"), // active, inactive
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
+export const insertInsightCategorySchema = createInsertSchema(insightCategoriesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertInsightCategory = z.infer<typeof insertInsightCategorySchema>;
+export type InsightCategory = typeof insightCategoriesTable.$inferSelect;
 
 export const blogPostsTable = pgTable("blog_posts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
   excerpt: text("excerpt").notNull(),
-  content: text("content").notNull(),
+  content: text("content").notNull(), // Markdown format strictly
   authorName: text("author_name").notNull(),
+  authorTitle: text("author_title"),
   thumbnailUrl: text("thumbnail_url"),
+  imageAlt: text("image_alt"),
+  sourceReferences: jsonb("source_references").$type<Array<{
+    title: string;
+    publisher?: string;
+    url?: string;
+    publicationDate?: string;
+    accessDate?: string;
+  }>>().notNull().default([]),
+  readingTimeMinutes: integer("reading_time_minutes").notNull().default(5),
+  seoTitle: text("seo_title"),
+  seoDescription: text("seo_description"),
   tags: text("tags").array().notNull().default([]),
-  isPublished: boolean("is_published").notNull().default(true),
+  isPublished: boolean("is_published").notNull().default(true), // deprecated compatibility flag
+  status: text("status").notNull().default("draft"), // draft, review, scheduled, published, archived
+  insightCategoryId: integer("insight_category_id").references(() => insightCategoriesTable.id, { onDelete: "set null" }),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+  reviewDate: timestamp("review_date", { withTimezone: true }),
+  createdBy: text("created_by"),
+  updatedBy: text("updated_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
 export const testimonialsTable = pgTable("testimonials", {
@@ -28,10 +62,11 @@ export const testimonialsTable = pgTable("testimonials", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const insertBlogPostSchema = createInsertSchema(blogPostsTable).omit({ id: true, createdAt: true });
+export const insertBlogPostSchema = createInsertSchema(blogPostsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogPost = typeof blogPostsTable.$inferSelect;
 
 export const insertTestimonialSchema = createInsertSchema(testimonialsTable).omit({ id: true, createdAt: true });
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
 export type Testimonial = typeof testimonialsTable.$inferSelect;
+

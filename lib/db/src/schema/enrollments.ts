@@ -15,6 +15,7 @@ export const enrollmentsTable = pgTable("enrollments", {
   progressPct: integer("progress_pct").notNull().default(0),
   lastAccessedAt: timestamp("last_accessed_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
+  completedVersion: integer("completed_version"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

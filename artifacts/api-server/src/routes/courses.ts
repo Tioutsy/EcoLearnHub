@@ -44,6 +44,7 @@ router.get("/", async (req, res): Promise<void> => {
       includesCertificate: coursesTable.includesCertificate,
       passingScore: coursesTable.passingScore,
       createdAt: coursesTable.createdAt,
+      status: coursesTable.status,
     })
     .from(coursesTable)
     .leftJoin(categoriesTable, eq(coursesTable.categoryId, categoriesTable.id))

@@ -44,6 +44,7 @@ import type {
   Course,
   CourseDetail,
   CourseInput,
+  CourseMetadataInput,
   CourseProgressSummary,
   CourseUpdate,
   CreateLeadInput,
@@ -62,12 +63,35 @@ import type {
   GetTrainingReportParams,
   HealthStatus,
   ImpactMetrics,
+  InsightArticle,
+  InsightArticleInput,
+  InsightCategory,
+  InsightCategoryInput,
   Lead,
   LeaderboardResponse,
   LearningPath,
+  Lesson,
   LessonProgress,
   ListCoursesParams,
   Plan,
+  PlatformAdminCreateLearningPathInput,
+  PlatformAdminCreateSdgGoalInput,
+  PlatformAdminCreateSdgTargetInput,
+  PlatformAdminLessonInput,
+  PlatformAdminQuizQuestion,
+  PlatformAdminQuizQuestionInput,
+  PlatformAdminUpdateInsightArticleStatusInput,
+  PlatformAdminUpdateInsightCategoryStatusInput,
+  PlatformAdminUpdateLearningPathCourses200,
+  PlatformAdminUpdateLearningPathCoursesInput,
+  PlatformAdminUpdateLearningPathInput,
+  PlatformAdminUpdateLearningPathStatusInput,
+  PlatformAdminUpdateSdgContributionStatusInput,
+  PlatformAdminUpdateSdgGoalInput,
+  PlatformAdminUpdateSdgGoalStatusInput,
+  PlatformAdminUpdateSdgTargetInput,
+  PlatformAdminUpdateSdgTargetStatusInput,
+  PlatformAdminUpdateSectorStatusInput,
   PointsBreakdown,
   PortalSession,
   ProgressUpdate,
@@ -76,6 +100,12 @@ import type {
   QuizSubmission,
   RetrainingScanResult,
   SaveCommitmentsInput,
+  SdgContribution,
+  SdgContributionInput,
+  SdgGoal,
+  SdgTarget,
+  Sector,
+  SectorInput,
   SendReminderInput,
   Subscription,
   SustainabilityScore,
@@ -5054,4 +5084,3394 @@ export function useListTestimonials<TData = Awaited<ReturnType<typeof listTestim
 
 
 
+
+export const getPlatformAdminListSectorsUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sectors`
+}
+
+/**
+ * @summary List all sectors (platform admin)
+ */
+export const platformAdminListSectors = async ( options?: RequestInit): Promise<Sector[]> => {
+
+  return customFetch<Sector[]>(getPlatformAdminListSectorsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListSectorsQueryKey = () => {
+    return [
+    `/api/platform-admin/sectors`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListSectorsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListSectors>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSectors>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListSectorsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListSectors>>> = ({ signal }) => platformAdminListSectors({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSectors>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListSectorsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListSectors>>>
+export type PlatformAdminListSectorsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all sectors (platform admin)
+ */
+
+export function usePlatformAdminListSectors<TData = Awaited<ReturnType<typeof platformAdminListSectors>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSectors>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListSectorsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateSectorUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sectors`
+}
+
+/**
+ * @summary Create a new sector (platform admin)
+ */
+export const platformAdminCreateSector = async (sectorInput: SectorInput, options?: RequestInit): Promise<Sector> => {
+
+  return customFetch<Sector>(getPlatformAdminCreateSectorUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sectorInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateSectorMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSector>>, TError,{data: BodyType<SectorInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSector>>, TError,{data: BodyType<SectorInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateSector'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateSector>>, {data: BodyType<SectorInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateSector(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateSectorMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateSector>>>
+    export type PlatformAdminCreateSectorMutationBody = BodyType<SectorInput>
+    export type PlatformAdminCreateSectorMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new sector (platform admin)
+ */
+export const usePlatformAdminCreateSector = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSector>>, TError,{data: BodyType<SectorInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateSector>>,
+        TError,
+        {data: BodyType<SectorInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateSectorMutationOptions(options));
+    }
+
+export const getPlatformAdminGetSectorUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sectors/${id}`
+}
+
+/**
+ * @summary Get sector details (platform admin)
+ */
+export const platformAdminGetSector = async (id: number, options?: RequestInit): Promise<Sector> => {
+
+  return customFetch<Sector>(getPlatformAdminGetSectorUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetSectorQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/sectors/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetSectorQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetSector>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSector>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetSectorQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetSector>>> = ({ signal }) => platformAdminGetSector(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSector>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetSectorQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetSector>>>
+export type PlatformAdminGetSectorQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get sector details (platform admin)
+ */
+
+export function usePlatformAdminGetSector<TData = Awaited<ReturnType<typeof platformAdminGetSector>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSector>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetSectorQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateSectorUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sectors/${id}`
+}
+
+/**
+ * @summary Update sector details (platform admin)
+ */
+export const platformAdminUpdateSector = async (id: number,
+    sectorInput: SectorInput, options?: RequestInit): Promise<Sector> => {
+
+  return customFetch<Sector>(getPlatformAdminUpdateSectorUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sectorInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSectorMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSector>>, TError,{id: number;data: BodyType<SectorInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSector>>, TError,{id: number;data: BodyType<SectorInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSector'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSector>>, {id: number;data: BodyType<SectorInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSector(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSectorMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSector>>>
+    export type PlatformAdminUpdateSectorMutationBody = BodyType<SectorInput>
+    export type PlatformAdminUpdateSectorMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update sector details (platform admin)
+ */
+export const usePlatformAdminUpdateSector = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSector>>, TError,{id: number;data: BodyType<SectorInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSector>>,
+        TError,
+        {id: number;data: BodyType<SectorInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSectorMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateSectorStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sectors/${id}/status`
+}
+
+/**
+ * @summary Update sector status/archive (platform admin)
+ */
+export const platformAdminUpdateSectorStatus = async (id: number,
+    platformAdminUpdateSectorStatusInput: PlatformAdminUpdateSectorStatusInput, options?: RequestInit): Promise<Sector> => {
+
+  return customFetch<Sector>(getPlatformAdminUpdateSectorStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateSectorStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSectorStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSectorStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSectorStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSectorStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSectorStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSectorStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSectorStatus>>, {id: number;data: BodyType<PlatformAdminUpdateSectorStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSectorStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSectorStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSectorStatus>>>
+    export type PlatformAdminUpdateSectorStatusMutationBody = BodyType<PlatformAdminUpdateSectorStatusInput>
+    export type PlatformAdminUpdateSectorStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update sector status/archive (platform admin)
+ */
+export const usePlatformAdminUpdateSectorStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSectorStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSectorStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSectorStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateSectorStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSectorStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminListInsightCategoriesUrl = () => {
+
+
+
+
+  return `/api/platform-admin/insights/categories`
+}
+
+/**
+ * @summary List all insight categories
+ */
+export const platformAdminListInsightCategories = async ( options?: RequestInit): Promise<InsightCategory[]> => {
+
+  return customFetch<InsightCategory[]>(getPlatformAdminListInsightCategoriesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListInsightCategoriesQueryKey = () => {
+    return [
+    `/api/platform-admin/insights/categories`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListInsightCategoriesQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListInsightCategories>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListInsightCategories>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListInsightCategoriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListInsightCategories>>> = ({ signal }) => platformAdminListInsightCategories({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListInsightCategories>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListInsightCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListInsightCategories>>>
+export type PlatformAdminListInsightCategoriesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all insight categories
+ */
+
+export function usePlatformAdminListInsightCategories<TData = Awaited<ReturnType<typeof platformAdminListInsightCategories>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListInsightCategories>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListInsightCategoriesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateInsightCategoryUrl = () => {
+
+
+
+
+  return `/api/platform-admin/insights/categories`
+}
+
+/**
+ * @summary Create an insight category
+ */
+export const platformAdminCreateInsightCategory = async (insightCategoryInput: InsightCategoryInput, options?: RequestInit): Promise<InsightCategory> => {
+
+  return customFetch<InsightCategory>(getPlatformAdminCreateInsightCategoryUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      insightCategoryInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateInsightCategoryMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateInsightCategory>>, TError,{data: BodyType<InsightCategoryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateInsightCategory>>, TError,{data: BodyType<InsightCategoryInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateInsightCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateInsightCategory>>, {data: BodyType<InsightCategoryInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateInsightCategory(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateInsightCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateInsightCategory>>>
+    export type PlatformAdminCreateInsightCategoryMutationBody = BodyType<InsightCategoryInput>
+    export type PlatformAdminCreateInsightCategoryMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create an insight category
+ */
+export const usePlatformAdminCreateInsightCategory = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateInsightCategory>>, TError,{data: BodyType<InsightCategoryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateInsightCategory>>,
+        TError,
+        {data: BodyType<InsightCategoryInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateInsightCategoryMutationOptions(options));
+    }
+
+export const getPlatformAdminGetInsightCategoryUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/insights/categories/${id}`
+}
+
+/**
+ * @summary Get insight category
+ */
+export const platformAdminGetInsightCategory = async (id: number, options?: RequestInit): Promise<InsightCategory> => {
+
+  return customFetch<InsightCategory>(getPlatformAdminGetInsightCategoryUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetInsightCategoryQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/insights/categories/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetInsightCategoryQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetInsightCategory>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetInsightCategory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetInsightCategoryQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetInsightCategory>>> = ({ signal }) => platformAdminGetInsightCategory(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetInsightCategory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetInsightCategoryQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetInsightCategory>>>
+export type PlatformAdminGetInsightCategoryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get insight category
+ */
+
+export function usePlatformAdminGetInsightCategory<TData = Awaited<ReturnType<typeof platformAdminGetInsightCategory>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetInsightCategory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetInsightCategoryQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateInsightCategoryUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/insights/categories/${id}`
+}
+
+/**
+ * @summary Update insight category
+ */
+export const platformAdminUpdateInsightCategory = async (id: number,
+    insightCategoryInput: InsightCategoryInput, options?: RequestInit): Promise<InsightCategory> => {
+
+  return customFetch<InsightCategory>(getPlatformAdminUpdateInsightCategoryUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      insightCategoryInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateInsightCategoryMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightCategory>>, TError,{id: number;data: BodyType<InsightCategoryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightCategory>>, TError,{id: number;data: BodyType<InsightCategoryInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateInsightCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateInsightCategory>>, {id: number;data: BodyType<InsightCategoryInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateInsightCategory(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateInsightCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateInsightCategory>>>
+    export type PlatformAdminUpdateInsightCategoryMutationBody = BodyType<InsightCategoryInput>
+    export type PlatformAdminUpdateInsightCategoryMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update insight category
+ */
+export const usePlatformAdminUpdateInsightCategory = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightCategory>>, TError,{id: number;data: BodyType<InsightCategoryInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateInsightCategory>>,
+        TError,
+        {id: number;data: BodyType<InsightCategoryInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateInsightCategoryMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateInsightCategoryStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/insights/categories/${id}/status`
+}
+
+/**
+ * @summary Archive or activate category
+ */
+export const platformAdminUpdateInsightCategoryStatus = async (id: number,
+    platformAdminUpdateInsightCategoryStatusInput: PlatformAdminUpdateInsightCategoryStatusInput, options?: RequestInit): Promise<InsightCategory> => {
+
+  return customFetch<InsightCategory>(getPlatformAdminUpdateInsightCategoryStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateInsightCategoryStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateInsightCategoryStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightCategoryStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateInsightCategoryStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightCategoryStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateInsightCategoryStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateInsightCategoryStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateInsightCategoryStatus>>, {id: number;data: BodyType<PlatformAdminUpdateInsightCategoryStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateInsightCategoryStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateInsightCategoryStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateInsightCategoryStatus>>>
+    export type PlatformAdminUpdateInsightCategoryStatusMutationBody = BodyType<PlatformAdminUpdateInsightCategoryStatusInput>
+    export type PlatformAdminUpdateInsightCategoryStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Archive or activate category
+ */
+export const usePlatformAdminUpdateInsightCategoryStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightCategoryStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateInsightCategoryStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateInsightCategoryStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateInsightCategoryStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateInsightCategoryStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminListInsightArticlesUrl = () => {
+
+
+
+
+  return `/api/platform-admin/insights/articles`
+}
+
+/**
+ * @summary List all insight articles (including drafts)
+ */
+export const platformAdminListInsightArticles = async ( options?: RequestInit): Promise<InsightArticle[]> => {
+
+  return customFetch<InsightArticle[]>(getPlatformAdminListInsightArticlesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListInsightArticlesQueryKey = () => {
+    return [
+    `/api/platform-admin/insights/articles`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListInsightArticlesQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListInsightArticles>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListInsightArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListInsightArticlesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListInsightArticles>>> = ({ signal }) => platformAdminListInsightArticles({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListInsightArticles>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListInsightArticlesQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListInsightArticles>>>
+export type PlatformAdminListInsightArticlesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all insight articles (including drafts)
+ */
+
+export function usePlatformAdminListInsightArticles<TData = Awaited<ReturnType<typeof platformAdminListInsightArticles>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListInsightArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListInsightArticlesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateInsightArticleUrl = () => {
+
+
+
+
+  return `/api/platform-admin/insights/articles`
+}
+
+/**
+ * @summary Create a new insight article
+ */
+export const platformAdminCreateInsightArticle = async (insightArticleInput: InsightArticleInput, options?: RequestInit): Promise<InsightArticle> => {
+
+  return customFetch<InsightArticle>(getPlatformAdminCreateInsightArticleUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      insightArticleInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateInsightArticleMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateInsightArticle>>, TError,{data: BodyType<InsightArticleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateInsightArticle>>, TError,{data: BodyType<InsightArticleInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateInsightArticle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateInsightArticle>>, {data: BodyType<InsightArticleInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateInsightArticle(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateInsightArticleMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateInsightArticle>>>
+    export type PlatformAdminCreateInsightArticleMutationBody = BodyType<InsightArticleInput>
+    export type PlatformAdminCreateInsightArticleMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new insight article
+ */
+export const usePlatformAdminCreateInsightArticle = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateInsightArticle>>, TError,{data: BodyType<InsightArticleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateInsightArticle>>,
+        TError,
+        {data: BodyType<InsightArticleInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateInsightArticleMutationOptions(options));
+    }
+
+export const getPlatformAdminGetInsightArticleUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/insights/articles/${id}`
+}
+
+/**
+ * @summary Get article details
+ */
+export const platformAdminGetInsightArticle = async (id: number, options?: RequestInit): Promise<InsightArticle> => {
+
+  return customFetch<InsightArticle>(getPlatformAdminGetInsightArticleUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetInsightArticleQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/insights/articles/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetInsightArticleQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetInsightArticle>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetInsightArticle>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetInsightArticleQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetInsightArticle>>> = ({ signal }) => platformAdminGetInsightArticle(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetInsightArticle>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetInsightArticleQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetInsightArticle>>>
+export type PlatformAdminGetInsightArticleQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get article details
+ */
+
+export function usePlatformAdminGetInsightArticle<TData = Awaited<ReturnType<typeof platformAdminGetInsightArticle>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetInsightArticle>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetInsightArticleQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateInsightArticleUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/insights/articles/${id}`
+}
+
+/**
+ * @summary Update article details
+ */
+export const platformAdminUpdateInsightArticle = async (id: number,
+    insightArticleInput: InsightArticleInput, options?: RequestInit): Promise<InsightArticle> => {
+
+  return customFetch<InsightArticle>(getPlatformAdminUpdateInsightArticleUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      insightArticleInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateInsightArticleMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightArticle>>, TError,{id: number;data: BodyType<InsightArticleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightArticle>>, TError,{id: number;data: BodyType<InsightArticleInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateInsightArticle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateInsightArticle>>, {id: number;data: BodyType<InsightArticleInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateInsightArticle(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateInsightArticleMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateInsightArticle>>>
+    export type PlatformAdminUpdateInsightArticleMutationBody = BodyType<InsightArticleInput>
+    export type PlatformAdminUpdateInsightArticleMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update article details
+ */
+export const usePlatformAdminUpdateInsightArticle = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightArticle>>, TError,{id: number;data: BodyType<InsightArticleInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateInsightArticle>>,
+        TError,
+        {id: number;data: BodyType<InsightArticleInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateInsightArticleMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateInsightArticleStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/insights/articles/${id}/status`
+}
+
+/**
+ * @summary Archive, publish, or change article status
+ */
+export const platformAdminUpdateInsightArticleStatus = async (id: number,
+    platformAdminUpdateInsightArticleStatusInput: PlatformAdminUpdateInsightArticleStatusInput, options?: RequestInit): Promise<InsightArticle> => {
+
+  return customFetch<InsightArticle>(getPlatformAdminUpdateInsightArticleStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateInsightArticleStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateInsightArticleStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightArticleStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateInsightArticleStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightArticleStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateInsightArticleStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateInsightArticleStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateInsightArticleStatus>>, {id: number;data: BodyType<PlatformAdminUpdateInsightArticleStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateInsightArticleStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateInsightArticleStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateInsightArticleStatus>>>
+    export type PlatformAdminUpdateInsightArticleStatusMutationBody = BodyType<PlatformAdminUpdateInsightArticleStatusInput>
+    export type PlatformAdminUpdateInsightArticleStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Archive, publish, or change article status
+ */
+export const usePlatformAdminUpdateInsightArticleStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateInsightArticleStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateInsightArticleStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateInsightArticleStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateInsightArticleStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateInsightArticleStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminListLearningPathsUrl = () => {
+
+
+
+
+  return `/api/platform-admin/learning-paths`
+}
+
+/**
+ * @summary List all learning paths (including drafts)
+ */
+export const platformAdminListLearningPaths = async ( options?: RequestInit): Promise<LearningPath[]> => {
+
+  return customFetch<LearningPath[]>(getPlatformAdminListLearningPathsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListLearningPathsQueryKey = () => {
+    return [
+    `/api/platform-admin/learning-paths`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListLearningPathsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListLearningPaths>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListLearningPaths>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListLearningPathsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListLearningPaths>>> = ({ signal }) => platformAdminListLearningPaths({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListLearningPaths>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListLearningPathsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListLearningPaths>>>
+export type PlatformAdminListLearningPathsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all learning paths (including drafts)
+ */
+
+export function usePlatformAdminListLearningPaths<TData = Awaited<ReturnType<typeof platformAdminListLearningPaths>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListLearningPaths>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListLearningPathsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateLearningPathUrl = () => {
+
+
+
+
+  return `/api/platform-admin/learning-paths`
+}
+
+/**
+ * @summary Create a learning path
+ */
+export const platformAdminCreateLearningPath = async (platformAdminCreateLearningPathInput: PlatformAdminCreateLearningPathInput, options?: RequestInit): Promise<LearningPath> => {
+
+  return customFetch<LearningPath>(getPlatformAdminCreateLearningPathUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminCreateLearningPathInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateLearningPathMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateLearningPath>>, TError,{data: BodyType<PlatformAdminCreateLearningPathInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateLearningPath>>, TError,{data: BodyType<PlatformAdminCreateLearningPathInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateLearningPath'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateLearningPath>>, {data: BodyType<PlatformAdminCreateLearningPathInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateLearningPath(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateLearningPathMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateLearningPath>>>
+    export type PlatformAdminCreateLearningPathMutationBody = BodyType<PlatformAdminCreateLearningPathInput>
+    export type PlatformAdminCreateLearningPathMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a learning path
+ */
+export const usePlatformAdminCreateLearningPath = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateLearningPath>>, TError,{data: BodyType<PlatformAdminCreateLearningPathInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateLearningPath>>,
+        TError,
+        {data: BodyType<PlatformAdminCreateLearningPathInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateLearningPathMutationOptions(options));
+    }
+
+export const getPlatformAdminGetLearningPathUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/learning-paths/${id}`
+}
+
+/**
+ * @summary Get path details
+ */
+export const platformAdminGetLearningPath = async (id: number, options?: RequestInit): Promise<LearningPath> => {
+
+  return customFetch<LearningPath>(getPlatformAdminGetLearningPathUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetLearningPathQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/learning-paths/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetLearningPathQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetLearningPath>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetLearningPath>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetLearningPathQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetLearningPath>>> = ({ signal }) => platformAdminGetLearningPath(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetLearningPath>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetLearningPathQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetLearningPath>>>
+export type PlatformAdminGetLearningPathQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get path details
+ */
+
+export function usePlatformAdminGetLearningPath<TData = Awaited<ReturnType<typeof platformAdminGetLearningPath>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetLearningPath>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetLearningPathQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateLearningPathUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/learning-paths/${id}`
+}
+
+/**
+ * @summary Update path details
+ */
+export const platformAdminUpdateLearningPath = async (id: number,
+    platformAdminUpdateLearningPathInput: PlatformAdminUpdateLearningPathInput, options?: RequestInit): Promise<LearningPath> => {
+
+  return customFetch<LearningPath>(getPlatformAdminUpdateLearningPathUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateLearningPathInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateLearningPathMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPath>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPath>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateLearningPath'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateLearningPath>>, {id: number;data: BodyType<PlatformAdminUpdateLearningPathInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateLearningPath(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateLearningPathMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateLearningPath>>>
+    export type PlatformAdminUpdateLearningPathMutationBody = BodyType<PlatformAdminUpdateLearningPathInput>
+    export type PlatformAdminUpdateLearningPathMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update path details
+ */
+export const usePlatformAdminUpdateLearningPath = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPath>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateLearningPath>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateLearningPathInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateLearningPathMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateLearningPathStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/learning-paths/${id}/status`
+}
+
+/**
+ * @summary Archive or activate path
+ */
+export const platformAdminUpdateLearningPathStatus = async (id: number,
+    platformAdminUpdateLearningPathStatusInput: PlatformAdminUpdateLearningPathStatusInput, options?: RequestInit): Promise<LearningPath> => {
+
+  return customFetch<LearningPath>(getPlatformAdminUpdateLearningPathStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateLearningPathStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateLearningPathStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPathStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPathStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateLearningPathStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateLearningPathStatus>>, {id: number;data: BodyType<PlatformAdminUpdateLearningPathStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateLearningPathStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateLearningPathStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateLearningPathStatus>>>
+    export type PlatformAdminUpdateLearningPathStatusMutationBody = BodyType<PlatformAdminUpdateLearningPathStatusInput>
+    export type PlatformAdminUpdateLearningPathStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Archive or activate path
+ */
+export const usePlatformAdminUpdateLearningPathStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPathStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateLearningPathStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateLearningPathStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateLearningPathStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateLearningPathCoursesUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/learning-paths/${id}/courses`
+}
+
+/**
+ * @summary Set path courses assignment and order positions
+ */
+export const platformAdminUpdateLearningPathCourses = async (id: number,
+    platformAdminUpdateLearningPathCoursesInput: PlatformAdminUpdateLearningPathCoursesInput, options?: RequestInit): Promise<PlatformAdminUpdateLearningPathCourses200> => {
+
+  return customFetch<PlatformAdminUpdateLearningPathCourses200>(getPlatformAdminUpdateLearningPathCoursesUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateLearningPathCoursesInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateLearningPathCoursesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPathCourses>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathCoursesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPathCourses>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathCoursesInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateLearningPathCourses'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateLearningPathCourses>>, {id: number;data: BodyType<PlatformAdminUpdateLearningPathCoursesInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateLearningPathCourses(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateLearningPathCoursesMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateLearningPathCourses>>>
+    export type PlatformAdminUpdateLearningPathCoursesMutationBody = BodyType<PlatformAdminUpdateLearningPathCoursesInput>
+    export type PlatformAdminUpdateLearningPathCoursesMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Set path courses assignment and order positions
+ */
+export const usePlatformAdminUpdateLearningPathCourses = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLearningPathCourses>>, TError,{id: number;data: BodyType<PlatformAdminUpdateLearningPathCoursesInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateLearningPathCourses>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateLearningPathCoursesInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateLearningPathCoursesMutationOptions(options));
+    }
+
+export const getPlatformAdminListSdgGoalsUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sdg-goals`
+}
+
+/**
+ * @summary List all SDG goals
+ */
+export const platformAdminListSdgGoals = async ( options?: RequestInit): Promise<SdgGoal[]> => {
+
+  return customFetch<SdgGoal[]>(getPlatformAdminListSdgGoalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListSdgGoalsQueryKey = () => {
+    return [
+    `/api/platform-admin/sdg-goals`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListSdgGoalsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListSdgGoals>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgGoals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListSdgGoalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListSdgGoals>>> = ({ signal }) => platformAdminListSdgGoals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgGoals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListSdgGoalsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListSdgGoals>>>
+export type PlatformAdminListSdgGoalsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all SDG goals
+ */
+
+export function usePlatformAdminListSdgGoals<TData = Awaited<ReturnType<typeof platformAdminListSdgGoals>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgGoals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListSdgGoalsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateSdgGoalUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sdg-goals`
+}
+
+/**
+ * @summary Create an SDG goal
+ */
+export const platformAdminCreateSdgGoal = async (platformAdminCreateSdgGoalInput: PlatformAdminCreateSdgGoalInput, options?: RequestInit): Promise<SdgGoal> => {
+
+  return customFetch<SdgGoal>(getPlatformAdminCreateSdgGoalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminCreateSdgGoalInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateSdgGoalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgGoal>>, TError,{data: BodyType<PlatformAdminCreateSdgGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgGoal>>, TError,{data: BodyType<PlatformAdminCreateSdgGoalInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateSdgGoal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateSdgGoal>>, {data: BodyType<PlatformAdminCreateSdgGoalInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateSdgGoal(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateSdgGoalMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateSdgGoal>>>
+    export type PlatformAdminCreateSdgGoalMutationBody = BodyType<PlatformAdminCreateSdgGoalInput>
+    export type PlatformAdminCreateSdgGoalMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create an SDG goal
+ */
+export const usePlatformAdminCreateSdgGoal = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgGoal>>, TError,{data: BodyType<PlatformAdminCreateSdgGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateSdgGoal>>,
+        TError,
+        {data: BodyType<PlatformAdminCreateSdgGoalInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateSdgGoalMutationOptions(options));
+    }
+
+export const getPlatformAdminGetSdgGoalUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-goals/${id}`
+}
+
+/**
+ * @summary Get SDG goal
+ */
+export const platformAdminGetSdgGoal = async (id: number, options?: RequestInit): Promise<SdgGoal> => {
+
+  return customFetch<SdgGoal>(getPlatformAdminGetSdgGoalUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetSdgGoalQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/sdg-goals/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetSdgGoalQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetSdgGoal>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgGoal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetSdgGoalQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetSdgGoal>>> = ({ signal }) => platformAdminGetSdgGoal(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgGoal>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetSdgGoalQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetSdgGoal>>>
+export type PlatformAdminGetSdgGoalQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get SDG goal
+ */
+
+export function usePlatformAdminGetSdgGoal<TData = Awaited<ReturnType<typeof platformAdminGetSdgGoal>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgGoal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetSdgGoalQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateSdgGoalUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-goals/${id}`
+}
+
+/**
+ * @summary Update SDG goal
+ */
+export const platformAdminUpdateSdgGoal = async (id: number,
+    platformAdminUpdateSdgGoalInput: PlatformAdminUpdateSdgGoalInput, options?: RequestInit): Promise<SdgGoal> => {
+
+  return customFetch<SdgGoal>(getPlatformAdminUpdateSdgGoalUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateSdgGoalInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSdgGoalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgGoal>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgGoal>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgGoalInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSdgGoal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSdgGoal>>, {id: number;data: BodyType<PlatformAdminUpdateSdgGoalInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSdgGoal(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSdgGoalMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSdgGoal>>>
+    export type PlatformAdminUpdateSdgGoalMutationBody = BodyType<PlatformAdminUpdateSdgGoalInput>
+    export type PlatformAdminUpdateSdgGoalMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update SDG goal
+ */
+export const usePlatformAdminUpdateSdgGoal = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgGoal>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSdgGoal>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateSdgGoalInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSdgGoalMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateSdgGoalStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-goals/${id}/status`
+}
+
+/**
+ * @summary Toggle SDG goal active status
+ */
+export const platformAdminUpdateSdgGoalStatus = async (id: number,
+    platformAdminUpdateSdgGoalStatusInput: PlatformAdminUpdateSdgGoalStatusInput, options?: RequestInit): Promise<SdgGoal> => {
+
+  return customFetch<SdgGoal>(getPlatformAdminUpdateSdgGoalStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateSdgGoalStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSdgGoalStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgGoalStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgGoalStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgGoalStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgGoalStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSdgGoalStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSdgGoalStatus>>, {id: number;data: BodyType<PlatformAdminUpdateSdgGoalStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSdgGoalStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSdgGoalStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSdgGoalStatus>>>
+    export type PlatformAdminUpdateSdgGoalStatusMutationBody = BodyType<PlatformAdminUpdateSdgGoalStatusInput>
+    export type PlatformAdminUpdateSdgGoalStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Toggle SDG goal active status
+ */
+export const usePlatformAdminUpdateSdgGoalStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgGoalStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgGoalStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSdgGoalStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateSdgGoalStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSdgGoalStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminListSdgTargetsUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sdg-targets`
+}
+
+/**
+ * @summary List all SDG targets
+ */
+export const platformAdminListSdgTargets = async ( options?: RequestInit): Promise<SdgTarget[]> => {
+
+  return customFetch<SdgTarget[]>(getPlatformAdminListSdgTargetsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListSdgTargetsQueryKey = () => {
+    return [
+    `/api/platform-admin/sdg-targets`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListSdgTargetsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListSdgTargets>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgTargets>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListSdgTargetsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListSdgTargets>>> = ({ signal }) => platformAdminListSdgTargets({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgTargets>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListSdgTargetsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListSdgTargets>>>
+export type PlatformAdminListSdgTargetsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all SDG targets
+ */
+
+export function usePlatformAdminListSdgTargets<TData = Awaited<ReturnType<typeof platformAdminListSdgTargets>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgTargets>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListSdgTargetsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateSdgTargetUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sdg-targets`
+}
+
+/**
+ * @summary Create an SDG target
+ */
+export const platformAdminCreateSdgTarget = async (platformAdminCreateSdgTargetInput: PlatformAdminCreateSdgTargetInput, options?: RequestInit): Promise<SdgTarget> => {
+
+  return customFetch<SdgTarget>(getPlatformAdminCreateSdgTargetUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminCreateSdgTargetInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateSdgTargetMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgTarget>>, TError,{data: BodyType<PlatformAdminCreateSdgTargetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgTarget>>, TError,{data: BodyType<PlatformAdminCreateSdgTargetInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateSdgTarget'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateSdgTarget>>, {data: BodyType<PlatformAdminCreateSdgTargetInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateSdgTarget(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateSdgTargetMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateSdgTarget>>>
+    export type PlatformAdminCreateSdgTargetMutationBody = BodyType<PlatformAdminCreateSdgTargetInput>
+    export type PlatformAdminCreateSdgTargetMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create an SDG target
+ */
+export const usePlatformAdminCreateSdgTarget = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgTarget>>, TError,{data: BodyType<PlatformAdminCreateSdgTargetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateSdgTarget>>,
+        TError,
+        {data: BodyType<PlatformAdminCreateSdgTargetInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateSdgTargetMutationOptions(options));
+    }
+
+export const getPlatformAdminGetSdgTargetUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-targets/${id}`
+}
+
+/**
+ * @summary Get SDG target
+ */
+export const platformAdminGetSdgTarget = async (id: number, options?: RequestInit): Promise<SdgTarget> => {
+
+  return customFetch<SdgTarget>(getPlatformAdminGetSdgTargetUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetSdgTargetQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/sdg-targets/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetSdgTargetQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetSdgTarget>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgTarget>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetSdgTargetQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetSdgTarget>>> = ({ signal }) => platformAdminGetSdgTarget(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgTarget>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetSdgTargetQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetSdgTarget>>>
+export type PlatformAdminGetSdgTargetQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get SDG target
+ */
+
+export function usePlatformAdminGetSdgTarget<TData = Awaited<ReturnType<typeof platformAdminGetSdgTarget>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgTarget>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetSdgTargetQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateSdgTargetUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-targets/${id}`
+}
+
+/**
+ * @summary Update SDG target
+ */
+export const platformAdminUpdateSdgTarget = async (id: number,
+    platformAdminUpdateSdgTargetInput: PlatformAdminUpdateSdgTargetInput, options?: RequestInit): Promise<SdgTarget> => {
+
+  return customFetch<SdgTarget>(getPlatformAdminUpdateSdgTargetUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateSdgTargetInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSdgTargetMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgTarget>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgTargetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgTarget>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgTargetInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSdgTarget'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSdgTarget>>, {id: number;data: BodyType<PlatformAdminUpdateSdgTargetInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSdgTarget(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSdgTargetMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSdgTarget>>>
+    export type PlatformAdminUpdateSdgTargetMutationBody = BodyType<PlatformAdminUpdateSdgTargetInput>
+    export type PlatformAdminUpdateSdgTargetMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update SDG target
+ */
+export const usePlatformAdminUpdateSdgTarget = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgTarget>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgTargetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSdgTarget>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateSdgTargetInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSdgTargetMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateSdgTargetStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-targets/${id}/status`
+}
+
+/**
+ * @summary Toggle SDG target active status
+ */
+export const platformAdminUpdateSdgTargetStatus = async (id: number,
+    platformAdminUpdateSdgTargetStatusInput: PlatformAdminUpdateSdgTargetStatusInput, options?: RequestInit): Promise<SdgTarget> => {
+
+  return customFetch<SdgTarget>(getPlatformAdminUpdateSdgTargetStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateSdgTargetStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSdgTargetStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgTargetStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgTargetStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgTargetStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgTargetStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSdgTargetStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSdgTargetStatus>>, {id: number;data: BodyType<PlatformAdminUpdateSdgTargetStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSdgTargetStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSdgTargetStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSdgTargetStatus>>>
+    export type PlatformAdminUpdateSdgTargetStatusMutationBody = BodyType<PlatformAdminUpdateSdgTargetStatusInput>
+    export type PlatformAdminUpdateSdgTargetStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Toggle SDG target active status
+ */
+export const usePlatformAdminUpdateSdgTargetStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgTargetStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgTargetStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSdgTargetStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateSdgTargetStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSdgTargetStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminListSdgContributionsUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sdg-contributions`
+}
+
+/**
+ * @summary List all SDG mappings/contributions
+ */
+export const platformAdminListSdgContributions = async ( options?: RequestInit): Promise<SdgContribution[]> => {
+
+  return customFetch<SdgContribution[]>(getPlatformAdminListSdgContributionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListSdgContributionsQueryKey = () => {
+    return [
+    `/api/platform-admin/sdg-contributions`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListSdgContributionsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListSdgContributions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgContributions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListSdgContributionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListSdgContributions>>> = ({ signal }) => platformAdminListSdgContributions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgContributions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListSdgContributionsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListSdgContributions>>>
+export type PlatformAdminListSdgContributionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all SDG mappings/contributions
+ */
+
+export function usePlatformAdminListSdgContributions<TData = Awaited<ReturnType<typeof platformAdminListSdgContributions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListSdgContributions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListSdgContributionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateSdgContributionUrl = () => {
+
+
+
+
+  return `/api/platform-admin/sdg-contributions`
+}
+
+/**
+ * @summary Create an SDG contribution mapping rationale
+ */
+export const platformAdminCreateSdgContribution = async (sdgContributionInput: SdgContributionInput, options?: RequestInit): Promise<SdgContribution> => {
+
+  return customFetch<SdgContribution>(getPlatformAdminCreateSdgContributionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sdgContributionInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateSdgContributionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgContribution>>, TError,{data: BodyType<SdgContributionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgContribution>>, TError,{data: BodyType<SdgContributionInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateSdgContribution'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateSdgContribution>>, {data: BodyType<SdgContributionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  platformAdminCreateSdgContribution(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateSdgContributionMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateSdgContribution>>>
+    export type PlatformAdminCreateSdgContributionMutationBody = BodyType<SdgContributionInput>
+    export type PlatformAdminCreateSdgContributionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create an SDG contribution mapping rationale
+ */
+export const usePlatformAdminCreateSdgContribution = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateSdgContribution>>, TError,{data: BodyType<SdgContributionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateSdgContribution>>,
+        TError,
+        {data: BodyType<SdgContributionInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateSdgContributionMutationOptions(options));
+    }
+
+export const getPlatformAdminGetSdgContributionUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-contributions/${id}`
+}
+
+/**
+ * @summary Get SDG contribution
+ */
+export const platformAdminGetSdgContribution = async (id: number, options?: RequestInit): Promise<SdgContribution> => {
+
+  return customFetch<SdgContribution>(getPlatformAdminGetSdgContributionUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminGetSdgContributionQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/sdg-contributions/${id}`
+    ] as const;
+    }
+
+
+export const getPlatformAdminGetSdgContributionQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminGetSdgContribution>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgContribution>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminGetSdgContributionQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminGetSdgContribution>>> = ({ signal }) => platformAdminGetSdgContribution(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgContribution>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminGetSdgContributionQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminGetSdgContribution>>>
+export type PlatformAdminGetSdgContributionQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get SDG contribution
+ */
+
+export function usePlatformAdminGetSdgContribution<TData = Awaited<ReturnType<typeof platformAdminGetSdgContribution>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminGetSdgContribution>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminGetSdgContributionQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateSdgContributionUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-contributions/${id}`
+}
+
+/**
+ * @summary Update SDG contribution mapping
+ */
+export const platformAdminUpdateSdgContribution = async (id: number,
+    sdgContributionInput: SdgContributionInput, options?: RequestInit): Promise<SdgContribution> => {
+
+  return customFetch<SdgContribution>(getPlatformAdminUpdateSdgContributionUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sdgContributionInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSdgContributionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgContribution>>, TError,{id: number;data: BodyType<SdgContributionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgContribution>>, TError,{id: number;data: BodyType<SdgContributionInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSdgContribution'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSdgContribution>>, {id: number;data: BodyType<SdgContributionInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSdgContribution(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSdgContributionMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSdgContribution>>>
+    export type PlatformAdminUpdateSdgContributionMutationBody = BodyType<SdgContributionInput>
+    export type PlatformAdminUpdateSdgContributionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update SDG contribution mapping
+ */
+export const usePlatformAdminUpdateSdgContribution = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgContribution>>, TError,{id: number;data: BodyType<SdgContributionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSdgContribution>>,
+        TError,
+        {id: number;data: BodyType<SdgContributionInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSdgContributionMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateSdgContributionStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/sdg-contributions/${id}/status`
+}
+
+/**
+ * @summary Archive or change mapping status
+ */
+export const platformAdminUpdateSdgContributionStatus = async (id: number,
+    platformAdminUpdateSdgContributionStatusInput: PlatformAdminUpdateSdgContributionStatusInput, options?: RequestInit): Promise<SdgContribution> => {
+
+  return customFetch<SdgContribution>(getPlatformAdminUpdateSdgContributionStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminUpdateSdgContributionStatusInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateSdgContributionStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgContributionStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgContributionStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgContributionStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgContributionStatusInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateSdgContributionStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateSdgContributionStatus>>, {id: number;data: BodyType<PlatformAdminUpdateSdgContributionStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateSdgContributionStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateSdgContributionStatusMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateSdgContributionStatus>>>
+    export type PlatformAdminUpdateSdgContributionStatusMutationBody = BodyType<PlatformAdminUpdateSdgContributionStatusInput>
+    export type PlatformAdminUpdateSdgContributionStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Archive or change mapping status
+ */
+export const usePlatformAdminUpdateSdgContributionStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateSdgContributionStatus>>, TError,{id: number;data: BodyType<PlatformAdminUpdateSdgContributionStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateSdgContributionStatus>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminUpdateSdgContributionStatusInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateSdgContributionStatusMutationOptions(options));
+    }
+
+export const getPlatformAdminListCoursesUrl = () => {
+
+
+
+
+  return `/api/platform-admin/courses`
+}
+
+/**
+ * @summary List all courses, including drafts, review, and archived ones (platform admin)
+ */
+export const platformAdminListCourses = async ( options?: RequestInit): Promise<Course[]> => {
+
+  return customFetch<Course[]>(getPlatformAdminListCoursesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListCoursesQueryKey = () => {
+    return [
+    `/api/platform-admin/courses`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListCoursesQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListCourses>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListCourses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListCoursesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListCourses>>> = ({ signal }) => platformAdminListCourses({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListCourses>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListCoursesQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListCourses>>>
+export type PlatformAdminListCoursesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all courses, including drafts, review, and archived ones (platform admin)
+ */
+
+export function usePlatformAdminListCourses<TData = Awaited<ReturnType<typeof platformAdminListCourses>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListCourses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListCoursesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminUpdateCourseMetadataUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/metadata`
+}
+
+/**
+ * @summary Update course metadata, sectors, and SDG mappings (platform admin)
+ */
+export const platformAdminUpdateCourseMetadata = async (id: number,
+    courseMetadataInput: CourseMetadataInput, options?: RequestInit): Promise<Course> => {
+
+  return customFetch<Course>(getPlatformAdminUpdateCourseMetadataUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      courseMetadataInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateCourseMetadataMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateCourseMetadata>>, TError,{id: number;data: BodyType<CourseMetadataInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateCourseMetadata>>, TError,{id: number;data: BodyType<CourseMetadataInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateCourseMetadata'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateCourseMetadata>>, {id: number;data: BodyType<CourseMetadataInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateCourseMetadata(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateCourseMetadataMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateCourseMetadata>>>
+    export type PlatformAdminUpdateCourseMetadataMutationBody = BodyType<CourseMetadataInput>
+    export type PlatformAdminUpdateCourseMetadataMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update course metadata, sectors, and SDG mappings (platform admin)
+ */
+export const usePlatformAdminUpdateCourseMetadata = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateCourseMetadata>>, TError,{id: number;data: BodyType<CourseMetadataInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateCourseMetadata>>,
+        TError,
+        {id: number;data: BodyType<CourseMetadataInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateCourseMetadataMutationOptions(options));
+    }
+
+export const getPlatformAdminListLessonsUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/lessons`
+}
+
+/**
+ * @summary List all lessons of a course, including archived ones (platform admin)
+ */
+export const platformAdminListLessons = async (id: number, options?: RequestInit): Promise<Lesson[]> => {
+
+  return customFetch<Lesson[]>(getPlatformAdminListLessonsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListLessonsQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/courses/${id}/lessons`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListLessonsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListLessons>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListLessons>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListLessonsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListLessons>>> = ({ signal }) => platformAdminListLessons(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListLessons>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListLessonsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListLessons>>>
+export type PlatformAdminListLessonsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all lessons of a course, including archived ones (platform admin)
+ */
+
+export function usePlatformAdminListLessons<TData = Awaited<ReturnType<typeof platformAdminListLessons>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListLessons>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListLessonsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateLessonUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/lessons`
+}
+
+/**
+ * @summary Create a new lesson under a course (platform admin)
+ */
+export const platformAdminCreateLesson = async (id: number,
+    platformAdminLessonInput: PlatformAdminLessonInput, options?: RequestInit): Promise<Lesson> => {
+
+  return customFetch<Lesson>(getPlatformAdminCreateLessonUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminLessonInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateLessonMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateLesson>>, TError,{id: number;data: BodyType<PlatformAdminLessonInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateLesson>>, TError,{id: number;data: BodyType<PlatformAdminLessonInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateLesson'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateLesson>>, {id: number;data: BodyType<PlatformAdminLessonInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminCreateLesson(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateLessonMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateLesson>>>
+    export type PlatformAdminCreateLessonMutationBody = BodyType<PlatformAdminLessonInput>
+    export type PlatformAdminCreateLessonMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new lesson under a course (platform admin)
+ */
+export const usePlatformAdminCreateLesson = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateLesson>>, TError,{id: number;data: BodyType<PlatformAdminLessonInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateLesson>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminLessonInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateLessonMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateLessonUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/lessons/${id}`
+}
+
+/**
+ * @summary Update properties of a lesson (platform admin)
+ */
+export const platformAdminUpdateLesson = async (id: number,
+    platformAdminLessonInput: PlatformAdminLessonInput, options?: RequestInit): Promise<Lesson> => {
+
+  return customFetch<Lesson>(getPlatformAdminUpdateLessonUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminLessonInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateLessonMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLesson>>, TError,{id: number;data: BodyType<PlatformAdminLessonInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLesson>>, TError,{id: number;data: BodyType<PlatformAdminLessonInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateLesson'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateLesson>>, {id: number;data: BodyType<PlatformAdminLessonInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateLesson(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateLessonMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateLesson>>>
+    export type PlatformAdminUpdateLessonMutationBody = BodyType<PlatformAdminLessonInput>
+    export type PlatformAdminUpdateLessonMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update properties of a lesson (platform admin)
+ */
+export const usePlatformAdminUpdateLesson = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateLesson>>, TError,{id: number;data: BodyType<PlatformAdminLessonInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateLesson>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminLessonInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateLessonMutationOptions(options));
+    }
+
+export const getPlatformAdminReorderLessonsUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/lessons/reorder`
+}
+
+/**
+ * @summary Reorder course lessons (platform admin)
+ */
+export const platformAdminReorderLessons = async (id: number,
+    platformAdminReorderLessonsBody: number[], options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getPlatformAdminReorderLessonsUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminReorderLessonsBody,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminReorderLessonsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminReorderLessons>>, TError,{id: number;data: BodyType<number[]>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminReorderLessons>>, TError,{id: number;data: BodyType<number[]>}, TContext> => {
+
+const mutationKey = ['platformAdminReorderLessons'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminReorderLessons>>, {id: number;data: BodyType<number[]>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminReorderLessons(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminReorderLessonsMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminReorderLessons>>>
+    export type PlatformAdminReorderLessonsMutationBody = BodyType<number[]>
+    export type PlatformAdminReorderLessonsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reorder course lessons (platform admin)
+ */
+export const usePlatformAdminReorderLessons = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminReorderLessons>>, TError,{id: number;data: BodyType<number[]>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminReorderLessons>>,
+        TError,
+        {id: number;data: BodyType<number[]>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminReorderLessonsMutationOptions(options));
+    }
+
+export const getPlatformAdminListQuizQuestionsUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/quiz-questions`
+}
+
+/**
+ * @summary List all quiz questions of a course, including correct answers and explanations (platform admin)
+ */
+export const platformAdminListQuizQuestions = async (id: number, options?: RequestInit): Promise<PlatformAdminQuizQuestion[]> => {
+
+  return customFetch<PlatformAdminQuizQuestion[]>(getPlatformAdminListQuizQuestionsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPlatformAdminListQuizQuestionsQueryKey = (id: number,) => {
+    return [
+    `/api/platform-admin/courses/${id}/quiz-questions`
+    ] as const;
+    }
+
+
+export const getPlatformAdminListQuizQuestionsQueryOptions = <TData = Awaited<ReturnType<typeof platformAdminListQuizQuestions>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListQuizQuestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPlatformAdminListQuizQuestionsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof platformAdminListQuizQuestions>>> = ({ signal }) => platformAdminListQuizQuestions(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof platformAdminListQuizQuestions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PlatformAdminListQuizQuestionsQueryResult = NonNullable<Awaited<ReturnType<typeof platformAdminListQuizQuestions>>>
+export type PlatformAdminListQuizQuestionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all quiz questions of a course, including correct answers and explanations (platform admin)
+ */
+
+export function usePlatformAdminListQuizQuestions<TData = Awaited<ReturnType<typeof platformAdminListQuizQuestions>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof platformAdminListQuizQuestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPlatformAdminListQuizQuestionsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPlatformAdminCreateQuizQuestionUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/quiz-questions`
+}
+
+/**
+ * @summary Create a new quiz question under a course (platform admin)
+ */
+export const platformAdminCreateQuizQuestion = async (id: number,
+    platformAdminQuizQuestionInput: PlatformAdminQuizQuestionInput, options?: RequestInit): Promise<PlatformAdminQuizQuestion> => {
+
+  return customFetch<PlatformAdminQuizQuestion>(getPlatformAdminCreateQuizQuestionUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminQuizQuestionInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminCreateQuizQuestionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateQuizQuestion>>, TError,{id: number;data: BodyType<PlatformAdminQuizQuestionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateQuizQuestion>>, TError,{id: number;data: BodyType<PlatformAdminQuizQuestionInput>}, TContext> => {
+
+const mutationKey = ['platformAdminCreateQuizQuestion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminCreateQuizQuestion>>, {id: number;data: BodyType<PlatformAdminQuizQuestionInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminCreateQuizQuestion(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminCreateQuizQuestionMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminCreateQuizQuestion>>>
+    export type PlatformAdminCreateQuizQuestionMutationBody = BodyType<PlatformAdminQuizQuestionInput>
+    export type PlatformAdminCreateQuizQuestionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a new quiz question under a course (platform admin)
+ */
+export const usePlatformAdminCreateQuizQuestion = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminCreateQuizQuestion>>, TError,{id: number;data: BodyType<PlatformAdminQuizQuestionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminCreateQuizQuestion>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminQuizQuestionInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminCreateQuizQuestionMutationOptions(options));
+    }
+
+export const getPlatformAdminUpdateQuizQuestionUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/quiz-questions/${id}`
+}
+
+/**
+ * @summary Update a quiz question properties, correct index, and explanations (platform admin)
+ */
+export const platformAdminUpdateQuizQuestion = async (id: number,
+    platformAdminQuizQuestionInput: PlatformAdminQuizQuestionInput, options?: RequestInit): Promise<PlatformAdminQuizQuestion> => {
+
+  return customFetch<PlatformAdminQuizQuestion>(getPlatformAdminUpdateQuizQuestionUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminQuizQuestionInput,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminUpdateQuizQuestionMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateQuizQuestion>>, TError,{id: number;data: BodyType<PlatformAdminQuizQuestionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateQuizQuestion>>, TError,{id: number;data: BodyType<PlatformAdminQuizQuestionInput>}, TContext> => {
+
+const mutationKey = ['platformAdminUpdateQuizQuestion'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminUpdateQuizQuestion>>, {id: number;data: BodyType<PlatformAdminQuizQuestionInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminUpdateQuizQuestion(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminUpdateQuizQuestionMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminUpdateQuizQuestion>>>
+    export type PlatformAdminUpdateQuizQuestionMutationBody = BodyType<PlatformAdminQuizQuestionInput>
+    export type PlatformAdminUpdateQuizQuestionMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a quiz question properties, correct index, and explanations (platform admin)
+ */
+export const usePlatformAdminUpdateQuizQuestion = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminUpdateQuizQuestion>>, TError,{id: number;data: BodyType<PlatformAdminQuizQuestionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminUpdateQuizQuestion>>,
+        TError,
+        {id: number;data: BodyType<PlatformAdminQuizQuestionInput>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminUpdateQuizQuestionMutationOptions(options));
+    }
+
+export const getPlatformAdminReorderQuizQuestionsUrl = (id: number,) => {
+
+
+
+
+  return `/api/platform-admin/courses/${id}/quiz-questions/reorder`
+}
+
+/**
+ * @summary Reorder course quiz questions (platform admin)
+ */
+export const platformAdminReorderQuizQuestions = async (id: number,
+    platformAdminReorderQuizQuestionsBody: number[], options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getPlatformAdminReorderQuizQuestionsUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformAdminReorderQuizQuestionsBody,)
+  }
+);}
+
+
+
+
+export const getPlatformAdminReorderQuizQuestionsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminReorderQuizQuestions>>, TError,{id: number;data: BodyType<number[]>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof platformAdminReorderQuizQuestions>>, TError,{id: number;data: BodyType<number[]>}, TContext> => {
+
+const mutationKey = ['platformAdminReorderQuizQuestions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof platformAdminReorderQuizQuestions>>, {id: number;data: BodyType<number[]>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  platformAdminReorderQuizQuestions(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlatformAdminReorderQuizQuestionsMutationResult = NonNullable<Awaited<ReturnType<typeof platformAdminReorderQuizQuestions>>>
+    export type PlatformAdminReorderQuizQuestionsMutationBody = BodyType<number[]>
+    export type PlatformAdminReorderQuizQuestionsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reorder course quiz questions (platform admin)
+ */
+export const usePlatformAdminReorderQuizQuestions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof platformAdminReorderQuizQuestions>>, TError,{id: number;data: BodyType<number[]>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof platformAdminReorderQuizQuestions>>,
+        TError,
+        {id: number;data: BodyType<number[]>},
+        TContext
+      > => {
+      return useMutation(getPlatformAdminReorderQuizQuestionsMutationOptions(options));
+    }
 

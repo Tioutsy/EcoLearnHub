@@ -4,12 +4,14 @@ import { useAuth, useUser, UserButton } from "@clerk/react";
 import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as RouteIcon, Target, MapPin, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { isPlatformAdmin } from "@/lib/authHelpers";
 
 export function Navbar() {
   const [location] = useLocation();
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const isSuperAdmin = user?.publicMetadata?.role === "super_admin";
+  const showSuperAdminLink = user?.publicMetadata?.role === "super_admin";
+  const showPlatformAdminLink = isPlatformAdmin(user);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -26,8 +28,11 @@ export function Navbar() {
     ? [
         { href: "/dashboard", label: "My Learning", icon: UserCircle },
         { href: "/company", label: "Company", icon: Building2 },
-        ...(isSuperAdmin
+        ...(showSuperAdminLink
           ? [{ href: "/admin", label: "Admin", icon: ShieldCheck }]
+          : []),
+        ...(showPlatformAdminLink
+          ? [{ href: "/platform-admin", label: "Platform Admin", icon: ShieldCheck }]
           : []),
       ]
     : [];

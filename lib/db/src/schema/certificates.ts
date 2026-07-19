@@ -10,6 +10,7 @@ export const certificatesTable = pgTable("certificates", {
   employeeName: text("employee_name"),
   companyName: text("company_name"),
   courseId: integer("course_id").notNull(),
+  courseVersion: integer("course_version").notNull().default(1),
   uniqueCode: text("unique_code").notNull().unique(),
   pdfUrl: text("pdf_url"),
   issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),

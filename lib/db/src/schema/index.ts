@@ -15,3 +15,6 @@ export * from "./compliance";
 export * from "./leads";
 export * from "./commitments";
 export * from "./recycling";
+export * from "./sectors";
+export * from "./sdg";
+export * from "./companyServices";

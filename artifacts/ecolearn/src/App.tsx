@@ -5,6 +5,11 @@ import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wo
 import { QueryClientProvider, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { setBaseUrl } from "@workspace/api-client-react";
+
+if (import.meta.env.VITE_API_URL) {
+  setBaseUrl(import.meta.env.VITE_API_URL);
+}
 
 // Pages
 import Home from "@/pages/home";
@@ -17,8 +22,11 @@ import Quiz from "@/pages/quiz";
 import Dashboard from "@/pages/dashboard";
 import ImpactDashboard from "@/pages/impact";
 import Pricing from "@/pages/pricing";
-import BlogList from "@/pages/blog";
-import BlogPost from "@/pages/blog/detail";
+import InsightsLanding from "@/pages/insights";
+import InsightsArticlesList from "@/pages/insights/articles";
+import InsightsArticleDetail from "@/pages/insights/article-detail";
+import MauritiusResourcesList from "@/pages/insights/mauritius-resources";
+import MauritiusResourceDetail from "@/pages/insights/mauritius-resource-detail";
 import Certificates from "@/pages/certificates";
 import VerifyCertificate from "@/pages/certificates/verify";
 import CompanyDashboard from "@/pages/company";
@@ -28,11 +36,19 @@ import CompanyLeaderboards from "@/pages/company/leaderboards";
 import CompanyCompliance from "@/pages/company/compliance";
 import CompanyReports from "@/pages/company/reports";
 import SustainabilityImpact from "@/pages/sustainability";
-import MadeForMauritius from "@/pages/made-for-mauritius";
 import AdminPanel from "@/pages/admin";
 import AdminRecycling from "@/pages/admin/recycling";
 import CompanyRecycling from "@/pages/company/recycling";
 import NotFound from "@/pages/not-found";
+
+// Platform Admin Pages
+import PlatformAdminOverview from "@/pages/platform-admin/overview";
+import PlatformAdminSectors from "@/pages/platform-admin/sectors";
+import PlatformAdminInsights from "@/pages/platform-admin/insights";
+import PlatformAdminLearningPaths from "@/pages/platform-admin/learningPaths";
+import PlatformAdminCourses from "@/pages/platform-admin/courses";
+import AdminCoursePreview from "@/pages/platform-admin/preview";
+import PlatformAdminSdgMapping from "@/pages/platform-admin/sdgMapping";
 
 const queryClient = new QueryClient();
 
@@ -175,9 +191,20 @@ function ClerkProviderWithRoutes() {
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/impact" component={ImpactDashboard} />
             <Route path="/pricing" component={Pricing} />
-            <Route path="/made-for-mauritius" component={MadeForMauritius} />
-            <Route path="/blog" component={BlogList} />
-            <Route path="/blog/:slug" component={BlogPost} />
+            <Route path="/made-for-mauritius">
+              <Redirect to="/insights/mauritius-resources" />
+            </Route>
+            <Route path="/blog">
+              <Redirect to="/insights/articles" />
+            </Route>
+            <Route path="/blog/:slug">
+              {(params) => <Redirect to={`/insights/articles/${params.slug}`} />}
+            </Route>
+            <Route path="/insights" component={InsightsLanding} />
+            <Route path="/insights/articles" component={InsightsArticlesList} />
+            <Route path="/insights/articles/:slug" component={InsightsArticleDetail} />
+            <Route path="/insights/mauritius-resources" component={MauritiusResourcesList} />
+            <Route path="/insights/mauritius-resources/:slug" component={MauritiusResourceDetail} />
             <Route path="/company" component={CompanyDashboard} />
             <Route path="/company/employees" component={CompanyEmployees} />
             <Route path="/company/certificates" component={CompanyCertificates} />
@@ -188,6 +215,13 @@ function ClerkProviderWithRoutes() {
             <Route path="/company/sustainability" component={SustainabilityImpact} />
             <Route path="/admin" component={AdminPanel} />
             <Route path="/admin/recycling" component={AdminRecycling} />
+            <Route path="/platform-admin" component={PlatformAdminOverview} />
+            <Route path="/platform-admin/insights" component={PlatformAdminInsights} />
+            <Route path="/platform-admin/sectors" component={PlatformAdminSectors} />
+            <Route path="/platform-admin/learning-paths" component={PlatformAdminLearningPaths} />
+            <Route path="/platform-admin/courses" component={PlatformAdminCourses} />
+            <Route path="/platform-admin/courses/:id/preview" component={AdminCoursePreview} />
+            <Route path="/platform-admin/sdg-mapping" component={PlatformAdminSdgMapping} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />

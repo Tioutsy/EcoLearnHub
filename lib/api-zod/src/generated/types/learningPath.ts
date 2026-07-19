@@ -5,7 +5,9 @@
  * EcoLearn Mauritius API
  * OpenAPI spec version: 0.1.0
  */
+import type { LearningPathDifficulty } from './learningPathDifficulty';
 import type { LearningPathModule } from './learningPathModule';
+import type { LearningPathStatus } from './learningPathStatus';
 
 export interface LearningPath {
   id: number;
@@ -19,4 +21,14 @@ export interface LearningPath {
   progressPct: number;
   totalMinutes: number;
   modules: LearningPathModule[];
+  difficulty: LearningPathDifficulty;
+  intendedRoles: string[];
+  estimatedDurationMinutes: number;
+  status: LearningPathStatus;
+  version: number;
+  /** @nullable */
+  completionCriteria?: string | null;
+  certificateEligibility: boolean;
+  /** @nullable */
+  recommendedNextPathId?: number | null;
 }

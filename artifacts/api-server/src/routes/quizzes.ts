@@ -86,10 +86,15 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
     }
 
     const [course] = await db
-      .select({ passingScore: coursesTable.passingScore, title: coursesTable.title })
+      .select({
+        passingScore: coursesTable.passingScore,
+        title: coursesTable.title,
+        version: coursesTable.version,
+      })
       .from(coursesTable)
       .where(eq(coursesTable.id, courseId));
     const passingScore = course?.passingScore ?? 70;
+    const courseVersion = course?.version ?? 1;
 
     const totalQuestions = questions.length;
     const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
@@ -99,6 +104,7 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
     await db.insert(quizAttemptsTable).values({
       userId,
       courseId,
+      courseVersion,
       score,
       totalQuestions,
       correctAnswers,
@@ -146,6 +152,7 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
             employeeName: employee?.name ?? "EcoLearn Learner",
             companyName: company?.name ?? "EcoLearn Mauritius",
             courseId,
+            courseVersion,
             uniqueCode: code,
           })
           .returning();
@@ -159,6 +166,7 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
           status: "completed",
           progressPct: 100,
           completedAt,
+          completedVersion: courseVersion,
           lastAccessedAt: completedAt,
         })
         .where(eq(enrollmentsTable.id, enrollment.id));

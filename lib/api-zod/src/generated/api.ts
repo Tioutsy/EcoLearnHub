@@ -43,6 +43,11 @@ export const ListCoursesResponseItem = zod.object({
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
   "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
   "createdAt": zod.string().optional()
 })
 export const ListCoursesResponse = zod.array(ListCoursesResponseItem)
@@ -91,6 +96,11 @@ export const GetCourseResponse = zod.object({
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
   "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
   "createdAt": zod.string().optional()
 }).and(zod.object({
   "lessons": zod.array(zod.object({
@@ -101,7 +111,38 @@ export const GetCourseResponse = zod.object({
   "durationMinutes": zod.number(),
   "videoUrl": zod.string().nullish(),
   "pdfUrl": zod.string().nullish(),
-  "content": zod.string().nullish()
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
 })).optional()
 }))
 
@@ -145,6 +186,11 @@ export const UpdateCourseResponse = zod.object({
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
   "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
   "createdAt": zod.string().optional()
 })
 
@@ -178,6 +224,11 @@ export const GetFeaturedCoursesResponseItem = zod.object({
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
   "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
   "createdAt": zod.string().optional()
 })
 export const GetFeaturedCoursesResponse = zod.array(GetFeaturedCoursesResponseItem)
@@ -268,6 +319,11 @@ export const GetEnrollmentResponse = zod.object({
   "rating": zod.number().nullish(),
   "includesCertificate": zod.boolean().optional(),
   "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
   "createdAt": zod.string().optional()
 }).and(zod.object({
   "lessons": zod.array(zod.object({
@@ -278,7 +334,38 @@ export const GetEnrollmentResponse = zod.object({
   "durationMinutes": zod.number(),
   "videoUrl": zod.string().nullish(),
   "pdfUrl": zod.string().nullish(),
-  "content": zod.string().nullish()
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
 })).optional()
 })).nullish()
 }))
@@ -537,7 +624,15 @@ export const ListLearningPathsResponseItem = zod.object({
   "level": zod.string(),
   "orderIndex": zod.number(),
   "completed": zod.boolean()
-}))
+})),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "intendedRoles": zod.array(zod.string()),
+  "estimatedDurationMinutes": zod.number(),
+  "status": zod.enum(['draft', 'active', 'archived']),
+  "version": zod.number(),
+  "completionCriteria": zod.string().nullish(),
+  "certificateEligibility": zod.boolean(),
+  "recommendedNextPathId": zod.number().nullish()
 })
 export const ListLearningPathsResponse = zod.array(ListLearningPathsResponseItem)
 
@@ -1308,5 +1403,1350 @@ export const ListTestimonialsResponseItem = zod.object({
   "avatarUrl": zod.string().nullish()
 })
 export const ListTestimonialsResponse = zod.array(ListTestimonialsResponseItem)
+
+
+/**
+ * @summary List all sectors (platform admin)
+ */
+export const PlatformAdminListSectorsResponseItem = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const PlatformAdminListSectorsResponse = zod.array(PlatformAdminListSectorsResponseItem)
+
+
+/**
+ * @summary Create a new sector (platform admin)
+ */
+export const PlatformAdminCreateSectorBody = zod.object({
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get sector details (platform admin)
+ */
+export const PlatformAdminGetSectorParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetSectorResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update sector details (platform admin)
+ */
+export const PlatformAdminUpdateSectorParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSectorBody = zod.object({
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish()
+})
+
+export const PlatformAdminUpdateSectorResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update sector status/archive (platform admin)
+ */
+export const PlatformAdminUpdateSectorStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSectorStatusBody = zod.object({
+  "status": zod.enum(['active', 'inactive'])
+})
+
+export const PlatformAdminUpdateSectorStatusResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary List all insight categories
+ */
+export const PlatformAdminListInsightCategoriesResponseItem = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const PlatformAdminListInsightCategoriesResponse = zod.array(PlatformAdminListInsightCategoriesResponseItem)
+
+
+/**
+ * @summary Create an insight category
+ */
+export const PlatformAdminCreateInsightCategoryBody = zod.object({
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get insight category
+ */
+export const PlatformAdminGetInsightCategoryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetInsightCategoryResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update insight category
+ */
+export const PlatformAdminUpdateInsightCategoryParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateInsightCategoryBody = zod.object({
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish()
+})
+
+export const PlatformAdminUpdateInsightCategoryResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Archive or activate category
+ */
+export const PlatformAdminUpdateInsightCategoryStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateInsightCategoryStatusBody = zod.object({
+  "status": zod.enum(['active', 'inactive'])
+})
+
+export const PlatformAdminUpdateInsightCategoryStatusResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary List all insight articles (including drafts)
+ */
+export const PlatformAdminListInsightArticlesResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "authorName": zod.string(),
+  "authorTitle": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
+  "sourceReferences": zod.array(zod.object({
+  "title": zod.string(),
+  "publisher": zod.string().optional(),
+  "url": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "accessDate": zod.string().optional()
+})),
+  "readingTimeMinutes": zod.number(),
+  "seoTitle": zod.string().nullish(),
+  "seoDescription": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived']),
+  "insightCategoryId": zod.number().nullish(),
+  "scheduledAt": zod.string().nullish(),
+  "publishedAt": zod.string(),
+  "archivedAt": zod.string().nullish(),
+  "reviewDate": zod.string().nullish(),
+  "createdBy": zod.string().nullish(),
+  "updatedBy": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const PlatformAdminListInsightArticlesResponse = zod.array(PlatformAdminListInsightArticlesResponseItem)
+
+
+/**
+ * @summary Create a new insight article
+ */
+export const PlatformAdminCreateInsightArticleBody = zod.object({
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "authorName": zod.string(),
+  "authorTitle": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
+  "sourceReferences": zod.array(zod.object({
+  "title": zod.string(),
+  "publisher": zod.string().optional(),
+  "url": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "accessDate": zod.string().optional()
+})).optional(),
+  "readingTimeMinutes": zod.number().optional(),
+  "seoTitle": zod.string().nullish(),
+  "seoDescription": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived']).optional(),
+  "insightCategoryId": zod.number().nullish(),
+  "scheduledAt": zod.string().nullish(),
+  "publishedAt": zod.string().nullish(),
+  "archivedAt": zod.string().nullish(),
+  "reviewDate": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get article details
+ */
+export const PlatformAdminGetInsightArticleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetInsightArticleResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "authorName": zod.string(),
+  "authorTitle": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
+  "sourceReferences": zod.array(zod.object({
+  "title": zod.string(),
+  "publisher": zod.string().optional(),
+  "url": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "accessDate": zod.string().optional()
+})),
+  "readingTimeMinutes": zod.number(),
+  "seoTitle": zod.string().nullish(),
+  "seoDescription": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived']),
+  "insightCategoryId": zod.number().nullish(),
+  "scheduledAt": zod.string().nullish(),
+  "publishedAt": zod.string(),
+  "archivedAt": zod.string().nullish(),
+  "reviewDate": zod.string().nullish(),
+  "createdBy": zod.string().nullish(),
+  "updatedBy": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update article details
+ */
+export const PlatformAdminUpdateInsightArticleParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateInsightArticleBody = zod.object({
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "authorName": zod.string(),
+  "authorTitle": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
+  "sourceReferences": zod.array(zod.object({
+  "title": zod.string(),
+  "publisher": zod.string().optional(),
+  "url": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "accessDate": zod.string().optional()
+})).optional(),
+  "readingTimeMinutes": zod.number().optional(),
+  "seoTitle": zod.string().nullish(),
+  "seoDescription": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived']).optional(),
+  "insightCategoryId": zod.number().nullish(),
+  "scheduledAt": zod.string().nullish(),
+  "publishedAt": zod.string().nullish(),
+  "archivedAt": zod.string().nullish(),
+  "reviewDate": zod.string().nullish()
+})
+
+export const PlatformAdminUpdateInsightArticleResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "authorName": zod.string(),
+  "authorTitle": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
+  "sourceReferences": zod.array(zod.object({
+  "title": zod.string(),
+  "publisher": zod.string().optional(),
+  "url": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "accessDate": zod.string().optional()
+})),
+  "readingTimeMinutes": zod.number(),
+  "seoTitle": zod.string().nullish(),
+  "seoDescription": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived']),
+  "insightCategoryId": zod.number().nullish(),
+  "scheduledAt": zod.string().nullish(),
+  "publishedAt": zod.string(),
+  "archivedAt": zod.string().nullish(),
+  "reviewDate": zod.string().nullish(),
+  "createdBy": zod.string().nullish(),
+  "updatedBy": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Archive, publish, or change article status
+ */
+export const PlatformAdminUpdateInsightArticleStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateInsightArticleStatusBody = zod.object({
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived'])
+})
+
+export const PlatformAdminUpdateInsightArticleStatusResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "slug": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "authorName": zod.string(),
+  "authorTitle": zod.string().nullish(),
+  "thumbnailUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
+  "sourceReferences": zod.array(zod.object({
+  "title": zod.string(),
+  "publisher": zod.string().optional(),
+  "url": zod.string().optional(),
+  "publicationDate": zod.string().optional(),
+  "accessDate": zod.string().optional()
+})),
+  "readingTimeMinutes": zod.number(),
+  "seoTitle": zod.string().nullish(),
+  "seoDescription": zod.string().nullish(),
+  "tags": zod.array(zod.string()).optional(),
+  "status": zod.enum(['draft', 'review', 'scheduled', 'published', 'archived']),
+  "insightCategoryId": zod.number().nullish(),
+  "scheduledAt": zod.string().nullish(),
+  "publishedAt": zod.string(),
+  "archivedAt": zod.string().nullish(),
+  "reviewDate": zod.string().nullish(),
+  "createdBy": zod.string().nullish(),
+  "updatedBy": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary List all learning paths (including drafts)
+ */
+export const PlatformAdminListLearningPathsResponseItem = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "audience": zod.string(),
+  "icon": zod.string(),
+  "totalModules": zod.number(),
+  "completedModules": zod.number(),
+  "progressPct": zod.number(),
+  "totalMinutes": zod.number(),
+  "modules": zod.array(zod.object({
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "durationMinutes": zod.number(),
+  "level": zod.string(),
+  "orderIndex": zod.number(),
+  "completed": zod.boolean()
+})),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "intendedRoles": zod.array(zod.string()),
+  "estimatedDurationMinutes": zod.number(),
+  "status": zod.enum(['draft', 'active', 'archived']),
+  "version": zod.number(),
+  "completionCriteria": zod.string().nullish(),
+  "certificateEligibility": zod.boolean(),
+  "recommendedNextPathId": zod.number().nullish()
+})
+export const PlatformAdminListLearningPathsResponse = zod.array(PlatformAdminListLearningPathsResponseItem)
+
+
+/**
+ * @summary Create a learning path
+ */
+export const PlatformAdminCreateLearningPathBody = zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "audience": zod.string(),
+  "icon": zod.string().optional(),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "estimatedDurationMinutes": zod.number().optional(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
+  "completionCriteria": zod.string().optional(),
+  "certificateEligibility": zod.boolean().optional(),
+  "recommendedNextPathId": zod.number().optional()
+})
+
+
+/**
+ * @summary Get path details
+ */
+export const PlatformAdminGetLearningPathParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetLearningPathResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "audience": zod.string(),
+  "icon": zod.string(),
+  "totalModules": zod.number(),
+  "completedModules": zod.number(),
+  "progressPct": zod.number(),
+  "totalMinutes": zod.number(),
+  "modules": zod.array(zod.object({
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "durationMinutes": zod.number(),
+  "level": zod.string(),
+  "orderIndex": zod.number(),
+  "completed": zod.boolean()
+})),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "intendedRoles": zod.array(zod.string()),
+  "estimatedDurationMinutes": zod.number(),
+  "status": zod.enum(['draft', 'active', 'archived']),
+  "version": zod.number(),
+  "completionCriteria": zod.string().nullish(),
+  "certificateEligibility": zod.boolean(),
+  "recommendedNextPathId": zod.number().nullish()
+})
+
+
+/**
+ * @summary Update path details
+ */
+export const PlatformAdminUpdateLearningPathParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateLearningPathBody = zod.object({
+  "title": zod.string().optional(),
+  "description": zod.string().optional(),
+  "audience": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "estimatedDurationMinutes": zod.number().optional(),
+  "status": zod.enum(['draft', 'active', 'archived']).optional(),
+  "completionCriteria": zod.string().optional(),
+  "certificateEligibility": zod.boolean().optional(),
+  "recommendedNextPathId": zod.number().optional(),
+  "sectors": zod.array(zod.number()).optional()
+})
+
+export const PlatformAdminUpdateLearningPathResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "audience": zod.string(),
+  "icon": zod.string(),
+  "totalModules": zod.number(),
+  "completedModules": zod.number(),
+  "progressPct": zod.number(),
+  "totalMinutes": zod.number(),
+  "modules": zod.array(zod.object({
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "durationMinutes": zod.number(),
+  "level": zod.string(),
+  "orderIndex": zod.number(),
+  "completed": zod.boolean()
+})),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "intendedRoles": zod.array(zod.string()),
+  "estimatedDurationMinutes": zod.number(),
+  "status": zod.enum(['draft', 'active', 'archived']),
+  "version": zod.number(),
+  "completionCriteria": zod.string().nullish(),
+  "certificateEligibility": zod.boolean(),
+  "recommendedNextPathId": zod.number().nullish()
+})
+
+
+/**
+ * @summary Archive or activate path
+ */
+export const PlatformAdminUpdateLearningPathStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateLearningPathStatusBody = zod.object({
+  "status": zod.enum(['draft', 'active', 'archived'])
+})
+
+export const PlatformAdminUpdateLearningPathStatusResponse = zod.object({
+  "id": zod.number(),
+  "slug": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "audience": zod.string(),
+  "icon": zod.string(),
+  "totalModules": zod.number(),
+  "completedModules": zod.number(),
+  "progressPct": zod.number(),
+  "totalMinutes": zod.number(),
+  "modules": zod.array(zod.object({
+  "courseId": zod.number(),
+  "courseTitle": zod.string(),
+  "durationMinutes": zod.number(),
+  "level": zod.string(),
+  "orderIndex": zod.number(),
+  "completed": zod.boolean()
+})),
+  "difficulty": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "intendedRoles": zod.array(zod.string()),
+  "estimatedDurationMinutes": zod.number(),
+  "status": zod.enum(['draft', 'active', 'archived']),
+  "version": zod.number(),
+  "completionCriteria": zod.string().nullish(),
+  "certificateEligibility": zod.boolean(),
+  "recommendedNextPathId": zod.number().nullish()
+})
+
+
+/**
+ * @summary Set path courses assignment and order positions
+ */
+export const PlatformAdminUpdateLearningPathCoursesParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateLearningPathCoursesBody = zod.object({
+  "courses": zod.array(zod.object({
+  "courseId": zod.number(),
+  "position": zod.number(),
+  "isRequired": zod.boolean().optional()
+}))
+})
+
+export const PlatformAdminUpdateLearningPathCoursesResponse = zod.object({
+  "success": zod.boolean().optional()
+})
+
+
+/**
+ * @summary List all SDG goals
+ */
+export const PlatformAdminListSdgGoalsResponseItem = zod.object({
+  "id": zod.number(),
+  "goalNumber": zod.number(),
+  "title": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+export const PlatformAdminListSdgGoalsResponse = zod.array(PlatformAdminListSdgGoalsResponseItem)
+
+
+/**
+ * @summary Create an SDG goal
+ */
+export const PlatformAdminCreateSdgGoalBody = zod.object({
+  "goalNumber": zod.number(),
+  "title": zod.string(),
+  "officialReference": zod.string().optional(),
+  "sourceVersion": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Get SDG goal
+ */
+export const PlatformAdminGetSdgGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetSdgGoalResponse = zod.object({
+  "id": zod.number(),
+  "goalNumber": zod.number(),
+  "title": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+
+
+/**
+ * @summary Update SDG goal
+ */
+export const PlatformAdminUpdateSdgGoalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSdgGoalBody = zod.object({
+  "title": zod.string().optional(),
+  "officialReference": zod.string().optional(),
+  "sourceVersion": zod.string().optional()
+})
+
+export const PlatformAdminUpdateSdgGoalResponse = zod.object({
+  "id": zod.number(),
+  "goalNumber": zod.number(),
+  "title": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+
+
+/**
+ * @summary Toggle SDG goal active status
+ */
+export const PlatformAdminUpdateSdgGoalStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSdgGoalStatusBody = zod.object({
+  "status": zod.enum(['active', 'inactive'])
+})
+
+export const PlatformAdminUpdateSdgGoalStatusResponse = zod.object({
+  "id": zod.number(),
+  "goalNumber": zod.number(),
+  "title": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+
+
+/**
+ * @summary List all SDG targets
+ */
+export const PlatformAdminListSdgTargetsResponseItem = zod.object({
+  "id": zod.number(),
+  "sdgGoalId": zod.number(),
+  "targetCode": zod.string(),
+  "officialOrApprovedSummary": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+export const PlatformAdminListSdgTargetsResponse = zod.array(PlatformAdminListSdgTargetsResponseItem)
+
+
+/**
+ * @summary Create an SDG target
+ */
+export const PlatformAdminCreateSdgTargetBody = zod.object({
+  "sdgGoalId": zod.number(),
+  "targetCode": zod.string(),
+  "officialOrApprovedSummary": zod.string(),
+  "officialReference": zod.string().optional(),
+  "sourceVersion": zod.string().optional(),
+  "isActive": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Get SDG target
+ */
+export const PlatformAdminGetSdgTargetParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetSdgTargetResponse = zod.object({
+  "id": zod.number(),
+  "sdgGoalId": zod.number(),
+  "targetCode": zod.string(),
+  "officialOrApprovedSummary": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+
+
+/**
+ * @summary Update SDG target
+ */
+export const PlatformAdminUpdateSdgTargetParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSdgTargetBody = zod.object({
+  "targetCode": zod.string().optional(),
+  "officialOrApprovedSummary": zod.string().optional(),
+  "officialReference": zod.string().optional(),
+  "sourceVersion": zod.string().optional()
+})
+
+export const PlatformAdminUpdateSdgTargetResponse = zod.object({
+  "id": zod.number(),
+  "sdgGoalId": zod.number(),
+  "targetCode": zod.string(),
+  "officialOrApprovedSummary": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+
+
+/**
+ * @summary Toggle SDG target active status
+ */
+export const PlatformAdminUpdateSdgTargetStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSdgTargetStatusBody = zod.object({
+  "status": zod.enum(['active', 'inactive'])
+})
+
+export const PlatformAdminUpdateSdgTargetStatusResponse = zod.object({
+  "id": zod.number(),
+  "sdgGoalId": zod.number(),
+  "targetCode": zod.string(),
+  "officialOrApprovedSummary": zod.string(),
+  "officialReference": zod.string().nullish(),
+  "sourceVersion": zod.string().nullish(),
+  "reviewedAt": zod.string().nullish(),
+  "isActive": zod.boolean()
+})
+
+
+/**
+ * @summary List all SDG mappings/contributions
+ */
+export const PlatformAdminListSdgContributionsResponseItem = zod.object({
+  "id": zod.number(),
+  "sdgTargetId": zod.number(),
+  "contributionCategory": zod.enum(['education_awareness', 'capacity_building', 'operational_output', 'operational_outcome', 'self_reported_action', 'calculated_estimate']),
+  "rationale": zod.string(),
+  "evidenceRequired": zod.string().nullish(),
+  "evidenceStrength": zod.enum(['weak', 'medium', 'strong']),
+  "isDirect": zod.boolean(),
+  "sourceReference": zod.string().nullish(),
+  "methodologyVersion": zod.string().nullish(),
+  "limitations": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'archived']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const PlatformAdminListSdgContributionsResponse = zod.array(PlatformAdminListSdgContributionsResponseItem)
+
+
+/**
+ * @summary Create an SDG contribution mapping rationale
+ */
+export const PlatformAdminCreateSdgContributionBody = zod.object({
+  "sdgTargetId": zod.number(),
+  "contributionCategory": zod.enum(['education_awareness', 'capacity_building', 'operational_output', 'operational_outcome', 'self_reported_action', 'calculated_estimate']),
+  "rationale": zod.string(),
+  "evidenceRequired": zod.string().nullish(),
+  "evidenceStrength": zod.enum(['weak', 'medium', 'strong']).optional(),
+  "isDirect": zod.boolean().optional(),
+  "sourceReference": zod.string().nullish(),
+  "methodologyVersion": zod.string().nullish(),
+  "limitations": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'archived']).optional()
+})
+
+
+/**
+ * @summary Get SDG contribution
+ */
+export const PlatformAdminGetSdgContributionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminGetSdgContributionResponse = zod.object({
+  "id": zod.number(),
+  "sdgTargetId": zod.number(),
+  "contributionCategory": zod.enum(['education_awareness', 'capacity_building', 'operational_output', 'operational_outcome', 'self_reported_action', 'calculated_estimate']),
+  "rationale": zod.string(),
+  "evidenceRequired": zod.string().nullish(),
+  "evidenceStrength": zod.enum(['weak', 'medium', 'strong']),
+  "isDirect": zod.boolean(),
+  "sourceReference": zod.string().nullish(),
+  "methodologyVersion": zod.string().nullish(),
+  "limitations": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'archived']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update SDG contribution mapping
+ */
+export const PlatformAdminUpdateSdgContributionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSdgContributionBody = zod.object({
+  "sdgTargetId": zod.number(),
+  "contributionCategory": zod.enum(['education_awareness', 'capacity_building', 'operational_output', 'operational_outcome', 'self_reported_action', 'calculated_estimate']),
+  "rationale": zod.string(),
+  "evidenceRequired": zod.string().nullish(),
+  "evidenceStrength": zod.enum(['weak', 'medium', 'strong']).optional(),
+  "isDirect": zod.boolean().optional(),
+  "sourceReference": zod.string().nullish(),
+  "methodologyVersion": zod.string().nullish(),
+  "limitations": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'archived']).optional()
+})
+
+export const PlatformAdminUpdateSdgContributionResponse = zod.object({
+  "id": zod.number(),
+  "sdgTargetId": zod.number(),
+  "contributionCategory": zod.enum(['education_awareness', 'capacity_building', 'operational_output', 'operational_outcome', 'self_reported_action', 'calculated_estimate']),
+  "rationale": zod.string(),
+  "evidenceRequired": zod.string().nullish(),
+  "evidenceStrength": zod.enum(['weak', 'medium', 'strong']),
+  "isDirect": zod.boolean(),
+  "sourceReference": zod.string().nullish(),
+  "methodologyVersion": zod.string().nullish(),
+  "limitations": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'archived']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Archive or change mapping status
+ */
+export const PlatformAdminUpdateSdgContributionStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateSdgContributionStatusBody = zod.object({
+  "status": zod.enum(['active', 'inactive', 'archived'])
+})
+
+export const PlatformAdminUpdateSdgContributionStatusResponse = zod.object({
+  "id": zod.number(),
+  "sdgTargetId": zod.number(),
+  "contributionCategory": zod.enum(['education_awareness', 'capacity_building', 'operational_output', 'operational_outcome', 'self_reported_action', 'calculated_estimate']),
+  "rationale": zod.string(),
+  "evidenceRequired": zod.string().nullish(),
+  "evidenceStrength": zod.enum(['weak', 'medium', 'strong']),
+  "isDirect": zod.boolean(),
+  "sourceReference": zod.string().nullish(),
+  "methodologyVersion": zod.string().nullish(),
+  "limitations": zod.string().nullish(),
+  "status": zod.enum(['active', 'inactive', 'archived']),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary List all courses, including drafts, review, and archived ones (platform admin)
+ */
+export const PlatformAdminListCoursesResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "slug": zod.string().nullish(),
+  "description": zod.string(),
+  "categoryId": zod.number(),
+  "categoryName": zod.string().nullish(),
+  "durationMinutes": zod.number(),
+  "priceUsd": zod.number(),
+  "level": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "isFeatured": zod.boolean(),
+  "thumbnailUrl": zod.string().nullable(),
+  "previewVideoUrl": zod.string().nullish(),
+  "learningObjectives": zod.array(zod.string()).optional(),
+  "enrollmentCount": zod.number().nullish(),
+  "rating": zod.number().nullish(),
+  "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
+  "createdAt": zod.string().optional()
+})
+export const PlatformAdminListCoursesResponse = zod.array(PlatformAdminListCoursesResponseItem)
+
+
+/**
+ * @summary Update course metadata, sectors, and SDG mappings (platform admin)
+ */
+export const PlatformAdminUpdateCourseMetadataParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateCourseMetadataBody = zod.object({
+  "title": zod.string().optional(),
+  "slug": zod.string().optional(),
+  "description": zod.string().optional(),
+  "fullDescription": zod.string().optional(),
+  "level": zod.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  "durationMinutes": zod.number().optional(),
+  "priceUsd": zod.string().optional(),
+  "thumbnailUrl": zod.string().nullish(),
+  "learningObjectives": zod.array(zod.string()).optional(),
+  "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
+  "status": zod.enum(['draft', 'review', 'published']).optional(),
+  "badgeName": zod.string().nullish(),
+  "badgeDescription": zod.string().nullish(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
+  "prerequisites": zod.array(zod.number()).optional(),
+  "sectors": zod.array(zod.number()).optional(),
+  "sdgContributions": zod.array(zod.number()).optional()
+})
+
+export const PlatformAdminUpdateCourseMetadataResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "slug": zod.string().nullish(),
+  "description": zod.string(),
+  "categoryId": zod.number(),
+  "categoryName": zod.string().nullish(),
+  "durationMinutes": zod.number(),
+  "priceUsd": zod.number(),
+  "level": zod.enum(['beginner', 'intermediate', 'advanced']),
+  "isFeatured": zod.boolean(),
+  "thumbnailUrl": zod.string().nullable(),
+  "previewVideoUrl": zod.string().nullish(),
+  "learningObjectives": zod.array(zod.string()).optional(),
+  "enrollmentCount": zod.number().nullish(),
+  "rating": zod.number().nullish(),
+  "includesCertificate": zod.boolean().optional(),
+  "passingScore": zod.number().optional(),
+  "isPublished": zod.boolean().optional(),
+  "intendedRoles": zod.array(zod.string()).optional(),
+  "version": zod.number().optional(),
+  "reviewDate": zod.string().nullish(),
+  "recommendedNextCourseId": zod.number().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary List all lessons of a course, including archived ones (platform admin)
+ */
+export const PlatformAdminListLessonsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminListLessonsResponseItem = zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "title": zod.string(),
+  "orderIndex": zod.number(),
+  "durationMinutes": zod.number(),
+  "videoUrl": zod.string().nullish(),
+  "pdfUrl": zod.string().nullish(),
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
+})
+export const PlatformAdminListLessonsResponse = zod.array(PlatformAdminListLessonsResponseItem)
+
+
+/**
+ * @summary Create a new lesson under a course (platform admin)
+ */
+export const PlatformAdminCreateLessonParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminCreateLessonBody = zod.object({
+  "title": zod.string(),
+  "durationMinutes": zod.number(),
+  "videoUrl": zod.string().nullish(),
+  "pdfUrl": zod.string().nullish(),
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
+})
+
+export const PlatformAdminCreateLessonResponse = zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "title": zod.string(),
+  "orderIndex": zod.number(),
+  "durationMinutes": zod.number(),
+  "videoUrl": zod.string().nullish(),
+  "pdfUrl": zod.string().nullish(),
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
+})
+
+
+/**
+ * @summary Update properties of a lesson (platform admin)
+ */
+export const PlatformAdminUpdateLessonParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateLessonBody = zod.object({
+  "title": zod.string(),
+  "durationMinutes": zod.number(),
+  "videoUrl": zod.string().nullish(),
+  "pdfUrl": zod.string().nullish(),
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
+})
+
+export const PlatformAdminUpdateLessonResponse = zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "title": zod.string(),
+  "orderIndex": zod.number(),
+  "durationMinutes": zod.number(),
+  "videoUrl": zod.string().nullish(),
+  "pdfUrl": zod.string().nullish(),
+  "content": zod.string().nullish(),
+  "isArchived": zod.boolean().optional(),
+  "contentBlocks": zod.array(zod.object({
+  "id": zod.string(),
+  "type": zod.enum(['heading', 'short_text', 'key_message', 'workplace_example', 'mauritian_example', 'practical_action', 'image', 'expandable', 'multiple_choice', 'decision_scenario', 'reflection', 'commitment']),
+  "position": zod.number(),
+  "accessibilityLabel": zod.string().optional(),
+  "headingText": zod.string().optional(),
+  "bodyText": zod.string().optional(),
+  "imageUrl": zod.string().optional(),
+  "imageAlt": zod.string().optional(),
+  "expandableTitle": zod.string().optional(),
+  "expandableContent": zod.string().optional(),
+  "mcqQuestion": zod.string().optional(),
+  "mcqOptions": zod.array(zod.string()).optional(),
+  "mcqCorrectIndex": zod.number().optional(),
+  "mcqCorrectExplanation": zod.string().optional(),
+  "mcqIncorrectExplanation": zod.string().optional(),
+  "decisionIntro": zod.string().optional(),
+  "decisionPrompt": zod.string().optional(),
+  "decisionChoices": zod.array(zod.object({
+  "label": zod.string(),
+  "correct": zod.boolean(),
+  "feedback": zod.string()
+})).optional(),
+  "commitmentInstruction": zod.string().optional(),
+  "commitmentOptions": zod.array(zod.object({
+  "value": zod.string(),
+  "label": zod.string(),
+  "description": zod.string()
+})).optional()
+})).optional()
+})
+
+
+/**
+ * @summary Reorder course lessons (platform admin)
+ */
+export const PlatformAdminReorderLessonsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminReorderLessonsBodyItem = zod.number()
+export const PlatformAdminReorderLessonsBody = zod.array(PlatformAdminReorderLessonsBodyItem)
+
+
+/**
+ * @summary List all quiz questions of a course, including correct answers and explanations (platform admin)
+ */
+export const PlatformAdminListQuizQuestionsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminListQuizQuestionsResponseItem = zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "question": zod.string(),
+  "options": zod.array(zod.string()),
+  "correctOption": zod.number(),
+  "orderIndex": zod.number(),
+  "isArchived": zod.boolean(),
+  "correctExplanation": zod.string().nullish(),
+  "incorrectExplanation": zod.string().nullish(),
+  "optionFeedback": zod.array(zod.string().nullable()).optional()
+})
+export const PlatformAdminListQuizQuestionsResponse = zod.array(PlatformAdminListQuizQuestionsResponseItem)
+
+
+/**
+ * @summary Create a new quiz question under a course (platform admin)
+ */
+export const PlatformAdminCreateQuizQuestionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminCreateQuizQuestionBody = zod.object({
+  "question": zod.string(),
+  "options": zod.array(zod.string()),
+  "correctOption": zod.number(),
+  "isArchived": zod.boolean().optional(),
+  "correctExplanation": zod.string().nullish(),
+  "incorrectExplanation": zod.string().nullish(),
+  "optionFeedback": zod.array(zod.string().nullable()).optional()
+})
+
+export const PlatformAdminCreateQuizQuestionResponse = zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "question": zod.string(),
+  "options": zod.array(zod.string()),
+  "correctOption": zod.number(),
+  "orderIndex": zod.number(),
+  "isArchived": zod.boolean(),
+  "correctExplanation": zod.string().nullish(),
+  "incorrectExplanation": zod.string().nullish(),
+  "optionFeedback": zod.array(zod.string().nullable()).optional()
+})
+
+
+/**
+ * @summary Update a quiz question properties, correct index, and explanations (platform admin)
+ */
+export const PlatformAdminUpdateQuizQuestionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminUpdateQuizQuestionBody = zod.object({
+  "question": zod.string(),
+  "options": zod.array(zod.string()),
+  "correctOption": zod.number(),
+  "isArchived": zod.boolean().optional(),
+  "correctExplanation": zod.string().nullish(),
+  "incorrectExplanation": zod.string().nullish(),
+  "optionFeedback": zod.array(zod.string().nullable()).optional()
+})
+
+export const PlatformAdminUpdateQuizQuestionResponse = zod.object({
+  "id": zod.number(),
+  "courseId": zod.number(),
+  "question": zod.string(),
+  "options": zod.array(zod.string()),
+  "correctOption": zod.number(),
+  "orderIndex": zod.number(),
+  "isArchived": zod.boolean(),
+  "correctExplanation": zod.string().nullish(),
+  "incorrectExplanation": zod.string().nullish(),
+  "optionFeedback": zod.array(zod.string().nullable()).optional()
+})
+
+
+/**
+ * @summary Reorder course quiz questions (platform admin)
+ */
+export const PlatformAdminReorderQuizQuestionsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const PlatformAdminReorderQuizQuestionsBodyItem = zod.number()
+export const PlatformAdminReorderQuizQuestionsBody = zod.array(PlatformAdminReorderQuizQuestionsBodyItem)
 
 

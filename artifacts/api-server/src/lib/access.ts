@@ -123,11 +123,16 @@ async function findEmployeeForUser(
   return employee ?? null;
 }
 
+function getAuthContext(req: Request): { userId?: string | null; sessionClaims?: Record<string, unknown> } {
+  try {
+    return getAuth(req) as any;
+  } catch (e) {
+    return (req as any).auth || {};
+  }
+}
+
 export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
-  const auth = getAuth(req) as unknown as {
-    userId?: string | null;
-    sessionClaims?: Record<string, unknown>;
-  };
+  const auth = getAuthContext(req);
   const fallbackAuth = (req as unknown as { auth?: { userId?: string } }).auth;
   const userId = auth.userId ?? fallbackAuth?.userId ?? null;
   const claims = auth.sessionClaims ?? {};
@@ -185,11 +190,29 @@ export async function requireCompanyAdmin(req: Request): Promise<CompanyAccess> 
 }
 
 export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess> {
-  const access = await getCompanyAccess(req);
-  if (access.role !== "platform_admin") {
+  const auth = getAuthContext(req);
+  const fallbackAuth = (req as unknown as { auth?: { userId?: string } }).auth;
+  const userId = auth.userId ?? fallbackAuth?.userId ?? null;
+  const claims = auth.sessionClaims ?? {};
+  const claimRole = getClaimRole(claims);
+  const email = getClaimEmail(claims);
+
+  if (!userId) {
+    throw new HttpError(401, "Authentication required");
+  }
+
+  if (!isPlatformRole(claimRole)) {
     throw new HttpError(403, "Platform administrator access required");
   }
-  return access;
+
+  return {
+    userId,
+    email,
+    companyId: 0, // No company record is required for platform operations
+    role: "platform_admin",
+    employee: null,
+    isDemo: false,
+  };
 }
 
 export async function requireSameCompanyEmployee(

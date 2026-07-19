@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { courseCommitmentsTable } from "@workspace/db";
+import { courseCommitmentsTable, coursesTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { SaveCommitmentsBody } from "@workspace/api-zod";
 
@@ -47,6 +47,14 @@ router.post("/:courseId/commitments", async (req, res): Promise<void> => {
     new Set(parsed.data.commitments.map((c) => c.trim()).filter((c) => c.length > 0)),
   );
 
+  // Fetch current course version
+  const [course] = await db
+    .select({ version: coursesTable.version })
+    .from(coursesTable)
+    .where(eq(coursesTable.id, courseId))
+    .limit(1);
+  const courseVersion = course?.version ?? 1;
+
   await db.transaction(async (tx) => {
     await tx
       .delete(courseCommitmentsTable)
@@ -59,7 +67,15 @@ router.post("/:courseId/commitments", async (req, res): Promise<void> => {
     if (unique.length > 0) {
       await tx
         .insert(courseCommitmentsTable)
-        .values(unique.map((commitment) => ({ userId, courseId, commitment })))
+        .values(
+          unique.map((commitment) => ({
+            userId,
+            courseId,
+            courseVersion,
+            commitment,
+            status: "selected"
+          }))
+        )
         .onConflictDoNothing();
     }
   });

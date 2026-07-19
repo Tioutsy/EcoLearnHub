@@ -8,7 +8,9 @@ export const courseCommitmentsTable = pgTable(
     id: serial("id").primaryKey(),
     userId: text("user_id").notNull(),
     courseId: integer("course_id").notNull(),
+    courseVersion: integer("course_version").notNull().default(1),
     commitment: text("commitment").notNull(),
+    status: text("status").notNull().default("selected"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({

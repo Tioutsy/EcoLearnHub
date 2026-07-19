@@ -5,6 +5,7 @@
  * EcoLearn Mauritius API
  * OpenAPI spec version: 0.1.0
  */
+import type { ContentBlock } from './contentBlock';
 
 export interface Lesson {
   id: number;
@@ -18,4 +19,6 @@ export interface Lesson {
   pdfUrl?: string | null;
   /** @nullable */
   content?: string | null;
+  isArchived?: boolean;
+  contentBlocks?: ContentBlock[];
 }

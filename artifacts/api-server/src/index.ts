@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureFoundationsCourse } from "./lib/ensureFoundationsCourse";
 import { ensureWasteSortingCourse } from "./lib/ensureWasteSortingCourse";
+import { seedInitialSectors } from "./routes/platformAdmin";
 
 const rawPort = process.env["PORT"];
 
@@ -22,6 +23,8 @@ async function start(): Promise<void> {
   // requests after a deploy deterministically see the seeded course.
   await ensureFoundationsCourse();
   await ensureWasteSortingCourse();
+  await seedInitialSectors();
+
 
   app.listen(port, (err) => {
     if (err) {

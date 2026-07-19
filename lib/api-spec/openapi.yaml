@@ -1169,6 +1169,960 @@ paths:
                 items:
                   $ref: "#/components/schemas/Testimonial"
 
+  # ── PLATFORM ADMIN SECTORS ───────────────────────────────────────────────────
+  /platform-admin/sectors:
+    get:
+      operationId: platformAdminListSectors
+      tags: [platform-admin-sectors]
+      summary: List all sectors (platform admin)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sector"
+    post:
+      operationId: platformAdminCreateSector
+      tags: [platform-admin-sectors]
+      summary: Create a new sector (platform admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SectorInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sector"
+
+  /platform-admin/sectors/{id}:
+    get:
+      operationId: platformAdminGetSector
+      tags: [platform-admin-sectors]
+      summary: Get sector details (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sector"
+    patch:
+      operationId: platformAdminUpdateSector
+      tags: [platform-admin-sectors]
+      summary: Update sector details (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SectorInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sector"
+
+  /platform-admin/sectors/{id}/status:
+    patch:
+      operationId: platformAdminUpdateSectorStatus
+      tags: [platform-admin-sectors]
+      summary: Update sector status/archive (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateSectorStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sector"
+
+  # ── PLATFORM ADMIN INSIGHTS CATEGORIES ───────────────────────────────────────
+  /platform-admin/insights/categories:
+    get:
+      operationId: platformAdminListInsightCategories
+      tags: [platform-admin-insights]
+      summary: List all insight categories
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InsightCategory"
+    post:
+      operationId: platformAdminCreateInsightCategory
+      tags: [platform-admin-insights]
+      summary: Create an insight category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsightCategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightCategory"
+
+  /platform-admin/insights/categories/{id}:
+    get:
+      operationId: platformAdminGetInsightCategory
+      tags: [platform-admin-insights]
+      summary: Get insight category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightCategory"
+    patch:
+      operationId: platformAdminUpdateInsightCategory
+      tags: [platform-admin-insights]
+      summary: Update insight category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsightCategoryInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightCategory"
+
+  /platform-admin/insights/categories/{id}/status:
+    patch:
+      operationId: platformAdminUpdateInsightCategoryStatus
+      tags: [platform-admin-insights]
+      summary: Archive or activate category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateInsightCategoryStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightCategory"
+
+  # ── PLATFORM ADMIN INSIGHTS ARTICLES ─────────────────────────────────────────
+  /platform-admin/insights/articles:
+    get:
+      operationId: platformAdminListInsightArticles
+      tags: [platform-admin-insights]
+      summary: List all insight articles (including drafts)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InsightArticle"
+    post:
+      operationId: platformAdminCreateInsightArticle
+      tags: [platform-admin-insights]
+      summary: Create a new insight article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsightArticleInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightArticle"
+
+  /platform-admin/insights/articles/{id}:
+    get:
+      operationId: platformAdminGetInsightArticle
+      tags: [platform-admin-insights]
+      summary: Get article details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightArticle"
+    patch:
+      operationId: platformAdminUpdateInsightArticle
+      tags: [platform-admin-insights]
+      summary: Update article details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsightArticleInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightArticle"
+
+  /platform-admin/insights/articles/{id}/status:
+    patch:
+      operationId: platformAdminUpdateInsightArticleStatus
+      tags: [platform-admin-insights]
+      summary: Archive, publish, or change article status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateInsightArticleStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsightArticle"
+
+  # ── PLATFORM ADMIN LEARNING PATHS ────────────────────────────────────────────
+  /platform-admin/learning-paths:
+    get:
+      operationId: platformAdminListLearningPaths
+      tags: [platform-admin-learning-paths]
+      summary: List all learning paths (including drafts)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LearningPath"
+    post:
+      operationId: platformAdminCreateLearningPath
+      tags: [platform-admin-learning-paths]
+      summary: Create a learning path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminCreateLearningPathInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningPath"
+
+  /platform-admin/learning-paths/{id}:
+    get:
+      operationId: platformAdminGetLearningPath
+      tags: [platform-admin-learning-paths]
+      summary: Get path details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningPath"
+    patch:
+      operationId: platformAdminUpdateLearningPath
+      tags: [platform-admin-learning-paths]
+      summary: Update path details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateLearningPathInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningPath"
+
+  /platform-admin/learning-paths/{id}/status:
+    patch:
+      operationId: platformAdminUpdateLearningPathStatus
+      tags: [platform-admin-learning-paths]
+      summary: Archive or activate path
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateLearningPathStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningPath"
+
+  /platform-admin/learning-paths/{id}/courses:
+    put:
+      operationId: platformAdminUpdateLearningPathCourses
+      tags: [platform-admin-learning-paths]
+      summary: Set path courses assignment and order positions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateLearningPathCoursesInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  # ── PLATFORM ADMIN SDG GOALS & TARGETS ───────────────────────────────────────
+  /platform-admin/sdg-goals:
+    get:
+      operationId: platformAdminListSdgGoals
+      tags: [platform-admin-sdg]
+      summary: List all SDG goals
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SdgGoal"
+    post:
+      operationId: platformAdminCreateSdgGoal
+      tags: [platform-admin-sdg]
+      summary: Create an SDG goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminCreateSdgGoalInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgGoal"
+
+  /platform-admin/sdg-goals/{id}:
+    get:
+      operationId: platformAdminGetSdgGoal
+      tags: [platform-admin-sdg]
+      summary: Get SDG goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgGoal"
+    patch:
+      operationId: platformAdminUpdateSdgGoal
+      tags: [platform-admin-sdg]
+      summary: Update SDG goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateSdgGoalInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgGoal"
+
+  /platform-admin/sdg-goals/{id}/status:
+    patch:
+      operationId: platformAdminUpdateSdgGoalStatus
+      tags: [platform-admin-sdg]
+      summary: Toggle SDG goal active status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateSdgGoalStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgGoal"
+
+  /platform-admin/sdg-targets:
+    get:
+      operationId: platformAdminListSdgTargets
+      tags: [platform-admin-sdg]
+      summary: List all SDG targets
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SdgTarget"
+    post:
+      operationId: platformAdminCreateSdgTarget
+      tags: [platform-admin-sdg]
+      summary: Create an SDG target
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminCreateSdgTargetInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgTarget"
+
+  /platform-admin/sdg-targets/{id}:
+    get:
+      operationId: platformAdminGetSdgTarget
+      tags: [platform-admin-sdg]
+      summary: Get SDG target
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgTarget"
+    patch:
+      operationId: platformAdminUpdateSdgTarget
+      tags: [platform-admin-sdg]
+      summary: Update SDG target
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateSdgTargetInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgTarget"
+
+  /platform-admin/sdg-targets/{id}/status:
+    patch:
+      operationId: platformAdminUpdateSdgTargetStatus
+      tags: [platform-admin-sdg]
+      summary: Toggle SDG target active status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateSdgTargetStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgTarget"
+
+  /platform-admin/sdg-contributions:
+    get:
+      operationId: platformAdminListSdgContributions
+      tags: [platform-admin-sdg]
+      summary: List all SDG mappings/contributions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SdgContribution"
+    post:
+      operationId: platformAdminCreateSdgContribution
+      tags: [platform-admin-sdg]
+      summary: Create an SDG contribution mapping rationale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SdgContributionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgContribution"
+
+  /platform-admin/sdg-contributions/{id}:
+    get:
+      operationId: platformAdminGetSdgContribution
+      tags: [platform-admin-sdg]
+      summary: Get SDG contribution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgContribution"
+    patch:
+      operationId: platformAdminUpdateSdgContribution
+      tags: [platform-admin-sdg]
+      summary: Update SDG contribution mapping
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SdgContributionInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgContribution"
+
+  /platform-admin/sdg-contributions/{id}/status:
+    patch:
+      operationId: platformAdminUpdateSdgContributionStatus
+      tags: [platform-admin-sdg]
+      summary: Archive or change mapping status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminUpdateSdgContributionStatusInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdgContribution"
+
+  # ── PLATFORM ADMIN COURSES ───────────────────────────────────────────────────
+  /platform-admin/courses:
+    get:
+      operationId: platformAdminListCourses
+      tags: [platform-admin-courses]
+      summary: List all courses, including drafts, review, and archived ones (platform admin)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+  # ── PLATFORM ADMIN COURSES METADATA ──────────────────────────────────────────
+  /platform-admin/courses/{id}/metadata:
+    patch:
+      operationId: platformAdminUpdateCourseMetadata
+      tags: [platform-admin-courses]
+      summary: Update course metadata, sectors, and SDG mappings (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseMetadataInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+  # ── PLATFORM ADMIN LESSONS ──────────────────────────────────────────────────
+  /platform-admin/courses/{id}/lessons:
+    get:
+      operationId: platformAdminListLessons
+      tags: [platform-admin-courses]
+      summary: List all lessons of a course, including archived ones (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+    post:
+      operationId: platformAdminCreateLesson
+      tags: [platform-admin-courses]
+      summary: Create a new lesson under a course (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminLessonInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+
+  /platform-admin/lessons/{id}:
+    patch:
+      operationId: platformAdminUpdateLesson
+      tags: [platform-admin-courses]
+      summary: Update properties of a lesson (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminLessonInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+
+  /platform-admin/courses/{id}/lessons/reorder:
+    put:
+      operationId: platformAdminReorderLessons
+      tags: [platform-admin-courses]
+      summary: Reorder course lessons (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+      responses:
+        "200":
+          description: OK
+
+  # ── PLATFORM ADMIN QUIZ QUESTIONS ──────────────────────────────────────────
+  /platform-admin/courses/{id}/quiz-questions:
+    get:
+      operationId: platformAdminListQuizQuestions
+      tags: [platform-admin-courses]
+      summary: List all quiz questions of a course, including correct answers and explanations (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlatformAdminQuizQuestion"
+    post:
+      operationId: platformAdminCreateQuizQuestion
+      tags: [platform-admin-courses]
+      summary: Create a new quiz question under a course (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminQuizQuestionInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformAdminQuizQuestion"
+
+  /platform-admin/quiz-questions/{id}:
+    patch:
+      operationId: platformAdminUpdateQuizQuestion
+      tags: [platform-admin-courses]
+      summary: Update a quiz question properties, correct index, and explanations (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformAdminQuizQuestionInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformAdminQuizQuestion"
+
+  /platform-admin/courses/{id}/quiz-questions/reorder:
+    put:
+      operationId: platformAdminReorderQuizQuestions
+      tags: [platform-admin-courses]
+      summary: Reorder course quiz questions (platform admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+      responses:
+        "200":
+          description: OK
+
 components:
   schemas:
     HealthStatus:
@@ -1220,6 +2174,18 @@ components:
           type: boolean
         passingScore:
           type: integer
+        isPublished:
+          type: boolean
+        intendedRoles:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+        reviewDate:
+          type: ["string", "null"]
+        recommendedNextCourseId:
+          type: ["integer", "null"]
         createdAt:
           type: string
 
@@ -1311,6 +2277,12 @@ components:
           type: ["string", "null"]
         content:
           type: ["string", "null"]
+        isArchived:
+          type: boolean
+        contentBlocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentBlock"
 
     # ── CATEGORY ──────────────────────────────────────────────────────────────
     Category:
@@ -1579,7 +2551,7 @@ components:
           type: boolean
     LearningPath:
       type: object
-      required: [id, slug, title, description, audience, icon, totalModules, completedModules, progressPct, totalMinutes, modules]
+      required: [id, slug, title, description, audience, icon, totalModules, completedModules, progressPct, totalMinutes, modules, difficulty, intendedRoles, estimatedDurationMinutes, status, version, certificateEligibility]
       properties:
         id:
           type: integer
@@ -1605,6 +2577,27 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LearningPathModule"
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        intendedRoles:
+          type: array
+          items:
+            type: string
+        estimatedDurationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [draft, active, archived]
+        version:
+          type: integer
+        completionCriteria:
+          type: ["string", "null"]
+        certificateEligibility:
+          type: boolean
+        recommendedNextPathId:
+          type: ["integer", "null"]
+
 
     # ── BADGES ──────────────────────────────────────────────────────────────────
     AchievementBadge:
@@ -2667,3 +3660,688 @@ components:
           type: integer
         completionRate:
           type: integer
+
+    # ── SPRINT 3A SCHEMA ADDITIONS ──────────────────────────────────────────────
+    Sector:
+      type: object
+      required: [id, slug, name, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    SectorInput:
+      type: object
+      required: [slug, name]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+
+    InsightCategory:
+      type: object
+      required: [id, slug, name, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    InsightCategoryInput:
+      type: object
+      required: [slug, name]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+
+    SourceReference:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        publisher:
+          type: string
+        url:
+          type: string
+        publicationDate:
+          type: string
+        accessDate:
+          type: string
+
+    InsightArticle:
+      type: object
+      required: [id, title, slug, excerpt, content, authorName, sourceReferences, readingTimeMinutes, status, publishedAt, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        authorName:
+          type: string
+        authorTitle:
+          type: ["string", "null"]
+        thumbnailUrl:
+          type: ["string", "null"]
+        imageAlt:
+          type: ["string", "null"]
+        sourceReferences:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceReference"
+        readingTimeMinutes:
+          type: integer
+        seoTitle:
+          type: ["string", "null"]
+        seoDescription:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, review, scheduled, published, archived]
+        insightCategoryId:
+          type: ["integer", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        publishedAt:
+          type: string
+        archivedAt:
+          type: ["string", "null"]
+        reviewDate:
+          type: ["string", "null"]
+        createdBy:
+          type: ["string", "null"]
+        updatedBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    InsightArticleInput:
+      type: object
+      required: [title, slug, excerpt, content, authorName]
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        authorName:
+          type: string
+        authorTitle:
+          type: ["string", "null"]
+        thumbnailUrl:
+          type: ["string", "null"]
+        imageAlt:
+          type: ["string", "null"]
+        sourceReferences:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceReference"
+        readingTimeMinutes:
+          type: integer
+        seoTitle:
+          type: ["string", "null"]
+        seoDescription:
+          type: ["string", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, review, scheduled, published, archived]
+        insightCategoryId:
+          type: ["integer", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        publishedAt:
+          type: ["string", "null"]
+        archivedAt:
+          type: ["string", "null"]
+        reviewDate:
+          type: ["string", "null"]
+    CourseMetadataInput:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        fullDescription:
+          type: string
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        durationMinutes:
+          type: integer
+        priceUsd:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        learningObjectives:
+          type: array
+          items:
+            type: string
+        includesCertificate:
+          type: boolean
+        passingScore:
+          type: integer
+        status:
+          type: string
+          enum: [draft, review, published]
+        badgeName:
+          type: ["string", "null"]
+        badgeDescription:
+          type: ["string", "null"]
+        intendedRoles:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+        reviewDate:
+          type: ["string", "null"]
+        recommendedNextCourseId:
+          type: ["integer", "null"]
+        prerequisites:
+          type: array
+          items:
+            type: integer
+        sectors:
+          type: array
+          items:
+            type: integer
+        sdgContributions:
+          type: array
+          items:
+            type: integer
+
+    SdgGoal:
+      type: object
+      required: [id, goalNumber, title, isActive]
+      properties:
+        id:
+          type: integer
+        goalNumber:
+          type: integer
+        title:
+          type: string
+        officialReference:
+          type: ["string", "null"]
+        sourceVersion:
+          type: ["string", "null"]
+        reviewedAt:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+
+    SdgTarget:
+      type: object
+      required: [id, sdgGoalId, targetCode, officialOrApprovedSummary, isActive]
+      properties:
+        id:
+          type: integer
+        sdgGoalId:
+          type: integer
+        targetCode:
+          type: string
+        officialOrApprovedSummary:
+          type: string
+        officialReference:
+          type: ["string", "null"]
+        sourceVersion:
+          type: ["string", "null"]
+        reviewedAt:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+
+    SdgContribution:
+      type: object
+      required: [id, sdgTargetId, contributionCategory, rationale, evidenceStrength, isDirect, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        sdgTargetId:
+          type: integer
+        contributionCategory:
+          type: string
+          enum: [education_awareness, capacity_building, operational_output, operational_outcome, self_reported_action, calculated_estimate]
+        rationale:
+          type: string
+        evidenceRequired:
+          type: ["string", "null"]
+        evidenceStrength:
+          type: string
+          enum: [weak, medium, strong]
+        isDirect:
+          type: boolean
+        sourceReference:
+          type: ["string", "null"]
+        methodologyVersion:
+          type: ["string", "null"]
+        limitations:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, archived]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    SdgContributionInput:
+      type: object
+      required: [sdgTargetId, contributionCategory, rationale]
+      properties:
+        sdgTargetId:
+          type: integer
+        contributionCategory:
+          type: string
+          enum: [education_awareness, capacity_building, operational_output, operational_outcome, self_reported_action, calculated_estimate]
+        rationale:
+          type: string
+        evidenceRequired:
+          type: ["string", "null"]
+        evidenceStrength:
+          type: string
+          enum: [weak, medium, strong]
+        isDirect:
+          type: boolean
+        sourceReference:
+          type: ["string", "null"]
+        methodologyVersion:
+          type: ["string", "null"]
+        limitations:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, archived]
+
+
+    PlatformAdminUpdateSectorStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, inactive]
+
+    PlatformAdminUpdateInsightCategoryStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, inactive]
+
+    PlatformAdminUpdateInsightArticleStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [draft, review, scheduled, published, archived]
+
+    PlatformAdminCreateLearningPathInput:
+      type: object
+      required: [slug, title, description, audience]
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        audience:
+          type: string
+        icon:
+          type: string
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        intendedRoles:
+          type: array
+          items:
+            type: string
+        estimatedDurationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [draft, active, archived]
+        completionCriteria:
+          type: string
+        certificateEligibility:
+          type: boolean
+        recommendedNextPathId:
+          type: integer
+
+    PlatformAdminUpdateLearningPathInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        audience:
+          type: string
+        icon:
+          type: string
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        intendedRoles:
+          type: array
+          items:
+            type: string
+        estimatedDurationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [draft, active, archived]
+        completionCriteria:
+          type: string
+        certificateEligibility:
+          type: boolean
+        recommendedNextPathId:
+          type: integer
+        sectors:
+          type: array
+          items:
+            type: integer
+
+    PlatformAdminUpdateLearningPathStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [draft, active, archived]
+
+    PlatformAdminUpdateLearningPathCoursesInput:
+      type: object
+      required: [courses]
+      properties:
+        courses:
+          type: array
+          items:
+            type: object
+            required: [courseId, position]
+            properties:
+              courseId:
+                type: integer
+              position:
+                type: integer
+              isRequired:
+                type: boolean
+
+    PlatformAdminCreateSdgGoalInput:
+      type: object
+      required: [goalNumber, title]
+      properties:
+        goalNumber:
+          type: integer
+        title:
+          type: string
+        officialReference:
+          type: string
+        sourceVersion:
+          type: string
+        isActive:
+          type: boolean
+
+    PlatformAdminUpdateSdgGoalInput:
+      type: object
+      properties:
+        title:
+          type: string
+        officialReference:
+          type: string
+        sourceVersion:
+          type: string
+
+    PlatformAdminUpdateSdgGoalStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, inactive]
+
+    PlatformAdminCreateSdgTargetInput:
+      type: object
+      required: [sdgGoalId, targetCode, officialOrApprovedSummary]
+      properties:
+        sdgGoalId:
+          type: integer
+        targetCode:
+          type: string
+        officialOrApprovedSummary:
+          type: string
+        officialReference:
+          type: string
+        sourceVersion:
+          type: string
+        isActive:
+          type: boolean
+
+    PlatformAdminUpdateSdgTargetInput:
+      type: object
+      properties:
+        targetCode:
+          type: string
+        officialOrApprovedSummary:
+          type: string
+        officialReference:
+          type: string
+        sourceVersion:
+          type: string
+
+    PlatformAdminUpdateSdgTargetStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, inactive]
+
+    PlatformAdminUpdateSdgContributionStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, inactive, archived]
+
+    PlatformAdminLessonInput:
+      type: object
+      required: [title, durationMinutes]
+      properties:
+        title:
+          type: string
+        durationMinutes:
+          type: integer
+        videoUrl:
+          type: ["string", "null"]
+        pdfUrl:
+          type: ["string", "null"]
+        content:
+          type: ["string", "null"]
+        isArchived:
+          type: boolean
+        contentBlocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentBlock"
+
+    ContentBlock:
+      type: object
+      required: [id, type, position]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [heading, short_text, key_message, workplace_example, mauritian_example, practical_action, image, expandable, multiple_choice, decision_scenario, reflection, commitment]
+        position:
+          type: integer
+        accessibilityLabel:
+          type: string
+        headingText:
+          type: string
+        bodyText:
+          type: string
+        imageUrl:
+          type: string
+        imageAlt:
+          type: string
+        expandableTitle:
+          type: string
+        expandableContent:
+          type: string
+        mcqQuestion:
+          type: string
+        mcqOptions:
+          type: array
+          items:
+            type: string
+        mcqCorrectIndex:
+          type: integer
+        mcqCorrectExplanation:
+          type: string
+        mcqIncorrectExplanation:
+          type: string
+        decisionIntro:
+          type: string
+        decisionPrompt:
+          type: string
+        decisionChoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/DecisionChoice"
+        commitmentInstruction:
+          type: string
+        commitmentOptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommitmentOption"
+
+    DecisionChoice:
+      type: object
+      required: [label, correct, feedback]
+      properties:
+        label:
+          type: string
+        correct:
+          type: boolean
+        feedback:
+          type: string
+
+    CommitmentOption:
+      type: object
+      required: [value, label, description]
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+
+    PlatformAdminQuizQuestion:
+      type: object
+      required: [id, courseId, question, options, correctOption, orderIndex, isArchived]
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOption:
+          type: integer
+        orderIndex:
+          type: integer
+        isArchived:
+          type: boolean
+        correctExplanation:
+          type: ["string", "null"]
+        incorrectExplanation:
+          type: ["string", "null"]
+        optionFeedback:
+          type: array
+          items:
+            type: ["string", "null"]
+
+    PlatformAdminQuizQuestionInput:
+      type: object
+      required: [question, options, correctOption]
+      properties:
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOption:
+          type: integer
+        isArchived:
+          type: boolean
+        correctExplanation:
+          type: ["string", "null"]
+        incorrectExplanation:
+          type: ["string", "null"]
+        optionFeedback:
+          type: array
+          items:
+            type: ["string", "null"]

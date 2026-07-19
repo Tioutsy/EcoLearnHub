@@ -156,7 +156,8 @@ async function resolveCourseId(): Promise<number> {
       learningObjectives: COURSE.learningObjectives,
       includesCertificate: COURSE.includesCertificate,
       passingScore: COURSE.passingScore,
-      isPublished: COURSE.isPublished,
+      isPublished: true,
+      status: "published",
     })
     .onConflictDoNothing({ target: coursesTable.slug })
     .returning({ id: coursesTable.id });

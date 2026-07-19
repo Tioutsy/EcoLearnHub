@@ -22,6 +22,7 @@ import leadsRouter from "./leads";
 import adminRouter from "./admin";
 import blogRouter from "./blog";
 import recyclingRouter from "./recycling";
+import platformAdminRouter from "./platformAdmin";
 
 const router: IRouter = Router();
 
@@ -49,6 +50,8 @@ router.use("/compliance", complianceRouter);
 router.use("/leads", leadsRouter);
 router.use("/admin", adminRouter);
 router.use("/recycling", recyclingRouter);
+router.use("/platform-admin", platformAdminRouter);
 router.use(blogRouter);
 
 export default router;
+
