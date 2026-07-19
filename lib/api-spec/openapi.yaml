@@ -2442,6 +2442,36 @@ components:
           type: integer
         certificateId:
           type: ["integer", "null"]
+        feedback:
+          type: array
+          items:
+            type: object
+            required: [questionId, question, selectedOption, correctOption, isCorrect, options]
+            properties:
+              questionId:
+                type: integer
+              question:
+                type: string
+              selectedOption:
+                type: integer
+              correctOption:
+                type: integer
+              isCorrect:
+                type: boolean
+              correctExplanation:
+                type: ["string", "null"]
+              incorrectExplanation:
+                type: ["string", "null"]
+              practicalTakeaway:
+                type: ["string", "null"]
+              optionFeedback:
+                type: array
+                items:
+                  type: ["string", "null"]
+              options:
+                type: array
+                items:
+                  type: string
 
     # ── COMMITMENTS ───────────────────────────────────────────────────────────
     CommitmentList:

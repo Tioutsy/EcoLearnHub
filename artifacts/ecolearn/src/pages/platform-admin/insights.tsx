@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlatformAdminLayout } from "@/components/layout/PlatformAdminLayout";
 import {
   usePlatformAdminListInsightCategories,
@@ -22,37 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Plus, Edit, Archive, CheckCircle, ArrowLeft, Eye, Tag } from "lucide-react";
+import { AlertCircle, Plus, Edit, Archive, CheckCircle, ArrowLeft, Eye, Scale, Tag, Globe, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// React-based safe Markdown parser (no dangerouslySetInnerHTML, completely XSS safe)
-function parseMarkdownToReact(text: string = ""): React.ReactNode[] {
-  return text.split('\n\n').map((block, i) => {
-    const trimmed = block.trim();
-    if (!trimmed) return null;
-
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      const items = trimmed.split('\n').map(line => line.replace(/^[-*]\s+/, ''));
-      return (
-        <ul key={i} className="list-disc pl-5 my-2 space-y-1 text-sm text-foreground">
-          {items.map((item, j) => <li key={j}>{item}</li>)}
-        </ul>
-      );
-    }
-    if (trimmed.startsWith('### ')) {
-      return <h3 key={i} className="text-base font-bold font-serif my-3 text-foreground">{trimmed.slice(4)}</h3>;
-    }
-    if (trimmed.startsWith('## ')) {
-      return <h2 key={i} className="text-lg font-bold font-serif my-4 text-foreground">{trimmed.slice(3)}</h2>;
-    }
-    if (trimmed.startsWith('# ')) {
-      return <h1 key={i} className="text-xl font-bold font-serif my-5 text-foreground">{trimmed.slice(2)}</h1>;
-    }
-    return <p key={i} className="my-2 leading-relaxed text-sm text-muted-foreground">{trimmed}</p>;
-  }).filter(Boolean) as React.ReactNode[];
-}
 
 export default function PlatformAdminInsights() {
   const queryClient = useQueryClient();
@@ -64,83 +37,9 @@ export default function PlatformAdminInsights() {
   const coursesQuery = useListCourses();
   const sdgQuery = usePlatformAdminListSdgContributions();
 
-  // Mutations - Categories
-  const createCategoryMutation = usePlatformAdminCreateInsightCategory({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Category created");
-        queryClient.invalidateQueries({ queryKey: ["platformAdminListInsightCategories"] });
-        setCatCreateOpen(false);
-        setCatForm({ name: "", slug: "", description: "" });
-      },
-      onError: (err: any) => toast.error(err.message || "Failed to create category")
-    }
-  });
-
-  const updateCategoryMutation = usePlatformAdminUpdateInsightCategory({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Category updated");
-        queryClient.invalidateQueries({ queryKey: ["platformAdminListInsightCategories"] });
-        setCatEditOpen(false);
-        setCatForm({ name: "", slug: "", description: "" });
-      },
-      onError: (err: any) => toast.error(err.message || "Failed to update category")
-    }
-  });
-
-  const updateCategoryStatusMutation = usePlatformAdminUpdateInsightCategoryStatus({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Category status updated");
-        queryClient.invalidateQueries({ queryKey: ["platformAdminListInsightCategories"] });
-      },
-      onError: (err: any) => toast.error(err.message || "Failed to update status")
-    }
-  });
-
-  // Mutations - Articles
-  const createArticleMutation = usePlatformAdminCreateInsightArticle({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Article draft created successfully");
-        queryClient.invalidateQueries({ queryKey: ["platformAdminListInsightArticles"] });
-        setViewMode("list");
-        resetArticleForm();
-      },
-      onError: (err: any) => toast.error(err.message || "Failed to create article")
-    }
-  });
-
-  const updateArticleMutation = usePlatformAdminUpdateInsightArticle({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Article updated successfully");
-        queryClient.invalidateQueries({ queryKey: ["platformAdminListInsightArticles"] });
-        setViewMode("list");
-        resetArticleForm();
-      },
-      onError: (err: any) => toast.error(err.message || "Failed to update article")
-    }
-  });
-
-  const updateArticleStatusMutation = usePlatformAdminUpdateInsightArticleStatus({
-    mutation: {
-      onSuccess: () => {
-        toast.success("Article status updated successfully");
-        queryClient.invalidateQueries({ queryKey: ["platformAdminListInsightArticles"] });
-      },
-      onError: (err: any) => toast.error(err.message || "Failed to change article status")
-    }
-  });
-
   // State Management
   const [activeTab, setActiveTab] = useState("articles");
-  const [viewMode, setViewMode] = useState<"list" | "create" | "edit" | "preview">("list");
-
-  // Filter States
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"list" | "create" | "edit" | "preview" | "create_resource" | "edit_resource">("list");
 
   // Category Form State
   const [catCreateOpen, setCatCreateOpen] = useState(false);
@@ -168,6 +67,121 @@ export default function PlatformAdminInsights() {
   const [selectedSdg, setSelectedSdg] = useState<number[]>([]);
   const [sourceReferences, setSourceReferences] = useState<Array<{ title: string; url?: string }>>([]);
 
+  // Mauritius Resources State
+  const [resources, setResources] = useState<any[]>([]);
+  const [isLoadingResources, setIsLoadingResources] = useState(false);
+  const [editingResourceId, setEditingResourceId] = useState<number | null>(null);
+
+  // Resource Form State
+  const [resTitle, setResTitle] = useState("");
+  const [resSlug, setResSlug] = useState("");
+  const [resType, setResType] = useState("Act");
+  const [resShortSummary, setResShortSummary] = useState("");
+  const [resMainExplanation, setResMainExplanation] = useState("");
+  const [resOfficialName, setResOfficialName] = useState("");
+  const [resNumber, setResNumber] = useState("");
+  const [resAuthority, setResAuthority] = useState("");
+  const [resSector, setResSector] = useState("Waste");
+  const [resDateIssued, setResDateIssued] = useState("");
+  const [resEffectiveDate, setResEffectiveDate] = useState("");
+  const [resSourceLink, setResSourceLink] = useState("");
+  const [resDownloadLink, setResDownloadLink] = useState("");
+  const [resComplianceRelevance, setResComplianceRelevance] = useState("");
+  const [resPracticalImplications, setResPracticalImplications] = useState("");
+  const [resDisclaimer, setResDisclaimer] = useState("This content is provided for general educational purposes and does not constitute legal advice. Users should refer to the official legislation and seek professional advice where required.");
+  const [resIsFeatured, setResIsFeatured] = useState(false);
+
+  // Fetch Resources Function
+  const fetchResources = () => {
+    setIsLoadingResources(true);
+    fetch("/api/platform-admin/insights/mauritius-resources")
+      .then((res) => res.json())
+      .then((data) => {
+        setResources(data);
+        setIsLoadingResources(false);
+      })
+      .catch((err) => {
+        toast.error("Failed to load Mauritius resources");
+        setIsLoadingResources(false);
+      });
+  };
+
+  useEffect(() => {
+    if (activeTab === "resources") {
+      fetchResources();
+    }
+  }, [activeTab]);
+
+  // Mutations - Categories
+  const createCategoryMutation = usePlatformAdminCreateInsightCategory({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Category created");
+        categoriesQuery.refetch();
+        setCatCreateOpen(false);
+        setCatForm({ name: "", slug: "", description: "" });
+      },
+      onError: (err: any) => toast.error(err.message || "Failed to create category")
+    }
+  });
+
+  const updateCategoryMutation = usePlatformAdminUpdateInsightCategory({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Category updated");
+        categoriesQuery.refetch();
+        setCatEditOpen(false);
+        setCatForm({ name: "", slug: "", description: "" });
+      },
+      onError: (err: any) => toast.error(err.message || "Failed to update category")
+    }
+  });
+
+  const updateCategoryStatusMutation = usePlatformAdminUpdateInsightCategoryStatus({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Category status updated");
+        categoriesQuery.refetch();
+      },
+      onError: (err: any) => toast.error(err.message || "Failed to update status")
+    }
+  });
+
+  // Mutations - Articles
+  const createArticleMutation = usePlatformAdminCreateInsightArticle({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Article draft created successfully");
+        articlesQuery.refetch();
+        setViewMode("list");
+        resetArticleForm();
+      },
+      onError: (err: any) => toast.error(err.message || "Failed to create article")
+    }
+  });
+
+  const updateArticleMutation = usePlatformAdminUpdateInsightArticle({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Article updated successfully");
+        articlesQuery.refetch();
+        setViewMode("list");
+        resetArticleForm();
+      },
+      onError: (err: any) => toast.error(err.message || "Failed to update article")
+    }
+  });
+
+  const updateArticleStatusMutation = usePlatformAdminUpdateInsightArticleStatus({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Article status updated successfully");
+        articlesQuery.refetch();
+      },
+      onError: (err: any) => toast.error(err.message || "Failed to change article status")
+    }
+  });
+
   const resetArticleForm = () => {
     setEditingArticleId(null);
     setArtTitle("");
@@ -189,6 +203,27 @@ export default function PlatformAdminInsights() {
     setSourceReferences([]);
   };
 
+  const resetResourceForm = () => {
+    setEditingResourceId(null);
+    setResTitle("");
+    setResSlug("");
+    setResType("Act");
+    setResShortSummary("");
+    setResMainExplanation("");
+    setResOfficialName("");
+    setResNumber("");
+    setResAuthority("");
+    setResSector("Waste");
+    setResDateIssued("");
+    setResEffectiveDate("");
+    setResSourceLink("");
+    setResDownloadLink("");
+    setResComplianceRelevance("");
+    setResPracticalImplications("");
+    setResDisclaimer("This content is provided for general educational purposes and does not constitute legal advice. Users should refer to the official legislation and seek professional advice where required.");
+    setResIsFeatured(false);
+  };
+
   const handleEditArticleClick = (article: any) => {
     setEditingArticleId(article.id);
     setArtTitle(article.title);
@@ -204,12 +239,33 @@ export default function PlatformAdminInsights() {
     setArtSeoDescription(article.seoDescription || "");
     setArtTags(article.tags?.join(", ") || "");
     setArtCategoryId(article.insightCategoryId || "");
-    // Extract linked IDs
     setSelectedSectors(article.sectors || []);
     setSelectedCourses(article.relatedCourses || []);
     setSelectedSdg(article.sdgContributions || []);
     setSourceReferences(article.sourceReferences || []);
     setViewMode("edit");
+  };
+
+  const handleEditResourceClick = (res: any) => {
+    setEditingResourceId(res.id);
+    setResTitle(res.title);
+    setResSlug(res.slug);
+    setResType(res.resourceType);
+    setResShortSummary(res.shortSummary);
+    setResMainExplanation(res.mainExplanation);
+    setResOfficialName(res.officialName || "");
+    setResNumber(res.resourceNumber || "");
+    setResAuthority(res.responsibleAuthority || "");
+    setResSector(res.relevantSector || "Waste");
+    setResDateIssued(res.dateIssued ? new Date(res.dateIssued).toISOString().substring(0, 10) : "");
+    setResEffectiveDate(res.effectiveDate ? new Date(res.effectiveDate).toISOString().substring(0, 10) : "");
+    setResSourceLink(res.officialSourceLink || "");
+    setResDownloadLink(res.downloadableDocLink || "");
+    setResComplianceRelevance(res.complianceRelevance || "");
+    setResPracticalImplications(res.practicalImplications || "");
+    setResDisclaimer(res.disclaimer || "");
+    setResIsFeatured(res.isFeatured === true);
+    setViewMode("edit_resource");
   };
 
   // Submit Handlers
@@ -251,8 +307,8 @@ export default function PlatformAdminInsights() {
 
   const handleArticleSubmit = (e: React.FormEvent, forceStatus?: string) => {
     e.preventDefault();
-    if (!artTitle.trim() || !artSlug.trim() || !artExcerpt.trim() || !artContent.trim() || !artAuthorName.trim() || !artCategoryId) {
-      toast.error("Please fill in all required fields (marked *)");
+    if (!artTitle.trim() || !artSlug.trim() || !artExcerpt.trim() || !artContent.trim() || !artAuthorName.trim()) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -269,19 +325,21 @@ export default function PlatformAdminInsights() {
       seoTitle: artSeoTitle || null,
       seoDescription: artSeoDescription || null,
       tags: artTags.split(",").map(t => t.trim()).filter(Boolean),
-      insightCategoryId: Number(artCategoryId),
       sectors: selectedSectors,
       relatedCourses: selectedCourses,
       sdgContributions: selectedSdg,
       sourceReferences
     };
 
+    if (artCategoryId) {
+      payload.insightCategoryId = Number(artCategoryId);
+    }
+
     if (forceStatus) {
       payload.status = forceStatus;
     }
 
     if (viewMode === "create") {
-      // Create defaults to draft
       payload.status = payload.status || "draft";
       createArticleMutation.mutate({ data: payload });
     } else if (viewMode === "edit" && editingArticleId) {
@@ -293,7 +351,6 @@ export default function PlatformAdminInsights() {
   };
 
   const handleArticleStatusToggle = (id: number, current: string) => {
-    const allowed = ["draft", "review", "scheduled", "published", "archived"];
     let next = "draft";
     if (current === "draft") next = "review";
     else if (current === "review") next = "published";
@@ -309,14 +366,94 @@ export default function PlatformAdminInsights() {
     });
   };
 
-  // Helper selectors
+  // Resources Submission
+  const handleResourceSubmit = (e: React.FormEvent, forceStatus?: string) => {
+    e.preventDefault();
+    if (!resTitle.trim() || !resSlug.trim() || !resShortSummary.trim() || !resMainExplanation.trim()) {
+      toast.error("Please fill in all required fields (marked *)");
+      return;
+    }
+
+    const payload = {
+      title: resTitle,
+      slug: resSlug,
+      resourceType: resType,
+      shortSummary: resShortSummary,
+      mainExplanation: resMainExplanation,
+      officialName: resOfficialName || null,
+      resourceNumber: resNumber || null,
+      responsibleAuthority: resAuthority || null,
+      relevantSector: resSector,
+      dateIssued: resDateIssued ? new Date(resDateIssued).toISOString() : null,
+      effectiveDate: resEffectiveDate ? new Date(resEffectiveDate).toISOString() : null,
+      officialSourceLink: resSourceLink || null,
+      downloadableDocLink: resDownloadLink || null,
+      complianceRelevance: resComplianceRelevance || null,
+      practicalImplications: resPracticalImplications || null,
+      disclaimer: resDisclaimer,
+      isFeatured: resIsFeatured === true,
+      status: forceStatus || (viewMode === "create_resource" ? "draft" : undefined)
+    };
+
+    const method = viewMode === "create_resource" ? "POST" : "PATCH";
+    const url = viewMode === "create_resource" 
+      ? "/api/platform-admin/insights/mauritius-resources"
+      : `/api/platform-admin/insights/mauritius-resources/${editingResourceId}`;
+
+    fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then((res) => {
+        if (res.status === 200 || res.status === 201) {
+          toast.success("Resource saved successfully!");
+          fetchResources();
+          setViewMode("list");
+          resetResourceForm();
+          return null;
+        } else {
+          return res.json().then(e => { throw new Error(e.error || "Save failed"); });
+        }
+      })
+      .catch((err) => toast.error(err.message));
+  };
+
+  const handleResourceStatusToggle = (id: number, current: string) => {
+    let next = "draft";
+    if (current === "draft") next = "published";
+    else if (current === "published") {
+      const ok = window.confirm("Are you sure you want to archive this resource?");
+      if (!ok) return;
+      next = "archived";
+    }
+
+    fetch(`/api/platform-admin/insights/mauritius-resources/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next })
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success(`Resource status updated to ${next}`);
+          fetchResources();
+        } else {
+          toast.error("Failed to change resource status");
+        }
+      })
+      .catch((err) => toast.error(err.message));
+  };
+
+  // Helper variables
   const categories = categoriesQuery.data || [];
   const articles = articlesQuery.data || [];
   const sectors = sectorsQuery.data || [];
   const courses = coursesQuery.data || [];
   const sdgs = sdgQuery.data || [];
 
-  // Filter Articles
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+
   const filteredArticles = articles.filter((a: any) => {
     const matchesCat = filterCategory === "all" || String(a.insightCategoryId) === filterCategory;
     const matchesStatus = filterStatus === "all" || a.status === filterStatus;
@@ -329,20 +466,21 @@ export default function PlatformAdminInsights() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold font-serif">Insights Content</h2>
+              <h2 className="text-2xl font-bold font-serif">Insights & Resources Panel</h2>
               <p className="text-muted-foreground mt-1">
-                Manage editorial articles, blog posts, and categories.
+                Manage editorial articles, Categories, and Mauritius environmental compliance regulations.
               </p>
             </div>
 
             <TabsList>
               <TabsTrigger value="articles">Articles</TabsTrigger>
+              <TabsTrigger value="resources">Mauritius Rules & Resources</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
             </TabsList>
           </div>
 
+          {/* TAB 1: ARTICLES */}
           <TabsContent value="articles" className="space-y-4">
-            {/* Filter and Add Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-card border rounded-lg p-4">
               <div className="flex flex-wrap items-center gap-3">
                 <div>
@@ -380,18 +518,10 @@ export default function PlatformAdminInsights() {
               </Button>
             </div>
 
-            {/* Articles Table */}
             {articlesQuery.isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-20 w-full" />
-              </div>
+              <Skeleton className="h-40 w-full" />
             ) : filteredArticles.length === 0 ? (
-              <Card className="text-center py-12">
-                <CardContent className="text-muted-foreground">
-                  No articles match your filters.
-                </CardContent>
-              </Card>
+              <Card className="text-center py-12"><CardContent className="text-muted-foreground">No articles match your filters.</CardContent></Card>
             ) : (
               <div className="border rounded-lg overflow-x-auto bg-card">
                 <Table>
@@ -400,7 +530,6 @@ export default function PlatformAdminInsights() {
                       <TableHead>Title</TableHead>
                       <TableHead>Author</TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead>Reading Time</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -413,12 +542,8 @@ export default function PlatformAdminInsights() {
                           <TableCell className="font-medium max-w-xs truncate">{art.title}</TableCell>
                           <TableCell className="text-xs">{art.authorName}</TableCell>
                           <TableCell className="text-xs text-muted-foreground">{catName}</TableCell>
-                          <TableCell className="text-xs text-muted-foreground">{art.readingTimeMinutes} min</TableCell>
                           <TableCell>
-                            <Badge variant={
-                              art.status === "published" ? "default" :
-                              art.status === "draft" ? "secondary" : "outline"
-                            }>
+                            <Badge variant={art.status === "published" ? "default" : art.status === "draft" ? "secondary" : "outline"}>
                               {art.status}
                             </Badge>
                           </TableCell>
@@ -448,6 +573,70 @@ export default function PlatformAdminInsights() {
             )}
           </TabsContent>
 
+          {/* TAB 2: MAURITIUS RULES & RESOURCES */}
+          <TabsContent value="resources" className="space-y-4">
+            <div className="flex justify-end bg-card border rounded-lg p-4">
+              <Button onClick={() => { resetResourceForm(); setViewMode("create_resource"); }} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" /> Create Rule / Resource
+              </Button>
+            </div>
+
+            {isLoadingResources ? (
+              <Skeleton className="h-40 w-full" />
+            ) : resources.length === 0 ? (
+              <Card className="text-center py-12"><CardContent className="text-muted-foreground">No Mauritius compliance resources available.</CardContent></Card>
+            ) : (
+              <div className="border rounded-lg overflow-x-auto bg-card">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Resource Type</TableHead>
+                      <TableHead>Sector</TableHead>
+                      <TableHead>Authority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {resources.map((res: any) => (
+                      <TableRow key={res.id}>
+                        <TableCell className="font-medium max-w-xs truncate">{res.title}</TableCell>
+                        <TableCell className="text-xs">
+                          <Badge variant="outline">{res.resourceType}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{res.relevantSector}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-xs truncate">{res.responsibleAuthority}</TableCell>
+                        <TableCell>
+                          <Badge variant={res.status === "published" ? "default" : "secondary"}>
+                            {res.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditResourceClick(res)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleResourceStatusToggle(res.id, res.status)}
+                              disabled={res.status === "archived"}
+                            >
+                              {res.status === "draft" ? "Publish" :
+                               res.status === "published" ? "Archive" : "Archived"}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* TAB 3: CATEGORIES */}
           <TabsContent value="categories" className="space-y-4">
             <div className="flex justify-end">
               <Dialog open={catCreateOpen} onOpenChange={setCatCreateOpen}>
@@ -516,7 +705,6 @@ export default function PlatformAdminInsights() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Slug</TableHead>
-                      <TableHead>Description</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -526,7 +714,6 @@ export default function PlatformAdminInsights() {
                       <TableRow key={cat.id}>
                         <TableCell className="font-medium">{cat.name}</TableCell>
                         <TableCell className="text-xs text-muted-foreground">{cat.slug}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-xs truncate">{cat.description}</TableCell>
                         <TableCell>
                           <Badge variant={cat.status === "active" ? "default" : "secondary"}>
                             {cat.status}
@@ -537,13 +724,8 @@ export default function PlatformAdminInsights() {
                             <Button variant="ghost" size="icon" onClick={() => handleCategoryEditClick(cat)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCategoryStatusToggle(cat.id, cat.status)}
-                              className={cat.status === "active" ? "text-amber-600" : "text-emerald-600"}
-                            >
-                              {cat.status === "active" ? <Archive className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                            <Button variant="ghost" size="icon" onClick={() => handleCategoryStatusToggle(cat.id, cat.status)}>
+                              {cat.status === "active" ? <Archive className="h-4 w-4 text-amber-600" /> : <CheckCircle className="h-4 w-4 text-emerald-600" />}
                             </Button>
                           </div>
                         </TableCell>
@@ -555,8 +737,291 @@ export default function PlatformAdminInsights() {
             )}
           </TabsContent>
         </Tabs>
+      ) : viewMode === "create_resource" || viewMode === "edit_resource" ? (
+        // CREATE/EDIT RESOURCE SCREEN
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={() => setViewMode("list")}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h2 className="text-2xl font-bold font-serif">
+                {viewMode === "create_resource" ? "Create Mauritius Resource" : "Edit Mauritius Resource"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Expose regulatory compliance, laws, policies and guides.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <form onSubmit={(e) => handleResourceSubmit(e)} className="lg:col-span-2 space-y-6 bg-card border rounded-xl p-6 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <Label htmlFor="res-title">Resource Title *</Label>
+                  <Input
+                    id="res-title"
+                    value={resTitle}
+                    onChange={(e) => {
+                      setResTitle(e.target.value);
+                      if (viewMode === "create_resource") {
+                        setResSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
+                      }
+                    }}
+                    placeholder="e.g. Single-Use Plastic Ban Regulations"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-slug">Slug *</Label>
+                  <Input
+                    id="res-slug"
+                    value={resSlug}
+                    onChange={(e) => setResSlug(e.target.value.toLowerCase())}
+                    placeholder="regulation-slug"
+                    className="mt-1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-type">Resource Type *</Label>
+                  <select
+                    id="res-type"
+                    value={resType}
+                    onChange={(e) => setResType(e.target.value)}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring mt-1"
+                    required
+                  >
+                    <option value="Act">Act</option>
+                    <option value="Regulation">Regulation</option>
+                    <option value="Rule">Rule</option>
+                    <option value="Policy">Policy</option>
+                    <option value="Government guideline">Government guideline</option>
+                    <option value="Code">Code</option>
+                    <option value="Official notice">Official notice</option>
+                    <option value="Authority">Authority</option>
+                    <option value="Compliance resource">Compliance resource</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="res-short">Short Summary *</Label>
+                <Textarea
+                  id="res-short"
+                  value={resShortSummary}
+                  onChange={(e) => setResShortSummary(e.target.value)}
+                  placeholder="A brief 1-2 sentence regulatory summary..."
+                  className="mt-1"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="res-main">Simplified Explanation *</Label>
+                <Textarea
+                  id="res-main"
+                  value={resMainExplanation}
+                  onChange={(e) => setResMainExplanation(e.target.value)}
+                  placeholder="Explain the law in simplified terms for learners..."
+                  className="mt-1 min-h-[150px]"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+                <div>
+                  <Label htmlFor="res-official-name">Official Legal Name</Label>
+                  <Input
+                    id="res-official-name"
+                    value={resOfficialName}
+                    onChange={(e) => setResOfficialName(e.target.value)}
+                    placeholder="e.g. Environment Protection Act 2002"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-number">Act / Regulation / Guideline Number</Label>
+                  <Input
+                    id="res-number"
+                    value={resNumber}
+                    onChange={(e) => setResNumber(e.target.value)}
+                    placeholder="e.g. GN No. 316 of 2020"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-authority">Responsible Authority</Label>
+                  <Input
+                    id="res-authority"
+                    value={resAuthority}
+                    onChange={(e) => setResAuthority(e.target.value)}
+                    placeholder="e.g. Ministry of Environment"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-sector">Relevant Sector</Label>
+                  <select
+                    id="res-sector"
+                    value={resSector}
+                    onChange={(e) => setResSector(e.target.value)}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring mt-1"
+                  >
+                    <option value="Waste">Waste</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Water">Water</option>
+                    <option value="Biodiversity">Biodiversity</option>
+                    <option value="Pollution">Pollution</option>
+                    <option value="Climate">Climate</option>
+                    <option value="Workplace">Workplace</option>
+                    <option value="Procurement">Procurement</option>
+                    <option value="ESG">ESG</option>
+                    <option value="General environmental compliance">General environmental compliance</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+                <div>
+                  <Label htmlFor="res-date-issued">Date Issued</Label>
+                  <Input
+                    id="res-date-issued"
+                    type="date"
+                    value={resDateIssued}
+                    onChange={(e) => setResDateIssued(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-effective-date">Effective Date</Label>
+                  <Input
+                    id="res-effective-date"
+                    type="date"
+                    value={resEffectiveDate}
+                    onChange={(e) => setResEffectiveDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-source-link">Official Source Link (URL)</Label>
+                  <Input
+                    id="res-source-link"
+                    type="url"
+                    value={resSourceLink}
+                    onChange={(e) => setResSourceLink(e.target.value)}
+                    placeholder="https://..."
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-download-link">Downloadable Document Link (URL)</Label>
+                  <Input
+                    id="res-download-link"
+                    type="url"
+                    value={resDownloadLink}
+                    onChange={(e) => setResDownloadLink(e.target.value)}
+                    placeholder="https://..."
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 border-t pt-4">
+                <div>
+                  <Label htmlFor="res-relevance">Compliance Relevance</Label>
+                  <Textarea
+                    id="res-relevance"
+                    value={resComplianceRelevance}
+                    onChange={(e) => setResComplianceRelevance(e.target.value)}
+                    placeholder="What triggers compliance obligations..."
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="res-implications">Practical Implications for Organisations</Label>
+                  <Textarea
+                    id="res-implications"
+                    value={resPracticalImplications}
+                    onChange={(e) => setResPracticalImplications(e.target.value)}
+                    placeholder="Replace single-use plastics, audit water meters..."
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4 border-t pt-4">
+                <div>
+                  <Label htmlFor="res-disclaimer">Legal Disclaimer (Editable)</Label>
+                  <Textarea
+                    id="res-disclaimer"
+                    value={resDisclaimer}
+                    onChange={(e) => setResDisclaimer(e.target.value)}
+                    className="mt-1"
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <input
+                    id="res-featured"
+                    type="checkbox"
+                    checked={resIsFeatured}
+                    onChange={(e) => setResIsFeatured(e.target.checked)}
+                    className="h-4 w-4 text-primary rounded border-input bg-background"
+                  />
+                  <Label htmlFor="res-featured">Mark as Featured Resource</Label>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3 border-t pt-4">
+                <Button type="button" variant="outline" onClick={() => setViewMode("list")}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="secondary">
+                  Save as Draft
+                </Button>
+                <Button type="button" onClick={(e) => handleResourceSubmit(e, "published")}>
+                  Publish Resource
+                </Button>
+              </div>
+            </form>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader><CardTitle className="text-sm font-bold flex items-center gap-2"><Scale className="h-4 w-4" /> Live Preview</CardTitle></CardHeader>
+                <CardContent className="border-t p-4 max-h-[300px] overflow-y-auto space-y-3">
+                  {resTitle && <h3 className="text-base font-bold font-serif text-foreground">{resTitle}</h3>}
+                  <div className="flex gap-2">
+                    <Badge variant="outline">{resType}</Badge>
+                    <Badge variant="secondary">{resSector}</Badge>
+                  </div>
+                  {resShortSummary && <p className="text-xs text-muted-foreground">{resShortSummary}</p>}
+                  {resMainExplanation && (
+                    <div className="bg-muted p-3 rounded-lg text-xs italic text-muted-foreground mt-2">
+                      {resMainExplanation}
+                    </div>
+                  )}
+                  <p className="text-[10px] text-amber-700 leading-tight mt-2 bg-amber-50 p-2 rounded border border-amber-200">
+                    <strong>Disclaimer:</strong> {resDisclaimer}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       ) : (
-        // Create / Edit Screen Form
+        // ARTICLES CREATE/EDIT FORM SCREEN
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" onClick={() => setViewMode("list")}>
@@ -605,15 +1070,14 @@ export default function PlatformAdminInsights() {
                 </div>
 
                 <div>
-                  <Label htmlFor="art-cat">Category *</Label>
+                  <Label htmlFor="art-cat">Category</Label>
                   <select
                     id="art-cat"
                     value={artCategoryId}
-                    onChange={(e) => setArtCategoryId(Number(e.target.value))}
+                    onChange={(e) => setArtCategoryId(e.target.value ? Number(e.target.value) : "")}
                     className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring mt-1"
-                    required
                   >
-                    <option value="">Select Category...</option>
+                    <option value="">Select Category (Optional)...</option>
                     {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
@@ -673,7 +1137,7 @@ export default function PlatformAdminInsights() {
                     id="art-thumb"
                     value={artThumbnailUrl}
                     onChange={(e) => setArtThumbnailUrl(e.target.value)}
-                    placeholder="/images/blog/photo.png"
+                    placeholder="https://images.unsplash.com/photo-..."
                     className="mt-1"
                   />
                 </div>
@@ -714,32 +1178,6 @@ export default function PlatformAdminInsights() {
                 </div>
               </div>
 
-              <div className="space-y-4 border-t pt-4">
-                <h4 className="font-semibold text-sm">SEO Parameters</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="art-seo-title">SEO Title</Label>
-                    <Input
-                      id="art-seo-title"
-                      value={artSeoTitle}
-                      onChange={(e) => setArtSeoTitle(e.target.value)}
-                      placeholder="Meta title tag..."
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="art-seo-desc">SEO Description</Label>
-                    <Input
-                      id="art-seo-desc"
-                      value={artSeoDescription}
-                      onChange={(e) => setArtSeoDescription(e.target.value)}
-                      placeholder="Meta description summary..."
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
               <div className="flex flex-wrap gap-3 border-t pt-4">
                 <Button type="button" variant="outline" onClick={() => setViewMode("list")}>
                   Cancel
@@ -747,98 +1185,15 @@ export default function PlatformAdminInsights() {
                 <Button type="submit" variant="secondary">
                   Save as Draft
                 </Button>
-                <Button type="button" onClick={(e) => handleArticleSubmit(e, "review")}>
-                  Submit for Review
+                <Button type="button" onClick={(e) => handleArticleSubmit(e, "published")}>
+                  Publish Article
                 </Button>
-                {viewMode === "edit" && (
-                  <Button type="button" variant="destructive" onClick={(e) => handleArticleSubmit(e, "archived")}>
-                    Archive Article
-                  </Button>
-                )}
               </div>
             </form>
 
-            {/* Sidebar metadata selectors and Preview */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm font-bold">Classifications & Links</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 text-xs">
-                  {/* Sectors select */}
-                  <div>
-                    <Label className="font-semibold text-xs mb-1 block">Assigned Sectors</Label>
-                    <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
-                      {sectors.map((sec: any) => (
-                        <label key={sec.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedSectors.includes(sec.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedSectors([...selectedSectors, sec.id]);
-                              } else {
-                                setSelectedSectors(selectedSectors.filter(id => id !== sec.id));
-                              }
-                            }}
-                          />
-                          {sec.name}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Related Courses select */}
-                  <div>
-                    <Label className="font-semibold text-xs mb-1 block">Related Courses</Label>
-                    <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
-                      {courses.map((crs: any) => (
-                        <label key={crs.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedCourses.includes(crs.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedCourses([...selectedCourses, crs.id]);
-                              } else {
-                                setSelectedCourses(selectedCourses.filter(id => id !== crs.id));
-                              }
-                            }}
-                          />
-                          {crs.title}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* SDG Contributions select */}
-                  <div>
-                    <Label className="font-semibold text-xs mb-1 block">SDG Contributions</Label>
-                    <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
-                      {sdgs.map((sdg: any) => (
-                        <label key={sdg.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedSdg.includes(sdg.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedSdg([...selectedSdg, sdg.id]);
-                              } else {
-                                setSelectedSdg(selectedSdg.filter(id => id !== sdg.id));
-                              }
-                            }}
-                          />
-                          {sdg.rationale} ({sdg.contributionCategory})
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Markdown Preview Card */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <Eye className="h-4 w-4" /> Live Preview
                   </CardTitle>
@@ -846,7 +1201,11 @@ export default function PlatformAdminInsights() {
                 <CardContent className="border-t p-4 max-h-[300px] overflow-y-auto prose prose-sm">
                   {artTitle && <h2 className="text-base font-serif font-bold text-foreground mb-1">{artTitle}</h2>}
                   {artExcerpt && <p className="italic text-xs text-muted-foreground mb-4">{artExcerpt}</p>}
-                  {artContent ? parseMarkdownToReact(artContent) : <p className="text-xs text-muted-foreground">Markdown output preview will render here...</p>}
+                  {artContent ? (
+                    <div className="text-xs text-muted-foreground whitespace-pre-wrap">{artContent}</div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground font-sans">Content preview will render here...</p>
+                  )}
                 </CardContent>
               </Card>
             </div>

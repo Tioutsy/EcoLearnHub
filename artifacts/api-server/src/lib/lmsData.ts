@@ -17,6 +17,7 @@ import {
   getCompletionRate,
   getEmployeeTrainingStatus,
   isActionNeeded,
+  calculateEmployeeAverageScore,
   type AssignmentStatus,
   type EmployeeTrainingStatus,
 } from "./lms";
@@ -142,12 +143,7 @@ export async function syncEmployeeLearningStats(
       .select()
       .from(quizAttemptsTable)
       .where(inArray(quizAttemptsTable.userId, userKeys));
-    if (attempts.length > 0) {
-      avgScore = Math.round(
-        attempts.reduce((total, attempt) => total + attempt.score, 0) /
-          attempts.length,
-      );
-    }
+    avgScore = calculateEmployeeAverageScore(attempts);
   }
 
   await db

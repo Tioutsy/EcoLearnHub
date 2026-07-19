@@ -5,6 +5,7 @@ import {
   getCompletionRate,
   getEmployeeTrainingStatus,
   isActionNeeded,
+  calculateEmployeeAverageScore,
 } from "./lms";
 
 const now = new Date("2026-07-04T08:00:00.000Z");
@@ -71,4 +72,39 @@ test("action-needed catches overdue, due-soon and untouched assignments", () => 
 test("completion rates are rounded and zero-safe", () => {
   assert.equal(getCompletionRate(2, 3), 67);
   assert.equal(getCompletionRate(0, 0), 0);
+});
+
+test("calculateEmployeeAverageScore: calculates average of highest passing scores and ignores failed attempts", () => {
+  // Case 1: no attempts
+  assert.equal(calculateEmployeeAverageScore([]), 0);
+
+  // Case 2: only failed attempts
+  assert.equal(
+    calculateEmployeeAverageScore([
+      { courseId: 1, score: 30, passed: false },
+      { courseId: 1, score: 50, passed: false },
+    ]),
+    0
+  );
+
+  // Case 3: failed attempts and passing attempts (highest passing should be selected)
+  assert.equal(
+    calculateEmployeeAverageScore([
+      { courseId: 1, score: 30, passed: false },
+      { courseId: 1, score: 80, passed: true },
+      { courseId: 1, score: 100, passed: true },
+    ]),
+    100
+  );
+
+  // Case 4: multiple courses
+  assert.equal(
+    calculateEmployeeAverageScore([
+      { courseId: 1, score: 30, passed: false },
+      { courseId: 1, score: 100, passed: true },
+      { courseId: 2, score: 80, passed: true },
+      { courseId: 2, score: 60, passed: false },
+    ]),
+    90 // (100 + 80) / 2
+  );
 });

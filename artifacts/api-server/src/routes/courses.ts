@@ -11,6 +11,7 @@ import {
   CreateCourseBody,
   UpdateCourseBody,
 } from "@workspace/api-zod";
+import { getCompanyAccess } from "../lib/access";
 
 const router = Router();
 
@@ -112,6 +113,21 @@ router.get("/:id", async (req, res): Promise<void> => {
     return;
   }
 
+  // Load access context if present to allow platform admins to preview unpublished courses
+  let bypassFilter = false;
+  try {
+    const access = await getCompanyAccess(req);
+    if (access && access.role === "platform_admin") {
+      bypassFilter = true;
+    }
+  } catch (e) {
+    // Ignore auth errors for guest/learner accesses
+  }
+
+  const whereClause = bypassFilter 
+    ? eq(coursesTable.id, id)
+    : and(eq(coursesTable.id, id), eq(coursesTable.isPublished, true));
+
   const [course] = await db
     .select({
       id: coursesTable.id,
@@ -131,10 +147,11 @@ router.get("/:id", async (req, res): Promise<void> => {
       includesCertificate: coursesTable.includesCertificate,
       passingScore: coursesTable.passingScore,
       createdAt: coursesTable.createdAt,
+      recommendedNextCourseId: coursesTable.recommendedNextCourseId,
     })
     .from(coursesTable)
     .leftJoin(categoriesTable, eq(coursesTable.categoryId, categoriesTable.id))
-    .where(eq(coursesTable.id, id));
+    .where(whereClause);
 
   if (!course) {
     res.status(404).json({ error: "Course not found" });

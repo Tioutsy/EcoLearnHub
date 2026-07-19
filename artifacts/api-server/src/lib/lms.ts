@@ -81,3 +81,25 @@ export function isActionNeeded(
   soon.setDate(soon.getDate() + dueSoonDays);
   return dueDate <= soon;
 }
+
+export function calculateEmployeeAverageScore(
+  attempts: { courseId: number; score: number; passed: boolean }[]
+): number {
+  const passingAttempts = attempts.filter((a) => a.passed === true);
+  if (passingAttempts.length === 0) return 0;
+
+  const bestScoresByCourse = new Map<number, number>();
+  for (const a of passingAttempts) {
+    const currentBest = bestScoresByCourse.get(a.courseId) ?? 0;
+    if (a.score > currentBest) {
+      bestScoresByCourse.set(a.courseId, a.score);
+    }
+  }
+
+  const courseScores = Array.from(bestScoresByCourse.values());
+  if (courseScores.length === 0) return 0;
+
+  return Math.round(
+    courseScores.reduce((total, score) => total + score, 0) / courseScores.length
+  );
+}

@@ -10,6 +10,8 @@ import {
   useGetCourseProgressSummary,
   useGetCourseQuiz,
   useSubmitQuiz,
+  useGetCourse,
+  usePlatformAdminListQuizQuestions,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -27,51 +29,119 @@ import {
   Download,
   GraduationCap,
 } from "lucide-react";
-import { MODULES, COMMITMENT_OPTIONS, NEXT_COURSE_ID, NEXT_COURSE_TITLE, type Block } from "./content";
 import {
   TextView,
   CalloutView,
   ScenarioView,
-  MatchingView,
   CheckView,
-  RolesView,
-  DecisionView,
   CommitmentView,
 } from "./blocks";
 
-function isInteractive(block: Block): boolean {
-  return ["scenario", "matching", "check", "roles", "decision", "commitment"].includes(block.type);
+function isDatabaseInteractive(block: any): boolean {
+  return ["multiple_choice", "decision_scenario", "commitment"].includes(block.type);
 }
 
 type Phase = "modules" | "quiz" | "complete";
 
-export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: number }) {
+export default function DatabaseCoursePlayer({
+  enrollmentId,
+  isPreview = false,
+  previewCourseId,
+}: {
+  enrollmentId?: number;
+  isPreview?: boolean;
+  previewCourseId?: number;
+}) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: enrollment, isLoading } = useGetEnrollment(enrollmentId, {
-    query: { enabled: !!enrollmentId, queryKey: ["enrollment", enrollmentId] },
-  });
-  const { data: progressRows } = useGetProgress(enrollmentId, {
-    query: { enabled: !!enrollmentId, queryKey: ["progress", enrollmentId] },
+  // 1. Queries and Mutations (Conditional on preview mode)
+  const { data: rawEnrollment, isLoading: isEnrollmentLoading } = useGetEnrollment(enrollmentId || 0, {
+    query: { enabled: !!enrollmentId && !isPreview, queryKey: ["enrollment", enrollmentId] },
   });
 
-  const courseId = enrollment?.course?.id ?? 0;
-  const { data: existingCommitments } = useGetCommitments(courseId, {
-    query: { enabled: !!courseId, queryKey: ["commitments", courseId] },
+  const { data: rawProgressRows } = useGetProgress(enrollmentId || 0, {
+    query: { enabled: !!enrollmentId && !isPreview, queryKey: ["progress", enrollmentId] },
   });
 
-  const updateProgress = useUpdateProgress();
-  const saveCommitments = useSaveCommitments();
+  const { data: previewCourse, isLoading: isPreviewCourseLoading } = useGetCourse(previewCourseId || 0, {
+    query: { enabled: isPreview && !!previewCourseId, queryKey: ["course", previewCourseId] },
+  });
+
+  const courseId = isPreview ? (previewCourseId ?? 0) : (rawEnrollment?.course?.id ?? 0);
+
+  const { data: rawExistingCommitments } = useGetCommitments(courseId, {
+    query: { enabled: !!courseId && !isPreview, queryKey: ["commitments", courseId] },
+  });
+
+  const rawUpdateProgress = useUpdateProgress();
+  const rawSaveCommitments = useSaveCommitments();
+
+  // Mock States for Admin Preview
+  const [mockCompletedIds, setMockCompletedIds] = useState<Set<number>>(new Set());
+  const [mockCommitments, setMockCommitments] = useState<string[]>([]);
+
+  // 2. Computed States
+  const enrollment = useMemo(() => {
+    if (isPreview) {
+      return {
+        course: previewCourse ? {
+          ...previewCourse,
+        } : null,
+        progressPct: 0,
+        status: "active",
+      };
+    }
+    return rawEnrollment;
+  }, [isPreview, previewCourse, rawEnrollment]);
 
   const lessons = useMemo(
     () => (enrollment?.course?.lessons ? [...enrollment.course.lessons].sort((a, b) => a.orderIndex - b.orderIndex) : []),
     [enrollment],
   );
+
   const completedIds = useMemo(
-    () => new Set((progressRows || []).filter((p) => p.completed).map((p) => p.lessonId)),
-    [progressRows],
+    () => isPreview ? mockCompletedIds : new Set((rawProgressRows || []).filter((p) => p.completed).map((p) => p.lessonId)),
+    [isPreview, mockCompletedIds, rawProgressRows],
   );
+
+  const existingCommitments = useMemo(() => {
+    if (isPreview) {
+      return { commitments: mockCommitments };
+    }
+    return rawExistingCommitments;
+  }, [isPreview, mockCommitments, rawExistingCommitments]);
+
+  // Mock mutations
+  const updateProgress = useMemo(() => {
+    if (isPreview) {
+      return {
+        isPending: false,
+        mutate: (args: any, callbacks: any) => {
+          setMockCompletedIds(prev => {
+            const next = new Set(prev);
+            next.add(args.data.lessonId);
+            return next;
+          });
+          callbacks?.onSuccess?.();
+        }
+      };
+    }
+    return rawUpdateProgress;
+  }, [isPreview, rawUpdateProgress]);
+
+  const saveCommitments = useMemo(() => {
+    if (isPreview) {
+      return {
+        isPending: false,
+        mutate: (args: any, callbacks: any) => {
+          setMockCommitments(args.data.commitments);
+          callbacks?.onSuccess?.();
+        }
+      };
+    }
+    return rawSaveCommitments;
+  }, [isPreview, rawSaveCommitments]);
 
   const [phase, setPhase] = useState<Phase>("modules");
   const [moduleIndex, setModuleIndex] = useState(0);
@@ -81,7 +151,7 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
 
   // Resume to first uncompleted module, or to the completion hub if all modules done.
   useEffect(() => {
-    if (initialised || !enrollment || lessons.length === 0) return;
+    if (initialised || (!isPreview && !enrollment) || (isPreview && !previewCourse) || lessons.length === 0) return;
     const firstUncompleted = lessons.findIndex((l) => !completedIds.has(l.id));
     if (firstUncompleted === -1) {
       setPhase("complete");
@@ -90,7 +160,7 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
       setModuleIndex(firstUncompleted);
     }
     setInitialised(true);
-  }, [enrollment, lessons, completedIds, initialised]);
+  }, [enrollment, previewCourse, lessons, completedIds, initialised, isPreview]);
 
   // Prefill saved commitments.
   useEffect(() => {
@@ -104,7 +174,9 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
     setResolved(new Set());
   }, [moduleIndex]);
 
-  if (isLoading || !initialised) {
+  const isLoading = isPreview ? isPreviewCourseLoading : (isEnrollmentLoading || !initialised);
+
+  if (isLoading || (isPreview && !previewCourse) || (!isPreview && !enrollment)) {
     return (
       <div className="min-h-screen bg-background">
         <header className="h-16 border-b flex items-center px-4">
@@ -119,23 +191,11 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
     );
   }
 
-  if (!enrollment || !enrollment.course) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">Enrollment not found</h2>
-          <Button asChild>
-            <Link href="/dashboard">Back to Dashboard</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const module = MODULES[moduleIndex];
-  const interactiveCount = module.blocks.filter(isInteractive).length;
-  const gatePassed =
-    module.key === "commitment" ? commitmentSel.size > 0 : resolved.size >= interactiveCount;
+  const module = lessons[moduleIndex];
+  const blocks = module?.contentBlocks || [];
+  const isCommitmentLesson = blocks.some((b: any) => b.type === "commitment");
+  const interactiveCount = blocks.filter(isDatabaseInteractive).length;
+  const gatePassed = isCommitmentLesson ? commitmentSel.size > 0 : resolved.size >= interactiveCount;
   const overallPct = Math.round((completedIds.size / Math.max(lessons.length, 1)) * 100);
 
   function markResolved(blockIndex: number) {
@@ -148,13 +208,15 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
   }
 
   function invalidateProgress() {
-    queryClient.invalidateQueries({ queryKey: ["progress", enrollmentId] });
-    queryClient.invalidateQueries({ queryKey: ["enrollment", enrollmentId] });
+    if (!isPreview && enrollmentId) {
+      queryClient.invalidateQueries({ queryKey: ["progress", enrollmentId] });
+      queryClient.invalidateQueries({ queryKey: ["enrollment", enrollmentId] });
+    }
   }
 
   function advanceFromModule() {
     const lesson = lessons[moduleIndex];
-    const isLast = moduleIndex === MODULES.length - 1;
+    const isLast = moduleIndex === lessons.length - 1;
 
     const proceed = () => {
       invalidateProgress();
@@ -168,7 +230,7 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
 
     if (lesson && !completedIds.has(lesson.id)) {
       updateProgress.mutate(
-        { enrollmentId, data: { lessonId: lesson.id, completed: true } },
+        { enrollmentId: enrollmentId || 0, data: { lessonId: lesson.id, completed: true } },
         {
           onSuccess: proceed,
           onError: () => toast({ title: "Could not save progress", variant: "destructive" }),
@@ -180,12 +242,14 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
   }
 
   function handleModuleContinue() {
-    if (module.key === "commitment") {
+    if (isCommitmentLesson) {
       saveCommitments.mutate(
         { courseId, data: { commitments: Array.from(commitmentSel) } },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["commitments", courseId] });
+            if (!isPreview) {
+              queryClient.invalidateQueries({ queryKey: ["commitments", courseId] });
+            }
             toast({ title: "Commitments saved", description: "Well done for taking the first step." });
             advanceFromModule();
           },
@@ -197,27 +261,56 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
     }
   }
 
-  function renderBlock(block: Block, i: number) {
+  function renderDatabaseBlock(block: any, i: number) {
     switch (block.type) {
-      case "text":
-        return <TextView key={i} block={block} />;
-      case "callout":
-        return <CalloutView key={i} block={block} />;
-      case "scenario":
-        return <ScenarioView key={i} block={block} onResolved={() => markResolved(i)} />;
-      case "matching":
-        return <MatchingView key={i} block={block} onResolved={() => markResolved(i)} />;
-      case "check":
-        return <CheckView key={i} block={block} onResolved={() => markResolved(i)} />;
-      case "roles":
-        return <RolesView key={i} block={block} onResolved={() => markResolved(i)} />;
-      case "decision":
-        return <DecisionView key={i} block={block} onResolved={() => markResolved(i)} />;
+      case "heading":
+        return <TextView key={i} block={{ type: "text", heading: block.headingText, body: "" }} />;
+      case "short_text":
+        return <TextView key={i} block={{ type: "text", body: block.bodyText }} />;
+      case "key_message":
+      case "workplace_example":
+      case "mauritian_example":
+      case "practical_action":
+        return <CalloutView key={i} block={{ type: "callout", title: block.headingText || "Key Concept", body: block.bodyText }} />;
+      case "multiple_choice":
+        return (
+          <CheckView
+            key={i}
+            block={{
+              type: "check",
+              question: block.mcqQuestion || "Knowledge Check",
+              options: block.mcqOptions || [],
+              correctIndex: block.mcqCorrectIndex ?? 0,
+              explanation: block.mcqCorrectExplanation || ""
+            }}
+            onResolved={() => markResolved(i)}
+          />
+        );
+      case "decision_scenario":
+        return (
+          <ScenarioView
+            key={i}
+            block={{
+              type: "scenario",
+              prompt: block.decisionIntro ? `${block.decisionIntro}\n\n${block.decisionPrompt}` : block.decisionPrompt || "",
+              choices: (block.decisionChoices || []).map((c: any) => ({
+                label: c.label,
+                feedback: c.feedback,
+                ideal: c.correct
+              }))
+            }}
+            onResolved={() => markResolved(i)}
+          />
+        );
       case "commitment":
         return (
           <CommitmentView
             key={i}
-            block={block}
+            block={{
+              type: "commitment",
+              instruction: block.commitmentInstruction || "Select commitments:",
+              options: block.commitmentOptions || []
+            }}
             selected={commitmentSel}
             onToggle={(value) =>
               setCommitmentSel((prev) => {
@@ -238,10 +331,12 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
     <div className="min-h-screen flex flex-col bg-background">
       <header className="h-16 border-b flex items-center justify-between px-4 shrink-0 bg-card sticky top-0 z-10">
         <div className="flex items-center gap-3 min-w-0">
-          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground shrink-0">
+          <Link href={isPreview ? "/platform-admin/courses" : "/dashboard"} className="text-muted-foreground hover:text-foreground shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <div className="font-serif font-semibold text-base sm:text-lg truncate">Sustainability Foundations</div>
+          <div className="font-serif font-semibold text-base sm:text-lg truncate">
+            {enrollment?.course?.title || "Course Player"}
+          </div>
         </div>
         <div className="text-sm font-medium text-muted-foreground shrink-0">{overallPct}% complete</div>
       </header>
@@ -251,9 +346,9 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
           <Progress value={phase === "modules" ? overallPct : 100} className="h-1.5" />
           {phase === "modules" ? (
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              {MODULES.map((m, i) => (
+              {lessons.map((l, i) => (
                 <span
-                  key={m.key}
+                  key={l.id}
                   className={
                     i === moduleIndex
                       ? "font-semibold text-primary"
@@ -262,7 +357,7 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
                         : ""
                   }
                 >
-                  {i + 1}. {m.title}
+                  {i + 1}. {l.title}
                 </span>
               ))}
             </div>
@@ -274,26 +369,20 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
         <div className="max-w-3xl mx-auto px-4 py-8">
           {phase === "modules" ? (
             <div className="space-y-6">
-              {module.image ? (
-                <div className="aspect-[16/9] overflow-hidden rounded-xl border bg-muted">
-                  <img src={module.image} alt={module.title} className="h-full w-full object-cover" />
-                </div>
-              ) : null}
               <div className="space-y-1">
                 <p className="text-sm font-medium text-primary">
-                  Module {moduleIndex + 1} of {MODULES.length}
+                  Module {moduleIndex + 1} of {lessons.length}
                 </p>
-                <h1 className="text-3xl font-bold font-serif leading-tight">{module.title}</h1>
-                <p className="text-muted-foreground">{module.subtitle}</p>
+                <h1 className="text-3xl font-bold font-serif leading-tight">{module?.title}</h1>
               </div>
 
-              <div className="space-y-5" key={module.key}>
-                {module.blocks.map((b, i) => renderBlock(b, i))}
+              <div className="space-y-5" key={module?.id}>
+                {blocks.map((b: any, i: number) => renderDatabaseBlock(b, i))}
               </div>
 
               {!gatePassed ? (
                 <p className="text-sm text-muted-foreground">
-                  {module.key === "commitment"
+                  {isCommitmentLesson
                     ? "Choose at least one commitment to finish the course."
                     : "Complete the activities above to continue."}
                 </p>
@@ -317,7 +406,7 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
                 >
                   {updateProgress.isPending || saveCommitments.isPending
                     ? "Saving..."
-                    : moduleIndex === MODULES.length - 1
+                    : moduleIndex === lessons.length - 1
                       ? "Finish and take the quiz"
                       : "Mark complete and continue"}
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -329,21 +418,32 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
           {phase === "quiz" ? (
             <FinalQuiz
               courseId={courseId}
+              isPreview={isPreview}
               onPassed={() => {
                 invalidateProgress();
-                queryClient.invalidateQueries({ queryKey: ["courseSummary", courseId] });
+                if (!isPreview) {
+                  queryClient.invalidateQueries({ queryKey: ["courseSummary", courseId] });
+                }
                 setPhase("complete");
                 window.scrollTo({ top: 0 });
               }}
               onBackToModules={() => {
                 setPhase("modules");
-                setModuleIndex(MODULES.length - 1);
+                setModuleIndex(lessons.length - 1);
               }}
             />
           ) : null}
 
           {phase === "complete" ? (
-            <CompletionScreen courseId={courseId} onTakeQuiz={() => setPhase("quiz")} />
+            <CompletionScreen
+              courseId={courseId}
+              isPreview={isPreview}
+              mockCompletedIds={mockCompletedIds}
+              mockCommitments={mockCommitments}
+              lessons={lessons}
+              enrollment={enrollment}
+              onTakeQuiz={() => setPhase("quiz")}
+            />
           ) : null}
         </div>
       </main>
@@ -353,21 +453,72 @@ export default function FoundationsPlayer({ enrollmentId }: { enrollmentId: numb
 
 function FinalQuiz({
   courseId,
+  isPreview,
   onPassed,
   onBackToModules,
 }: {
   courseId: number;
+  isPreview: boolean;
   onPassed: () => void;
   onBackToModules: () => void;
 }) {
   const { toast } = useToast();
-  const { data: quiz, isLoading } = useGetCourseQuiz(courseId, {
-    query: { enabled: !!courseId, queryKey: ["quiz", courseId] },
+  const { data: rawQuiz, isLoading: isRawQuizLoading } = useGetCourseQuiz(courseId, {
+    query: { enabled: !isPreview && !!courseId, queryKey: ["quiz", courseId] },
   });
-  const submitQuiz = useSubmitQuiz();
+  const { data: adminQuiz, isLoading: isAdminQuizLoading } = usePlatformAdminListQuizQuestions(courseId, {
+    query: { enabled: isPreview && !!courseId, queryKey: ["adminQuiz", courseId] },
+  });
+  const { data: course } = useGetCourse(courseId, {
+    query: { enabled: isPreview && !!courseId, queryKey: ["course", courseId] },
+  });
+  const rawSubmitQuiz = useSubmitQuiz();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [result, setResult] = useState<{ passed: boolean; score: number; correctAnswers: number; totalQuestions: number } | null>(null);
+
+  const passingScore = course?.passingScore ?? 80;
+
+  const quiz = useMemo(() => {
+    if (isPreview) {
+      return {
+        courseId,
+        questions: adminQuiz || [],
+      };
+    }
+    return rawQuiz;
+  }, [isPreview, courseId, rawQuiz, adminQuiz]);
+
+  const isLoading = isPreview ? isAdminQuizLoading : isRawQuizLoading;
+
+  const submitQuiz = useMemo(() => {
+    if (isPreview) {
+      return {
+        isPending: false,
+        mutate: (args: any, callbacks: any) => {
+          let correctAnswers = 0;
+          const questions = (quiz?.questions || []) as any[];
+          for (const answer of args.data.answers) {
+            const question = questions.find((q: any) => q.id === answer.questionId);
+            if (question && question.correctOption === answer.selectedOption) {
+              correctAnswers++;
+            }
+          }
+          const totalQuestions = questions.length;
+          const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+          const passed = score >= passingScore;
+          callbacks?.onSuccess?.({
+            passed,
+            score,
+            correctAnswers,
+            totalQuestions,
+            certificateId: null
+          });
+        }
+      };
+    }
+    return rawSubmitQuiz;
+  }, [isPreview, quiz, passingScore, rawSubmitQuiz]);
 
   if (isLoading) {
     return (
@@ -401,7 +552,9 @@ function FinalQuiz({
             <p className="text-muted-foreground mb-1">
               Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})
             </p>
-            <p className="text-sm text-muted-foreground mb-6">Your certificate is ready.</p>
+            <p className="text-sm text-muted-foreground mb-6">
+              {isPreview ? "Preview complete. No certificate will be generated." : "Your certificate is ready."}
+            </p>
             <Button size="lg" onClick={onPassed}>
               See your results
             </Button>
@@ -416,7 +569,7 @@ function FinalQuiz({
               Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              You need 80% to pass. Review the modules and try again.
+              You need {passingScore}% to pass. Review the modules and try again.
             </p>
             <div className="flex gap-3 justify-center">
               <Button
@@ -456,7 +609,7 @@ function FinalQuiz({
     submitQuiz.mutate(
       { courseId, data: { answers: formatted } },
       {
-        onSuccess: (res) => setResult(res),
+        onSuccess: (res: any) => setResult(res),
         onError: () => toast({ title: "Error submitting quiz", variant: "destructive" }),
       },
     );
@@ -473,7 +626,7 @@ function FinalQuiz({
           <span>
             Question {current + 1} of {quiz.questions.length}
           </span>
-          <span>You need 80% to pass</span>
+          <span>You need {passingScore}% to pass</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
@@ -481,7 +634,7 @@ function FinalQuiz({
       <Card className="p-6">
         <h2 className="text-xl font-medium leading-relaxed mb-6">{question.question}</h2>
         <div className="space-y-3 mb-8">
-          {question.options.map((option, index) => {
+          {question.options.map((option: string, index: number) => {
             const isSelected = answers[question.id] === index;
             return (
               <button
@@ -518,12 +671,60 @@ function FinalQuiz({
   );
 }
 
-function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQuiz: () => void }) {
-  const { data: summary, isLoading } = useGetCourseProgressSummary(courseId, {
-    query: { enabled: !!courseId, queryKey: ["courseSummary", courseId] },
+function CompletionScreen({
+  courseId,
+  isPreview,
+  mockCompletedIds,
+  mockCommitments,
+  lessons,
+  enrollment,
+  onTakeQuiz,
+}: {
+  courseId: number;
+  isPreview: boolean;
+  mockCompletedIds: Set<number>;
+  mockCommitments: string[];
+  lessons: any[];
+  enrollment: any;
+  onTakeQuiz: () => void;
+}) {
+  const { data: rawSummary, isLoading: isSummaryLoading } = useGetCourseProgressSummary(courseId, {
+    query: { enabled: !!courseId && !isPreview, queryKey: ["courseSummary", courseId] },
   });
 
-  if (isLoading || !summary) {
+  const { data: rawCommitments } = useGetCommitments(courseId, {
+    query: { enabled: !!courseId && !isPreview, queryKey: ["commitments", courseId] },
+  });
+
+  const summary = useMemo(() => {
+    if (isPreview) {
+      return {
+        modulesCompleted: mockCompletedIds.size,
+        totalModules: lessons.length,
+        points: { totalPoints: mockCompletedIds.size * 50 + 100 },
+        bestScore: 100,
+        quizPassed: true,
+        badgeEarned: true,
+        badgeName: enrollment?.course?.badgeName || "Badge",
+        certificateId: null,
+      };
+    }
+    return rawSummary;
+  }, [isPreview, mockCompletedIds, lessons, rawSummary, enrollment]);
+
+  const selectedCommitmentList = useMemo(() => {
+    if (isPreview) {
+      return mockCommitments;
+    }
+    return rawCommitments?.commitments || [];
+  }, [isPreview, mockCommitments, rawCommitments]);
+
+  const nextCourseId = enrollment?.course?.recommendedNextCourseId;
+  const { data: nextCourse } = useGetCourse(nextCourseId || 0, {
+    query: { enabled: !!nextCourseId, queryKey: ["course", nextCourseId] }
+  });
+
+  if (isSummaryLoading || !summary) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-1/2" />
@@ -532,7 +733,8 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
     );
   }
 
-  const commitments = COMMITMENT_OPTIONS;
+  const completionMessage = enrollment?.course?.completionMessage ||
+    `You have completed the course ${enrollment?.course?.title || ""}. You can now put your newly acquired knowledge into practice.`;
 
   return (
     <div className="space-y-8">
@@ -541,8 +743,8 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
           <Sparkles className="h-10 w-10" />
         </div>
         <h1 className="text-3xl font-bold font-serif">Well done</h1>
-        <p className="text-muted-foreground">
-          You have completed the Sustainability Foundations course. Here is your progress.
+        <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+          {completionMessage}
         </p>
       </div>
 
@@ -554,7 +756,7 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
           <p className="text-xs text-muted-foreground">Modules done</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{summary.points.totalPoints}</p>
+          <p className="text-2xl font-bold text-foreground">{summary.points?.totalPoints || 0}</p>
           <p className="text-xs text-muted-foreground">Points earned</p>
         </Card>
         <Card className="p-4 text-center">
@@ -577,7 +779,7 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
           <div>
             <p className="font-semibold text-emerald-900 dark:text-emerald-200">Badge unlocked: {summary.badgeName}</p>
             <p className="text-sm text-emerald-800 dark:text-emerald-300">
-              You earned this for completing the course and making your first commitment.
+              {enrollment?.course?.badgeDescription || "You earned this for completing the course."}
             </p>
           </div>
         </Card>
@@ -588,13 +790,19 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
           <Award className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Your certificate</h3>
         </div>
-        {summary.quizPassed && summary.certificateId ? (
+        {summary.quizPassed && (summary.certificateId || isPreview) ? (
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button asChild>
-              <a href={`/api/certificates/${summary.certificateId}/pdf`} target="_blank" rel="noopener noreferrer">
-                <Download className="mr-2 h-4 w-4" /> Download certificate
-              </a>
-            </Button>
+            {isPreview ? (
+              <Button disabled variant="outline">
+                Download certificate (Preview)
+              </Button>
+            ) : (
+              <Button asChild>
+                <a href={`/api/certificates/${summary.certificateId}/pdf`} target="_blank" rel="noopener noreferrer">
+                  <Download className="mr-2 h-4 w-4" /> Download certificate
+                </a>
+              </Button>
+            )}
             <Button variant="outline" asChild>
               <Link href="/certificates">View all certificates</Link>
             </Button>
@@ -602,7 +810,7 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Pass the final quiz with 80% or more to unlock your certificate.
+              Pass the final quiz with {enrollment?.course?.passingScore ?? 80}% or more to unlock your certificate.
             </p>
             <Button onClick={onTakeQuiz}>
               <GraduationCap className="mr-2 h-4 w-4" /> Take the final quiz
@@ -612,26 +820,51 @@ function CompletionScreen({ courseId, onTakeQuiz }: { courseId: number; onTakeQu
       </Card>
 
       <Card className="p-5">
-        <h3 className="font-semibold mb-2">Keep the momentum going</h3>
+        <h3 className="font-semibold mb-2">Your Commitments</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Put your commitments into practice and continue building your knowledge.
+          Here are the daily workplace actions you committed to practice:
         </p>
         <div className="flex flex-wrap gap-2 mb-5">
-          {commitments.map((c) => (
-            <span key={c.value} className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-              {c.label}
-            </span>
-          ))}
+          {selectedCommitmentList.length > 0 ? (
+            selectedCommitmentList.map((cValue) => {
+              // Dynamic lookup of commitment option label from lessons
+              let label = cValue;
+              for (const l of lessons) {
+                const cBlock = (l.contentBlocks as any[])?.find((b: any) => b.type === "commitment");
+                if (cBlock?.commitmentOptions) {
+                  const opt = cBlock.commitmentOptions.find((o: any) => o.value === cValue);
+                  if (opt) {
+                    label = opt.label;
+                    break;
+                  }
+                }
+              }
+              return (
+                <span
+                  key={cValue}
+                  className="rounded-full bg-emerald-100 text-emerald-850 dark:bg-emerald-950/40 dark:text-emerald-200 px-3 py-1.5 text-xs font-semibold"
+                >
+                  {label}
+                </span>
+              );
+            })
+          ) : (
+            <span className="text-xs text-muted-foreground italic">No commitments registered yet.</span>
+          )}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button asChild>
-            <Link href={`/courses/${NEXT_COURSE_ID}`}>
-              Next course: {NEXT_COURSE_TITLE}
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          {nextCourseId && nextCourse && nextCourse.isPublished ? (
+            <Button asChild>
+              <Link href={`/courses/${nextCourse.id}`}>
+                Next course: {nextCourse.title}
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          ) : null}
           <Button variant="outline" asChild>
-            <Link href="/dashboard">Back to dashboard</Link>
+            <Link href={isPreview ? "/platform-admin/courses" : "/dashboard"}>
+              Back to dashboard
+            </Link>
           </Button>
         </div>
       </Card>

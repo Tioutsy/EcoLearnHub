@@ -1,19 +1,58 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Circle, Lightbulb, Eye } from "lucide-react";
+import { CheckCircle2, XCircle, Circle, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import type {
-  TextBlock,
-  CalloutBlock,
-  RevealBlock,
-  ScenarioBlock,
-  SortBlock,
-  MatchingBlock,
-  KnowledgeCheck,
-  RoleSelectorBlock,
-  DecisionBlock,
-  PledgeBlock,
-} from "./content";
+
+export type TextBlock = { type: "text"; heading?: string; body: string };
+export type CalloutBlock = { type: "callout"; title: string; body: string };
+
+export type ScenarioChoice = { label: string; feedback: string; ideal?: boolean };
+export type ScenarioBlock = {
+  type: "scenario";
+  prompt: string;
+  choices: ScenarioChoice[];
+};
+
+export type MatchPair = { term: string; match: string };
+export type MatchingBlock = {
+  type: "matching";
+  instruction: string;
+  pairs: MatchPair[];
+};
+
+export type KnowledgeCheck = {
+  type: "check";
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+};
+
+export type RoleExample = { role: string; example: string };
+export type RoleSelectorBlock = {
+  type: "roles";
+  instruction: string;
+  roles: RoleExample[];
+  actionPrompt: string;
+  actions: string[];
+};
+
+export type DecisionScenario = {
+  prompt: string;
+  options: { label: string; correct: boolean; feedback: string }[];
+};
+export type DecisionBlock = {
+  type: "decision";
+  intro: string;
+  scenarios: DecisionScenario[];
+};
+
+export type CommitmentOption = { value: string; label: string; description: string };
+export type CommitmentBlock = {
+  type: "commitment";
+  instruction: string;
+  options: CommitmentOption[];
+};
 
 export function TextView({ block }: { block: TextBlock }) {
   return (
@@ -35,64 +74,6 @@ export function CalloutView({ block }: { block: CalloutBlock }) {
           <p className="font-semibold text-emerald-900 dark:text-emerald-200">{block.title}</p>
           <p className="text-sm leading-relaxed text-emerald-800 dark:text-emerald-300">{block.body}</p>
         </div>
-      </div>
-    </Card>
-  );
-}
-
-export function RevealView({
-  block,
-  onResolved,
-}: {
-  block: RevealBlock;
-  onResolved: () => void;
-}) {
-  const [revealed, setRevealed] = useState<Set<number>>(new Set());
-
-  function reveal(i: number) {
-    setRevealed((prev) => {
-      if (prev.has(i)) return prev;
-      const next = new Set(prev);
-      next.add(i);
-      if (next.size === block.items.length) onResolved();
-      return next;
-    });
-  }
-
-  return (
-    <Card className="p-5">
-      <p className="mb-4 text-sm font-medium text-foreground">{block.instruction}</p>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {block.items.map((item, i) => {
-          const open = revealed.has(i);
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => reveal(i)}
-              className={cn(
-                "flex min-h-24 flex-col rounded-lg border p-4 text-left text-sm transition-colors",
-                open
-                  ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40"
-                  : "border-border hover:border-emerald-300 hover:bg-muted",
-              )}
-            >
-              <span className="flex items-center justify-between font-semibold text-foreground">
-                {item.label}
-                {open ? (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
-              </span>
-              {open ? (
-                <span className="mt-2 text-muted-foreground">{item.detail}</span>
-              ) : (
-                <span className="mt-2 text-xs text-muted-foreground">Tap to reveal</span>
-              )}
-            </button>
-          );
-        })}
       </div>
     </Card>
   );
@@ -145,114 +126,6 @@ export function ScenarioView({
           );
         })}
       </div>
-    </Card>
-  );
-}
-
-export function SortView({
-  block,
-  onResolved,
-}: {
-  block: SortBlock;
-  onResolved: () => void;
-}) {
-  const [selected, setSelected] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
-
-  function choose(itemIndex: number, binKey: string) {
-    if (answers[itemIndex] !== undefined) return;
-    const next = { ...answers, [itemIndex]: binKey };
-    setAnswers(next);
-    setSelected(null);
-    if (Object.keys(next).length === block.items.length) onResolved();
-  }
-
-  const allDone = Object.keys(answers).length === block.items.length;
-  const correctCount = block.items.filter((it, i) => answers[i] === it.correctBin).length;
-
-  return (
-    <Card className="p-5">
-      <p className="mb-4 text-sm font-medium text-foreground">{block.instruction}</p>
-      <div className="space-y-2">
-        {block.items.map((item, i) => {
-          const answered = answers[i] !== undefined;
-          const correct = answers[i] === item.correctBin;
-          const isSelected = selected === i;
-          const chosenBin = block.bins.find((b) => b.key === answers[i]);
-          const correctBin = block.bins.find((b) => b.key === item.correctBin);
-          return (
-            <button
-              key={i}
-              type="button"
-              disabled={answered}
-              onClick={() => setSelected(isSelected ? null : i)}
-              className={cn(
-                "flex w-full items-center justify-between rounded-lg border p-3 text-left text-sm transition-colors",
-                isSelected && "border-emerald-500 ring-2 ring-emerald-200",
-                answered
-                  ? correct
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40"
-                    : "border-red-400 bg-red-50 dark:bg-red-950/30"
-                  : "border-border hover:bg-muted",
-              )}
-            >
-              <span className="font-medium text-foreground">{item.label}</span>
-              {answered ? (
-                <span className="flex items-center gap-2 text-xs">
-                  <span className={correct ? "text-emerald-700 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
-                    {chosenBin?.label}
-                  </span>
-                  {correct ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-red-500" />
-                  )}
-                </span>
-              ) : (
-                <span className="text-xs text-muted-foreground">
-                  {isSelected ? "Choose a bin below" : "Tap to select"}
-                </span>
-              )}
-              {answered && !correct ? (
-                <span className="sr-only">Correct bin is {correctBin?.label}</span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {block.bins.map((bin) => (
-          <button
-            key={bin.key}
-            type="button"
-            disabled={selected === null}
-            onClick={() => selected !== null && choose(selected, bin.key)}
-            className={cn(
-              "rounded-lg border px-3 py-2 text-sm transition-colors",
-              selected === null
-                ? "border-border text-muted-foreground opacity-60"
-                : "border-emerald-300 text-foreground hover:bg-emerald-50 dark:hover:bg-emerald-950/40",
-            )}
-          >
-            {bin.label}
-          </button>
-        ))}
-      </div>
-
-      {block.items.map((item, i) =>
-        answers[i] !== undefined && answers[i] !== item.correctBin ? (
-          <p key={i} className="mt-2 text-sm text-muted-foreground">
-            {item.label}: {item.note}
-          </p>
-        ) : null,
-      )}
-
-      {allDone ? (
-        <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-400">
-          You sorted {correctCount} of {block.items.length} correctly. Review any notes above and keep them in mind.
-        </p>
-      ) : null}
     </Card>
   );
 }
@@ -337,7 +210,7 @@ export function MatchingView({
       </div>
       {allDone ? (
         <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-400">
-          Well matched. Thinking in this order helps you cut waste before it is even created.
+          Nicely done. Each action above brings a real benefit to people, the planet, and the business.
         </p>
       ) : null}
     </Card>
@@ -520,12 +393,12 @@ export function DecisionView({
   );
 }
 
-export function PledgeView({
+export function CommitmentView({
   block,
   selected,
   onToggle,
 }: {
-  block: PledgeBlock;
+  block: CommitmentBlock;
   selected: Set<string>;
   onToggle: (value: string) => void;
 }) {

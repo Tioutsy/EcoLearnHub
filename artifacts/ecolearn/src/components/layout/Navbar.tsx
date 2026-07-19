@@ -18,10 +18,9 @@ export function Navbar() {
     { href: "/courses", label: "Courses", icon: BookOpen },
     { href: "/learning-paths", label: "Paths", icon: RouteIcon },
     { href: "/challenges", label: "Challenges", icon: Target },
-    { href: "/made-for-mauritius", label: "Made for Mauritius", icon: MapPin },
+    { href: "/insights", label: "Insights", icon: Leaf },
     { href: "/impact", label: "Impact", icon: BarChart3 },
     { href: "/pricing", label: "Pricing", icon: Building2 },
-    { href: "/blog", label: "Insights", icon: Leaf },
   ];
 
   const authLinks = isSignedIn

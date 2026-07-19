@@ -57,3 +57,11 @@ Thumbs.db
 !.env.example
 !**/.env.example
 
+# Temporary Antigravity scripts
+check_db.ts
+check_db.js
+check_db.cjs
+test_drizzle.ts
+verify_seed.ts
+lib/api-spec/node
+EcoLearnHub_Antigravity_12_Course_Skeleton.md

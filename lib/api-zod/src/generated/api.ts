@@ -450,7 +450,19 @@ export const SubmitQuizResponse = zod.object({
   "passed": zod.boolean(),
   "totalQuestions": zod.number(),
   "correctAnswers": zod.number(),
-  "certificateId": zod.number().nullish()
+  "certificateId": zod.number().nullish(),
+  "feedback": zod.array(zod.object({
+  "questionId": zod.number(),
+  "question": zod.string(),
+  "selectedOption": zod.number(),
+  "correctOption": zod.number(),
+  "isCorrect": zod.boolean(),
+  "correctExplanation": zod.string().nullish(),
+  "incorrectExplanation": zod.string().nullish(),
+  "practicalTakeaway": zod.string().nullish(),
+  "optionFeedback": zod.array(zod.string().nullable()).optional(),
+  "options": zod.array(zod.string())
+})).optional()
 })
 
 

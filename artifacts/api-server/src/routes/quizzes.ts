@@ -26,6 +26,31 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
     return;
   }
 
+  const [course] = await db
+    .select({ isPublished: coursesTable.isPublished })
+    .from(coursesTable)
+    .where(eq(coursesTable.id, courseId));
+
+  if (!course) {
+    res.status(404).json({ error: "Course not found" });
+    return;
+  }
+
+  let bypassFilter = false;
+  try {
+    const access = await getCompanyAccess(req);
+    if (access && access.role === "platform_admin") {
+      bypassFilter = true;
+    }
+  } catch (e) {
+    // Ignore auth errors for guest/learner accesses
+  }
+
+  if (!course.isPublished && !bypassFilter) {
+    res.status(403).json({ error: "Cannot access quiz for an unpublished course" });
+    return;
+  }
+
   const questions = await db
     .select({
       id: quizQuestionsTable.id,
@@ -185,7 +210,23 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
       }
     }
 
-    res.json({ score, passed, totalQuestions, correctAnswers, certificateId });
+    const feedback = parsed.data.answers.map((answer) => {
+      const question = questions.find((q) => q.id === answer.questionId);
+      return {
+        questionId: answer.questionId,
+        question: question?.question ?? "",
+        selectedOption: answer.selectedOption,
+        correctOption: question?.correctOption ?? 0,
+        isCorrect: question?.correctOption === answer.selectedOption,
+        correctExplanation: question?.correctExplanation ?? null,
+        incorrectExplanation: question?.incorrectExplanation ?? null,
+        practicalTakeaway: question?.practicalTakeaway ?? null,
+        optionFeedback: question?.optionFeedback ?? [],
+        options: question?.options ?? []
+      };
+    });
+
+    res.json({ score, passed, totalQuestions, correctAnswers, certificateId, feedback });
   } catch (err) {
     if (!sendHttpError(res, err)) {
       req.log?.error({ err }, "Failed to submit quiz");

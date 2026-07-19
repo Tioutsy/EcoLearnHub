@@ -13,6 +13,7 @@ export const quizQuestionsTable = pgTable("quiz_questions", {
   correctExplanation: text("correct_explanation"),
   incorrectExplanation: text("incorrect_explanation"),
   optionFeedback: text("option_feedback").array(),
+  practicalTakeaway: text("practical_takeaway"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   quizQuestionsCourseOrderUnique: unique("quiz_questions_course_order_unique").on(t.courseId, t.orderIndex),

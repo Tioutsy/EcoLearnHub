@@ -275,6 +275,22 @@ export interface QuizSubmission {
   answers: QuizAnswer[];
 }
 
+export type QuizResultFeedbackItem = {
+  questionId: number;
+  question: string;
+  selectedOption: number;
+  correctOption: number;
+  isCorrect: boolean;
+  /** @nullable */
+  correctExplanation?: string | null;
+  /** @nullable */
+  incorrectExplanation?: string | null;
+  /** @nullable */
+  practicalTakeaway?: string | null;
+  optionFeedback?: (string | null)[];
+  options: string[];
+};
+
 export interface QuizResult {
   score: number;
   passed: boolean;
@@ -282,6 +298,7 @@ export interface QuizResult {
   correctAnswers: number;
   /** @nullable */
   certificateId?: number | null;
+  feedback?: QuizResultFeedbackItem[];
 }
 
 export interface CommitmentList {

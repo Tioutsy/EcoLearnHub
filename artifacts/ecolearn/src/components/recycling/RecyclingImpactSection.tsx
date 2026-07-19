@@ -127,7 +127,7 @@ export function RecyclingImpactSection() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/made-for-mauritius">Learn more</Link>
+              <Link href="/insights/mauritius-resources">Learn more</Link>
             </Button>
           </div>
         </div>

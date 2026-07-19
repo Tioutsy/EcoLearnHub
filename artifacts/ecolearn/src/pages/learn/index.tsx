@@ -6,10 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, PlayCircle, FileText, CheckCircle2, ChevronRight, Award, GraduationCap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import FoundationsPlayer from "./foundations/FoundationsPlayer";
-import { FOUNDATIONS_COURSE_ID, FOUNDATIONS_COURSE_SLUG } from "./foundations/content";
-import WasteSortingPlayer from "./waste-sorting/WasteSortingPlayer";
-import { WASTE_SORTING_COURSE_ID, WASTE_SORTING_COURSE_SLUG } from "./waste-sorting/content";
+import DatabaseCoursePlayer from "./DatabaseCoursePlayer";
 
 export default function Learn() {
   const { enrollmentId } = useParams();
@@ -67,19 +64,14 @@ export default function Learn() {
     );
   }
 
-  // Activate the bespoke player by durable slug (falls back to id for legacy rows).
-  if (
-    enrollment.course.slug === FOUNDATIONS_COURSE_SLUG ||
-    enrollment.course.id === FOUNDATIONS_COURSE_ID
-  ) {
-    return <FoundationsPlayer enrollmentId={id} />;
-  }
-
-  if (
-    enrollment.course.slug === WASTE_SORTING_COURSE_SLUG ||
-    enrollment.course.id === WASTE_SORTING_COURSE_ID
-  ) {
-    return <WasteSortingPlayer enrollmentId={id} />;
+  // Inspect lessons/contentBlocks to see if the course has structured database content blocks.
+  // If so, load our generic DatabaseCoursePlayer.
+  const lessonsList = enrollment.course?.lessons || [];
+  const hasStructuredBlocks = lessonsList.some(
+    (l) => l.contentBlocks && Array.isArray(l.contentBlocks) && l.contentBlocks.length > 0
+  );
+  if (hasStructuredBlocks) {
+    return <DatabaseCoursePlayer enrollmentId={id} />;
   }
 
   const course = enrollment.course;

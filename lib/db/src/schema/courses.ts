@@ -29,6 +29,7 @@ export const coursesTable = pgTable("courses", {
   recommendedNextCourseId: integer("recommended_next_course_id"),
   badgeName: text("badge_name"),
   badgeDescription: text("badge_description"),
+  completionMessage: text("completion_message"),
   status: text("status").notNull().default("draft"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),

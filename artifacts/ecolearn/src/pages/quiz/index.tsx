@@ -136,6 +136,59 @@ export default function Quiz() {
               <Link href="/dashboard">Back to Dashboard</Link>
             </Button>
           </div>
+
+          {result.feedback && result.feedback.length > 0 && (
+            <div className="mt-16 text-left border-t pt-12">
+              <h3 className="text-2xl font-bold font-serif mb-8 text-center">Review Your Answers</h3>
+              <div className="space-y-8">
+                {result.feedback.map((item: any, i: number) => (
+                  <div key={item.questionId} className={`p-6 rounded-2xl border-2 ${item.isCorrect ? "border-green-200 bg-green-50/50" : "border-red-200 bg-red-50/50"}`}>
+                    <h4 className="text-lg font-medium mb-4">
+                      <span className="text-muted-foreground mr-2">{i + 1}.</span>
+                      {item.question}
+                    </h4>
+                    <div className="space-y-3 mb-6">
+                      {item.options.map((opt: string, optIdx: number) => {
+                        const isSelected = item.selectedOption === optIdx;
+                        const isCorrectOpt = item.correctOption === optIdx;
+                        let badge = null;
+                        if (isSelected && isCorrectOpt) badge = <span className="ml-auto text-xs font-bold uppercase tracking-wider text-green-600 bg-green-100 px-2 py-1 rounded">Your Answer (Correct)</span>;
+                        else if (isSelected && !isCorrectOpt) badge = <span className="ml-auto text-xs font-bold uppercase tracking-wider text-red-600 bg-red-100 px-2 py-1 rounded">Your Answer (Incorrect)</span>;
+                        else if (!isSelected && isCorrectOpt) badge = <span className="ml-auto text-xs font-bold uppercase tracking-wider text-green-600 bg-green-100 px-2 py-1 rounded">Correct Answer</span>;
+
+                        return (
+                          <div key={optIdx} className={`p-3 rounded-xl border flex items-center gap-3 ${isSelected ? (isCorrectOpt ? "border-green-400 bg-green-50" : "border-red-400 bg-red-50") : (isCorrectOpt ? "border-green-400 bg-green-50" : "bg-card")}`}>
+                            <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? (isCorrectOpt ? "border-green-500" : "border-red-500") : "border-muted-foreground/30"}`}>
+                              {isSelected && <div className={`h-2.5 w-2.5 rounded-full ${isCorrectOpt ? "bg-green-500" : "bg-red-500"}`} />}
+                            </div>
+                            <div>
+                              <span className={isCorrectOpt ? "font-medium" : ""}>{opt}</span>
+                              {item.optionFeedback && item.optionFeedback[optIdx] && (
+                                <p className="text-xs text-muted-foreground mt-1">{item.optionFeedback[optIdx]}</p>
+                              )}
+                            </div>
+                            {badge}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {(item.correctExplanation || item.incorrectExplanation) && (
+                      <div className="bg-card/60 p-4 rounded-xl border text-sm text-muted-foreground">
+                        <strong className="block text-foreground mb-1">Explanation:</strong>
+                        {item.isCorrect ? (item.correctExplanation || item.incorrectExplanation) : (item.incorrectExplanation || item.correctExplanation)}
+                        {item.practicalTakeaway && (
+                          <>
+                            <strong className="block text-foreground mt-3 mb-1">Practical Takeaway:</strong>
+                            {item.practicalTakeaway}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </Layout>
     );

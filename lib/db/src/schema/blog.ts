@@ -70,3 +70,33 @@ export const insertTestimonialSchema = createInsertSchema(testimonialsTable).omi
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
 export type Testimonial = typeof testimonialsTable.$inferSelect;
 
+export const mauritiusResourcesTable = pgTable("mauritius_resources", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  resourceType: text("resource_type").notNull(), // Act, Regulation, Rule, Policy, Government guideline, Code, Official notice, Authority, Compliance resource
+  shortSummary: text("short_summary").notNull(),
+  mainExplanation: text("main_explanation").notNull(), // Simplified EcoLearnHub explanation
+  officialName: text("official_name"),
+  resourceNumber: text("resource_number"),
+  responsibleAuthority: text("responsible_authority"),
+  relevantSector: text("relevant_sector"), // Waste, Energy, Water, Biodiversity, Pollution, Climate, Workplace, Procurement, ESG, General environmental compliance
+  dateIssued: timestamp("date_issued", { withTimezone: true }),
+  effectiveDate: timestamp("effective_date", { withTimezone: true }),
+  officialSourceLink: text("official_source_link"),
+  downloadableDocLink: text("downloadable_doc_link"),
+  complianceRelevance: text("compliance_relevance"), // Compliance relevance
+  practicalImplications: text("practical_implications"), // Practical implications for organisations
+  status: text("status").notNull().default("draft"), // draft, published, archived
+  disclaimer: text("disclaimer").notNull().default("This content is provided for general educational purposes and does not constitute legal advice. Users should refer to the official legislation and seek professional advice where required."),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  relatedResources: jsonb("related_resources").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
+export const insertMauritiusResourceSchema = createInsertSchema(mauritiusResourcesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertMauritiusResource = z.infer<typeof insertMauritiusResourceSchema>;
+export type MauritiusResource = typeof mauritiusResourcesTable.$inferSelect;
+
+

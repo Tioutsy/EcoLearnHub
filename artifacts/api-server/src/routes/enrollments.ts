@@ -69,6 +69,21 @@ router.post("/", async (req, res): Promise<void> => {
       existingClauses.push(eq(enrollmentsTable.userId, access.employee.email));
     }
 
+    const [course] = await db
+      .select({ isPublished: coursesTable.isPublished })
+      .from(coursesTable)
+      .where(eq(coursesTable.id, parsed.data.courseId));
+
+    if (!course) {
+      res.status(404).json({ error: "Course not found" });
+      return;
+    }
+
+    if (!course.isPublished && access.role !== "platform_admin") {
+      res.status(403).json({ error: "Cannot enroll in an unpublished course" });
+      return;
+    }
+
     const existing = await db
       .select()
       .from(enrollmentsTable)
@@ -153,7 +168,22 @@ router.get("/:id", async (req, res): Promise<void> => {
     const [course] = await db
       .select()
       .from(coursesTable)
-      .where(eq(coursesTable.id, enrollment.courseId));
+      .where(eq(coursesTable.id, enrollment.courseId))
+      .limit(1);
+
+    if (!course) {
+      res.status(404).json({ error: "Course not found" });
+      return;
+    }
+
+
+
+    // Block non-admin learners from accessing unpublished courses
+    const isPlatformAdmin = access.role === "platform_admin";
+    if (!course.isPublished && !isPlatformAdmin) {
+      res.status(403).json({ error: "This course is not published yet" });
+      return;
+    }
 
     const lessons = await db
       .select()

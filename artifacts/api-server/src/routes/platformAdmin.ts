@@ -21,13 +21,15 @@ import {
   companyServicesTable,
   insightCategoriesTable,
   blogPostsTable,
+  mauritiusResourcesTable,
   learningPathsTable,
   learningPathCoursesTable,
   coursesTable,
+  categoriesTable,
   lessonsTable,
   quizQuestionsTable
 } from "@workspace/db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, desc } from "drizzle-orm";
 import { requirePlatformAdmin, sendHttpError } from "../lib/access";
 
 const router = Router();
@@ -392,6 +394,166 @@ router.patch("/insights/articles/:id/status", async (req, res): Promise<void> =>
     res.status(500).json({ error: (err as Error).message });
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAURITIUS RULES & RESOURCES
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.get("/insights/mauritius-resources", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const result = await db.select().from(mauritiusResourcesTable).orderBy(mauritiusResourcesTable.createdAt);
+    res.json(result);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.post("/insights/mauritius-resources", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+  } catch (err) {
+    sendHttpError(res, err);
+    return;
+  }
+
+  try {
+    const {
+      title,
+      slug,
+      resourceType,
+      shortSummary,
+      mainExplanation,
+      officialName,
+      resourceNumber,
+      responsibleAuthority,
+      relevantSector,
+      dateIssued,
+      effectiveDate,
+      officialSourceLink,
+      downloadableDocLink,
+      complianceRelevance,
+      practicalImplications,
+      status,
+      disclaimer,
+      isFeatured,
+      relatedResources
+    } = req.body;
+
+    if (!title || !slug || !resourceType || !shortSummary || !mainExplanation) {
+      res.status(400).json({ error: "Missing required resource fields" });
+      return;
+    }
+
+    const [resource] = await db
+      .insert(mauritiusResourcesTable)
+      .values({
+        title,
+        slug,
+        resourceType,
+        shortSummary,
+        mainExplanation,
+        officialName: officialName || null,
+        resourceNumber: resourceNumber || null,
+        responsibleAuthority: responsibleAuthority || null,
+        relevantSector: relevantSector || null,
+        dateIssued: dateIssued ? new Date(dateIssued) : null,
+        effectiveDate: effectiveDate ? new Date(effectiveDate) : null,
+        officialSourceLink: officialSourceLink || null,
+        downloadableDocLink: downloadableDocLink || null,
+        complianceRelevance: complianceRelevance || null,
+        practicalImplications: practicalImplications || null,
+        status: status || "draft",
+        disclaimer: disclaimer || undefined,
+        isFeatured: isFeatured === true,
+        relatedResources: relatedResources || [],
+      })
+      .returning();
+
+    res.status(201).json(resource);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+router.get("/insights/mauritius-resources/:id", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const id = parseInt(req.params.id);
+    const [resource] = await db.select().from(mauritiusResourcesTable).where(eq(mauritiusResourcesTable.id, id)).limit(1);
+    if (!resource) {
+      res.status(404).json({ error: "Resource not found" });
+      return;
+    }
+    res.json(resource);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.patch("/insights/mauritius-resources/:id", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+  } catch (err) {
+    sendHttpError(res, err);
+    return;
+  }
+
+  try {
+    const id = parseInt(req.params.id);
+    const bodyCopy = { ...req.body };
+    if (bodyCopy.dateIssued) bodyCopy.dateIssued = new Date(bodyCopy.dateIssued);
+    if (bodyCopy.effectiveDate) bodyCopy.effectiveDate = new Date(bodyCopy.effectiveDate);
+    bodyCopy.updatedAt = new Date();
+
+    const [resource] = await db
+      .update(mauritiusResourcesTable)
+      .set(bodyCopy)
+      .where(eq(mauritiusResourcesTable.id, id))
+      .returning();
+    if (!resource) {
+      res.status(404).json({ error: "Resource not found" });
+      return;
+    }
+    res.json(resource);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+router.patch("/insights/mauritius-resources/:id/status", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+  } catch (err) {
+    sendHttpError(res, err);
+    return;
+  }
+
+  try {
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+    const allowed = ["draft", "published", "archived"];
+    if (!allowed.includes(status)) {
+      res.status(400).json({ error: "Invalid status value" });
+      return;
+    }
+
+    const [resource] = await db
+      .update(mauritiusResourcesTable)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(mauritiusResourcesTable.id, id))
+      .returning();
+
+    if (!resource) {
+      res.status(404).json({ error: "Resource not found" });
+      return;
+    }
+    res.json(resource);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LEARNING PATHS
@@ -1022,10 +1184,12 @@ router.patch("/courses/:id/metadata", async (req, res): Promise<void> => {
 // PLATFORM ADMIN COURSES ROUTE
 // =============================================================================
 
-// List all courses (draft, review, published, archived) for platform admin
 router.get("/courses", async (req, res): Promise<void> => {
   try {
+    console.log("[DIAG] GET /platform-admin/courses - Received request");
     await requirePlatformAdmin(req);
+    console.log("[DIAG] GET /platform-admin/courses - Auth checks passed");
+    
     const courses = await db
       .select({
         id: coursesTable.id,
@@ -1051,6 +1215,8 @@ router.get("/courses", async (req, res): Promise<void> => {
       .leftJoin(categoriesTable, eq(coursesTable.categoryId, categoriesTable.id))
       .orderBy(desc(coursesTable.isFeatured), desc(coursesTable.enrollmentCount));
 
+    console.log("[DIAG] GET /platform-admin/courses - Database query completed, length:", courses.length);
+
     res.json(
       courses.map((c) => ({
         ...c,
@@ -1058,8 +1224,10 @@ router.get("/courses", async (req, res): Promise<void> => {
         rating: c.rating ? parseFloat(c.rating) : null,
       })),
     );
+    console.log("[DIAG] GET /platform-admin/courses - Response sent");
   } catch (err) {
-    res.status(401).json({ error: (err as Error).message });
+    console.log("[DIAG] GET /platform-admin/courses - Error occurred:", err);
+    sendHttpError(res, err);
   }
 });
 
@@ -1207,7 +1375,7 @@ router.put("/courses/:id/lessons/reorder", async (req, res): Promise<void> => {
         const id = submittedIds[idx]!;
         await tx
           .update(lessonsTable)
-          .set({ orderIndex: idx, updatedAt: new Date() })
+          .set({ orderIndex: idx })
           .where(eq(lessonsTable.id, id));
       }
     });
