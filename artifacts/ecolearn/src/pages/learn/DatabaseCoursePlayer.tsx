@@ -542,7 +542,7 @@ function FinalQuiz({
   }
 
   if (result) {
-    if (result.competencyScores) {
+    if ((result as any).competencyScores) {
       const passed = result.passed;
       return (
         <Card className="p-8 text-center max-w-2xl mx-auto">

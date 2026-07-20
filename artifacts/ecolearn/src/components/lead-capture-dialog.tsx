@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateLead } from "@workspace/api-client-react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
-type Interest = "trial" | "demo" | "proposal";
+type Interest = "proposal";
 
 interface LeadCaptureDialogProps {
   interest: Interest;
@@ -34,22 +34,6 @@ const COPY: Record<
   Interest,
   { title: string; description: string; cta: string; success: string }
 > = {
-  trial: {
-    title: "Start your 14-day free trial",
-    description:
-      "Up to 5 employees, one full course, no card required. Tell us where to set things up and our team will activate your trial.",
-    cta: "Start free trial",
-    success:
-      "Your trial request is in. Our team will set up your account and email you within one business day.",
-  },
-  demo: {
-    title: "Book a demo",
-    description:
-      "See how EcoLearn trains, tracks, and certifies your workforce. We will walk your team through the platform on a call.",
-    cta: "Request demo",
-    success:
-      "Thanks. We will reach out shortly to arrange a demo that fits your schedule.",
-  },
   proposal: {
     title: "Request a corporate proposal",
     description:

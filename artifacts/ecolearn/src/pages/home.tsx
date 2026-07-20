@@ -123,7 +123,7 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoading ? (
-              Array(3).fill(0).map((_, i) => (
+              Array.from({length: 3}).map((_, i) => (
                 <div key={i} className="flex flex-col gap-3">
                   <Skeleton className="h-48 w-full rounded-xl" />
                   <Skeleton className="h-6 w-3/4" />
@@ -251,19 +251,14 @@ export default function Home() {
             Join Mauritian companies who train their teams, track engagement, and certify ESG readiness with reporting their stakeholders can trust.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" asChild className="bg-white text-secondary hover:bg-white/90 h-12 px-8 text-base">
+              <Link href="/pricing">View Corporate Plans</Link>
+            </Button>
             <LeadCaptureDialog
-              interest="trial"
-              trigger={
-                <Button size="lg" className="bg-white text-secondary hover:bg-white/90 h-12 px-8 text-base">
-                  Start Free Trial
-                </Button>
-              }
-            />
-            <LeadCaptureDialog
-              interest="demo"
+              interest="proposal"
               trigger={
                 <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 h-12 px-8 text-base">
-                  Book a Demo
+                  Request a Proposal
                 </Button>
               }
             />
