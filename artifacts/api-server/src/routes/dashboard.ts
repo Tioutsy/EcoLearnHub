@@ -3,8 +3,11 @@ import { db } from "@workspace/db";
 import {
   companiesTable,
   employeesTable,
+  challengeParticipantsTable,
+  quizAttemptsTable,
+  coursesTable,
 } from "@workspace/db";
-import { eq, count, sum, sql } from "drizzle-orm";
+import { eq, count, sum, sql, and } from "drizzle-orm";
 
 const router = Router();
 
@@ -27,6 +30,11 @@ router.get("/stats", async (_req, res): Promise<void> => {
       learningHoursCompleted: 0,
       trainingAdoptionRate: 0,
       employeesNeedingRetraining: 0,
+      employeesParticipatingInChallenges: 0,
+      submittedChallengesAwaitingReview: 0,
+      approvedChallenges: 0,
+      totalApprovedWorkplaceActions: 0,
+      avgApprovedChallengesPerParticipatingEmployee: 0,
     });
     return;
   }
@@ -46,6 +54,30 @@ router.get("/stats", async (_req, res): Promise<void> => {
     .from(employeesTable)
     .where(eq(employeesTable.companyId, company.id));
 
+  // Challenge metrics calculations
+  const participations = await db
+    .select()
+    .from(challengeParticipantsTable)
+    .where(eq(challengeParticipantsTable.companyId, company.id));
+
+  const uniqueParticipants = new Set(participations.map((p) => p.userId));
+  const employeesParticipatingInChallenges = uniqueParticipants.size;
+
+  const submittedChallengesAwaitingReview = participations.filter(
+    (p) => p.status === "submitted"
+  ).length;
+
+  const approvedChallenges = participations.filter(
+    (p) => p.status === "approved"
+  ).length;
+
+  const totalApprovedWorkplaceActions = approvedChallenges;
+
+  const avgApprovedChallengesPerParticipatingEmployee =
+    employeesParticipatingInChallenges > 0
+      ? Math.round((approvedChallenges / employeesParticipatingInChallenges) * 10) / 10
+      : 0;
+
   const totalEmployees = Number(agg?.totalEmployees ?? 0);
   const assigned = Number(agg?.assigned ?? 0);
   const completed = Number(agg?.completed ?? 0);
@@ -64,6 +96,11 @@ router.get("/stats", async (_req, res): Promise<void> => {
     learningHoursCompleted: Math.round(learningMinutes / 60),
     trainingAdoptionRate: totalEmployees > 0 ? Math.round((adopted / totalEmployees) * 100) : 0,
     employeesNeedingRetraining: Number(agg?.needsRetraining ?? 0),
+    employeesParticipatingInChallenges,
+    submittedChallengesAwaitingReview,
+    approvedChallenges,
+    totalApprovedWorkplaceActions,
+    avgApprovedChallengesPerParticipatingEmployee,
   });
 });
 
@@ -79,20 +116,84 @@ router.get("/employee-progress", async (_req, res): Promise<void> => {
     .from(employeesTable)
     .where(eq(employeesTable.companyId, company.id));
 
-  const rows = employees.map((emp) => ({
-    employeeId: emp.id,
-    employeeName: emp.name,
-    email: emp.email,
-    department: emp.department,
-    coursesCompleted: emp.completedCourses,
-    totalCourses: emp.enrolledCourses,
-    completionRate:
-      emp.enrolledCourses > 0 ? Math.round((emp.completedCourses / emp.enrolledCourses) * 100) : 0,
-    certificates: emp.certificates,
-    avgScore: emp.avgScore,
-    lastActiveAt: emp.lastActiveAt?.toISOString() ?? null,
-    needsRetraining: emp.completedCourses === 0 && emp.enrolledCourses > 0,
-  }));
+  // Load challenges and quiz attempts dynamically
+  const participations = await db
+    .select()
+    .from(challengeParticipantsTable)
+    .where(eq(challengeParticipantsTable.companyId, company.id));
+
+  const [course12] = await db
+    .select({ id: coursesTable.id })
+    .from(coursesTable)
+    .where(eq(coursesTable.slug, "final-sustainability-certification"))
+    .limit(1);
+  const course12Id = course12?.id ?? 12;
+
+  const quizAttempts = await db
+    .select()
+    .from(quizAttemptsTable)
+    .where(eq(quizAttemptsTable.courseId, course12Id));
+
+  const attemptsByUser = new Map<string, number[]>();
+  for (const qa of quizAttempts) {
+    if (qa.passed) {
+      const list = attemptsByUser.get(qa.userId) ?? [];
+      list.push(qa.score);
+      attemptsByUser.set(qa.userId, list);
+    }
+  }
+
+  const rows = employees.map((emp) => {
+    const userId = emp.clerkUserId || emp.email;
+
+    // Filter participations for this employee
+    const empParticipations = participations.filter((p) => p.userId === emp.clerkUserId || p.userId === emp.email);
+    const approvedChallenges = empParticipations.filter((p) => p.status === "approved");
+    const approvedCount = approvedChallenges.length;
+
+    const challengePoints = approvedCount * 10;
+    const challengeBonus = Math.min(approvedCount, 10);
+
+    // Get Course 12 best score
+    const passedScores = attemptsByUser.get(emp.clerkUserId || "") ?? attemptsByUser.get(emp.email) ?? [];
+    const bestScore = passedScores.length > 0 ? Math.max(...passedScores) : null;
+    const passedC12 = bestScore !== null;
+
+    const finalSustainabilityScore = passedC12
+      ? Math.min(100, bestScore + challengeBonus)
+      : null;
+
+    // Get last challenge activity timestamp
+    const activityTimes = empParticipations
+      .map((p) => p.updatedAt?.getTime())
+      .filter((t): t is number => !!t);
+    const lastChallengeActivityAt = activityTimes.length > 0
+      ? new Date(Math.max(...activityTimes)).toISOString()
+      : null;
+
+    return {
+      employeeId: emp.id,
+      employeeName: emp.name,
+      email: emp.email,
+      department: emp.department,
+      coursesCompleted: emp.completedCourses,
+      totalCourses: emp.enrolledCourses,
+      completionRate:
+        emp.enrolledCourses > 0 ? Math.round((emp.completedCourses / emp.enrolledCourses) * 100) : 0,
+      certificates: emp.certificates,
+      avgScore: emp.avgScore,
+      lastActiveAt: emp.lastActiveAt?.toISOString() ?? null,
+      needsRetraining: emp.completedCourses === 0 && emp.enrolledCourses > 0,
+      
+      // New Challenge & Scoring metrics
+      approved_challenge_count: approvedCount,
+      challenge_points: challengePoints,
+      challenge_bonus: challengeBonus,
+      certification_exam_score: bestScore,
+      final_sustainability_score: finalSustainabilityScore,
+      last_challenge_activity_at: lastChallengeActivityAt,
+    };
+  });
 
   res.json(rows);
 });

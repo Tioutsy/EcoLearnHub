@@ -14,12 +14,16 @@ export function authBypassMiddleware(req: Request, res: Response, next: NextFunc
   if (!isProd && enabled && req.headers["x-test-user-id"] && !(req as AuthRequest).auth?.userId) {
     const testId = req.headers["x-test-user-id"] as string;
     const testEmail = req.headers["x-test-user-email"] as string || null;
+    const testRole = req.headers["x-test-user-role"] as string || null;
     
     (req as AuthRequest).auth = {
       userId: testId,
       sessionClaims: {
         email: testEmail,
         email_address: testEmail,
+        publicMetadata: {
+          role: testRole
+        }
       }
     };
   }

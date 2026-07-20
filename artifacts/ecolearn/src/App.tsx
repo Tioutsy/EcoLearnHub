@@ -35,6 +35,7 @@ import Certificates from "@/pages/certificates";
 import VerifyCertificate from "@/pages/certificates/verify";
 import CompanyDashboard from "@/pages/company";
 import Subscribe from "@/pages/company/subscribe";
+import ChallengesReview from "@/pages/company/challenges-review";
 import CompanyEmployees from "@/pages/company/employees";
 import CompanyCertificates from "@/pages/company/certificates";
 import CompanyLeaderboards from "@/pages/company/leaderboards";
@@ -249,6 +250,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/insights/mauritius-resources/:slug" component={MauritiusResourceDetail} />
             <Route path="/company" component={CompanyDashboard} />
             <Route path="/company/subscribe" component={Subscribe} />
+            <Route path="/company/challenges-review" component={ChallengesReview} />
             <Route path="/company/employees" component={CompanyEmployees} />
             <Route path="/company/certificates" component={CompanyCertificates} />
             <Route path="/company/leaderboards" component={CompanyLeaderboards} />

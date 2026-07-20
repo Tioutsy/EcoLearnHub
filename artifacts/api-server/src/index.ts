@@ -17,6 +17,7 @@ import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
 import { ensureDefaultCompany } from "./lib/ensureDefaultCompany";
 import { ensurePlans } from "./lib/ensurePlans";
+import { ensureChallenges } from "./lib/ensureChallenges";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
 import { syncSequences } from "./lib/syncSequences";
 
@@ -49,6 +50,9 @@ async function start(): Promise<void> {
 
   // Seed default company if none exists
   await ensureDefaultCompany();
+
+  // Seed challenges
+  await ensureChallenges();
 
   // Ensure required course content exists before accepting traffic so the first
   // requests after a deploy deterministically see the seeded course.
