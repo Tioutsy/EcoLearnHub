@@ -15,6 +15,7 @@ import { ensureFinalSustainabilityCertificationCourse } from "./lib/ensureFinalS
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
+import { ensureDefaultCompany } from "./lib/ensureDefaultCompany";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
 import { syncSequences } from "./lib/syncSequences";
 
@@ -41,6 +42,9 @@ async function start(): Promise<void> {
 
   // Synchronize auto-increment sequences with actual table data
   await syncSequences();
+
+  // Seed default company if none exists
+  await ensureDefaultCompany();
 
   // Ensure required course content exists before accepting traffic so the first
   // requests after a deploy deterministically see the seeded course.
