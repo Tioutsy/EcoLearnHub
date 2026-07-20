@@ -16,7 +16,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/courses", label: "Courses", icon: BookOpen },
-    { href: "/learning-paths", label: "Learning Paths", icon: RouteIcon },
+    // { href: "/learning-paths", label: "Learning Paths", icon: RouteIcon },
     { href: "/challenges", label: "Challenges", icon: Target },
     { href: "/insights", label: "Insights", icon: Leaf },
     { href: "/impact", label: "Impact", icon: BarChart3 },
