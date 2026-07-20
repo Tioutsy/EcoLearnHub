@@ -5,7 +5,10 @@ import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wo
 import { QueryClientProvider, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { setBaseUrl } from "@workspace/api-client-react";
+import {
+  setBaseUrl,
+  setAuthTokenGetter,
+} from "@workspace/api-client-react";
 
 if (import.meta.env.VITE_API_URL) {
   setBaseUrl(import.meta.env.VITE_API_URL);
