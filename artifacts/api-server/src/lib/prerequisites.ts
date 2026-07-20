@@ -5,7 +5,7 @@ import {
   enrollmentsTable,
 } from "@workspace/db";
 import { and, eq, inArray, or } from "drizzle-orm";
-import { AccessContext } from "./access";
+import { CompanyAccess } from "./access";
 
 export type PrerequisiteStatus = {
   courseId: number;
@@ -23,7 +23,7 @@ export type EligibilityResult = {
 
 export async function checkCourseEligibility(
   courseId: number,
-  access: AccessContext | null
+  access: CompanyAccess | null
 ): Promise<EligibilityResult> {
   // 1. Get all prerequisites for the target course
   const prereqs = await db
@@ -89,6 +89,9 @@ export async function checkCourseEligibility(
     const isCompleted = completedCourseIds.has(p.courseId);
     if (isCompleted) {
       completedCount++;
+    }
+    if (!p.slug) {
+      throw new Error(`Data integrity violation: Prerequisite course (ID: ${p.courseId}) is missing a unique URL slug.`);
     }
     return {
       courseId: p.courseId,

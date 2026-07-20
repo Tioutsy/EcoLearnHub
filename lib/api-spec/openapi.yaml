@@ -476,6 +476,27 @@ paths:
                 items:
                   $ref: "#/components/schemas/LearningPath"
 
+  /learning-paths/{slug}:
+    get:
+      operationId: getLearningPathDetails
+      tags: [learning-paths]
+      summary: Get detailed learning path with ordered courses and enrollment status
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningPathDetail"
+        "404":
+          description: Not Found
+
   # ── BADGES ────────────────────────────────────────────────────────────────────
   /badges:
     get:

@@ -74,7 +74,6 @@ async function verifyFirstRunSafety() {
     courseId: course.id,
     score: 100,
     passed: true,
-    responses: { "q1": "opt-safe" },
   });
 
   // 4. Add Certificate

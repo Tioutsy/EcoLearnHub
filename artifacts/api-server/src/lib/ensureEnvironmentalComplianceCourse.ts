@@ -583,10 +583,15 @@ export async function ensureEnvironmentalComplianceCourse() {
         const byId = await tx.query.coursesTable.findFirst({
           where: eq(coursesTable.id, COURSE_ID),
         });
-        if (byId && byId.slug === COURSE_SLUG) {
-          existingCourse = byId;
-        } else if (byId && byId.slug.includes('environmental')) {
-          existingCourse = byId;
+        if (byId) {
+          if (!byId.slug) {
+            throw new Error(`Data integrity violation: Course (ID: ${COURSE_ID}) is missing a unique slug.`);
+          }
+          if (byId.slug === COURSE_SLUG) {
+            existingCourse = byId;
+          } else if (byId.slug.includes('environmental')) {
+            existingCourse = byId;
+          }
         }
       }
 

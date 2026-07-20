@@ -476,7 +476,14 @@ function FinalQuiz({
   const rawSubmitQuiz = useSubmitQuiz();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [result, setResult] = useState<{ passed: boolean; score: number; correctAnswers: number; totalQuestions: number } | null>(null);
+  const [result, setResult] = useState<{
+    passed: boolean;
+    score: number;
+    correctAnswers: number;
+    totalQuestions: number;
+    competencyScores?: any;
+    recommendations?: number[];
+  } | null>(null);
 
   const passingScore = course?.passingScore ?? 80;
 

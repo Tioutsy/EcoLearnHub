@@ -9,21 +9,12 @@ import {
   Building2,
   Factory,
   CheckCircle2,
-  Circle,
   Clock,
   BookOpen,
-  PlayCircle,
+  ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "wouter";
-import type { LucideIcon } from "lucide-react";
-
-const ICONS: Record<string, LucideIcon> = {
-  users: Users,
-  "concierge-bell": ConciergeBell,
-  "building-2": Building2,
-  factory: Factory,
-  route: RouteIcon,
-};
 
 function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
@@ -40,7 +31,7 @@ const LEVEL_LABEL: Record<string, string> = {
 };
 
 export default function LearningPaths() {
-  const { data: paths, isLoading } = useListLearningPaths();
+  const { data: paths, isLoading, error, refetch } = useListLearningPaths() as any;
 
   return (
     <Layout>
@@ -60,7 +51,18 @@ export default function LearningPaths() {
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        {isLoading ? (
+        {error ? (
+          <div className="py-16 text-center border-2 border-dashed border-destructive/30 rounded-2xl bg-destructive/5 max-w-xl mx-auto">
+            <RouteIcon className="h-16 w-16 text-destructive mx-auto mb-4 opacity-70" />
+            <h3 className="text-xl font-bold mb-2">We could not load the learning paths</h3>
+            <p className="text-muted-foreground max-w-md mx-auto mb-6">
+              Please try again. If the problem continues, contact your EcoLearnHub administrator.
+            </p>
+            <Button onClick={() => refetch()} variant="destructive">
+              Retry
+            </Button>
+          </div>
+        ) : isLoading ? (
           <div className="grid lg:grid-cols-2 gap-8">
             {Array(4)
               .fill(0)
@@ -75,29 +77,25 @@ export default function LearningPaths() {
                 </div>
               ))}
           </div>
-        ) : paths?.length === 0 ? (
+        ) : !paths || paths.length === 0 ? (
           <div className="py-16 text-center border-2 border-dashed rounded-2xl bg-muted/10">
             <RouteIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-bold mb-2">No learning paths yet</h3>
+            <h3 className="text-xl font-bold mb-2">No learning paths are currently available</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Learning paths will appear here once they have been published.
+              Published learning paths will appear here when they are ready.
             </p>
           </div>
         ) : (
           <div className="grid lg:grid-cols-2 gap-8">
-            {paths?.map((path) => {
-              const Icon = ICONS[path.icon] ?? RouteIcon;
-              const isComplete =
-                path.totalModules > 0 &&
-                path.completedModules === path.totalModules;
-              const nextModule = path.modules.find((m) => !m.completed);
-
+            {paths.map((path: any) => {
+              const Icon = RouteIcon;
+              
               return (
                 <div
                   key={path.id}
-                  className="bg-card border rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+                  className="bg-card border rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow relative"
                 >
-                  <div className="p-6 border-b">
+                  <div className="p-6 border-b flex-1">
                     <div className="flex items-start gap-4">
                       <div className="h-12 w-12 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                         <Icon className="h-6 w-6" />
@@ -107,20 +105,34 @@ export default function LearningPaths() {
                           <h2 className="font-bold font-serif text-xl">
                             {path.title}
                           </h2>
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-secondary/15 text-secondary-foreground border">
-                            {path.audience}
-                          </span>
+                          {path.isSystemManaged && (
+                            <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                              <ShieldCheck className="w-3 h-3" /> System Managed
+                            </span>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground line-clamp-2">
                           {path.description}
                         </p>
                       </div>
                     </div>
 
+                    <div className="flex flex-wrap gap-2 mt-4 mb-4">
+                      <span className="text-xs font-medium px-2 py-1 rounded bg-secondary/15 text-secondary-foreground border">
+                        Target: {path.audience}
+                      </span>
+                      <span className="text-xs font-medium px-2 py-1 rounded bg-secondary/15 text-secondary-foreground border">
+                        Level: {path.level}
+                      </span>
+                      <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary border border-primary/20">
+                        {path.providerLabel}
+                      </span>
+                    </div>
+
                     <div className="mt-5">
                       <div className="flex items-center justify-between text-sm mb-2">
                         <span className="font-medium">
-                          {path.completedModules} of {path.totalModules} modules
+                          {path.completedCourses} of {path.totalCourses} courses
                           completed
                         </span>
                         <span className="text-muted-foreground">
@@ -136,72 +148,45 @@ export default function LearningPaths() {
                       <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <BookOpen className="h-3.5 w-3.5" />
-                          {path.totalModules} modules
+                          {path.totalCourses} courses
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          {formatDuration(path.totalMinutes)} total
-                        </span>
+                        {path.estimatedDurationMinutes && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5" />
+                            {formatDuration(path.estimatedDurationMinutes)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 flex-1">
-                    <ol className="space-y-3">
-                      {path.modules.map((mod, index) => (
-                        <li
-                          key={mod.courseId}
-                          className="flex items-start gap-3"
-                        >
-                          {mod.completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div className="p-6 bg-muted/30">
+                    <div className="flex flex-col gap-4">
+                      {path.nextCourse && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground block mb-1">Up next:</span>
+                          <span className="font-medium line-clamp-1">{path.nextCourse.title}</span>
+                        </div>
+                      )}
+                      
+                      <Button className="w-full" asChild variant={path.isComplete ? "outline" : "default"}>
+                        <Link href={`/learning-paths/${path.slug}`}>
+                          {path.isComplete ? (
+                            <>
+                              <CheckCircle2 className="mr-2 h-4 w-4" /> Review completed path
+                            </>
+                          ) : path.progressPct > 0 ? (
+                            <>
+                              Continue learning path <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
                           ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground/40 shrink-0 mt-0.5" />
+                            <>
+                              View learning path <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
                           )}
-                          <div className="flex-1 min-w-0">
-                            <Link
-                              href={`/courses/${mod.courseId}`}
-                              className={`text-sm font-medium hover:text-primary transition-colors ${
-                                mod.completed
-                                  ? "text-muted-foreground"
-                                  : "text-foreground"
-                              }`}
-                            >
-                              {index + 1}. {mod.courseTitle}
-                            </Link>
-                            <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
-                              <span>{LEVEL_LABEL[mod.level] ?? mod.level}</span>
-                              <span>{formatDuration(mod.durationMinutes)}</span>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-
-                  <div className="p-6 pt-0">
-                    {path.totalModules === 0 ? (
-                      <Button variant="outline" className="w-full" disabled>
-                        No modules assigned yet
-                      </Button>
-                    ) : isComplete ? (
-                      <Button variant="outline" className="w-full" disabled>
-                        <CheckCircle2 className="mr-2 h-4 w-4" /> Path completed
-                      </Button>
-                    ) : (
-                      <Button className="w-full" asChild>
-                        <Link
-                          href={`/courses/${
-                            nextModule?.courseId ?? path.modules[0]?.courseId
-                          }`}
-                        >
-                          <PlayCircle className="mr-2 h-4 w-4" />
-                          {path.completedModules > 0
-                            ? "Continue path"
-                            : "Start path"}
                         </Link>
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </div>
               );

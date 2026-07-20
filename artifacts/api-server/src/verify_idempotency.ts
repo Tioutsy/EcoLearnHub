@@ -41,7 +41,6 @@ async function verifyIdempotency() {
     courseId: course.id,
     score: 80,
     passed: true,
-    responses: { "q1": "opt-1" },
   });
 
   // Insert fake lesson progress

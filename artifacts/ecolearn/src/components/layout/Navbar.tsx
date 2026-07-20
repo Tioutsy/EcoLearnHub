@@ -16,7 +16,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/courses", label: "Courses", icon: BookOpen },
-    { href: "/learning-paths", label: "Paths", icon: RouteIcon },
+    { href: "/learning-paths", label: "Learning Paths", icon: RouteIcon },
     { href: "/challenges", label: "Challenges", icon: Target },
     { href: "/insights", label: "Insights", icon: Leaf },
     { href: "/impact", label: "Impact", icon: BarChart3 },
@@ -49,8 +49,8 @@ export function Navbar() {
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex md:items-center md:gap-6">
-          <div className="flex items-center gap-6 text-sm font-medium">
+        <div className="hidden md:flex md:items-center md:gap-4 lg:gap-6">
+          <div className="flex items-center gap-4 lg:gap-6 text-sm font-medium">
             {navLinks.map((link) => (
               <Link
                 key={link.href}

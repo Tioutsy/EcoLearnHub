@@ -417,22 +417,29 @@ export interface LearningPath {
   title: string;
   description: string;
   audience: string;
-  icon: string;
-  totalModules: number;
-  completedModules: number;
+  level: string;
+  providerLabel: string;
+  isSystemManaged: boolean;
+  totalCourses: number;
+  completedCourses: number;
   progressPct: number;
-  totalMinutes: number;
-  modules: LearningPathModule[];
-  difficulty: LearningPathDifficulty;
-  intendedRoles: string[];
-  estimatedDurationMinutes: number;
-  status: LearningPathStatus;
-  version: number;
-  /** @nullable */
-  completionCriteria?: string | null;
-  certificateEligibility: boolean;
-  /** @nullable */
-  recommendedNextPathId?: number | null;
+  isComplete: boolean;
+  estimatedDurationMinutes?: number;
+  nextCourse?: { id: number; title: string } | null;
+}
+
+export interface LearningPathDetailCourse {
+  position: number;
+  isRequired: boolean;
+  course: Course;
+  status: 'not_started' | 'in_progress' | 'completed' | 'locked';
+  isLocked: boolean;
+  action: string;
+  enrollmentId?: number;
+}
+
+export interface LearningPathDetail extends LearningPath {
+  courses: LearningPathDetailCourse[];
 }
 
 export interface AchievementBadge {

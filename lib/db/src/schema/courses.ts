@@ -6,6 +6,7 @@ export const coursesTable = pgTable("courses", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   slug: text("slug").unique(),
+  courseCode: text("course_code").unique(),
   description: text("description").notNull(),
   fullDescription: text("full_description"),
   categoryId: integer("category_id").notNull(),

@@ -16,6 +16,7 @@ import Home from "@/pages/home";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/courses/detail";
 import LearningPaths from "@/pages/learning-paths";
+import LearningPathDetail from "@/pages/learning-paths/detail";
 import Challenges from "@/pages/challenges";
 import Learn from "@/pages/learn";
 import Quiz from "@/pages/quiz";
@@ -183,6 +184,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/courses" component={Courses} />
             <Route path="/courses/:id" component={CourseDetail} />
             <Route path="/learning-paths" component={LearningPaths} />
+            <Route path="/learning-paths/:slug" component={LearningPathDetail} />
             <Route path="/challenges" component={Challenges} />
             <Route path="/learn/:enrollmentId" component={Learn} />
             <Route path="/quiz/:courseId" component={Quiz} />

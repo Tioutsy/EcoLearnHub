@@ -137,10 +137,15 @@ export async function ensureFinalSustainabilityCertificationCourse() {
     const byId = await db.query.coursesTable.findFirst({
       where: eq(coursesTable.id, COURSE_ID)
     });
-    if (byId && byId.slug === COURSE_SLUG) {
-      existingCourse = byId;
-    } else if (byId && byId.slug.includes('certification')) {
-      existingCourse = byId;
+    if (byId) {
+      if (!byId.slug) {
+        throw new Error(`Data integrity violation: Course (ID: ${COURSE_ID}) is missing a unique slug.`);
+      }
+      if (byId.slug === COURSE_SLUG) {
+        existingCourse = byId;
+      } else if (byId.slug.includes('certification')) {
+        existingCourse = byId;
+      }
     }
   }
 
@@ -215,6 +220,9 @@ export async function ensureFinalSustainabilityCertificationCourse() {
   // Create a fast slug->ID lookup map
   const courseMap: Record<string, number> = {};
   for (const c of prereqCourses) {
+    if (!c.slug) {
+      throw new Error(`Data integrity violation: Prerequisite course (ID: ${c.id}) is missing a unique slug.`);
+    }
     courseMap[c.slug] = c.id;
   }
   const certificationQuestions = getCertificationQuestions(courseMap);

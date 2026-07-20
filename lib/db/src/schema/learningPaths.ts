@@ -1,6 +1,7 @@
-import { pgTable, text, serial, integer, timestamp, unique, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, unique, boolean, foreignKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { companiesTable } from "./companies";
 
 export const learningPathsTable = pgTable("learning_paths", {
   id: serial("id").primaryKey(),
@@ -13,6 +14,10 @@ export const learningPathsTable = pgTable("learning_paths", {
   difficulty: text("difficulty").notNull().default("beginner"), // beginner, intermediate, advanced
   intendedRoles: text("intended_roles").array().notNull().default([]), // target employee roles
   estimatedDurationMinutes: integer("estimated_duration_minutes").notNull().default(0),
+  level: text("level").notNull().default("beginner"),
+  providerLabel: text("provider_label").notNull().default("EcoLearnHub"),
+  isSystemManaged: boolean("is_system_managed").notNull().default(true),
+  companyId: integer("company_id"),
   status: text("status").notNull().default("draft"), // draft, active, archived
   version: integer("version").notNull().default(1),
   completionCriteria: text("completion_criteria"),
@@ -20,7 +25,13 @@ export const learningPathsTable = pgTable("learning_paths", {
   recommendedNextPathId: integer("recommended_next_path_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
-});
+}, (t) => ({
+  companyFk: foreignKey({
+    columns: [t.companyId],
+    foreignColumns: [companiesTable.id],
+    name: "learning_paths_company_id_fk"
+  }).onDelete("cascade")
+}));
 
 export const learningPathCoursesTable = pgTable("learning_path_courses", {
   id: serial("id").primaryKey(),
