@@ -6,10 +6,13 @@ import {
   FileText,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@clerk/react";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import { PRICING_PLANS } from "@/config/pricing";
 
 export default function Pricing() {
+  const { isSignedIn } = useAuth();
+
   return (
     <Layout>
       <div className="bg-primary/5 pt-20 pb-16 border-b">
@@ -54,7 +57,9 @@ export default function Pricing() {
                   asChild
                   className="w-full mb-6 h-11 text-sm bg-secondary text-secondary-foreground hover:bg-secondary/90"
                 >
-                  <Link href="/sign-up">Get started</Link>
+                  <Link href={isSignedIn ? `/company/subscribe?planId=${plan.id}` : `/sign-up?redirect_url=/company/subscribe?planId=${plan.id}`}>
+                    Get started
+                  </Link>
                 </Button>
               ) : (
                 <LeadCaptureDialog

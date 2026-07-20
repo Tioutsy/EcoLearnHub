@@ -34,6 +34,7 @@ import MauritiusResourceDetail from "@/pages/Insights/mauritius-resource-detail"
 import Certificates from "@/pages/certificates";
 import VerifyCertificate from "@/pages/certificates/verify";
 import CompanyDashboard from "@/pages/company";
+import Subscribe from "@/pages/company/subscribe";
 import CompanyEmployees from "@/pages/company/employees";
 import CompanyCertificates from "@/pages/company/certificates";
 import CompanyLeaderboards from "@/pages/company/leaderboards";
@@ -122,9 +123,17 @@ function SignInPage() {
 }
 
 function SignUpPage() {
+  const params = new URLSearchParams(window.location.search);
+  const redirectUrl = params.get("redirect_url") || `${basePath}/dashboard`;
+
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+      <SignUp 
+        routing="path" 
+        path={`${basePath}/sign-up`} 
+        signInUrl={`${basePath}/sign-in`} 
+        forceRedirectUrl={redirectUrl} 
+      />
     </div>
   );
 }
@@ -239,6 +248,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/insights/mauritius-resources" component={MauritiusResourcesList} />
             <Route path="/insights/mauritius-resources/:slug" component={MauritiusResourceDetail} />
             <Route path="/company" component={CompanyDashboard} />
+            <Route path="/company/subscribe" component={Subscribe} />
             <Route path="/company/employees" component={CompanyEmployees} />
             <Route path="/company/certificates" component={CompanyCertificates} />
             <Route path="/company/leaderboards" component={CompanyLeaderboards} />

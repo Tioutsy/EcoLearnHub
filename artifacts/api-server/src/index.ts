@@ -16,6 +16,7 @@ import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
 import { ensureDefaultCompany } from "./lib/ensureDefaultCompany";
+import { ensurePlans } from "./lib/ensurePlans";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
 import { syncSequences } from "./lib/syncSequences";
 
@@ -42,6 +43,9 @@ async function start(): Promise<void> {
 
   // Synchronize auto-increment sequences with actual table data
   await syncSequences();
+
+  // Seed plans if table is empty
+  await ensurePlans();
 
   // Seed default company if none exists
   await ensureDefaultCompany();

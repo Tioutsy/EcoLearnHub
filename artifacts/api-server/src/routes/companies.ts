@@ -24,6 +24,7 @@ import {
 import {
   requireCompanyAdmin,
   sendHttpError,
+  getCompanyAccess,
 } from "../lib/access";
 
 const router = Router();
@@ -235,6 +236,42 @@ router.post("/", async (req, res): Promise<void> => {
     .returning();
   const full = await getCompanyWithPlan(company.id);
   res.status(201).json(full);
+});
+
+router.post("/subscribe", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    const { planSlug } = req.body;
+    if (!planSlug) {
+      res.status(400).json({ error: "planSlug is required" });
+      return;
+    }
+
+    const [plan] = await db
+      .select()
+      .from(plansTable)
+      .where(eq(plansTable.slug, planSlug))
+      .limit(1);
+
+    if (!plan) {
+      res.status(404).json({ error: "Plan not found" });
+      return;
+    }
+
+    await db
+      .update(companiesTable)
+      .set({ 
+        planId: plan.id,
+        maxEmployees: plan.maxEmployees,
+      })
+      .where(eq(companiesTable.id, access.companyId));
+
+    res.json({ message: "Subscription upgraded successfully", planName: plan.name });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to upgrade subscription" });
+    }
+  }
 });
 
 router.get("/lms-overview", async (req, res): Promise<void> => {
