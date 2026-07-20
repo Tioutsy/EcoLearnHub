@@ -256,10 +256,11 @@ function ClerkProviderWithRoutes() {
             <Route path="/platform-admin/courses/:id/preview" component={AdminCoursePreview} />
             <Route path="/platform-admin/sdg-mapping" component={PlatformAdminSdgMapping} />
             <Route component={NotFound} />
-          </Switch>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
+                </Switch>
+      <Toaster />
+    </TooltipProvider>
+  </ClerkApiTokenBridge>
+</QueryClientProvider>
     </ClerkProvider>
   );
 }
