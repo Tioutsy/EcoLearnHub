@@ -164,6 +164,33 @@ function ClerkQueryClientCacheInvalidator() {
   return null;
 }
 
+function ClerkApiTokenBridge({ children }: { children: ReactNode }) {
+  const { getToken, isLoaded } = useAuth();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    setAuthTokenGetter(async () => {
+      return await getToken();
+    });
+
+    setIsReady(true);
+
+    return () => {
+      setAuthTokenGetter(null);
+    };
+  }, [getToken, isLoaded]);
+
+  if (!isReady) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
+
 function ClerkProviderWithRoutes() {
   const [, setLocation] = useLocation();
 
