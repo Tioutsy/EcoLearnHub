@@ -9,7 +9,7 @@ import {
   enrollmentsTable,
   courseAssignmentsTable,
 } from "@workspace/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 import {
   CreateCompanyBody,
   UpdateMyCompanyBody,
@@ -241,7 +241,7 @@ router.post("/", async (req, res): Promise<void> => {
 router.post("/subscribe", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
-    const { planSlug } = req.body;
+    const { planSlug, companyName } = req.body;
     if (!planSlug) {
       res.status(400).json({ error: "planSlug is required" });
       return;
@@ -258,13 +258,49 @@ router.post("/subscribe", async (req, res): Promise<void> => {
       return;
     }
 
+    const companyUpdates: any = {
+      planId: plan.id,
+      maxEmployees: plan.maxEmployees,
+    };
+    if (companyName) {
+      companyUpdates.name = companyName;
+      companyUpdates.slug = companyName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    }
+
     await db
       .update(companiesTable)
-      .set({ 
-        planId: plan.id,
-        maxEmployees: plan.maxEmployees,
-      })
+      .set(companyUpdates)
       .where(eq(companiesTable.id, access.companyId));
+
+    // Elevate user's role to admin of this company in the employees table
+    const clauses = [eq(employeesTable.clerkUserId, access.userId)];
+    if (access.email) {
+      clauses.push(eq(employeesTable.email, access.email));
+    }
+    const [existingEmployee] = await db
+      .select()
+      .from(employeesTable)
+      .where(or(...clauses))
+      .limit(1);
+
+    if (existingEmployee) {
+      await db
+        .update(employeesTable)
+        .set({ role: "admin" })
+        .where(eq(employeesTable.id, existingEmployee.id));
+    } else {
+      await db
+        .insert(employeesTable)
+        .values({
+          clerkUserId: access.userId,
+          email: access.email || `${access.userId}@ecolearnhub.com`,
+          name: "Company Administrator",
+          companyId: access.companyId,
+          role: "admin",
+          invitationStatus: "accepted",
+          invitationAcceptedAt: new Date(),
+        });
+    }
 
     res.json({ message: "Subscription upgraded successfully", planName: plan.name });
   } catch (err) {

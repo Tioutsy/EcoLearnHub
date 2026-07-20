@@ -101,16 +101,13 @@ export default function Subscribe() {
       // Map config pricing ID to database slug
       const dbPlanSlug = selectedPlan.id.replace("_", "-");
 
-      // Upgrade company plan
+      // Upgrade company plan and update company name
       await customFetch("/api/company/subscribe", {
         method: "POST",
-        body: JSON.stringify({ planSlug: dbPlanSlug }),
-      });
-
-      // Update company name as well to match user's custom company entry
-      await customFetch("/api/company", {
-        method: "PATCH",
-        body: JSON.stringify({ name: companyName }),
+        body: JSON.stringify({ 
+          planSlug: dbPlanSlug, 
+          companyName: companyName 
+        }),
       });
 
       setIsSuccess(true);
