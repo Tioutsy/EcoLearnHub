@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   CheckCircle2,
   Building2,
-  TreePine,
   FileText,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -24,15 +23,6 @@ export default function Pricing() {
           <p className="text-sm text-muted-foreground mb-8">
             All prices are shown in Mauritian rupees and are charged monthly.
           </p>
-
-          <div className="mt-2 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2.5 text-sm text-foreground">
-            <TreePine className="h-4 w-4 text-primary shrink-0" />
-            <span>
-              <strong>5%</strong> of every subscription plants native trees with{" "}
-              <strong>Ebony Forest, Chamarel</strong>. See it on our{" "}
-              <Link href="/impact" className="text-primary font-semibold underline underline-offset-2">Impact</Link> page.
-            </span>
-          </div>
         </div>
       </div>
 
