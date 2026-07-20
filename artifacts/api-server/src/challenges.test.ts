@@ -185,12 +185,12 @@ test("Employee Challenges and Final Sustainability Score integration tests", asy
       .limit(1);
     assert.ok(foundUnrelated, "Unrelated challenges must be preserved by seeder");
 
-    // Verify exactly 10 canonical challenges exist
+    // Verify exactly 12 canonical challenges exist
     const canonChallenges = await db
       .select()
       .from(challengesTable)
       .where(ne(challengesTable.code, "UNRELATED-CH"));
-    assert.equal(canonChallenges.length, 10, "Expected exactly 10 canonical challenges");
+    assert.equal(canonChallenges.length, 12, "Expected exactly 12 canonical challenges");
 
     // Run seeder again to verify no duplicates are created
     await ensureChallenges();
@@ -198,13 +198,13 @@ test("Employee Challenges and Final Sustainability Score integration tests", asy
       .select()
       .from(challengesTable)
       .where(ne(challengesTable.code, "UNRELATED-CH"));
-    assert.equal(canonChallenges2.length, 10, "Re-running seeder must not create duplicates");
+    assert.equal(canonChallenges2.length, 12, "Re-running seeder must not create duplicates");
 
     // 2. Fetch challenges list and check score routing precedence
     const listRes = await fetch(`${API_BASE}/challenges`, { headers: HEADERS_L1 });
     assert.equal(listRes.status, 200, "Listing challenges should succeed");
     const listData = await listRes.json() as any;
-    assert.ok(listData.challenges.length >= 10, "Should return seeded challenges");
+    assert.ok(listData.challenges.length >= 12, "Should return seeded challenges");
 
     const scoreRes = await fetch(`${API_BASE}/challenges/score`, { headers: HEADERS_L1 });
     assert.equal(scoreRes.status, 200, "GET /score should not be captured as parameter route");
