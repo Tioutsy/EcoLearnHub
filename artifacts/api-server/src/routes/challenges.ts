@@ -5,6 +5,7 @@ import { eq, and, asc, or, desc } from "drizzle-orm";
 import { getCompanyAccess, requireCompanyAdmin, sendHttpError } from "../lib/access";
 import { calculateSustainabilityScore } from "../lib/scoring";
 import { logger } from "../lib/logger";
+import { evaluateChallengeAchievements } from "../lib/achievementsService";
 
 const router = Router();
 
@@ -161,7 +162,28 @@ router.post("/submissions/:submissionId/review", async (req, res): Promise<void>
       points: outcome.row.pointsAwarded,
     }, `Challenge ${outcome.row.status === "approved" ? "approved" : "rejected"}`);
 
-    res.json(outcome.row);
+    let newAchievements: any[] = [];
+    if (outcome.kind === "success" && outcome.row.status === "approved") {
+      const [employee] = await db
+        .select()
+        .from(employeesTable)
+        .where(
+          or(
+            eq(employeesTable.clerkUserId, outcome.row.userId),
+            eq(employeesTable.email, outcome.row.userId)
+          )
+        )
+        .limit(1);
+      
+      if (employee) {
+        newAchievements = await evaluateChallengeAchievements(employee);
+      }
+    }
+
+    res.json({
+      ...outcome.row,
+      newAchievements,
+    });
   } catch (err) {
     if (!sendHttpError(res, err)) {
       logger.error({ err }, "Failed to review challenge submission");

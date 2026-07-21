@@ -1,16 +1,14 @@
 import { Layout } from "@/components/layout/Layout";
 import {
-  useGetComplianceOverview,
+  useGetManagerTrainingOverview,
+  useGetManagerTrainingEmployees,
+  useGetEmployeeTrainingDetail,
+  type ManagerTrainingFilters,
+} from "@/lib/manager-api";
+import {
   useListEmployees,
   useListCourses,
-  useAssignCourse,
-  useSendReminder,
-  useRunRetrainingScan,
-  useBulkImportEmployees,
-  getGetComplianceOverviewQueryKey,
-  getListEmployeesQueryKey,
 } from "@workspace/api-client-react";
-import type { ComplianceAssignment } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,11 +25,9 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -42,45 +38,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ShieldCheck,
   ShieldAlert,
   Clock,
-  CalendarX,
   CircleSlash,
-  Bell,
-  Upload,
   Download,
   ClipboardCheck,
-  Send,
-  FileSpreadsheet,
+  Trophy,
+  Award,
+  BookOpen,
+  Calendar,
+  CheckCircle,
+  HelpCircle,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import * as XLSX from "xlsx";
 
-const STATUS_META: Record<
-  string,
-  { label: string; className: string }
-> = {
-  compliant: {
-    label: "Compliant",
+const ALL = "all";
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  completed: {
+    label: "Completed",
     className: "bg-green-500/10 text-green-700 border-green-500/30",
   },
-  expiring_soon: {
-    label: "Expiring soon",
-    className: "bg-amber-500/10 text-amber-700 border-amber-500/30",
-  },
-  expired: {
-    label: "Expired",
-    className: "bg-red-500/10 text-red-700 border-red-500/30",
-  },
-  overdue: {
-    label: "Overdue",
-    className: "bg-orange-500/10 text-orange-700 border-orange-500/30",
+  in_progress: {
+    label: "In Progress",
+    className: "bg-blue-500/10 text-blue-700 border-blue-500/30",
   },
   not_started: {
-    label: "Not started",
+    label: "Not Started",
     className: "bg-slate-400/10 text-slate-600 border-slate-400/30",
   },
 };
@@ -95,83 +84,86 @@ function fmtDate(value: string | null | undefined): string {
 }
 
 export default function CompanyCompliance() {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data, isLoading } = useGetComplianceOverview();
-  const { data: employees } = useListEmployees();
-  const { data: courses } = useListCourses();
 
-  const invalidate = () => {
-    queryClient.invalidateQueries({
-      queryKey: getGetComplianceOverviewQueryKey(),
-    });
+  // Search & Filter state
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState(ALL);
+  const [certificationStatus, setCertificationStatus] = useState(ALL);
+  const [role, setRole] = useState(ALL);
+  const [courseId, setCourseId] = useState(ALL);
+  const [department, setDepartment] = useState(ALL);
+  const [overdue, setOverdue] = useState(ALL);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<any>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  // Detail Modal State
+  const [detailEmployeeId, setDetailEmployeeId] = useState<number | null>(null);
+
+  // Queries
+  const { data: overview, isLoading: isLoadingOverview, error: overviewError, refetch: refetchOverview } = useGetManagerTrainingOverview();
+  
+  const filters: ManagerTrainingFilters = {
+    search: search || undefined,
+    status: status === ALL ? undefined : (status as any),
+    certificationStatus: certificationStatus === ALL ? undefined : (certificationStatus as any),
+    role: role === ALL ? undefined : role,
+    courseId: courseId === ALL ? undefined : Number(courseId),
+    department: department === ALL ? undefined : department,
+    overdue: overdue === ALL ? undefined : overdue === "true",
+    page,
+    pageSize: 10,
+    sortBy,
+    sortDirection,
   };
 
-  const assignCourse = useAssignCourse({
-    mutation: { onSuccess: invalidate },
-  });
-  const sendReminder = useSendReminder();
-  const retrainingScan = useRunRetrainingScan({
-    mutation: { onSuccess: invalidate },
-  });
-  const bulkImport = useBulkImportEmployees({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: getListEmployeesQueryKey(),
-        });
-        invalidate();
-      },
-    },
-  });
+  const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError, refetch: refetchEmployees } = useGetManagerTrainingEmployees(filters);
+  const { data: allEmployees } = useListEmployees();
+  const { data: allCourses } = useListCourses();
 
-  const summary = data?.summary;
-
+  // Departments list for dropdown filter
   const departments = useMemo(() => {
     const set = new Set<string>();
-    (employees ?? []).forEach((e) => {
+    (allEmployees ?? []).forEach((e) => {
       if (e.department) set.add(e.department);
     });
     return Array.from(set).sort();
-  }, [employees]);
+  }, [allEmployees]);
 
-  const cards = [
-    {
-      key: "compliant",
-      label: "Compliant",
-      value: summary?.compliant ?? 0,
-      icon: ShieldCheck,
-      color: "text-green-600 bg-green-500/10",
-    },
-    {
-      key: "expiring",
-      label: "Expiring soon",
-      value: summary?.expiringSoon ?? 0,
-      icon: Clock,
-      color: "text-amber-600 bg-amber-500/10",
-    },
-    {
-      key: "expired",
-      label: "Expired",
-      value: summary?.expired ?? 0,
-      icon: CalendarX,
-      color: "text-red-600 bg-red-500/10",
-    },
-    {
-      key: "overdue",
-      label: "Overdue",
-      value: summary?.overdue ?? 0,
-      icon: ShieldAlert,
-      color: "text-orange-600 bg-orange-500/10",
-    },
-    {
-      key: "not_started",
-      label: "Not started",
-      value: summary?.notStarted ?? 0,
-      icon: CircleSlash,
-      color: "text-slate-600 bg-slate-400/10",
-    },
-  ];
+  const handleExport = () => {
+    const searchParams = new URLSearchParams();
+    if (search) searchParams.set("search", search);
+    if (status !== ALL) searchParams.set("status", status);
+    if (certificationStatus !== ALL) searchParams.set("certificationStatus", certificationStatus);
+    if (role !== ALL) searchParams.set("role", role);
+    if (courseId !== ALL) searchParams.set("courseId", courseId);
+    if (department !== ALL) searchParams.set("department", department);
+    if (overdue !== ALL) searchParams.set("overdue", overdue);
+
+    window.open(`/api/manager/training/export.csv?${searchParams.toString()}`, "_blank");
+    
+    toast({
+      title: "Exporting training records",
+      description: "Your CSV download has been initiated.",
+    });
+  };
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const handleRetry = () => {
+    refetchOverview();
+    refetchEmployees();
+  };
+
+  const hasErrors = Boolean(overviewError || employeesError);
 
   return (
     <Layout>
@@ -179,642 +171,472 @@ export default function CompanyCompliance() {
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
             <ClipboardCheck className="h-4 w-4" />
-            HR and compliance
+            Manager Console
           </div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold font-serif mb-2">
-                Training Compliance
-              </h1>
+              <h1 className="text-3xl font-bold font-serif mb-2">Training Compliance</h1>
               <p className="text-muted-foreground max-w-2xl">
-                Track mandatory training across your organisation. Monitor
-                expiry dates, assign courses by department, and send reminders to
-                keep every team compliant.
+                Review employee progress across the EcoLearnHub core curriculum and export clear training records for internal reporting.
               </p>
             </div>
-            <div className="flex gap-2 shrink-0">
-              <Button
-                variant="outline"
-                disabled={retrainingScan.isPending}
-                onClick={async () => {
-                  const result = await retrainingScan.mutateAsync();
-                  toast({
-                    title:
-                      result.notified > 0
-                        ? `${result.notified} retraining notice${result.notified === 1 ? "" : "s"} sent`
-                        : "No retraining needed",
-                    description:
-                      result.notified > 0
-                        ? "Employees with expired training were notified."
-                        : result.skipped > 0
-                          ? `${result.skipped} already notified in the last 7 days.`
-                          : "Every certification is still valid.",
-                  });
-                }}
-              >
-                <Bell className="h-4 w-4" />
-                {retrainingScan.isPending ? "Scanning..." : "Run retraining scan"}
+            <div className="shrink-0">
+              <Button onClick={handleExport} className="w-full sm:w-auto">
+                <Download className="mr-2 h-4 w-4" /> Export training records
               </Button>
-              <ImportEmployeesDialog
-                onImport={async (rows) => {
-                  const result = await bulkImport.mutateAsync({
-                    data: { employees: rows },
-                  });
-                  return result;
-                }}
-                pending={bulkImport.isPending}
-              />
-              <AssignCourseDialog
-                courses={(courses ?? []).map((c) => ({
-                  id: c.id,
-                  title: c.title,
-                }))}
-                employees={(employees ?? []).map((e) => ({
-                  id: e.id,
-                  name: e.name,
-                  department: e.department ?? null,
-                }))}
-                departments={departments}
-                pending={assignCourse.isPending}
-                onAssign={async (payload) => {
-                  const result = await assignCourse.mutateAsync({
-                    data: payload,
-                  });
-                  toast({
-                    title: `Assigned to ${result.assigned} employee${result.assigned === 1 ? "" : "s"}`,
-                    description:
-                      result.skipped > 0
-                        ? `${result.skipped} already had this course.`
-                        : undefined,
-                  });
-                }}
-              />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 space-y-10">
-        {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {Array(5)
-              .fill(0)
-              .map((_, i) => (
-                <Skeleton key={i} className="h-28 w-full rounded-xl" />
-              ))}
+      <div className="container mx-auto px-4 py-10 space-y-8">
+        {hasErrors ? (
+          <div className="py-16 text-center border rounded-2xl bg-red-50/50 dark:bg-red-950/10">
+            <ShieldAlert className="h-14 w-14 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-bold mb-2">Failed to load training compliance data</h3>
+            <p className="text-muted-foreground max-w-md mx-auto mb-6">
+              There was an issue communicating with the training reporting service. Please check your connection and try again.
+            </p>
+            <Button onClick={handleRetry}>Retry loading dashboard</Button>
           </div>
         ) : (
           <>
-            <div className="bg-card border rounded-2xl p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Overall compliance rate
-                  </p>
-                  <p className="text-4xl font-bold font-serif text-primary">
-                    {summary?.complianceRate ?? 0}%
-                  </p>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {summary?.total ?? 0} mandatory training assignments tracked
-                </p>
+            {/* Overview Stats Cards */}
+            {isLoadingOverview ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {Array(5)
+                  .fill(0)
+                  .map((_, i) => (
+                    <Skeleton key={i} className="h-28 w-full rounded-xl" />
+                  ))}
               </div>
-              <Progress value={summary?.complianceRate ?? 0} className="h-2" />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {cards.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <div
-                    key={card.key}
-                    className="bg-card border rounded-xl p-5 flex flex-col gap-3"
-                  >
-                    <div
-                      className={`h-10 w-10 rounded-lg flex items-center justify-center ${card.color}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{card.value}</p>
+            ) : (
+              overview && (
+                <div className="space-y-6">
+                  {/* Overall Compliance Bar */}
+                  <div className="bg-card border rounded-2xl p-6 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Overall core curriculum compliance rate</p>
+                        <p className="text-4xl font-bold font-serif text-primary mt-1">
+                          {overview.overallCoreCompletionRate}%
+                        </p>
+                      </div>
                       <p className="text-sm text-muted-foreground">
-                        {card.label}
+                        {overview.totalEmployees} active learners tracked
                       </p>
+                    </div>
+                    <Progress value={overview.overallCoreCompletionRate} className="h-2" />
+                  </div>
+
+                  {/* Summary Cards */}
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="bg-card border rounded-xl p-5 shadow-sm">
+                      <div className="h-10 w-10 bg-blue-500/10 rounded flex items-center justify-center text-blue-600 mb-3">
+                        <BookOpen className="h-5 w-5" />
+                      </div>
+                      <p className="text-2xl font-bold">{overview.inProgressCoreCount}</p>
+                      <p className="text-sm text-muted-foreground">In progress</p>
+                    </div>
+                    <div className="bg-card border rounded-xl p-5 shadow-sm">
+                      <div className="h-10 w-10 bg-green-500/10 rounded flex items-center justify-center text-green-600 mb-3">
+                        <ShieldCheck className="h-5 w-5" />
+                      </div>
+                      <p className="text-2xl font-bold">{overview.completedCoreCount}</p>
+                      <p className="text-sm text-muted-foreground">Core curriculum completed</p>
+                    </div>
+                    <div className="bg-card border rounded-xl p-5 shadow-sm">
+                      <div className="h-10 w-10 bg-purple-500/10 rounded flex items-center justify-center text-purple-600 mb-3">
+                        <Award className="h-5 w-5" />
+                      </div>
+                      <p className="text-2xl font-bold">{overview.certifiedCount}</p>
+                      <p className="text-sm text-muted-foreground">Certified (Course 12)</p>
+                    </div>
+                    <div className="bg-card border rounded-xl p-5 shadow-sm">
+                      <div className="h-10 w-10 bg-amber-500/10 rounded flex items-center justify-center text-amber-600 mb-3">
+                        <Trophy className="h-5 w-5" />
+                      </div>
+                      <p className="text-2xl font-bold">{overview.achievements.employeesWithBadgesCount}</p>
+                      <p className="text-sm text-muted-foreground">Employees with achievements</p>
+                    </div>
+                    <div className="bg-card border rounded-xl p-5 shadow-sm">
+                      <div className="h-10 w-10 bg-orange-500/10 rounded flex items-center justify-center text-orange-600 mb-3">
+                        <ShieldAlert className="h-5 w-5" />
+                      </div>
+                      <p className="text-2xl font-bold">{overview.overdueCount}</p>
+                      <p className="text-sm text-muted-foreground">Overdue learners</p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
 
-            {data && data.courses.length > 0 && (
-              <div>
-                <h2 className="text-xl font-bold font-serif mb-4">
-                  Compliance by course
-                </h2>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {data.courses.map((c) => (
-                    <div key={c.courseId} className="bg-card border rounded-xl p-5">
-                      <p className="font-semibold mb-1 line-clamp-2">{c.title}</p>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {c.compliant} of {c.total} compliant
-                      </p>
-                      <Progress value={c.complianceRate} className="h-2 mb-1" />
-                      <p className="text-right text-sm font-medium text-primary">
-                        {c.complianceRate}%
-                      </p>
+                  {/* Course Performance Breakdown Section */}
+                  <div>
+                    <h2 className="text-xl font-bold font-serif mb-4">Course compliance performance</h2>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {overview.performance.map((c: any) => (
+                        <div key={c.courseId} className="bg-card border rounded-xl p-5 shadow-sm">
+                          <div className="flex items-start justify-between mb-2">
+                            <p className="font-semibold line-clamp-1">{c.title}</p>
+                            <Badge variant="secondary" className="shrink-0">{c.courseCode}</Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground mb-3 space-y-1">
+                            <p>{c.completed} completed • {c.inProgress} in progress</p>
+                            <p>Average quiz score: {c.averageQuizScore ? `${c.averageQuizScore}%` : "-"}</p>
+                            {c.courseId === 12 && (
+                              <p className="text-purple-600 font-medium">EcoLearnHub Certifications: {c.certificationCount}</p>
+                            )}
+                          </div>
+                          <Progress value={c.completionRate} className="h-2 mb-1" />
+                          <p className="text-right text-xs font-semibold text-primary">{c.completionRate}% completion rate</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              )
             )}
 
-            <div>
-              <h2 className="text-xl font-bold font-serif mb-4">
-                Employee training status
-              </h2>
-              {!data || data.assignments.length === 0 ? (
-                <div className="py-16 text-center border-2 border-dashed rounded-2xl bg-muted/10">
-                  <ClipboardCheck className="h-14 w-14 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-bold mb-2">
-                    No training assigned yet
-                  </h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    Assign a mandatory course to your team to start tracking
-                    compliance.
-                  </p>
+            {/* Filters Section */}
+            <div className="bg-card border rounded-xl p-6 shadow-sm space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Filter className="h-4 w-4" />
+                Filters
+              </div>
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="search" className="text-xs">Search</Label>
+                  <Input
+                    id="search"
+                    placeholder="Name or email..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                  />
                 </div>
-              ) : (
-                <div className="bg-card border rounded-2xl overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Employee</TableHead>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Due</TableHead>
-                        <TableHead>Expires</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.assignments.map((row) => (
-                        <ComplianceRow
-                          key={row.id}
-                          row={row}
-                          onRemind={async (type) => {
-                            await sendReminder.mutateAsync({
-                              data: {
-                                employeeId: row.employeeId,
-                                courseId: row.courseId,
-                                type,
-                              },
-                            });
-                            toast({
-                              title:
-                                type === "retraining"
-                                  ? "Retraining notice sent"
-                                  : "Reminder sent",
-                              description: `Notified ${row.employeeName}.`,
-                            });
-                          }}
-                        />
+                <div className="space-y-1">
+                  <Label htmlFor="status" className="text-xs">Training status</Label>
+                  <Select value={status} onValueChange={(val) => { setStatus(val); setPage(1); }}>
+                    <SelectTrigger id="status"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All statuses</SelectItem>
+                      <SelectItem value="completed">Completed core</SelectItem>
+                      <SelectItem value="in_progress">In progress</SelectItem>
+                      <SelectItem value="not_started">Not started</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="cert" className="text-xs">Certification</Label>
+                  <Select value={certificationStatus} onValueChange={(val) => { setCertificationStatus(val); setPage(1); }}>
+                    <SelectTrigger id="cert"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All certifications</SelectItem>
+                      <SelectItem value="certified">Certified</SelectItem>
+                      <SelectItem value="not_certified">Not certified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="dept" className="text-xs">Department</Label>
+                  <Select value={department} onValueChange={(val) => { setDepartment(val); setPage(1); }}>
+                    <SelectTrigger id="dept"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All departments</SelectItem>
+                      {departments.map((deptName) => (
+                        <SelectItem key={deptName} value={deptName}>{deptName}</SelectItem>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="course" className="text-xs">Course completed</Label>
+                  <Select value={courseId} onValueChange={(val) => { setCourseId(val); setPage(1); }}>
+                    <SelectTrigger id="course"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All courses</SelectItem>
+                      {(allCourses ?? []).map((c) => (
+                        <SelectItem key={c.id} value={String(c.id)}>{c.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="overdue" className="text-xs">Overdue status</Label>
+                  <Select value={overdue} onValueChange={(val) => { setOverdue(val); setPage(1); }}>
+                    <SelectTrigger id="overdue"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL}>All timelines</SelectItem>
+                      <SelectItem value="true">Overdue</SelectItem>
+                      <SelectItem value="false">On time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Employee Training Records Table */}
+            <div className="bg-card border rounded-2xl overflow-hidden shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="cursor-pointer select-none" onClick={() => handleSort("name")}>
+                      Employee {sortBy === "name" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none" onClick={() => handleSort("email")}>
+                      Email {sortBy === "email" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead className="cursor-pointer select-none text-center" onClick={() => handleSort("progress")}>
+                      Core Completed {sortBy === "progress" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </TableHead>
+                    <TableHead className="cursor-pointer select-none text-center" onClick={() => handleSort("status")}>
+                      Training Status {sortBy === "status" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </TableHead>
+                    <TableHead className="text-center">Certification</TableHead>
+                    <TableHead className="cursor-pointer select-none text-right" onClick={() => handleSort("lastActive")}>
+                      Last Active {sortBy === "lastActive" && (sortDirection === "asc" ? "▲" : "▼")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingEmployees ? (
+                    Array(5)
+                      .fill(0)
+                      .map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell colSpan={8}><Skeleton className="h-6 w-full" /></TableCell>
+                        </TableRow>
+                      ))
+                  ) : employeesData?.data?.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
+                        No employees match the selected filters.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    employeesData?.data?.map((row: any) => {
+                      const meta = STATUS_META[row.status] ?? STATUS_META.not_started;
+                      return (
+                        <TableRow
+                          key={row.employeeId}
+                          className="cursor-pointer hover:bg-muted/30"
+                          onClick={() => setDetailEmployeeId(row.employeeId)}
+                        >
+                          <TableCell className="font-semibold">{row.name}</TableCell>
+                          <TableCell className="text-muted-foreground">{row.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">{row.role}</Badge>
+                          </TableCell>
+                          <TableCell>{row.department ?? "-"}</TableCell>
+                          <TableCell className="text-center">
+                            <div className="space-y-1">
+                              <p className="text-sm font-semibold">{row.coreCompletedCount} of 11</p>
+                              <p className="text-xs text-muted-foreground">({row.individualCoreProgress}%)</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="outline" className={`${meta.className}`}>
+                              {meta.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {row.isCertified ? (
+                              <Badge variant="default" className="bg-purple-600 hover:bg-purple-700 text-white border-transparent">
+                                Certified
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Not Certified</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground text-sm">
+                            {fmtDate(row.lastActiveAt)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+
+              {/* Pagination Controls */}
+              {employeesData?.pagination && (
+                <div className="border-t px-6 py-4 flex items-center justify-between gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, employeesData.pagination.total)} of {employeesData.pagination.total} employees
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page === 1}
+                      onClick={() => setPage(page - 1)}
+                    >
+                      <ChevronLeft className="h-4 w-4" /> Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={page >= employeesData.pagination.totalPages}
+                      onClick={() => setPage(page + 1)}
+                    >
+                      Next <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
           </>
         )}
       </div>
+
+      {/* Employee Detail Modal */}
+      {detailEmployeeId !== null && (
+        <EmployeeDetailDialog
+          employeeId={detailEmployeeId}
+          open={detailEmployeeId !== null}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setDetailEmployeeId(null);
+          }}
+        />
+      )}
     </Layout>
   );
 }
 
-function ComplianceRow({
-  row,
-  onRemind,
+function EmployeeDetailDialog({
+  employeeId,
+  open,
+  onOpenChange,
 }: {
-  row: ComplianceAssignment;
-  onRemind: (type: "reminder" | "retraining") => Promise<void>;
+  employeeId: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const [pending, setPending] = useState(false);
-  const meta = STATUS_META[row.status] ?? STATUS_META.not_started;
-  const needsRetraining = row.status === "expired";
-  const needsReminder =
-    row.status === "overdue" ||
-    row.status === "not_started" ||
-    row.status === "expiring_soon";
-
-  const handle = async (type: "reminder" | "retraining") => {
-    setPending(true);
-    try {
-      await onRemind(type);
-    } finally {
-      setPending(false);
-    }
-  };
+  const { data: detail, isLoading } = useGetEmployeeTrainingDetail(employeeId);
 
   return (
-    <TableRow>
-      <TableCell>
-        <p className="font-medium">{row.employeeName}</p>
-        {row.department && (
-          <p className="text-xs text-muted-foreground">{row.department}</p>
-        )}
-      </TableCell>
-      <TableCell className="max-w-[220px]">
-        <span className="line-clamp-2">{row.courseTitle}</span>
-      </TableCell>
-      <TableCell className="text-sm text-muted-foreground">
-        {fmtDate(row.dueDate)}
-      </TableCell>
-      <TableCell className="text-sm text-muted-foreground">
-        {fmtDate(row.expiresAt)}
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline" className={meta.className}>
-          {meta.label}
-        </Badge>
-      </TableCell>
-      <TableCell className="text-right">
-        {needsRetraining ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={pending}
-            onClick={() => handle("retraining")}
-          >
-            <Bell className="h-3.5 w-3.5 mr-1.5" />
-            Retrain
-          </Button>
-        ) : needsReminder ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={pending}
-            onClick={() => handle("reminder")}
-          >
-            <Send className="h-3.5 w-3.5 mr-1.5" />
-            Remind
-          </Button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-serif">Employee Training Record</DialogTitle>
+          <DialogDescription>
+            Detailed compliance activity log for {detail?.name ?? "Employee"}.
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="space-y-4 py-8">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-28 w-full" />
+          </div>
         ) : (
-          <span className="text-xs text-muted-foreground">No action</span>
-        )}
-      </TableCell>
-    </TableRow>
-  );
-}
-
-function AssignCourseDialog({
-  courses,
-  employees,
-  departments,
-  pending,
-  onAssign,
-}: {
-  courses: { id: number; title: string }[];
-  employees: { id: number; name: string; department: string | null }[];
-  departments: string[];
-  pending: boolean;
-  onAssign: (payload: {
-    courseId: number;
-    employeeIds?: number[];
-    department?: string;
-    dueDate?: string;
-  }) => Promise<void>;
-}) {
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"department" | "employees">("department");
-  const [courseId, setCourseId] = useState<string>("");
-  const [department, setDepartment] = useState<string>("");
-  const [selected, setSelected] = useState<number[]>([]);
-  const [dueDate, setDueDate] = useState<string>("");
-
-  const reset = () => {
-    setCourseId("");
-    setDepartment("");
-    setSelected([]);
-    setDueDate("");
-    setMode("department");
-  };
-
-  const submit = async () => {
-    if (!courseId) {
-      toast({ title: "Select a course", variant: "destructive" });
-      return;
-    }
-    if (mode === "department" && !department) {
-      toast({ title: "Select a department", variant: "destructive" });
-      return;
-    }
-    if (mode === "employees" && selected.length === 0) {
-      toast({ title: "Select at least one employee", variant: "destructive" });
-      return;
-    }
-    await onAssign({
-      courseId: Number(courseId),
-      department: mode === "department" ? department : undefined,
-      employeeIds: mode === "employees" ? selected : undefined,
-      dueDate: dueDate || undefined,
-    });
-    setOpen(false);
-    reset();
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <ClipboardCheck className="h-4 w-4 mr-2" />
-          Assign training
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Assign mandatory training</DialogTitle>
-          <DialogDescription>
-            Assign a course to a whole department or selected employees.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Course</Label>
-            <Select value={courseId} onValueChange={setCourseId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a course" />
-              </SelectTrigger>
-              <SelectContent>
-                {courses.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={mode === "department" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setMode("department")}
-            >
-              By department
-            </Button>
-            <Button
-              type="button"
-              variant={mode === "employees" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setMode("employees")}
-            >
-              Select employees
-            </Button>
-          </div>
-
-          {mode === "department" ? (
-            <div className="space-y-2">
-              <Label>Department</Label>
-              <Select value={department} onValueChange={setDepartment}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((d) => (
-                    <SelectItem key={d} value={d}>
-                      {d}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label>Employees</Label>
-              <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
-                {employees.map((e) => {
-                  const checked = selected.includes(e.id);
-                  return (
-                    <label
-                      key={e.id}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted/50 cursor-pointer text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={(ev) => {
-                          setSelected((prev) =>
-                            ev.target.checked
-                              ? [...prev, e.id]
-                              : prev.filter((id) => id !== e.id),
-                          );
-                        }}
-                      />
-                      <span className="flex-1">{e.name}</span>
-                      {e.department && (
-                        <span className="text-xs text-muted-foreground">
-                          {e.department}
-                        </span>
-                      )}
-                    </label>
-                  );
-                })}
+          detail && (
+            <div className="space-y-6">
+              {/* Employee Metadata */}
+              <div className="grid sm:grid-cols-2 gap-4 bg-muted/30 p-4 border rounded-xl">
+                <div>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Email Address</p>
+                  <p className="font-semibold">{detail.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Role / Title</p>
+                  <p className="font-semibold capitalize">{detail.role} {detail.jobTitle ? `(${detail.jobTitle})` : ""}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Department</p>
+                  <p className="font-semibold">{detail.department ?? "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Last Recorded Activity</p>
+                  <p className="font-semibold">{fmtDate(detail.lastActiveAt)}</p>
+                </div>
               </div>
+
+              {/* Progress Summary */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="border rounded-xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground font-medium">Core Progress (1-11)</span>
+                    <span className="text-sm font-semibold">{detail.completedCoreCount} of 11</span>
+                  </div>
+                  <Progress value={detail.individualCoreProgress} className="h-2" />
+                  <p className="text-right text-xs text-muted-foreground">{detail.individualCoreProgress}% completed</p>
+                </div>
+                <div className="border rounded-xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground font-medium">Full Curriculum Progress</span>
+                    <span className="text-sm font-semibold">{detail.fullCurriculumCompletedCount} of 12</span>
+                  </div>
+                  <Progress value={detail.fullCurriculumProgress} className="h-2" />
+                  <p className="text-right text-xs text-muted-foreground">{detail.fullCurriculumProgress}% completed</p>
+                </div>
+              </div>
+
+              {/* Course-by-Course Status */}
+              <div>
+                <h3 className="font-semibold mb-3 font-serif">Curriculum Courses</h3>
+                <div className="bg-card border rounded-xl overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Code</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead className="text-center">Status</TableHead>
+                        <TableHead className="text-center">Progress</TableHead>
+                        <TableHead className="text-center">Quiz Score</TableHead>
+                        <TableHead className="text-right">Completed Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detail.courseStatuses.map((course: any) => {
+                        const meta = STATUS_META[course.status] ?? STATUS_META.not_started;
+                        return (
+                          <TableRow key={course.courseId}>
+                            <TableCell className="font-semibold text-xs">{course.courseCode}</TableCell>
+                            <TableCell>{course.title}</TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className={meta.className}>{meta.label}</Badge>
+                            </TableCell>
+                            <TableCell className="text-center text-sm font-semibold">
+                              {course.progressPct}%
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {course.bestScore !== null ? `${course.bestScore}%` : "-"}
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground text-sm">
+                              {fmtDate(course.completedAt)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {/* Achievements & Badges Grid */}
+              {detail.badges.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-3 font-serif">Unlocked Badges ({detail.badges.length})</h3>
+                  <div className="grid gap-2 grid-cols-2 sm:grid-cols-3">
+                    {detail.badges.map((badge: any) => (
+                      <div key={badge.id} className="bg-primary/5 border rounded-lg p-3 flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-amber-600 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold truncate capitalize">{badge.awardSource.replace(/_/g, " ")}</p>
+                          <p className="text-[10px] text-muted-foreground">{fmtDate(badge.earnedAt)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-
-          <div className="space-y-2">
-            <Label>Due date (optional)</Label>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={submit} disabled={pending}>
-            {pending ? "Assigning..." : "Assign"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-type ImportRow = {
-  name: string;
-  email: string;
-  department?: string;
-  role?: string;
-};
-
-function ImportEmployeesDialog({
-  onImport,
-  pending,
-}: {
-  onImport: (
-    rows: ImportRow[],
-  ) => Promise<{ created: number; skipped: number; errors: string[] }>;
-  pending: boolean;
-}) {
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<ImportRow[]>([]);
-  const [fileName, setFileName] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const reset = () => {
-    setRows([]);
-    setFileName("");
-    if (fileRef.current) fileRef.current.value = "";
-  };
-
-  const downloadTemplate = () => {
-    const ws = XLSX.utils.json_to_sheet([
-      {
-        name: "Jane Doe",
-        email: "jane@company.mu",
-        department: "Finance",
-        role: "employee",
-      },
-    ]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Employees");
-    XLSX.writeFile(wb, "employee-import-template.xlsx");
-  };
-
-  const handleFile = async (file: File) => {
-    try {
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: "array" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
-      const parsed: ImportRow[] = json.map((r) => ({
-        name: String(r.name ?? r.Name ?? "").trim(),
-        email: String(r.email ?? r.Email ?? "").trim(),
-        department: String(r.department ?? r.Department ?? "").trim(),
-        role: String(r.role ?? r.Role ?? "employee").trim(),
-      }));
-      setFileName(file.name);
-      setRows(parsed);
-    } catch {
-      toast({
-        title: "Could not read file",
-        description: "Please upload a valid .xlsx spreadsheet.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const submit = async () => {
-    if (rows.length === 0) return;
-    const result = await onImport(rows);
-    toast({
-      title: `Imported ${result.created} employee${result.created === 1 ? "" : "s"}`,
-      description:
-        result.errors.length > 0
-          ? `${result.errors.length} row(s) skipped due to errors.`
-          : result.skipped > 0
-            ? `${result.skipped} duplicate(s) skipped.`
-            : undefined,
-    });
-    setOpen(false);
-    reset();
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(o) => {
-        setOpen(o);
-        if (!o) reset();
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <Upload className="h-4 w-4 mr-2" />
-          Bulk import
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Bulk import employees</DialogTitle>
-          <DialogDescription>
-            Upload an Excel file with columns: name, email, department, role.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <Button variant="outline" size="sm" onClick={downloadTemplate}>
-            <Download className="h-4 w-4 mr-2" />
-            Download template
-          </Button>
-
-          <label className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/30 transition-colors">
-            <FileSpreadsheet className="h-8 w-8 text-muted-foreground mb-2" />
-            <span className="text-sm font-medium">
-              {fileName || "Click to choose an .xlsx file"}
-            </span>
-            <span className="text-xs text-muted-foreground mt-1">
-              The first sheet will be imported
-            </span>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".xlsx,.xls"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFile(f);
-              }}
-            />
-          </label>
-
-          {rows.length > 0 && (
-            <div className="border rounded-lg max-h-48 overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Department</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.slice(0, 50).map((r, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{r.name || "-"}</TableCell>
-                      <TableCell>{r.email || "-"}</TableCell>
-                      <TableCell>{r.department || "-"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-          {rows.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {rows.length} row{rows.length === 1 ? "" : "s"} ready to import.
-            </p>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={submit} disabled={pending || rows.length === 0}>
-            {pending ? "Importing..." : "Import"}
-          </Button>
-        </DialogFooter>
+          )
+        )}
       </DialogContent>
     </Dialog>
   );

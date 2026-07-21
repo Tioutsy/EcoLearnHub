@@ -85,7 +85,7 @@ function isCompanyAdminRole(role: string | null): boolean {
 }
 
 export async function getPrimaryCompany(): Promise<Company | null> {
-  const [company] = await db.select().from(companiesTable).limit(1);
+  const [company] = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
   return company ?? null;
 }
 

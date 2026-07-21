@@ -12,7 +12,7 @@ import { eq, count, sum, sql, and } from "drizzle-orm";
 const router = Router();
 
 async function getPrimaryCompany() {
-  const companies = await db.select().from(companiesTable).limit(1);
+  const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
   return companies[0] ?? null;
 }
 

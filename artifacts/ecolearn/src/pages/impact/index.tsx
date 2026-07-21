@@ -72,27 +72,6 @@ export default function ImpactDashboard() {
               </Card>
             ))}
           </div>
-
-          {/* Donation explainer */}
-          <Card className="mt-6 bg-primary/5 border-primary/20">
-            <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <TreePine className="h-6 w-6" />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {metrics ? (
-                  <>
-                    For every <strong>Rs {fmt(metrics.treeCost)}</strong> donated, one endemic Mauritian
-                    tree is planted with <strong>{partner}</strong>. When your organisation subscribes,
-                    {" "}<strong>{metrics.donationRatePct}%</strong> of what you pay goes directly to restoring
-                    native forest, turning workforce training into measurable ecological recovery.
-                  </>
-                ) : (
-                  "A portion of every subscription funds native tree planting in Mauritius."
-                )}
-              </p>
-            </CardContent>
-          </Card>
         </section>
 
         {/* Social impact — learning */}

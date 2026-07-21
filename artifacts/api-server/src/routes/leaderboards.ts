@@ -53,7 +53,7 @@ const buildBoard = (
 
 router.get("/", async (req, res): Promise<void> => {
   try {
-    const [company] = await db.select().from(companiesTable).limit(1);
+    const [company] = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
     if (!company) {
       res.json({ enabled: false, boards: [] });
       return;

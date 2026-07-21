@@ -13,7 +13,7 @@ import {
 import { eq, and, ne } from "drizzle-orm";
 import { ensureChallenges } from "./lib/ensureChallenges";
 
-const API_BASE = "http://localhost:8082/api";
+const API_BASE = "http://localhost:8084/api";
 
 const LEARNER_1_ID = "test_learner_1";
 const LEARNER_1_EMAIL = "learner1@test.com";
@@ -121,13 +121,13 @@ test("Employee Challenges and Final Sustainability Score integration tests", asy
   let devServer: ChildProcess | undefined;
 
   try {
-    // Start server on port 8082
+    // Start server on port 8084
     devServer = spawn(process.execPath, ["./dist/index.mjs"], {
       env: {
         ...process.env,
         NODE_ENV: "development",
         ENABLE_TEST_AUTH_BYPASS: "true",
-        PORT: "8082",
+        PORT: "8084",
       },
       cwd: process.cwd(),
     });

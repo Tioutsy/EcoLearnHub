@@ -130,7 +130,7 @@ router.get("/", async (_req, res): Promise<void> => {
 });
 
 router.get("/badges", async (_req, res): Promise<void> => {
-  const companies = await db.select().from(companiesTable).limit(1);
+  const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
   if (!companies.length) {
     res.json([]);
     return;
@@ -141,7 +141,7 @@ router.get("/badges", async (_req, res): Promise<void> => {
 });
 
 router.get("/department-breakdown", async (_req, res): Promise<void> => {
-  const companies = await db.select().from(companiesTable).limit(1);
+  const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
   if (!companies.length) {
     res.json([]);
     return;

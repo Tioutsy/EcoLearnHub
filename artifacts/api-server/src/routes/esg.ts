@@ -39,7 +39,7 @@ function levelFor(score: number) {
 }
 
 async function getCompanyAggregates() {
-  const companies = await db.select().from(companiesTable).limit(1);
+  const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
   if (!companies.length) return null;
   const company = companies[0];
 

@@ -15,6 +15,7 @@ import { SubmitQuizBody } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
 import { getCompanyAccess, sendHttpError } from "../lib/access";
 import { syncEmployeeLearningStats } from "../lib/lmsData";
+import { awardCourseBadge, evaluateCourseMilestones } from "../lib/achievementsService";
 
 const router = Router();
 
@@ -322,6 +323,14 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
        }
     }
 
+    const newAchievements: any[] = [];
+    if (passed && employee) {
+      const newBadge = await awardCourseBadge(employee, courseId);
+      const newMilestones = await evaluateCourseMilestones(employee);
+      if (newBadge) newAchievements.push(newBadge);
+      newAchievements.push(...newMilestones);
+    }
+
     res.json({ 
       score, 
       passed, 
@@ -331,7 +340,8 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
       feedback,
       competencyScores: isCertification ? competencyScores : null,
       recommendations: recommendations.length > 0 ? recommendations : null,
-      weakestCompetencyArea
+      weakestCompetencyArea,
+      newAchievements
     });
   } catch (err) {
     if (!sendHttpError(res, err)) {

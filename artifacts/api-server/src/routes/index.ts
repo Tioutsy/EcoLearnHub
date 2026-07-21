@@ -15,6 +15,7 @@ import impactRouter from "./impact";
 import esgRouter from "./esg";
 import learningPathsRouter from "./learningPaths";
 import badgesRouter from "./badges";
+import meAchievementsRouter from "./meAchievements";
 import leaderboardsRouter from "./leaderboards";
 import challengesRouter from "./challenges";
 import complianceRouter from "./compliance";
@@ -23,6 +24,7 @@ import adminRouter from "./admin";
 import blogRouter from "./blog";
 import recyclingRouter from "./recycling";
 import platformAdminRouter from "./platformAdmin";
+import managerTrainingRouter from "./managerTraining";
 
 const router: IRouter = Router();
 
@@ -44,6 +46,7 @@ router.use("/impact", impactRouter);
 router.use("/esg", esgRouter);
 router.use("/learning-paths", learningPathsRouter);
 router.use("/badges", badgesRouter);
+router.use("/me/achievements", meAchievementsRouter);
 router.use("/leaderboards", leaderboardsRouter);
 router.use("/challenges", challengesRouter);
 router.use("/compliance", complianceRouter);
@@ -51,6 +54,7 @@ router.use("/leads", leadsRouter);
 router.use("/admin", adminRouter);
 router.use("/recycling", recyclingRouter);
 router.use("/platform-admin", platformAdminRouter);
+router.use("/manager/training", managerTrainingRouter);
 router.use(blogRouter);
 
 export default router;

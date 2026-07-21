@@ -72,8 +72,16 @@ export default function Quiz() {
       submitQuiz.mutate(
         { courseId: id, data: { answers: formattedAnswers } },
         {
-          onSuccess: (res) => {
+          onSuccess: (res: any) => {
             setResult(res);
+            if (res.newAchievements && res.newAchievements.length > 0) {
+              const names = res.newAchievements.map((a: any) => a.name).join(", ");
+              toast({
+                title: "🏆 Achievements Unlocked!",
+                description: `You've earned: ${names}`,
+                variant: "default",
+              });
+            }
           },
           onError: () => {
             toast({ title: "Error submitting quiz", variant: "destructive" });

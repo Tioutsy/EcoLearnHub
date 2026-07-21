@@ -19,7 +19,7 @@ router.get("/", async (_req, res): Promise<void> => {
 
 // Subscriptions
 router.get("/subscriptions/current", async (_req, res): Promise<void> => {
-  const companies = await db.select().from(companiesTable).limit(1);
+  const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
   if (!companies.length) {
     res.status(404).json({ error: "No company found" });
     return;
