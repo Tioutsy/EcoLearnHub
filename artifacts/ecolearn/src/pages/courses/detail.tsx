@@ -152,7 +152,9 @@ export default function CourseDetail() {
                     <Lock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <h3 className="font-semibold text-foreground mb-1">Course Locked</h3>
                     <p className="text-sm text-muted-foreground">
-                      You must complete {prereqsTotal} prerequisite courses before enrolling.
+                      {course.slug === "sustainability-action-planning"
+                        ? "Complete the Core Sustainability Certificate before starting Applied Workplace Sustainability courses."
+                        : `You must complete ${prereqsTotal} prerequisite courses before enrolling.`}
                     </p>
                     <div className="mt-4">
                       <div className="flex justify-between text-xs mb-1 font-medium">

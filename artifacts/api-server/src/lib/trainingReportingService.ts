@@ -42,9 +42,9 @@ export async function getTrainingOverviewData(companyId: number) {
     .where(eq(employeesTable.companyId, companyId));
 
   const courses = await db.select().from(coursesTable);
-  // Core curriculum: Courses 1 to 12
+  // Core curriculum: Courses 1 to 13
   const coreCourses = courses
-    .filter((c) => c.courseCode && /^ELH-(0[1-9]|1[0-2])$/.test(c.courseCode))
+    .filter((c) => c.courseCode && /^ELH-(0[1-9]|1[0-3])$/.test(c.courseCode))
     .sort((a, b) => (a.courseCode ?? "").localeCompare(b.courseCode ?? ""));
 
   const employeeIds = employees.map((e) => e.id);
@@ -222,6 +222,7 @@ export async function getTrainingOverviewData(companyId: number) {
 
     return {
       courseId: c.id,
+      slug: c.slug,
       title: c.title,
       courseCode: c.courseCode ?? `ELH-${String(c.id).padStart(2, "0")}`,
       notStarted,
@@ -269,6 +270,7 @@ export async function getTrainingOverviewData(companyId: number) {
     employeesWithBadges: employeesWithBadgesCount,
     overdueCount: overdueLearnersCount,
     performance,
+    courseBreakdown: performance,
     achievements: {
       employeesWithBadgesCount,
       totalCourseBadgesCount: courseBadgesCount,
@@ -293,7 +295,7 @@ export async function getEmployeeTrainingDetail(companyId: number, employeeId: n
 
   const courses = await db.select().from(coursesTable);
   const coreCourses = courses
-    .filter((c) => c.courseCode && /^ELH-(0[1-9]|1[0-2])$/.test(c.courseCode))
+    .filter((c) => c.courseCode && /^ELH-(0[1-9]|1[0-3])$/.test(c.courseCode))
     .sort((a, b) => (a.courseCode ?? "").localeCompare(b.courseCode ?? ""));
 
   const enrollments = await db
@@ -359,6 +361,7 @@ export async function getEmployeeTrainingDetail(companyId: number, employeeId: n
 
     return {
       courseId: c.id,
+      slug: c.slug,
       title: c.title,
       courseCode: c.courseCode ?? `ELH-${String(c.id).padStart(2, "0")}`,
       status,
@@ -608,6 +611,7 @@ export async function getFilteredEmployeeRecords(companyId: number, filters: Man
 
   return {
     data: paginated,
+    records: paginated,
     pagination: {
       total,
       page,
@@ -636,7 +640,7 @@ export async function generateAuditCsv(companyId: number, filters: ManagerTraini
 
   const courses = await db.select().from(coursesTable);
   const coreCourses = courses
-    .filter((c) => c.courseCode && /^ELH-(0[1-9]|1[0-2])$/.test(c.courseCode))
+    .filter((c) => c.courseCode && /^ELH-(0[1-9]|1[0-3])$/.test(c.courseCode))
     .sort((a, b) => (a.courseCode ?? "").localeCompare(b.courseCode ?? ""));
 
   const employeeIds = employees.map((e) => e.employeeId);

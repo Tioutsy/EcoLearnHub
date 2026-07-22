@@ -169,11 +169,20 @@ router.get("/:id", async (req, res): Promise<void> => {
 
   const eligibility = await checkCourseEligibility(id, accessContext);
 
+  let safeLessons = lessons;
+  if (!eligibility.eligible && accessContext?.role !== "platform_admin") {
+    safeLessons = lessons.map((l) => ({
+      ...l,
+      content: null,
+      contentBlocks: [],
+    }));
+  }
+
   res.json({
     ...course,
     priceUsd: parseFloat(course.priceUsd),
     rating: course.rating ? parseFloat(course.rating) : null,
-    lessons,
+    lessons: safeLessons,
     prerequisites: eligibility.prerequisites,
   });
 });

@@ -14,6 +14,31 @@ router.get("/:enrollmentId", async (req, res): Promise<void> => {
     return;
   }
 
+  const [enrollment] = await db
+    .select({ courseId: enrollmentsTable.courseId })
+    .from(enrollmentsTable)
+    .where(eq(enrollmentsTable.id, enrollmentId))
+    .limit(1);
+
+  if (!enrollment) {
+    res.status(404).json({ error: "Enrollment not found" });
+    return;
+  }
+
+  const { getCompanyAccess } = await import("../lib/access");
+  const access = await getCompanyAccess(req);
+  const isPlatformAdmin = access.role === "platform_admin";
+
+  const { checkCourseEligibility } = await import("../lib/prerequisites");
+  const eligibility = await checkCourseEligibility(enrollment.courseId, access);
+  if (!eligibility.eligible && !isPlatformAdmin) {
+    res.status(403).json({
+      error: "PREREQUISITES_INCOMPLETE",
+      message: "You must complete all prerequisite courses before accessing progress."
+    });
+    return;
+  }
+
   const progressRows = await db
     .select({
       id: lessonProgressTable.id,
@@ -36,6 +61,31 @@ router.patch("/:enrollmentId", async (req, res): Promise<void> => {
   const enrollmentId = parseInt(raw, 10);
   if (isNaN(enrollmentId)) {
     res.status(400).json({ error: "Invalid enrollmentId" });
+    return;
+  }
+
+  const [enr] = await db
+    .select({ courseId: enrollmentsTable.courseId, status: enrollmentsTable.status, completedAt: enrollmentsTable.completedAt })
+    .from(enrollmentsTable)
+    .where(eq(enrollmentsTable.id, enrollmentId))
+    .limit(1);
+
+  if (!enr) {
+    res.status(404).json({ error: "Enrollment not found" });
+    return;
+  }
+
+  const { getCompanyAccess } = await import("../lib/access");
+  const access = await getCompanyAccess(req);
+  const isPlatformAdmin = access.role === "platform_admin";
+
+  const { checkCourseEligibility } = await import("../lib/prerequisites");
+  const eligibility = await checkCourseEligibility(enr.courseId, access);
+  if (!eligibility.eligible && !isPlatformAdmin) {
+    res.status(403).json({
+      error: "PREREQUISITES_INCOMPLETE",
+      message: "You must complete all prerequisite courses before accessing or updating progress."
+    });
     return;
   }
 

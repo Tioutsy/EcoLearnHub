@@ -198,6 +198,16 @@ router.get("/:id", async (req, res): Promise<void> => {
       return;
     }
 
+    const { checkCourseEligibility } = await import("../lib/prerequisites");
+    const eligibility = await checkCourseEligibility(enrollment.courseId, access);
+    if (!eligibility.eligible && !isPlatformAdmin) {
+      res.status(403).json({
+        error: "PREREQUISITES_INCOMPLETE",
+        message: "You must complete all prerequisite courses before accessing this course content."
+      });
+      return;
+    }
+
     const lessons = await db
       .select()
       .from(lessonsTable)
