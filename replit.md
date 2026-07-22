@@ -10,7 +10,11 @@ A professional B2B e-learning platform for environmental training, waste sorting
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL`, `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`
+- `pnpm --filter @workspace/api-server db:verify` — run database schema integrity checks
+- `pnpm --filter @workspace/api-server db:repair -- --dry-run` — run database repairs in dry-run mode
+- `pnpm --filter @workspace/api-server db:repair -- --apply` — apply database repairs in transaction
+- `node lib/db/run_migration_0011.mjs` — apply versioned corrective SQL migration 0011
+- Required env: `DATABASE_URL` (with `sslmode=verify-full` in production/Render), `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`
 
 ## Stack
 

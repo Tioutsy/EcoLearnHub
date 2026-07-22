@@ -39,10 +39,24 @@ if (Number.isNaN(port) || port <= 0) {
 
 
 import { ensureSchemaModifications } from "./lib/ensureSchemaModifications";
+import { verifyDatabaseIntegrity } from "./lib/verifyDatabaseIntegrity";
 
 async function start(): Promise<void> {
   // Ensure any schema modifications that were missed by the remote migration runner are applied
   await ensureSchemaModifications();
+
+  // Run database schema integrity verification
+  const report = await verifyDatabaseIntegrity();
+  if (!report.valid) {
+    logger.error({ issues: report.issues }, "Database schema verification failed. Startup aborted.");
+    process.exit(1);
+  }
+
+  if (report.issues.length === 0) {
+    logger.info("Database schema verification completed successfully.");
+  } else {
+    logger.info("Database schema is current. No modifications required.");
+  }
 
   // Synchronize auto-increment sequences with actual table data
   await syncSequences();

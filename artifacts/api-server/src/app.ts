@@ -53,4 +53,11 @@ app.use(authBypassMiddleware);
 
 app.use("/api", router);
 
+app.get("/", (req, res) => {
+  res.json({
+    service: "EcoLearnHub API",
+    status: "ok",
+  });
+});
+
 export default app;

@@ -2,108 +2,314 @@ import { db } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { logger } from "./logger";
 
+async function columnExists(table: string, column: string): Promise<boolean> {
+  try {
+    const res = await db.execute(sql.raw(`
+      SELECT 1 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' AND table_name = '${table}' AND column_name = '${column}'
+    `));
+    return res.rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function tableExists(table: string): Promise<boolean> {
+  try {
+    const res = await db.execute(sql.raw(`
+      SELECT 1 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = '${table}'
+    `));
+    return res.rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function courseCodeExists(slug: string, expectedCode: string): Promise<boolean> {
+  try {
+    const res = await db.execute(sql.raw(`
+      SELECT 1 
+      FROM "courses" 
+      WHERE "slug" = '${slug}' AND "course_code" = '${expectedCode}'
+    `));
+    return res.rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+interface SchemaOperation {
+  name: string;
+  check: () => Promise<boolean>;
+  execute: () => Promise<any>;
+}
+
 export async function ensureSchemaModifications() {
   logger.info("Checking for missing schema modifications...");
 
-  const queries = [
-    `ALTER TABLE "quiz_attempts" ADD COLUMN IF NOT EXISTS "competency_scores" jsonb;`,
-    `ALTER TABLE "quiz_questions" ADD COLUMN IF NOT EXISTS "competency_area" text;`,
-    `ALTER TABLE "quiz_questions" ADD COLUMN IF NOT EXISTS "source_course_id" integer;`,
-    `ALTER TABLE "quiz_questions" ADD COLUMN IF NOT EXISTS "learning_outcome" text;`,
-    `ALTER TABLE "certificates" ADD COLUMN IF NOT EXISTS "certificate_title" text;`,
-    `ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "level" text DEFAULT 'beginner' NOT NULL;`,
-    `ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "provider_label" text DEFAULT 'EcoLearnHub' NOT NULL;`,
-    `ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "is_system_managed" boolean DEFAULT true NOT NULL;`,
-    `ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "company_id" integer;`,
-    `ALTER TABLE "learning_paths" ADD CONSTRAINT "learning_paths_company_id_fk" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE cascade ON UPDATE no action;`,
-    `ALTER TABLE "courses" ADD COLUMN IF NOT EXISTS "course_code" text;`,
-    `UPDATE "courses" SET "course_code" = 'ELH-01' WHERE "slug" = 'sustainability-foundations';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-02' WHERE "slug" IN ('waste-sorting', 'waste-sorting-mauritian-bin-system');`,
-    `UPDATE "courses" SET "course_code" = 'ELH-03' WHERE "slug" = 'energy-efficiency-at-work';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-04' WHERE "slug" = 'water-conservation';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-05' WHERE "slug" = 'sustainable-procurement';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-06' WHERE "slug" = 'green-office-practices';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-07' WHERE "slug" = 'carbon-footprint-awareness';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-08' WHERE "slug" = 'biodiversity-in-mauritius';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-09' WHERE "slug" = 'esg-basics';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-10' WHERE "slug" = 'environmental-compliance';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-11' WHERE "slug" = 'circular-economy';`,
-    `UPDATE "courses" SET "course_code" = 'ELH-12' WHERE "slug" = 'final-sustainability-certification';`,
-    `ALTER TABLE "courses" DROP CONSTRAINT IF EXISTS "courses_course_code_unique";`,
-    `ALTER TABLE "courses" ADD CONSTRAINT "courses_course_code_unique" UNIQUE("course_code");`,
-
-    // Challenges extensions schema modifications (Sprint 6C)
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "code" text;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "summary" text DEFAULT '' NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "category" text DEFAULT '' NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "linked_course_id" integer;`,
-    `ALTER TABLE "challenges" ADD CONSTRAINT "challenges_linked_course_id_fk" FOREIGN KEY ("linked_course_id") REFERENCES "courses"("id") ON DELETE SET NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "duration_label" text DEFAULT '' NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "instructions" text DEFAULT '' NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "evidence_prompt" text DEFAULT '' NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "is_active" boolean DEFAULT true NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;`,
-    `ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;`,
-    `ALTER TABLE "challenges" ADD CONSTRAINT "challenges_code_key" UNIQUE ("code");`,
-
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "company_id" integer;`,
-    `ALTER TABLE "challenge_participants" ADD CONSTRAINT "challenge_participants_company_id_fk" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE CASCADE;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "status" text DEFAULT 'in_progress' NOT NULL;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "evidence_text" text;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "submitted_at" timestamp with time zone;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "reviewed_at" timestamp with time zone;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "reviewed_by" text;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "review_note" text;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "points_awarded" integer DEFAULT 0 NOT NULL;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;`,
-    `ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;`,
-
-    `UPDATE "challenge_participants" SET "company_id" = 1 WHERE "company_id" IS NULL;`,
-    `ALTER TABLE "challenge_participants" ALTER COLUMN "company_id" SET NOT NULL;`,
-
-    `ALTER TABLE "challenge_participants" DROP CONSTRAINT IF EXISTS "challenge_participants_challenge_id_user_id_unique";`,
-    `ALTER TABLE "challenge_participants" ADD CONSTRAINT "uniq_participant_company" UNIQUE ("challenge_id", "user_id", "company_id");`,
-    `ALTER TABLE "challenge_participants" ADD CONSTRAINT "chk_status" CHECK ("status" IN ('in_progress', 'submitted', 'approved', 'rejected'));`,
-    `ALTER TABLE "challenge_participants" ADD CONSTRAINT "chk_points_awarded" CHECK ("points_awarded" IN (0, 10));`,
-
-    // Achievements extensions (Sprint 6D)
-    `ALTER TABLE "badge_definitions" ADD COLUMN IF NOT EXISTS "code" text;`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_01_COMPLETE' WHERE "slug" IN ('sustainability-starter', 'sustainability-champion', 'sustainability-foundations');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_02_COMPLETE' WHERE "slug" IN ('sorting-champion', 'waste-warrior', 'waste-sorting');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_03_COMPLETE' WHERE "slug" IN ('energy-saver', 'energy-efficiency-at-work');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_04_COMPLETE' WHERE "slug" IN ('water-wise-at-work', 'water-conservation');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_05_COMPLETE' WHERE "slug" IN ('responsible-purchasing', 'sustainable-procurement-badge', 'sustainable-procurement-champion', 'sustainable-procurement');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_06_COMPLETE' WHERE "slug" IN ('green-office-champion', 'green-office-practitioner', 'green-office-practices');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_07_COMPLETE' WHERE "slug" IN ('carbon-aware', 'carbon-neutral-champion', 'carbon-footprint-awareness');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_08_COMPLETE' WHERE "slug" IN ('biodiversity-aware', 'biodiversity-champion', 'biodiversity-in-mauritius');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_09_COMPLETE' WHERE "slug" IN ('esg-fundamentals', 'esg-champion', 'esg-basics');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_10_COMPLETE' WHERE "slug" IN ('compliance-aware', 'environmental-responsibility', 'environmental-compliance-champion', 'environmental-compliance');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_11_COMPLETE' WHERE "slug" IN ('circular-economy-practitioner', 'circular-economy-badge', 'circular-economy-champion', 'circular-economy');`,
-    `UPDATE "badge_definitions" SET "code" = 'COURSE_ELH_12_COMPLETE' WHERE "slug" IN ('core-sustainability-certified', 'final-sustainability-certification');`,
-    `UPDATE "badge_definitions" SET "code" = UPPER(REPLACE("slug", '-', '_')) WHERE "code" IS NULL;`,
-    `ALTER TABLE "badge_definitions" ADD CONSTRAINT "badge_definitions_code_key" UNIQUE ("code");`,
-
-    `CREATE TABLE IF NOT EXISTS "employee_badges" (
-      "id" serial PRIMARY KEY,
-      "employee_id" integer NOT NULL,
-      "company_id" integer NOT NULL,
-      "badge_id" integer NOT NULL,
-      "earned_at" timestamp with time zone NOT NULL DEFAULT now(),
-      "award_source" text NOT NULL
-    );`,
-    `ALTER TABLE "employee_badges" ADD CONSTRAINT "employee_badges_employee_id_fk" FOREIGN KEY ("employee_id") REFERENCES "employees"("id") ON DELETE CASCADE;`,
-    `ALTER TABLE "employee_badges" ADD CONSTRAINT "employee_badges_company_id_fk" FOREIGN KEY ("company_id") REFERENCES "companies"("id") ON DELETE CASCADE;`,
-    `ALTER TABLE "employee_badges" ADD CONSTRAINT "employee_badges_badge_id_fk" FOREIGN KEY ("badge_id") REFERENCES "badge_definitions"("id") ON DELETE CASCADE;`,
-    `ALTER TABLE "employee_badges" ADD CONSTRAINT "uniq_employee_badge" UNIQUE ("employee_id", "badge_id");`
+  const operations: SchemaOperation[] = [
+    {
+      name: "Add competency_scores to quiz_attempts",
+      check: () => columnExists("quiz_attempts", "competency_scores"),
+      execute: () => db.execute(sql`ALTER TABLE "quiz_attempts" ADD COLUMN IF NOT EXISTS "competency_scores" jsonb;`)
+    },
+    {
+      name: "Add competency_area to quiz_questions",
+      check: () => columnExists("quiz_questions", "competency_area"),
+      execute: () => db.execute(sql`ALTER TABLE "quiz_questions" ADD COLUMN IF NOT EXISTS "competency_area" text;`)
+    },
+    {
+      name: "Add source_course_id to quiz_questions",
+      check: () => columnExists("quiz_questions", "source_course_id"),
+      execute: () => db.execute(sql`ALTER TABLE "quiz_questions" ADD COLUMN IF NOT EXISTS "source_course_id" integer;`)
+    },
+    {
+      name: "Add learning_outcome to quiz_questions",
+      check: () => columnExists("quiz_questions", "learning_outcome"),
+      execute: () => db.execute(sql`ALTER TABLE "quiz_questions" ADD COLUMN IF NOT EXISTS "learning_outcome" text;`)
+    },
+    {
+      name: "Add certificate_title to certificates",
+      check: () => columnExists("certificates", "certificate_title"),
+      execute: () => db.execute(sql`ALTER TABLE "certificates" ADD COLUMN IF NOT EXISTS "certificate_title" text;`)
+    },
+    {
+      name: "Add level to learning_paths",
+      check: () => columnExists("learning_paths", "level"),
+      execute: () => db.execute(sql`ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "level" text DEFAULT 'beginner' NOT NULL;`)
+    },
+    {
+      name: "Add provider_label to learning_paths",
+      check: () => columnExists("learning_paths", "provider_label"),
+      execute: () => db.execute(sql`ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "provider_label" text DEFAULT 'EcoLearnHub' NOT NULL;`)
+    },
+    {
+      name: "Add is_system_managed to learning_paths",
+      check: () => columnExists("learning_paths", "is_system_managed"),
+      execute: () => db.execute(sql`ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "is_system_managed" boolean DEFAULT true NOT NULL;`)
+    },
+    {
+      name: "Add company_id to learning_paths",
+      check: () => columnExists("learning_paths", "company_id"),
+      execute: () => db.execute(sql`ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "company_id" integer;`)
+    },
+    {
+      name: "Add course_code to courses",
+      check: () => columnExists("courses", "course_code"),
+      execute: () => db.execute(sql`ALTER TABLE "courses" ADD COLUMN IF NOT EXISTS "course_code" text;`)
+    },
+    {
+      name: "Backfill course code ELH-01",
+      check: () => courseCodeExists("sustainability-foundations", "ELH-01"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-01' WHERE "slug" = 'sustainability-foundations';`)
+    },
+    {
+      name: "Backfill course code ELH-02",
+      check: () => courseCodeExists("waste-sorting", "ELH-02"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-02' WHERE "slug" IN ('waste-sorting', 'waste-sorting-mauritian-bin-system');`)
+    },
+    {
+      name: "Backfill course code ELH-03",
+      check: () => courseCodeExists("energy-efficiency-at-work", "ELH-03"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-03' WHERE "slug" = 'energy-efficiency-at-work';`)
+    },
+    {
+      name: "Backfill course code ELH-04",
+      check: () => courseCodeExists("water-conservation", "ELH-04"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-04' WHERE "slug" = 'water-conservation';`)
+    },
+    {
+      name: "Backfill course code ELH-05",
+      check: () => courseCodeExists("sustainable-procurement", "ELH-05"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-05' WHERE "slug" = 'sustainable-procurement';`)
+    },
+    {
+      name: "Backfill course code ELH-06",
+      check: () => courseCodeExists("green-office-practices", "ELH-06"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-06' WHERE "slug" = 'green-office-practices';`)
+    },
+    {
+      name: "Backfill course code ELH-07",
+      check: () => courseCodeExists("carbon-footprint-awareness", "ELH-07"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-07' WHERE "slug" = 'carbon-footprint-awareness';`)
+    },
+    {
+      name: "Backfill course code ELH-08",
+      check: () => courseCodeExists("biodiversity-in-mauritius", "ELH-08"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-08' WHERE "slug" = 'biodiversity-in-mauritius';`)
+    },
+    {
+      name: "Backfill course code ELH-09",
+      check: () => courseCodeExists("esg-basics", "ELH-09"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-09' WHERE "slug" = 'esg-basics';`)
+    },
+    {
+      name: "Backfill course code ELH-10",
+      check: () => courseCodeExists("environmental-compliance", "ELH-10"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-10' WHERE "slug" = 'environmental-compliance';`)
+    },
+    {
+      name: "Backfill course code ELH-11",
+      check: () => courseCodeExists("circular-economy", "ELH-11"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-11' WHERE "slug" = 'circular-economy';`)
+    },
+    {
+      name: "Backfill course code ELH-12",
+      check: () => courseCodeExists("final-sustainability-certification", "ELH-12"),
+      execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-12' WHERE "slug" = 'final-sustainability-certification';`)
+    },
+    {
+      name: "Add code to challenges",
+      check: () => columnExists("challenges", "code"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "code" text;`)
+    },
+    {
+      name: "Add summary to challenges",
+      check: () => columnExists("challenges", "summary"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "summary" text DEFAULT '' NOT NULL;`)
+    },
+    {
+      name: "Add category to challenges",
+      check: () => columnExists("challenges", "category"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "category" text DEFAULT '' NOT NULL;`)
+    },
+    {
+      name: "Add linked_course_id to challenges",
+      check: () => columnExists("challenges", "linked_course_id"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "linked_course_id" integer;`)
+    },
+    {
+      name: "Add duration_label to challenges",
+      check: () => columnExists("challenges", "duration_label"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "duration_label" text DEFAULT '' NOT NULL;`)
+    },
+    {
+      name: "Add instructions to challenges",
+      check: () => columnExists("challenges", "instructions"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "instructions" text DEFAULT '' NOT NULL;`)
+    },
+    {
+      name: "Add evidence_prompt to challenges",
+      check: () => columnExists("challenges", "evidence_prompt"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "evidence_prompt" text DEFAULT '' NOT NULL;`)
+    },
+    {
+      name: "Add is_active to challenges",
+      check: () => columnExists("challenges", "is_active"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "is_active" boolean DEFAULT true NOT NULL;`)
+    },
+    {
+      name: "Add created_at to challenges",
+      check: () => columnExists("challenges", "created_at"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add updated_at to challenges",
+      check: () => columnExists("challenges", "updated_at"),
+      execute: () => db.execute(sql`ALTER TABLE "challenges" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add company_id to challenge_participants",
+      check: () => columnExists("challenge_participants", "company_id"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "company_id" integer;`)
+    },
+    {
+      name: "Add status to challenge_participants",
+      check: () => columnExists("challenge_participants", "status"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "status" text DEFAULT 'in_progress' NOT NULL;`)
+    },
+    {
+      name: "Add evidence_text to challenge_participants",
+      check: () => columnExists("challenge_participants", "evidence_text"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "evidence_text" text;`)
+    },
+    {
+      name: "Add submitted_at to challenge_participants",
+      check: () => columnExists("challenge_participants", "submitted_at"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "submitted_at" timestamp with time zone;`)
+    },
+    {
+      name: "Add reviewed_at to challenge_participants",
+      check: () => columnExists("challenge_participants", "reviewed_at"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "reviewed_at" timestamp with time zone;`)
+    },
+    {
+      name: "Add reviewed_by to challenge_participants",
+      check: () => columnExists("challenge_participants", "reviewed_by"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "reviewed_by" text;`)
+    },
+    {
+      name: "Add review_note to challenge_participants",
+      check: () => columnExists("challenge_participants", "review_note"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "review_note" text;`)
+    },
+    {
+      name: "Add points_awarded to challenge_participants",
+      check: () => columnExists("challenge_participants", "points_awarded"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "points_awarded" integer DEFAULT 0 NOT NULL;`)
+    },
+    {
+      name: "Add created_at to challenge_participants",
+      check: () => columnExists("challenge_participants", "created_at"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "created_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add updated_at to challenge_participants",
+      check: () => columnExists("challenge_participants", "updated_at"),
+      execute: () => db.execute(sql`ALTER TABLE "challenge_participants" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add code to badge_definitions",
+      check: () => columnExists("badge_definitions", "code"),
+      execute: () => db.execute(sql`ALTER TABLE "badge_definitions" ADD COLUMN IF NOT EXISTS "code" text;`)
+    },
+    {
+      name: "Create employee_badges table",
+      check: () => tableExists("employee_badges"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "employee_badges" (
+          "id" serial PRIMARY KEY,
+          "employee_id" integer NOT NULL,
+          "company_id" integer NOT NULL,
+          "badge_id" integer NOT NULL,
+          "earned_at" timestamp with time zone NOT NULL DEFAULT now(),
+          "award_source" text NOT NULL
+        );
+      `)
+    }
   ];
 
-  for (const q of queries) {
+  const summary = {
+    checked: 0,
+    applied: 0,
+    alreadyPresent: 0,
+    skipped: 0,
+    failed: 0,
+  };
+
+  for (const op of operations) {
+    summary.checked++;
     try {
-      await db.execute(sql.raw(q));
+      const present = await op.check();
+      if (present) {
+        summary.alreadyPresent++;
+      } else {
+        await op.execute();
+        summary.applied++;
+        logger.info(`Schema modification applied: ${op.name}`);
+      }
     } catch (e: any) {
-      logger.warn(`Failed to execute schema modification: ${q}. Error: ${e.message}`);
+      summary.failed++;
+      logger.error({ err: e }, `Failed to execute schema modification: ${op.name}. Error: ${e.message}`);
     }
   }
 
-  logger.info("Schema modifications applied successfully.");
+  logger.info(summary, "Schema modifications check completed");
+
+  if (summary.failed > 0) {
+    throw new Error("One or more schema modifications failed to execute.");
+  }
 }

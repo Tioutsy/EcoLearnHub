@@ -64,6 +64,27 @@
       "when": 1784534400000,
       "tag": "0008_remove_legacy_course12_title_enforcement",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784534400001,
+      "tag": "0009_challenges_extensions",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784534400002,
+      "tag": "0010_employee_badges",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784534400003,
+      "tag": "0011_repair_constraints_and_schema_integrity",
+      "breakpoints": true
     }
   ]
 }
