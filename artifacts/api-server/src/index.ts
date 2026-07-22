@@ -13,6 +13,7 @@ import { ensureEnvironmentalComplianceCourse } from "./lib/ensureEnvironmentalCo
 import { ensureCircularEconomyCourse } from "./lib/ensureCircularEconomyCourse";
 import { ensureFinalSustainabilityCertificationCourse } from "./lib/ensureFinalSustainabilityCertificationCourse";
 import { ensureActionPlanningCourse } from "./lib/ensureActionPlanningCourse";
+import { ensureDepartmentalSustainabilityGoalsCourse } from "./lib/ensureDepartmentalSustainabilityGoalsCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
@@ -90,6 +91,7 @@ async function start(): Promise<void> {
   await ensureCatalogueSkeletons();
   await ensureFinalSustainabilityCertificationCourse();
   await ensureActionPlanningCourse();
+  await ensureDepartmentalSustainabilityGoalsCourse();
   await ensureCoreSustainabilityPath();
   await ensureInsightsMigrated();
 
