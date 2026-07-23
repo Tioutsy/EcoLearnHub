@@ -20,6 +20,7 @@ import { ensureTrackingSustainabilityActionsCourse } from "./lib/ensureTrackingS
 import { ensureSustainabilityDataCollectionCourse } from "./lib/ensureSustainabilityDataCollectionCourse";
 import { ensureSustainabilityPerformanceReviewCourse } from "./lib/ensureSustainabilityPerformanceReviewCourse";
 import { ensureSustainabilityRolesAccountabilityCourse } from "./lib/ensureSustainabilityRolesAccountabilityCourse";
+import { ensureEmployeeSustainabilityEngagementCourse } from "./lib/ensureEmployeeSustainabilityEngagementCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
@@ -104,6 +105,7 @@ async function start(): Promise<void> {
   await ensureSustainabilityDataCollectionCourse();
   await ensureSustainabilityPerformanceReviewCourse();
   await ensureSustainabilityRolesAccountabilityCourse();
+  await ensureEmployeeSustainabilityEngagementCourse();
   await ensureCoreSustainabilityPath();
   await ensureInsightsMigrated();
 
