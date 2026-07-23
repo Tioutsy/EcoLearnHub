@@ -14,6 +14,10 @@ import { ensureCircularEconomyCourse } from "./lib/ensureCircularEconomyCourse";
 import { ensureFinalSustainabilityCertificationCourse } from "./lib/ensureFinalSustainabilityCertificationCourse";
 import { ensureActionPlanningCourse } from "./lib/ensureActionPlanningCourse";
 import { ensureDepartmentalSustainabilityGoalsCourse } from "./lib/ensureDepartmentalSustainabilityGoalsCourse";
+import { ensureWorkplaceSustainabilityTeamCourse } from "./lib/ensureWorkplaceSustainabilityTeamCourse";
+import { ensureCommunicatingSustainabilityAtWorkCourse } from "./lib/ensureCommunicatingSustainabilityAtWorkCourse";
+import { ensureTrackingSustainabilityActionsCourse } from "./lib/ensureTrackingSustainabilityActionsCourse";
+import { ensureSustainabilityDataCollectionCourse } from "./lib/ensureSustainabilityDataCollectionCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
@@ -92,6 +96,10 @@ async function start(): Promise<void> {
   await ensureFinalSustainabilityCertificationCourse();
   await ensureActionPlanningCourse();
   await ensureDepartmentalSustainabilityGoalsCourse();
+  await ensureWorkplaceSustainabilityTeamCourse();
+  await ensureCommunicatingSustainabilityAtWorkCourse();
+  await ensureTrackingSustainabilityActionsCourse();
+  await ensureSustainabilityDataCollectionCourse();
   await ensureCoreSustainabilityPath();
   await ensureInsightsMigrated();
 
