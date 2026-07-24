@@ -628,19 +628,7 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
         throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
       }
 
-      // 2. Resolve Course 17
-      let course17 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-17")
-      });
-      if (!course17) {
-        course17 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "tracking-sustainability-actions-and-progress")
-        });
-      }
-
-      if (!course17) {
-        throw new Error("Data integrity error: Course 17 (ELH-17) not found. Prerequisite cannot be established.");
-      }
+      // 2. (ELH-17 was incorrectly added as a prerequisite in the original seed. Only ELH-12 is required.)
 
       // 3. Resolve or insert Course 29
       let existingCourse = await tx.query.coursesTable.findFirst({
@@ -789,22 +777,8 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
         }).where(eq(badgeDefinitionsTable.id, existingBadge.id));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 17
-      const existingPrereq17 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course17.id)
-        )
-      });
-      if (!existingPrereq17) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course17.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
+      // 6. Ensure only ELH-12 (Final Sustainability Certification) is the prerequisite.
+      // ELH-17 was incorrectly added in the original seed — the corrective migration removes it from live data.
       const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
         where: and(
           eq(coursePrerequisitesTable.courseId, actualCourseId),
@@ -818,11 +792,11 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
         });
       }
 
-      // Remove legacy prerequisites (if any) that are not Course 12 or 17
+      // Remove any prerequisites that are not ELH-12 (including the incorrectly-added ELH-17)
       await tx.delete(coursePrerequisitesTable).where(
         and(
           eq(coursePrerequisitesTable.courseId, actualCourseId),
-          notInArray(coursePrerequisitesTable.prerequisiteCourseId, [course12.id, course17.id])
+          notInArray(coursePrerequisitesTable.prerequisiteCourseId, [course12.id])
         )
       );
 

@@ -138,20 +138,13 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
     const course29Id = course29.id;
 
     const [course12] = await db
-      .select({ id: coursesTable.id })
+      .select({ id: coursesTable.id, courseCode: coursesTable.courseCode, title: coursesTable.title })
       .from(coursesTable)
       .where(eq(coursesTable.courseCode, "ELH-12"))
       .limit(1);
-    assert.ok(course12, "Course 12 must exist in DB");
+    assert.ok(course12, "ELH-12 must exist in DB");
+    assert.equal(course12.title, "Final Sustainability Certification", "ELH-12 must be titled Final Sustainability Certification");
     const course12Id = course12.id;
-
-    const [course17] = await db
-      .select({ id: coursesTable.id })
-      .from(coursesTable)
-      .where(eq(coursesTable.courseCode, "ELH-17"))
-      .limit(1);
-    assert.ok(course17, "Course 17 must exist in DB");
-    const course17Id = course17.id;
 
     const [badge] = await db
       .select()
@@ -159,6 +152,15 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
       .where(eq(badgeDefinitionsTable.slug, "operational-sustainability-practitioner"))
       .limit(1);
     assert.ok(badge, "Badge Operational Sustainability Practitioner must exist in DB");
+
+    // Verify that ELH-29's prerequisite relationship is exactly ELH-12 (Final Sustainability Certification) and nothing else
+    const { coursePrerequisitesTable } = await import("@workspace/db");
+    const prereqRecords = await db
+      .select({ prereqId: coursePrerequisitesTable.prerequisiteCourseId })
+      .from(coursePrerequisitesTable)
+      .where(eq(coursePrerequisitesTable.courseId, course29Id));
+    assert.equal(prereqRecords.length, 1, "ELH-29 must have exactly 1 prerequisite (ELH-12)");
+    assert.equal(prereqRecords[0].prereqId, course12Id, "ELH-29 prerequisite must be ELH-12 (Final Sustainability Certification)");
 
     // Ensure clean state: delete any existing enrollments for the test user to start from fresh
     const clauses: any[] = [
@@ -228,7 +230,7 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
     });
     assert.equal(quizSubmitRes.status, 403, "Expected 403 Forbidden submitting quiz without enrollment");
 
-    // Step 2. Partially Eligible Learner (Complete ELH-12 but NOT ELH-17) -> Expect 403 when enrolling
+    // Step 2. Eligible Learner (Complete ELH-12 Final Sustainability Certification) -> Expect 201 Created when enrolling
     await db.insert(enrollmentsTable).values({
       userId: TEST_USER_ID,
       employeeId: employee.id,
@@ -238,32 +240,13 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
       progressPct: 100,
     }).onConflictDoNothing();
 
+    // Retry enrolling - should now succeed
     enrollRes = await fetch(`${API_BASE}/enrollments`, {
       method: "POST",
       headers: HEADERS,
       body: JSON.stringify({ courseId: course29Id }),
     });
-    assert.equal(enrollRes.status, 403, "Expected 403 Forbidden enrolling with only one prerequisite completed");
-    errBody = (await enrollRes.json()) as any;
-    assert.equal(errBody.error, "PREREQUISITES_INCOMPLETE", "Expected prerequisites incomplete error code");
-
-    // Step 3. Eligible Learner (Complete ELH-12 AND ELH-17) -> Expect 201 Created when enrolling
-    await db.insert(enrollmentsTable).values({
-      userId: TEST_USER_ID,
-      employeeId: employee.id,
-      courseId: course17Id,
-      status: "completed",
-      completedAt: new Date(),
-      progressPct: 100,
-    }).onConflictDoNothing();
-
-    // Retry enrolling
-    enrollRes = await fetch(`${API_BASE}/enrollments`, {
-      method: "POST",
-      headers: HEADERS,
-      body: JSON.stringify({ courseId: course29Id }),
-    });
-    assert.equal(enrollRes.status, 201, "Expected 201 Created enrolling with all prerequisites completed");
+    assert.equal(enrollRes.status, 201, "Expected 201 Created enrolling after completing ELH-12 (Final Sustainability Certification)");
     const enrollData = (await enrollRes.json()) as any;
     assert.ok(enrollData.id, "Expected enrollment ID to be returned");
     const activeEnrollmentId = enrollData.id;

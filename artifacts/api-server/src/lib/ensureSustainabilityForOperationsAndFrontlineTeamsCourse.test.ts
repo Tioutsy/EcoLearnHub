@@ -70,23 +70,6 @@ test("Course 29 Seeding & Integrity Unit Tests", async () => {
         }).returning();
       }
 
-      let c17 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-17")
-      });
-      if (!c17) {
-        [c17] = await tx.insert(coursesTable).values({
-          courseCode: "ELH-17",
-          slug: "tracking-sustainability-actions-and-progress",
-          title: "Tracking Sustainability Actions and Progress",
-          level: "Applied Workplace Practice",
-          passingScore: 80,
-          status: "published",
-          isPublished: true,
-          description: "Prerequisite Course 17",
-          categoryId: 1,
-        }).returning();
-      }
-
       let c28 = await tx.query.coursesTable.findFirst({
         where: eq(coursesTable.courseCode, "ELH-28")
       });
@@ -146,6 +129,16 @@ test("Course 29 Seeding & Integrity Unit Tests", async () => {
     assert.ok(badge, "Course 29 completion badge must be created");
     assert.equal(badge.slug, "operational-sustainability-practitioner");
     assert.equal(badge.name, "Operational Sustainability Practitioner");
+
+    // Verify prerequisite: exactly ELH-12 (Final Sustainability Certification), nothing else
+    const prereqs = await db.select({
+      prereqId: coursePrerequisitesTable.prerequisiteCourseId
+    }).from(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.courseId, course!.id));
+    assert.equal(prereqs.length, 1, "ELH-29 must have exactly 1 prerequisite (ELH-12)");
+    const [prereqCourse] = await db.select({ courseCode: coursesTable.courseCode, title: coursesTable.title })
+      .from(coursesTable).where(eq(coursesTable.id, prereqs[0].prereqId)).limit(1);
+    assert.equal(prereqCourse.courseCode, "ELH-12", "ELH-29 prerequisite course code must be ELH-12");
+    assert.equal(prereqCourse.title, "Final Sustainability Certification", "ELH-29 prerequisite must be Final Sustainability Certification");
 
     // 2. Test Idempotency: Running it twice shouldn't duplicate entries
     await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
