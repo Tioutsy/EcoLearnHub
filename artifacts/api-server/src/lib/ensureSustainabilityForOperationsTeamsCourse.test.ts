@@ -17,8 +17,8 @@ import {
 import { eq, and, inArray } from "drizzle-orm";
 import { ensureSustainabilityForOperationsTeamsCourse } from "./ensureSustainabilityForOperationsTeamsCourse";
 
-// Thorough cleanup of Course 26 data, recommendations, and orphans
-async function cleanUpCourse26() {
+// Thorough cleanup of Course 29 data, recommendations, and orphans
+async function cleanUpCourse29() {
   const [emp] = await db.select().from(employeesTable).where(eq(employeesTable.clerkUserId, "preserve_ops_user_id")).limit(1);
   if (emp) {
     await db.delete(employeeBadgesTable).where(eq(employeeBadgesTable.employeeId, emp.id));
@@ -31,28 +31,28 @@ async function cleanUpCourse26() {
     await db.delete(employeesTable).where(eq(employeesTable.id, emp.id));
   }
   await db.delete(quizAttemptsTable).where(eq(quizAttemptsTable.userId, "preserve_ops_user_id"));
-  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-operations-teams-v1"));
+  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-operations-teams-v2"));
 
-  // Reset Course 25 recommendation link unconditionally
+  // Reset Course 28 recommendation link unconditionally
   await db.update(coursesTable)
     .set({ recommendedNextCourseId: null })
-    .where(eq(coursesTable.courseCode, "ELH-25"));
+    .where(eq(coursesTable.courseCode, "ELH-28"));
 
-  const c26s = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-26"));
-  const c26Ids = c26s.map(c => c.id);
-  if (c26Ids.length > 0) {
-    await db.delete(lessonsTable).where(inArray(lessonsTable.courseId, c26Ids));
-    await db.delete(quizQuestionsTable).where(inArray(quizQuestionsTable.courseId, c26Ids));
-    await db.delete(coursesTable).where(inArray(coursesTable.id, c26Ids));
+  const c29s = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-29"));
+  const c29Ids = c29s.map(c => c.id);
+  if (c29Ids.length > 0) {
+    await db.delete(lessonsTable).where(inArray(lessonsTable.courseId, c29Ids));
+    await db.delete(quizQuestionsTable).where(inArray(quizQuestionsTable.courseId, c29Ids));
+    await db.delete(coursesTable).where(inArray(coursesTable.id, c29Ids));
   }
 }
 
-test("Course 26 Seeding & Integrity Unit Tests", async () => {
-  await cleanUpCourse26();
+test("Course 29 Seeding & Integrity Unit Tests", async () => {
+  await cleanUpCourse29();
 
   try {
     await db.transaction(async (tx) => {
-      // 0. Set up prerequisite courses (ELH-12 and ELH-23) if they do not exist
+      // 0. Set up prerequisite courses (ELH-12 and ELH-17) if they do not exist
       let c12 = await tx.query.coursesTable.findFirst({
         where: eq(coursesTable.courseCode, "ELH-12")
       });
@@ -70,36 +70,36 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
         }).returning();
       }
 
-      let c23 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-23")
+      let c17 = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-17")
       });
-      if (!c23) {
-        [c23] = await tx.insert(coursesTable).values({
-          courseCode: "ELH-23",
-          slug: "planning-and-delivering-workplace-sustainability-initiatives",
-          title: "Planning and Delivering Workplace Sustainability Initiatives",
+      if (!c17) {
+        [c17] = await tx.insert(coursesTable).values({
+          courseCode: "ELH-17",
+          slug: "tracking-sustainability-actions-and-progress",
+          title: "Tracking Sustainability Actions and Progress",
           level: "Applied Workplace Practice",
           passingScore: 80,
           status: "published",
           isPublished: true,
-          description: "Prerequisite Course 23",
+          description: "Prerequisite Course 17",
           categoryId: 1,
         }).returning();
       }
 
-      let c25 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-25")
+      let c28 = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-28")
       });
-      if (!c25) {
-        [c25] = await tx.insert(coursesTable).values({
-          courseCode: "ELH-25",
-          slug: "sustainability-for-finance-teams",
-          title: "Sustainability for Finance Teams",
+      if (!c28) {
+        [c28] = await tx.insert(coursesTable).values({
+          courseCode: "ELH-28",
+          slug: "sustainability-for-sales-and-marketing-teams",
+          title: "Sustainability for Sales and Marketing Teams",
           level: "Applied Workplace Practice",
           passingScore: 80,
           status: "published",
           isPublished: true,
-          description: "Prerequisite Course 25",
+          description: "Prerequisite Course 28",
           categoryId: 1,
         }).returning();
       }
@@ -111,10 +111,10 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
       const [course] = await tx
         .select()
         .from(coursesTable)
-        .where(eq(coursesTable.courseCode, "ELH-26"))
+        .where(eq(coursesTable.courseCode, "ELH-29"))
         .limit(1);
 
-      assert.ok(course, "Course 26 must be created");
+      assert.ok(course, "Course 29 must be created");
       assert.equal(course.slug, "sustainability-for-operations-teams");
       assert.equal(course.title, "Sustainability for Operations Teams");
       assert.equal(course.level, "Applied Workplace Practice");
@@ -161,9 +161,9 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
         .where(eq(badgeDefinitionsTable.slug, "sustainable-operations-practitioner"))
         .limit(1);
       assert.ok(badge, "Badge must be created");
-      assert.equal(badge.code, "COURSE_ELH_26_COMPLETE");
+      assert.equal(badge.code, "COURSE_ELH_29_COMPLETE");
 
-      // Verify prerequisites (ELH-12 and ELH-23)
+      // Verify prerequisites (ELH-12 and ELH-17)
       const prereqs = await tx
         .select()
         .from(coursePrerequisitesTable)
@@ -171,22 +171,22 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
       assert.equal(prereqs.length, 2, "Should have exactly 2 prerequisites");
       const prereqIds = prereqs.map(p => p.prerequisiteCourseId);
       assert.ok(prereqIds.includes(c12.id), "Prerequisite should include Course 12");
-      assert.ok(prereqIds.includes(c23.id), "Prerequisite should include Course 23");
+      assert.ok(prereqIds.includes(c17.id), "Prerequisite should include Course 17");
 
-      // Verify Course 25 recommendation link points to Course 26
-      const [c25Post] = await tx
+      // Verify Course 28 recommendation link points to Course 29
+      const [c28Post] = await tx
         .select()
         .from(coursesTable)
-        .where(eq(coursesTable.id, c25.id))
+        .where(eq(coursesTable.id, c28.id))
         .limit(1);
-      assert.equal(c25Post.recommendedNextCourseId, course.id, "Course 25 should recommend Course 26");
+      assert.equal(c28Post.recommendedNextCourseId, course.id, "Course 28 should recommend Course 29");
 
       // 2. Repeated execution does not duplicate course
       await ensureSustainabilityForOperationsTeamsCourse();
       const coursesPost = await tx
         .select()
         .from(coursesTable)
-        .where(eq(coursesTable.courseCode, "ELH-26"));
+        .where(eq(coursesTable.courseCode, "ELH-29"));
       assert.equal(coursesPost.length, 1, "Idempotency: Should not duplicate course record");
 
       tx.rollback();
@@ -199,8 +199,8 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
   }
 });
 
-test("Course 26 Learner Data Preservation Unit Tests", async () => {
-  await cleanUpCourse26();
+test("Course 29 Learner Data Preservation Unit Tests", async () => {
+  await cleanUpCourse29();
 
   try {
     let c12 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-12") });
@@ -217,30 +217,30 @@ test("Course 26 Learner Data Preservation Unit Tests", async () => {
         categoryId: 1,
       }).returning();
     }
-    let c23 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-23") });
-    if (!c23) {
-      [c23] = await db.insert(coursesTable).values({
-        courseCode: "ELH-23",
-        slug: "planning-and-delivering-workplace-sustainability-initiatives",
-        title: "Planning and Delivering Workplace Sustainability Initiatives",
+    let c17 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-17") });
+    if (!c17) {
+      [c17] = await db.insert(coursesTable).values({
+        courseCode: "ELH-17",
+        slug: "tracking-sustainability-actions-and-progress",
+        title: "Tracking Sustainability Actions and Progress",
         level: "Applied Workplace Practice",
         passingScore: 80,
         status: "published",
         isPublished: true,
-        description: "Prerequisite Course 23",
+        description: "Prerequisite Course 17",
         categoryId: 1,
       }).returning();
     }
 
     await ensureSustainabilityForOperationsTeamsCourse();
 
-    const [course] = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-26")).limit(1);
+    const [course] = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-29")).limit(1);
     const [lesson] = await db.select().from(lessonsTable).where(eq(lessonsTable.courseId, course.id)).limit(1);
     const [badge] = await db.select().from(badgeDefinitionsTable).where(eq(badgeDefinitionsTable.slug, "sustainable-operations-practitioner")).limit(1);
 
     const [employee] = await db.insert(employeesTable).values({
       name: "Test Preserved Ops User",
-      email: "preserve26@ecolearn.mu",
+      email: "preserve29@ecolearn.mu",
       clerkUserId: "preserve_ops_user_id",
       companyId: 1,
       role: "employee",
@@ -284,7 +284,7 @@ test("Course 26 Learner Data Preservation Unit Tests", async () => {
       awardSource: "course_completion",
     });
 
-    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-operations-teams-v1"));
+    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-operations-teams-v2"));
 
     await ensureSustainabilityForOperationsTeamsCourse();
 
@@ -313,12 +313,12 @@ test("Course 26 Learner Data Preservation Unit Tests", async () => {
     assert.ok(badgePost, "Badge award must be preserved");
 
   } finally {
-    await cleanUpCourse26();
+    await cleanUpCourse29();
   }
 });
 
-test("Course 26 Transactional Rollback Atomicity Unit Tests", async () => {
-  await cleanUpCourse26();
+test("Course 29 Transactional Rollback Atomicity Unit Tests", async () => {
+  await cleanUpCourse29();
 
   let c12 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-12") });
   if (!c12) {
@@ -334,17 +334,17 @@ test("Course 26 Transactional Rollback Atomicity Unit Tests", async () => {
       categoryId: 1,
     }).returning();
   }
-  let c23 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-23") });
-  if (!c23) {
-    [c23] = await db.insert(coursesTable).values({
-      courseCode: "ELH-23",
-      slug: "planning-and-delivering-workplace-sustainability-initiatives",
-      title: "Planning and Delivering Workplace Sustainability Initiatives",
+  let c17 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-17") });
+  if (!c17) {
+    [c17] = await db.insert(coursesTable).values({
+      courseCode: "ELH-17",
+      slug: "tracking-sustainability-actions-and-progress",
+      title: "Tracking Sustainability Actions and Progress",
       level: "Applied Workplace Practice",
       passingScore: 80,
       status: "published",
       isPublished: true,
-      description: "Prerequisite Course 23",
+      description: "Prerequisite Course 17",
       categoryId: 1,
     }).returning();
   }
@@ -358,7 +358,7 @@ test("Course 26 Transactional Rollback Atomicity Unit Tests", async () => {
     const mockTx = async (callback: any) => {
       return originalTransaction.call(db, async (tx: any) => {
         await callback(tx);
-        throw new Error("Forced transaction failure for testing Course 26 rollback");
+        throw new Error("Forced transaction failure for testing Course 29 rollback");
       });
     };
 
@@ -369,7 +369,7 @@ test("Course 26 Transactional Rollback Atomicity Unit Tests", async () => {
 
     await ensureSustainabilityForOperationsTeamsCourse();
   } catch (err: any) {
-    assert.equal(err.message, "Forced transaction failure for testing Course 26 rollback");
+    assert.equal(err.message, "Forced transaction failure for testing Course 29 rollback");
     didThrow = true;
   } finally {
     db.transaction = originalTransaction;
@@ -381,7 +381,7 @@ test("Course 26 Transactional Rollback Atomicity Unit Tests", async () => {
   assert.ok(didThrow, "Seeder must throw when database insert fails");
 
   const course = await db.query.coursesTable.findFirst({
-    where: eq(coursesTable.courseCode, "ELH-26")
+    where: eq(coursesTable.courseCode, "ELH-29")
   });
-  assert.ok(!course, "Course 26 record should not exist because the transaction rolled back");
+  assert.ok(!course, "Course 29 record should not exist because the transaction rolled back");
 });

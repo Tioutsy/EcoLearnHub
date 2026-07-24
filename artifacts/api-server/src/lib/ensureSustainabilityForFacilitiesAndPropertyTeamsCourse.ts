@@ -483,18 +483,18 @@ export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() 
         throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
       }
 
-      // 2. Resolve Course 26
-      let course26 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-26")
+      // 2. Resolve Course 29
+      let course29 = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-29")
       });
-      if (!course26) {
-        course26 = await tx.query.coursesTable.findFirst({
+      if (!course29) {
+        course29 = await tx.query.coursesTable.findFirst({
           where: eq(coursesTable.slug, "sustainability-for-operations-teams")
         });
       }
 
-      if (!course26) {
-        throw new Error("Data integrity error: Course 26 (ELH-26) not found. Prerequisite cannot be established.");
+      if (!course29) {
+        throw new Error("Data integrity error: Course 29 (ELH-29) not found. Prerequisite cannot be established.");
       }
 
       // 3. Resolve or insert Course 27
@@ -557,36 +557,20 @@ export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() 
         }).where(eq(coursesTable.id, actualCourseId));
       }
 
-      // 4. Update Course 26 recommendedNextCourseId to point to Course 27 preserving admin edits
-      let course26Ref = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-26")
+      // 4. Clear Course 29 (formerly 26) recommendedNextCourseId pointing to Course 27 to avoid cycles
+      let course29Ref = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-29")
       });
-      if (!course26Ref) {
-        course26Ref = await tx.query.coursesTable.findFirst({
+      if (!course29Ref) {
+        course29Ref = await tx.query.coursesTable.findFirst({
           where: eq(coursesTable.slug, "sustainability-for-operations-teams")
         });
       }
 
-      if (course26Ref) {
-        let isSystemManaged = false;
-        if (course26Ref.recommendedNextCourseId) {
-          const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-            where: eq(coursesTable.id, course26Ref.recommendedNextCourseId)
-          });
-          if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-27") {
-            isSystemManaged = true;
-          }
-        }
-
-        if (course26Ref.recommendedNextCourseId === null || course26Ref.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-          await tx.update(coursesTable).set({
-            recommendedNextCourseId: actualCourseId
-          }).where(eq(coursesTable.id, course26Ref.id));
-        } else {
-          logger.warn(`Recommendation conflict: Course 26 currently recommends course ID ${course26Ref.recommendedNextCourseId} instead of Course 27 (ID: ${actualCourseId}). Preserving administrator edit.`);
-        }
-      } else {
-        logger.warn("Data integrity note: Course 26 not found during Course 27 recommendation configuration.");
+      if (course29Ref && course29Ref.recommendedNextCourseId === actualCourseId) {
+        await tx.update(coursesTable).set({
+          recommendedNextCourseId: null
+        }).where(eq(coursesTable.id, course29Ref.id));
       }
 
       // 5. Ensure Badge Definition exists
@@ -616,17 +600,17 @@ export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() 
       }
 
       // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 26
-      const existingPrereq26 = await tx.query.coursePrerequisitesTable.findFirst({
+      // Prerequisite 1: Course 29
+      const existingPrereq29 = await tx.query.coursePrerequisitesTable.findFirst({
         where: and(
           eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course26.id)
+          eq(coursePrerequisitesTable.prerequisiteCourseId, course29.id)
         )
       });
-      if (!existingPrereq26) {
+      if (!existingPrereq29) {
         await tx.insert(coursePrerequisitesTable).values({
           courseId: actualCourseId,
-          prerequisiteCourseId: course26.id
+          prerequisiteCourseId: course29.id
         });
       }
 

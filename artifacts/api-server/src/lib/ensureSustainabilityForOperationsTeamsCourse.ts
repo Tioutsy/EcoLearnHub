@@ -15,11 +15,11 @@ import { logger } from "./logger";
 const COURSE_SLUG = "sustainability-for-operations-teams";
 const COURSE_TITLE = "Sustainability for Operations Teams";
 const BADGE_SLUG = "sustainable-operations-practitioner";
-const BADGE_CODE = "COURSE_ELH_26_COMPLETE";
-const SEED_NAME = "sustainability-for-operations-teams-v1";
+const BADGE_CODE = "COURSE_ELH_29_COMPLETE";
+const SEED_NAME = "sustainability-for-operations-teams-v2";
 
 const COURSE_META = {
-  courseCode: "ELH-26",
+  courseCode: "ELH-29",
   description: "Learn how operations teams can reduce avoidable waste, embed approved sustainability actions into daily routines and respond safely when workplace conditions change.",
   fullDescription: "Learn how operations teams can reduce avoidable waste, embed approved sustainability actions into daily routines and respond safely when workplace conditions change.",
   categoryId: 1,
@@ -482,18 +482,18 @@ export async function ensureSustainabilityForOperationsTeamsCourse() {
         throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
       }
 
-      // 2. Resolve Course 23
-      let course23 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-23")
+      // 2. Resolve Course 17
+      let course17 = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-17")
       });
-      if (!course23) {
-        course23 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "planning-and-delivering-workplace-sustainability-initiatives")
+      if (!course17) {
+        course17 = await tx.query.coursesTable.findFirst({
+          where: eq(coursesTable.slug, "tracking-sustainability-actions-and-progress")
         });
       }
 
-      if (!course23) {
-        throw new Error("Data integrity error: Course 23 (ELH-23) not found. Prerequisite cannot be established.");
+      if (!course17) {
+        throw new Error("Data integrity error: Course 17 (ELH-17) not found. Prerequisite cannot be established.");
       }
 
       // 3. Resolve or insert Course 26
@@ -556,36 +556,53 @@ export async function ensureSustainabilityForOperationsTeamsCourse() {
         }).where(eq(coursesTable.id, actualCourseId));
       }
 
-      // 4. Update Course 25 recommendedNextCourseId to point to Course 26 preserving admin edits
-      let course25 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-25")
+      // 4. Update Course 28 recommendedNextCourseId to point to Course 29 preserving admin edits
+      let course28 = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-28")
       });
-      if (!course25) {
-        course25 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-finance-teams")
+      if (!course28) {
+        course28 = await tx.query.coursesTable.findFirst({
+          where: eq(coursesTable.slug, "sustainability-for-sales-and-marketing-teams")
         });
       }
 
-      if (course25) {
+      if (course28) {
         let isSystemManaged = false;
-        if (course25.recommendedNextCourseId) {
+        if (course28.recommendedNextCourseId) {
           const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-            where: eq(coursesTable.id, course25.recommendedNextCourseId)
+            where: eq(coursesTable.id, course28.recommendedNextCourseId)
           });
-          if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-26") {
+          if (currentRecommendedCourse && (currentRecommendedCourse.courseCode === "ELH-26" || currentRecommendedCourse.courseCode === "ELH-29")) {
             isSystemManaged = true;
           }
         }
 
-        if (course25.recommendedNextCourseId === null || course25.recommendedNextCourseId === actualCourseId || isSystemManaged) {
+        if (course28.recommendedNextCourseId === null || course28.recommendedNextCourseId === actualCourseId || isSystemManaged) {
           await tx.update(coursesTable).set({
             recommendedNextCourseId: actualCourseId
-          }).where(eq(coursesTable.id, course25.id));
+          }).where(eq(coursesTable.id, course28.id));
         } else {
-          logger.warn(`Recommendation conflict: Course 25 currently recommends course ID ${course25.recommendedNextCourseId} instead of Course 26 (ID: ${actualCourseId}). Preserving administrator edit.`);
+          logger.warn(`Recommendation conflict: Course 28 currently recommends course ID ${course28.recommendedNextCourseId} instead of Course 29 (ID: ${actualCourseId}). Preserving administrator edit.`);
         }
       } else {
-        logger.warn("Data integrity note: Course 25 not found during Course 26 recommendation configuration.");
+        logger.warn("Data integrity note: Course 28 not found during Course 29 recommendation configuration.");
+      }
+
+      // Clear Course 25's recommendation pointing to Course 29 (which was Course 26), and update Course 25 to recommend Course 27 (Facilities & Property)
+      let course25 = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-25")
+      });
+      if (course25) {
+        let course27Ref = await tx.query.coursesTable.findFirst({
+          where: eq(coursesTable.courseCode, "ELH-27")
+        });
+        if (course27Ref) {
+          if (course25.recommendedNextCourseId === null || course25.recommendedNextCourseId === actualCourseId) {
+            await tx.update(coursesTable).set({
+              recommendedNextCourseId: course27Ref.id
+            }).where(eq(coursesTable.id, course25.id));
+          }
+        }
       }
 
       // 5. Ensure Badge Definition exists
@@ -615,17 +632,17 @@ export async function ensureSustainabilityForOperationsTeamsCourse() {
       }
 
       // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 23
-      const existingPrereq23 = await tx.query.coursePrerequisitesTable.findFirst({
+      // Prerequisite 1: Course 17
+      const existingPrereq17 = await tx.query.coursePrerequisitesTable.findFirst({
         where: and(
           eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course23.id)
+          eq(coursePrerequisitesTable.prerequisiteCourseId, course17.id)
         )
       });
-      if (!existingPrereq23) {
+      if (!existingPrereq17) {
         await tx.insert(coursePrerequisitesTable).values({
           courseId: actualCourseId,
-          prerequisiteCourseId: course23.id
+          prerequisiteCourseId: course17.id
         });
       }
 
@@ -641,6 +658,19 @@ export async function ensureSustainabilityForOperationsTeamsCourse() {
           courseId: actualCourseId,
           prerequisiteCourseId: course12.id
         });
+      }
+
+      // Cleanup old prerequisite relationships (Course 23 if it was previously set)
+      let course23Ref = await tx.query.coursesTable.findFirst({
+        where: eq(coursesTable.courseCode, "ELH-23")
+      });
+      if (course23Ref) {
+        await tx.delete(coursePrerequisitesTable).where(
+          and(
+            eq(coursePrerequisitesTable.courseId, actualCourseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, course23Ref.id)
+          )
+        );
       }
 
       // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)

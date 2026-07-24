@@ -272,7 +272,10 @@ router.post("/insights/articles", async (req, res): Promise<void> => {
       scheduledAt,
       publishedAt,
       archivedAt,
-      reviewDate
+      reviewDate,
+      linkedResourceSlugs,
+      lastVerifiedAt,
+      nextReviewAt
     } = req.body;
 
     if (!title || !slug || !excerpt || !content || !authorName) {
@@ -302,6 +305,9 @@ router.post("/insights/articles", async (req, res): Promise<void> => {
         publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
         archivedAt,
         reviewDate,
+        linkedResourceSlugs: linkedResourceSlugs || [],
+        lastVerifiedAt: lastVerifiedAt ? new Date(lastVerifiedAt) : new Date(),
+        nextReviewAt: nextReviewAt ? new Date(nextReviewAt) : null,
         createdBy: access.userId
       })
       .returning();
@@ -339,6 +345,8 @@ router.patch("/insights/articles/:id", async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id);
     const updateData = { ...req.body, updatedBy: access.userId, updatedAt: new Date() };
+    if (updateData.lastVerifiedAt) updateData.lastVerifiedAt = new Date(updateData.lastVerifiedAt);
+    if (updateData.nextReviewAt) updateData.nextReviewAt = new Date(updateData.nextReviewAt);
     const [article] = await db
       .update(blogPostsTable)
       .set(updateData)
@@ -437,7 +445,10 @@ router.post("/insights/mauritius-resources", async (req, res): Promise<void> => 
       status,
       disclaimer,
       isFeatured,
-      relatedResources
+      relatedResources,
+      legalStatus,
+      lastVerifiedAt,
+      nextReviewAt
     } = req.body;
 
     if (!title || !slug || !resourceType || !shortSummary || !mainExplanation) {
@@ -467,6 +478,9 @@ router.post("/insights/mauritius-resources", async (req, res): Promise<void> => 
         disclaimer: disclaimer || undefined,
         isFeatured: isFeatured === true,
         relatedResources: relatedResources || [],
+        legalStatus: legalStatus || "active",
+        lastVerifiedAt: lastVerifiedAt ? new Date(lastVerifiedAt) : new Date(),
+        nextReviewAt: nextReviewAt ? new Date(nextReviewAt) : null,
       })
       .returning();
 
@@ -504,6 +518,8 @@ router.patch("/insights/mauritius-resources/:id", async (req, res): Promise<void
     const bodyCopy = { ...req.body };
     if (bodyCopy.dateIssued) bodyCopy.dateIssued = new Date(bodyCopy.dateIssued);
     if (bodyCopy.effectiveDate) bodyCopy.effectiveDate = new Date(bodyCopy.effectiveDate);
+    if (bodyCopy.lastVerifiedAt) bodyCopy.lastVerifiedAt = new Date(bodyCopy.lastVerifiedAt);
+    if (bodyCopy.nextReviewAt) bodyCopy.nextReviewAt = new Date(bodyCopy.nextReviewAt);
     bodyCopy.updatedAt = new Date();
 
     const [resource] = await db
@@ -1524,5 +1540,38 @@ router.put("/courses/:id/quiz-questions/reorder", async (req, res): Promise<void
   }
 });
 
+
+router.get("/insights/review-dashboard", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const articles = await db.select().from(blogPostsTable);
+    const resources = await db.select().from(mauritiusResourcesTable);
+    const now = new Date();
+
+    const overdueArticles = articles.filter(a => a.status !== "archived" && (
+      (a.nextReviewAt && new Date(a.nextReviewAt) < now) ||
+      (a.reviewDate && new Date(a.reviewDate) < now)
+    ));
+
+    const overdueResources = resources.filter(r => r.status !== "archived" && r.nextReviewAt && new Date(r.nextReviewAt) < now);
+
+    const brokenLinks = resources.filter(r => !r.officialSourceLink || !r.officialSourceLink.startsWith("http"));
+
+    const unsourcedArticles = articles.filter(a => !a.sourceReferences || a.sourceReferences.length === 0);
+
+    const supersededSlugs = new Set(resources.filter(r => r.legalStatus === "superseded" || r.legalStatus === "revoked").map(r => r.slug));
+    const articlesWithSupersededLinks = articles.filter(a => a.linkedResourceSlugs && a.linkedResourceSlugs.some(slug => supersededSlugs.has(slug)));
+
+    res.json({
+      overdueArticles,
+      overdueResources,
+      brokenLinks,
+      unsourcedArticles,
+      articlesWithSupersededLinks
+    });
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
 
 export default router;

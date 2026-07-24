@@ -23,6 +23,8 @@ interface MauritiusResource {
   complianceRelevance?: string;
   practicalImplications?: string;
   disclaimer: string;
+  legalStatus?: string;
+  lastVerifiedAt?: string;
 }
 
 export default function MauritiusResourceDetail() {
@@ -98,6 +100,11 @@ export default function MauritiusResourceDetail() {
                   Sector: {resource.relevantSector}
                 </span>
               )}
+              {resource.legalStatus && resource.legalStatus !== "active" && (
+                <span className="bg-destructive text-destructive-foreground px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase">
+                  {resource.legalStatus}
+                </span>
+              )}
             </div>
 
             <h1 className="text-3xl md:text-5xl font-bold font-serif mb-4 leading-tight">
@@ -111,6 +118,18 @@ export default function MauritiusResourceDetail() {
             )}
           </div>
         </header>
+
+        {/* Warning block for superseded or revoked laws */}
+        {resource.legalStatus && resource.legalStatus !== "active" && (
+          <div className="container mx-auto px-4 max-w-4xl mt-8">
+            <div className="bg-destructive/10 border border-destructive/25 rounded-xl p-4 flex gap-3 text-destructive text-sm">
+              <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+              <div>
+                <strong>Legal Warning:</strong> This legal instrument has status <strong>{resource.legalStatus.toUpperCase()}</strong>. It is not currently active. Reference should be made to current laws such as the Environment Act 2024.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Disclaimer Alert */}
         <div className="container mx-auto px-4 max-w-4xl mt-8">
@@ -210,6 +229,18 @@ export default function MauritiusResourceDetail() {
                   <span className="text-sm font-medium text-foreground flex items-center gap-1.5">
                     <Calendar className="h-4 w-4 text-primary shrink-0" />
                     {format(new Date(resource.effectiveDate), 'MMM d, yyyy')}
+                  </span>
+                </div>
+              )}
+
+              {resource.lastVerifiedAt && (
+                <div>
+                  <span className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
+                    Last Verified
+                  </span>
+                  <span className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-primary shrink-0" />
+                    {format(new Date(resource.lastVerifiedAt), 'MMM d, yyyy')}
                   </span>
                 </div>
               )}

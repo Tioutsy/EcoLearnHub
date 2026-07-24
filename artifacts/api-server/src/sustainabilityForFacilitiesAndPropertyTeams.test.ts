@@ -200,14 +200,14 @@ test("Course 27 Full E2E Integration, Access Control, and Prerequisites Verifica
     });
     assert.equal(submitResDummy.status, 403, "Expected 403 when submitting quiz without prerequisites");
 
-    // 3. Partially Eligible Learner (Complete ELH-12 but NOT ELH-26)
+    // 3. Partially Eligible Learner (Complete ELH-12 but NOT ELH-29)
     const c12Rows = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-12"));
     assert.equal(c12Rows.length, 1, "Course 12 does not exist");
     const course12Id = c12Rows[0].id;
 
-    const c26Rows = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-26"));
-    assert.equal(c26Rows.length, 1, "Course 26 does not exist");
-    const course26Id = c26Rows[0].id;
+    const c29Rows = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-29"));
+    assert.equal(c29Rows.length, 1, "Course 29 does not exist");
+    const course29Id = c29Rows[0].id;
 
     // Seed ONLY Course 12 completion
     await db.insert(enrollmentsTable).values({
@@ -227,11 +227,11 @@ test("Course 27 Full E2E Integration, Access Control, and Prerequisites Verifica
     });
     assert.equal(partialEnrollRes.status, 403, "Expected 403 when enrolling with only Course 12 completed");
 
-    // 4. Meet Remaining Prerequisites (Complete Course 26)
+    // 4. Meet Remaining Prerequisites (Complete Course 29)
     await db.insert(enrollmentsTable).values({
       userId: TEST_USER_ID,
       employeeId: employee.id,
-      courseId: course26Id,
+      courseId: course29Id,
       status: "completed",
       completedAt: new Date(),
       progressPct: 100,

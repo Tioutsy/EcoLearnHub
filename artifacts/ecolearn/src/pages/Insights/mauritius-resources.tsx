@@ -14,6 +14,7 @@ interface MauritiusResource {
   resourceNumber?: string;
   responsibleAuthority?: string;
   relevantSector?: string;
+  legalStatus?: string;
 }
 
 export default function MauritiusResourcesList() {
@@ -84,7 +85,7 @@ export default function MauritiusResourcesList() {
             <Scale className="h-8 w-8 text-primary" /> Mauritius Rules & Resources
           </h1>
           <p className="text-lg text-muted-foreground">
-            Access information on Mauritian environmental laws, regulations, policies, official guidance and compliance resources.
+            This is a curated directory of Mauritius sustainability, environmental and ESG rules relevant to organisations. It does not represent every law or regulation in Mauritius.
           </p>
         </div>
       </div>
@@ -176,6 +177,11 @@ export default function MauritiusResourcesList() {
                       {res.resourceNumber && (
                         <span className="text-xs text-muted-foreground">
                           {res.resourceNumber}
+                        </span>
+                      )}
+                      {res.legalStatus && res.legalStatus !== "active" && (
+                        <span className="bg-destructive/10 text-destructive border border-destructive/20 px-2 py-0.5 rounded text-[10px] font-semibold uppercase">
+                          {res.legalStatus}
                         </span>
                       )}
                     </div>

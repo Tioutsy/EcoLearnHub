@@ -46,6 +46,9 @@ export const blogPostsTable = pgTable("blog_posts", {
   reviewDate: timestamp("review_date", { withTimezone: true }),
   createdBy: text("created_by"),
   updatedBy: text("updated_by"),
+  linkedResourceSlugs: text("linked_resource_slugs").array().notNull().default([]),
+  lastVerifiedAt: timestamp("last_verified_at", { withTimezone: true }).notNull().defaultNow(),
+  nextReviewAt: timestamp("next_review_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
@@ -91,6 +94,9 @@ export const mauritiusResourcesTable = pgTable("mauritius_resources", {
   disclaimer: text("disclaimer").notNull().default("This content is provided for general educational purposes and does not constitute legal advice. Users should refer to the official legislation and seek professional advice where required."),
   isFeatured: boolean("is_featured").notNull().default(false),
   relatedResources: jsonb("related_resources").$type<string[]>().notNull().default([]),
+  legalStatus: text("legal_status").notNull().default("active"), // active, superseded, revoked, non_legal
+  lastVerifiedAt: timestamp("last_verified_at", { withTimezone: true }).notNull().defaultNow(),
+  nextReviewAt: timestamp("next_review_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

@@ -91,6 +91,34 @@ export default function PlatformAdminInsights() {
   const [resDisclaimer, setResDisclaimer] = useState("This content is provided for general educational purposes and does not constitute legal advice. Users should refer to the official legislation and seek professional advice where required.");
   const [resIsFeatured, setResIsFeatured] = useState(false);
 
+  // New Resource Fields
+  const [resLegalStatus, setResLegalStatus] = useState("active");
+  const [resLastVerified, setResLastVerified] = useState("");
+  const [resNextReview, setResNextReview] = useState("");
+
+  // New Article Fields
+  const [artLinkedResources, setArtLinkedResources] = useState("");
+  const [artLastVerified, setArtLastVerified] = useState("");
+  const [artNextReview, setArtNextReview] = useState("");
+
+  // Dashboard State
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
+
+  const fetchDashboardData = () => {
+    setIsLoadingDashboard(true);
+    fetch("/api/platform-admin/insights/review-dashboard")
+      .then((res) => res.json())
+      .then((data) => {
+        setDashboardData(data);
+        setIsLoadingDashboard(false);
+      })
+      .catch((err) => {
+        toast.error("Failed to load review dashboard data");
+        setIsLoadingDashboard(false);
+      });
+  };
+
   // Fetch Resources Function
   const fetchResources = () => {
     setIsLoadingResources(true);
@@ -109,6 +137,9 @@ export default function PlatformAdminInsights() {
   useEffect(() => {
     if (activeTab === "resources") {
       fetchResources();
+    }
+    if (activeTab === "review") {
+      fetchDashboardData();
     }
   }, [activeTab]);
 
@@ -201,6 +232,9 @@ export default function PlatformAdminInsights() {
     setSelectedCourses([]);
     setSelectedSdg([]);
     setSourceReferences([]);
+    setArtLinkedResources("");
+    setArtLastVerified("");
+    setArtNextReview("");
   };
 
   const resetResourceForm = () => {
@@ -222,6 +256,9 @@ export default function PlatformAdminInsights() {
     setResPracticalImplications("");
     setResDisclaimer("This content is provided for general educational purposes and does not constitute legal advice. Users should refer to the official legislation and seek professional advice where required.");
     setResIsFeatured(false);
+    setResLegalStatus("active");
+    setResLastVerified("");
+    setResNextReview("");
   };
 
   const handleEditArticleClick = (article: any) => {
@@ -243,6 +280,9 @@ export default function PlatformAdminInsights() {
     setSelectedCourses(article.relatedCourses || []);
     setSelectedSdg(article.sdgContributions || []);
     setSourceReferences(article.sourceReferences || []);
+    setArtLinkedResources(article.linkedResourceSlugs?.join(", ") || "");
+    setArtLastVerified(article.lastVerifiedAt ? new Date(article.lastVerifiedAt).toISOString().substring(0, 10) : "");
+    setArtNextReview(article.nextReviewAt ? new Date(article.nextReviewAt).toISOString().substring(0, 10) : "");
     setViewMode("edit");
   };
 
@@ -265,6 +305,9 @@ export default function PlatformAdminInsights() {
     setResPracticalImplications(res.practicalImplications || "");
     setResDisclaimer(res.disclaimer || "");
     setResIsFeatured(res.isFeatured === true);
+    setResLegalStatus(res.legalStatus || "active");
+    setResLastVerified(res.lastVerifiedAt ? new Date(res.lastVerifiedAt).toISOString().substring(0, 10) : "");
+    setResNextReview(res.nextReviewAt ? new Date(res.nextReviewAt).toISOString().substring(0, 10) : "");
     setViewMode("edit_resource");
   };
 
@@ -328,7 +371,10 @@ export default function PlatformAdminInsights() {
       sectors: selectedSectors,
       relatedCourses: selectedCourses,
       sdgContributions: selectedSdg,
-      sourceReferences
+      sourceReferences,
+      linkedResourceSlugs: artLinkedResources.split(",").map(s => s.trim()).filter(Boolean),
+      lastVerifiedAt: artLastVerified ? new Date(artLastVerified).toISOString() : new Date().toISOString(),
+      nextReviewAt: artNextReview ? new Date(artNextReview).toISOString() : null
     };
 
     if (artCategoryId) {
@@ -392,6 +438,9 @@ export default function PlatformAdminInsights() {
       practicalImplications: resPracticalImplications || null,
       disclaimer: resDisclaimer,
       isFeatured: resIsFeatured === true,
+      legalStatus: resLegalStatus,
+      lastVerifiedAt: resLastVerified ? new Date(resLastVerified).toISOString() : new Date().toISOString(),
+      nextReviewAt: resNextReview ? new Date(resNextReview).toISOString() : null,
       status: forceStatus || (viewMode === "create_resource" ? "draft" : undefined)
     };
 
@@ -476,6 +525,7 @@ export default function PlatformAdminInsights() {
               <TabsTrigger value="articles">Articles</TabsTrigger>
               <TabsTrigger value="resources">Mauritius Rules & Resources</TabsTrigger>
               <TabsTrigger value="categories">Categories</TabsTrigger>
+              <TabsTrigger value="review">Review Dashboard</TabsTrigger>
             </TabsList>
           </div>
 
@@ -736,6 +786,119 @@ export default function PlatformAdminInsights() {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="review" className="space-y-6">
+            {isLoadingDashboard ? (
+              <div className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-40 w-full" />
+              </div>
+            ) : dashboardData ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardDescription>Overdue Articles</CardDescription>
+                      <CardTitle className="text-3xl font-bold text-destructive">
+                        {dashboardData.overdueArticles?.length || 0}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardDescription>Overdue Resources</CardDescription>
+                      <CardTitle className="text-3xl font-bold text-destructive">
+                        {dashboardData.overdueResources?.length || 0}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardDescription>Broken Source Links</CardDescription>
+                      <CardTitle className="text-3xl font-bold text-amber-600">
+                        {dashboardData.brokenLinks?.length || 0}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardDescription>Unsourced Articles</CardDescription>
+                      <CardTitle className="text-3xl font-bold text-amber-600">
+                        {dashboardData.unsourcedArticles?.length || 0}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-serif">Overdue Items Pending Review</CardTitle>
+                    <CardDescription>Articles and rules exceeding their next review date.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {dashboardData.overdueArticles?.map((art: any) => (
+                        <div key={`overdue-art-${art.id}`} className="flex justify-between items-center p-3 border rounded-lg bg-card">
+                          <div>
+                            <Badge className="mr-2">Article</Badge>
+                            <span className="font-semibold">{art.title}</span>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Overdue since: {art.nextReviewAt ? new Date(art.nextReviewAt).toLocaleDateString() : (art.reviewDate ? new Date(art.reviewDate).toLocaleDateString() : "N/A")}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => handleEditArticleClick(art)}>Edit & Verify</Button>
+                        </div>
+                      ))}
+                      {dashboardData.overdueResources?.map((res: any) => (
+                        <div key={`overdue-res-${res.id}`} className="flex justify-between items-center p-3 border rounded-lg bg-card">
+                          <div>
+                            <Badge className="mr-2" variant="secondary">Resource</Badge>
+                            <span className="font-semibold">{res.title}</span>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Overdue since: {res.nextReviewAt ? new Date(res.nextReviewAt).toLocaleDateString() : "N/A"}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => handleEditResourceClick(res)}>Edit & Verify</Button>
+                        </div>
+                      ))}
+                      {(!dashboardData.overdueArticles?.length && !dashboardData.overdueResources?.length) && (
+                        <p className="text-sm text-muted-foreground">No overdue review items found.</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-serif text-destructive flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5" /> Warning: Articles Referencing Outdated Laws
+                    </CardTitle>
+                    <CardDescription>Published articles containing link references to revoked or superseded legislation.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {dashboardData.articlesWithSupersededLinks?.map((art: any) => (
+                        <div key={`superseded-warn-${art.id}`} className="flex justify-between items-center p-3 border border-destructive/20 rounded-lg bg-destructive/5">
+                          <div>
+                            <span className="font-semibold text-destructive">{art.title}</span>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Linked Slugs: {art.linkedResourceSlugs?.join(", ")}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => handleEditArticleClick(art)}>Re-link Rules</Button>
+                        </div>
+                      ))}
+                      {!dashboardData.articlesWithSupersededLinks?.length && (
+                        <p className="text-sm text-muted-foreground">No articles referencing superseded laws found.</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No data available.</p>
+            )}
+          </TabsContent>
         </Tabs>
       ) : viewMode === "create_resource" || viewMode === "edit_resource" ? (
         // CREATE/EDIT RESOURCE SCREEN
@@ -972,6 +1135,43 @@ export default function PlatformAdminInsights() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t pt-4">
+                  <div>
+                    <Label htmlFor="res-legal-status">Legal Status</Label>
+                    <select
+                      id="res-legal-status"
+                      value={resLegalStatus}
+                      onChange={(e) => setResLegalStatus(e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring mt-1"
+                    >
+                      <option value="active">Active</option>
+                      <option value="superseded">Superseded</option>
+                      <option value="revoked">Revoked</option>
+                      <option value="non_legal">Non Legal / Portal</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="res-last-verified">Last Verified Date</Label>
+                    <Input
+                      id="res-last-verified"
+                      type="date"
+                      value={resLastVerified}
+                      onChange={(e) => setResLastVerified(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="res-next-review">Next Review Date</Label>
+                    <Input
+                      id="res-next-review"
+                      type="date"
+                      value={resNextReview}
+                      onChange={(e) => setResNextReview(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-2 pt-2">
                   <input
                     id="res-featured"
@@ -1173,6 +1373,39 @@ export default function PlatformAdminInsights() {
                     value={artTags}
                     onChange={(e) => setArtTags(e.target.value)}
                     placeholder="climate, waste, recycling"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t pt-4">
+                <div>
+                  <Label htmlFor="art-linked-resources">Linked Resource Slugs (comma-separated)</Label>
+                  <Input
+                    id="art-linked-resources"
+                    value={artLinkedResources}
+                    onChange={(e) => setArtLinkedResources(e.target.value)}
+                    placeholder="regulation-slug-1, regulation-slug-2"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="art-last-verified">Last Verified Date</Label>
+                  <Input
+                    id="art-last-verified"
+                    type="date"
+                    value={artLastVerified}
+                    onChange={(e) => setArtLastVerified(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="art-next-review">Next Review Date</Label>
+                  <Input
+                    id="art-next-review"
+                    type="date"
+                    value={artNextReview}
+                    onChange={(e) => setArtNextReview(e.target.value)}
                     className="mt-1"
                   />
                 </div>

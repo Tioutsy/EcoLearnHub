@@ -15,12 +15,19 @@ interface ArticlePost {
   publishedAt: string;
   authorName: string;
   tags?: string[];
+  linkedResourceSlugs?: string[];
+  sourceReferences?: Array<{
+    title: string;
+    url?: string;
+    publisher?: string;
+  }>;
 }
 
 export default function InsightsArticleDetail() {
   const { slug } = useParams();
   const [post, setPost] = useState<ArticlePost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [relatedResources, setRelatedResources] = useState<any[]>([]);
 
   useEffect(() => {
     if (!slug) return;
@@ -41,6 +48,23 @@ export default function InsightsArticleDetail() {
         setIsLoading(false);
       });
   }, [slug]);
+
+  useEffect(() => {
+    if (!post || !post.linkedResourceSlugs || post.linkedResourceSlugs.length === 0) {
+      setRelatedResources([]);
+      return;
+    }
+    
+    fetch("/api/insights/mauritius-resources")
+      .then((res) => res.json())
+      .then((data) => {
+        const filtered = data.filter((r: any) => post.linkedResourceSlugs!.includes(r.slug));
+        setRelatedResources(filtered);
+      })
+      .catch((err) => {
+        console.error("Failed to load related resources", err);
+      });
+  }, [post]);
 
   if (isLoading) {
     return (
@@ -136,6 +160,55 @@ export default function InsightsArticleDetail() {
                   {tag}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Related Official Resources */}
+          {relatedResources.length > 0 && (
+            <div className="mt-12 pt-8 border-t">
+              <h3 className="text-xl font-bold font-serif mb-4">Related Mauritius Rules & Resources</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {relatedResources.map((res) => (
+                  <Link key={res.id} href={`/insights/mauritius-resources/${res.slug}`}>
+                    <div className="border rounded-xl p-4 hover:border-primary/45 hover:shadow-sm transition-all cursor-pointer bg-card h-full flex flex-col justify-between">
+                      <div>
+                        <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-semibold mb-2 inline-block">
+                          {res.resourceType}
+                        </span>
+                        <h4 className="font-bold text-sm text-foreground hover:text-primary transition-colors line-clamp-1">
+                          {res.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                          {res.shortSummary}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Source References */}
+          {post.sourceReferences && post.sourceReferences.length > 0 && (
+            <div className="mt-8 pt-8 border-t">
+              <h3 className="text-xl font-bold font-serif mb-4">References & Sources</h3>
+              <ul className="space-y-2.5 text-sm text-muted-foreground">
+                {post.sourceReferences.map((ref, idx) => (
+                  <li key={idx} className="flex items-start gap-1">
+                    <span>•</span>
+                    <div>
+                      <strong className="text-foreground">{ref.title}</strong>
+                      {ref.publisher && ` — ${ref.publisher}`}
+                      {ref.url && (
+                        <a href={ref.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1.5 inline-block">
+                          View source
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
