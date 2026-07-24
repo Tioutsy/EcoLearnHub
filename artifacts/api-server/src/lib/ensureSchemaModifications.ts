@@ -279,6 +279,36 @@ export async function ensureSchemaModifications() {
           "award_source" text NOT NULL
         );
       `)
+    },
+    {
+      name: "Add linked_resource_slugs to blog_posts",
+      check: () => columnExists("blog_posts", "linked_resource_slugs"),
+      execute: () => db.execute(sql`ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "linked_resource_slugs" text[] DEFAULT '{}'::text[] NOT NULL;`)
+    },
+    {
+      name: "Add last_verified_at to blog_posts",
+      check: () => columnExists("blog_posts", "last_verified_at"),
+      execute: () => db.execute(sql`ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "last_verified_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add next_review_at to blog_posts",
+      check: () => columnExists("blog_posts", "next_review_at"),
+      execute: () => db.execute(sql`ALTER TABLE "blog_posts" ADD COLUMN IF NOT EXISTS "next_review_at" timestamp with time zone;`)
+    },
+    {
+      name: "Add legal_status to mauritius_resources",
+      check: () => columnExists("mauritius_resources", "legal_status"),
+      execute: () => db.execute(sql`ALTER TABLE "mauritius_resources" ADD COLUMN IF NOT EXISTS "legal_status" text DEFAULT 'active' NOT NULL;`)
+    },
+    {
+      name: "Add last_verified_at to mauritius_resources",
+      check: () => columnExists("mauritius_resources", "last_verified_at"),
+      execute: () => db.execute(sql`ALTER TABLE "mauritius_resources" ADD COLUMN IF NOT EXISTS "last_verified_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add next_review_at to mauritius_resources",
+      check: () => columnExists("mauritius_resources", "next_review_at"),
+      execute: () => db.execute(sql`ALTER TABLE "mauritius_resources" ADD COLUMN IF NOT EXISTS "next_review_at" timestamp with time zone;`)
     }
   ];
 
