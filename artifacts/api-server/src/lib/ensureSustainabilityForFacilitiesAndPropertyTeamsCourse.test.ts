@@ -16,7 +16,7 @@ import {
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
-import { ensureSustainabilityForOperationsTeamsCourse } from "./ensureSustainabilityForOperationsTeamsCourse";
+import { ensureSustainabilityForOperationsAndFrontlineTeamsCourse } from "./ensureSustainabilityForOperationsAndFrontlineTeamsCourse";
 
 // Thorough cleanup of Course 27 data, recommendations, and orphans
 async function cleanUpCourse27() {
@@ -50,7 +50,7 @@ async function cleanUpCourse27() {
 
 test("Course 27 Seeding & Integrity Unit Tests", async () => {
   await cleanUpCourse27();
-  await ensureSustainabilityForOperationsTeamsCourse();
+  await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
 
   try {
     await db.transaction(async (tx) => {
@@ -78,8 +78,8 @@ test("Course 27 Seeding & Integrity Unit Tests", async () => {
       if (!c29) {
         [c29] = await tx.insert(coursesTable).values({
           courseCode: "ELH-29",
-          slug: "sustainability-for-operations-teams",
-          title: "Sustainability for Operations Teams",
+          slug: "sustainability-for-operations-and-frontline-teams",
+          title: "Sustainability for Operations and Frontline Teams",
           level: "Applied Workplace Practice",
           passingScore: 80,
           status: "published",
@@ -186,7 +186,7 @@ test("Course 27 Seeding & Integrity Unit Tests", async () => {
 
 test("Course 27 Learner Data Preservation Unit Tests", async () => {
   await cleanUpCourse27();
-  await ensureSustainabilityForOperationsTeamsCourse();
+  await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
 
   try {
     let c12 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-12") });
@@ -207,8 +207,8 @@ test("Course 27 Learner Data Preservation Unit Tests", async () => {
     if (!c29) {
       [c29] = await db.insert(coursesTable).values({
         courseCode: "ELH-29",
-        slug: "sustainability-for-operations-teams",
-        title: "Sustainability for Operations Teams",
+        slug: "sustainability-for-operations-and-frontline-teams",
+        title: "Sustainability for Operations and Frontline Teams",
         level: "Applied Workplace Practice",
         passingScore: 80,
         status: "published",
@@ -305,7 +305,7 @@ test("Course 27 Learner Data Preservation Unit Tests", async () => {
 
 test("Course 27 Transactional Rollback Atomicity Unit Tests", async () => {
   await cleanUpCourse27();
-  await ensureSustainabilityForOperationsTeamsCourse();
+  await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
 
   let c12 = await db.query.coursesTable.findFirst({ where: eq(coursesTable.courseCode, "ELH-12") });
   if (!c12) {
@@ -325,8 +325,8 @@ test("Course 27 Transactional Rollback Atomicity Unit Tests", async () => {
   if (!c29) {
     [c29] = await db.insert(coursesTable).values({
       courseCode: "ELH-29",
-      slug: "sustainability-for-operations-teams",
-      title: "Sustainability for Operations Teams",
+      slug: "sustainability-for-operations-and-frontline-teams",
+      title: "Sustainability for Operations and Frontline Teams",
       level: "Applied Workplace Practice",
       passingScore: 80,
       status: "published",

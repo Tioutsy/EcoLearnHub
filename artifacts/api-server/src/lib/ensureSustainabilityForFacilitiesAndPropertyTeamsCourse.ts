@@ -489,7 +489,7 @@ export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() 
       });
       if (!course29) {
         course29 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-operations-teams")
+          where: eq(coursesTable.slug, "sustainability-for-operations-and-frontline-teams")
         });
       }
 
@@ -563,7 +563,7 @@ export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() 
       });
       if (!course29Ref) {
         course29Ref = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-operations-teams")
+          where: eq(coursesTable.slug, "sustainability-for-operations-and-frontline-teams")
         });
       }
 

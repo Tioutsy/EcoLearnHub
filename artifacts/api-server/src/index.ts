@@ -25,7 +25,7 @@ import { ensureEffectiveGreenTeamsCourse } from "./lib/ensureEffectiveGreenTeams
 import { ensureWorkplaceSustainabilityInitiativesCourse } from "./lib/ensureWorkplaceSustainabilityInitiativesCourse";
 import { ensureSustainabilityForHrTeamsCourse } from "./lib/ensureSustainabilityForHrTeamsCourse";
 import { ensureSustainabilityForFinanceTeamsCourse } from "./lib/ensureSustainabilityForFinanceTeamsCourse";
-import { ensureSustainabilityForOperationsTeamsCourse } from "./lib/ensureSustainabilityForOperationsTeamsCourse";
+import { ensureSustainabilityForOperationsAndFrontlineTeamsCourse } from "./lib/ensureSustainabilityForOperationsAndFrontlineTeamsCourse";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./lib/ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
 import { ensureSustainabilityForSalesAndMarketingTeamsCourse } from "./lib/ensureSustainabilityForSalesAndMarketingTeamsCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
@@ -117,7 +117,7 @@ async function start(): Promise<void> {
   await ensureWorkplaceSustainabilityInitiativesCourse();
   await ensureSustainabilityForHrTeamsCourse();
   await ensureSustainabilityForFinanceTeamsCourse();
-  await ensureSustainabilityForOperationsTeamsCourse();
+  await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
   await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
   await ensureSustainabilityForSalesAndMarketingTeamsCourse();
   await ensureCoreSustainabilityPath();

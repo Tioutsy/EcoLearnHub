@@ -106,57 +106,92 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
     devServer.stdout?.on("data", (data) => {
       console.log(`[TEST SERVER STDOUT] ${data.toString().trim()}`);
     });
+
     devServer.stderr?.on("data", (data) => {
       console.error(`[TEST SERVER STDERR] ${data.toString().trim()}`);
     });
 
-    let ready = false;
-    for (let attempt = 1; attempt <= 240; attempt++) {
+    // Wait for the backend server to launch and complete seed check
+    let healthy = false;
+    for (let i = 0; i < 300; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       try {
-        const res = await fetch(`${API_BASE}/courses`, { headers: HEADERS });
+        const res = await fetch("http://localhost:8086/api/healthz");
         if (res.status === 200) {
-          ready = true;
+          healthy = true;
           break;
         }
-      } catch {
-        await new Promise((r) => setTimeout(r, 1000));
-      }
+      } catch {}
     }
 
-    if (!ready) {
-      throw new Error("Server failed to start on port 8086");
-    }
+    assert.ok(healthy, "Expected test API server to start and pass health check on port 8086");
 
     const employee = await cleanDb();
 
-    // 1. Resolve Course 29 in the DB
-    const c29Rows = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-29"));
-    assert.equal(c29Rows.length, 1, "Course 29 does not exist in DB");
-    const course29 = c29Rows[0];
+    // Retrieve dynamically created course and prerequisites IDs
+    const [course29] = await db
+      .select({ id: coursesTable.id })
+      .from(coursesTable)
+      .where(eq(coursesTable.slug, "sustainability-for-operations-and-frontline-teams"))
+      .limit(1);
+    assert.ok(course29, "Course 29 must exist in DB");
     const course29Id = course29.id;
 
-    assert.equal(course29.courseCode, "ELH-29", "Course 29 code should be ELH-29");
-    assert.equal(course29.level, "Applied Workplace Practice", "Course 29 level should be Applied Workplace Practice");
+    const [course12] = await db
+      .select({ id: coursesTable.id })
+      .from(coursesTable)
+      .where(eq(coursesTable.courseCode, "ELH-12"))
+      .limit(1);
+    assert.ok(course12, "Course 12 must exist in DB");
+    const course12Id = course12.id;
 
-    const c29Lessons = await db.select().from(lessonsTable).where(eq(lessonsTable.courseId, course29Id));
-    assert.equal(c29Lessons.length, 6, "Course 29 should have exactly 6 lessons");
+    const [course17] = await db
+      .select({ id: coursesTable.id })
+      .from(coursesTable)
+      .where(eq(coursesTable.courseCode, "ELH-17"))
+      .limit(1);
+    assert.ok(course17, "Course 17 must exist in DB");
+    const course17Id = course17.id;
 
-    const c29Questions = await db.select().from(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, course29Id));
-    assert.equal(c29Questions.length, 8, "Course 29 should have exactly 8 quiz questions");
+    const [badge] = await db
+      .select()
+      .from(badgeDefinitionsTable)
+      .where(eq(badgeDefinitionsTable.slug, "operational-sustainability-practitioner"))
+      .limit(1);
+    assert.ok(badge, "Badge Operational Sustainability Practitioner must exist in DB");
 
-    // 2. Ineligible Learner Access Control Verification
+    // Ensure clean state: delete any existing enrollments for the test user to start from fresh
+    const clauses: any[] = [
+      eq(enrollmentsTable.userId, TEST_USER_ID),
+      eq(enrollmentsTable.userId, TEST_EMAIL),
+    ];
+    const enrollments = await db
+      .select({ id: enrollmentsTable.id })
+      .from(enrollmentsTable)
+      .where(or(...clauses));
+    const enrollmentIds = enrollments.map((e) => e.id);
+    if (enrollmentIds.length > 0) {
+      await db.delete(lessonProgressTable).where(inArray(lessonProgressTable.enrollmentId, enrollmentIds));
+      await db.delete(enrollmentsTable).where(inArray(enrollmentsTable.id, enrollmentIds));
+    }
+
+    // Step 1. Ineligible Learner (No prerequisites completed) -> Expect 403 when enrolling
     let enrollRes = await fetch(`${API_BASE}/enrollments`, {
       method: "POST",
       headers: HEADERS,
       body: JSON.stringify({ courseId: course29Id }),
     });
-    assert.equal(enrollRes.status, 403, "Expected 403 Forbidden when enrolling without prerequisites");
+    assert.equal(enrollRes.status, 403, "Expected 403 Forbidden enrolling without prerequisites");
+    let errBody = (await enrollRes.json()) as any;
+    assert.equal(errBody.error, "PREREQUISITES_INCOMPLETE", "Expected prerequisites incomplete error code");
 
-    const courseDetailRes = await fetch(`${API_BASE}/courses/${course29Id}`, { headers: HEADERS });
-    assert.equal(courseDetailRes.status, 200, "Should return 200 for course lookup even if locked");
-    const courseDetail = await courseDetailRes.json() as any;
-    assert.ok(courseDetail.lessons.length > 0, "Should list lessons");
-    for (const l of courseDetail.lessons) {
+    // Expect course detail lesson content to be locked/null
+    const detailsRes = await fetch(`${API_BASE}/courses/${course29Id}`, {
+      headers: HEADERS,
+    });
+    assert.equal(detailsRes.status, 200, "Expected 200 OK retrieving course metadata (public metadata is open)");
+    const detailsData = (await detailsRes.json()) as any;
+    for (const l of detailsData.lessons) {
       assert.equal(l.content, null, "Locked lesson content must be null");
       assert.equal(l.contentBlocks.length, 0, "Locked lesson contentBlocks must be empty array");
     }
@@ -167,49 +202,33 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
       employeeId: employee.id,
       courseId: course29Id,
       status: "in_progress",
+      progressPct: 0
     }).returning();
 
     const progressRes = await fetch(`${API_BASE}/progress/${mockEnrollment.id}`, {
       method: "PATCH",
       headers: HEADERS,
-      body: JSON.stringify({
-        lessonId: c29Lessons[0].id,
-        completed: true,
-      }),
+      body: JSON.stringify({ lessonIndex: 0, progressPct: 100 }),
     });
-    assert.equal(progressRes.status, 403, "Expected 403 PREREQUISITES_INCOMPLETE on progress update");
-    const progressData = await progressRes.json() as any;
-    assert.equal(progressData.error, "PREREQUISITES_INCOMPLETE", "Error must be PREREQUISITES_INCOMPLETE");
+    assert.equal(progressRes.status, 403, "Expected 403 Forbidden updating progress when prerequisites are incomplete");
+    const progressErrBody = (await progressRes.json()) as any;
+    assert.equal(progressErrBody.error, "PREREQUISITES_INCOMPLETE", "Expected prerequisites incomplete error code");
 
     await db.delete(enrollmentsTable).where(eq(enrollmentsTable.id, mockEnrollment.id));
 
-    const quizRes = await fetch(`${API_BASE}/courses/${course29Id}/quiz`, { headers: HEADERS });
-    assert.equal(quizRes.status, 403, "Expected 403 when fetching quiz without prerequisites");
-    const quizData = await quizRes.json() as any;
-    assert.equal(quizData.error, "PREREQUISITES_INCOMPLETE", "Quiz fetch error must be PREREQUISITES_INCOMPLETE");
+    const quizGetRes = await fetch(`${API_BASE}/courses/${course29Id}/quiz`, {
+      headers: HEADERS,
+    });
+    assert.equal(quizGetRes.status, 403, "Expected 403 Forbidden retrieving quiz without enrollment");
 
-    const answersDummy = c29Questions.map((q) => ({
-      questionId: q.id,
-      selectedOption: 0,
-    }));
-
-    const submitResDummy = await fetch(`${API_BASE}/courses/${course29Id}/quiz/submit`, {
+    const quizSubmitRes = await fetch(`${API_BASE}/courses/${course29Id}/quiz/submit`, {
       method: "POST",
       headers: HEADERS,
-      body: JSON.stringify({ answers: answersDummy }),
+      body: JSON.stringify({ answers: [] }),
     });
-    assert.equal(submitResDummy.status, 403, "Expected 403 when submitting quiz without prerequisites");
+    assert.equal(quizSubmitRes.status, 403, "Expected 403 Forbidden submitting quiz without enrollment");
 
-    // 3. Partially Eligible Learner (Complete ELH-12 but NOT ELH-17)
-    const c12Rows = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-12"));
-    assert.equal(c12Rows.length, 1, "Course 12 does not exist");
-    const course12Id = c12Rows[0].id;
-
-    const c17Rows = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-17"));
-    assert.equal(c17Rows.length, 1, "Course 17 does not exist");
-    const course17Id = c17Rows[0].id;
-
-    // Seed ONLY Course 12 completion
+    // Step 2. Partially Eligible Learner (Complete ELH-12 but NOT ELH-17) -> Expect 403 when enrolling
     await db.insert(enrollmentsTable).values({
       userId: TEST_USER_ID,
       employeeId: employee.id,
@@ -219,15 +238,16 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
       progressPct: 100,
     }).onConflictDoNothing();
 
-    // Verify Course 29 is STILL blocked
-    const partialEnrollRes = await fetch(`${API_BASE}/enrollments`, {
+    enrollRes = await fetch(`${API_BASE}/enrollments`, {
       method: "POST",
       headers: HEADERS,
       body: JSON.stringify({ courseId: course29Id }),
     });
-    assert.equal(partialEnrollRes.status, 403, "Expected 403 when enrolling with only Course 12 completed");
+    assert.equal(enrollRes.status, 403, "Expected 403 Forbidden enrolling with only one prerequisite completed");
+    errBody = (await enrollRes.json()) as any;
+    assert.equal(errBody.error, "PREREQUISITES_INCOMPLETE", "Expected prerequisites incomplete error code");
 
-    // 4. Meet Remaining Prerequisites (Complete Course 17)
+    // Step 3. Eligible Learner (Complete ELH-12 AND ELH-17) -> Expect 201 Created when enrolling
     await db.insert(enrollmentsTable).values({
       userId: TEST_USER_ID,
       employeeId: employee.id,
@@ -237,28 +257,37 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
       progressPct: 100,
     }).onConflictDoNothing();
 
-    // 5. Eligible Learner Access
-    // Step 5a. Enrolling in Course 29 -> expect 201 Created
+    // Retry enrolling
     enrollRes = await fetch(`${API_BASE}/enrollments`, {
       method: "POST",
       headers: HEADERS,
       body: JSON.stringify({ courseId: course29Id }),
     });
-    assert.equal(enrollRes.status, 201, "Expected 201 Created for Course 29 enrollment");
+    assert.equal(enrollRes.status, 201, "Expected 201 Created enrolling with all prerequisites completed");
     const enrollData = (await enrollRes.json()) as any;
-    const enrollmentId = enrollData.id;
+    assert.ok(enrollData.id, "Expected enrollment ID to be returned");
+    const activeEnrollmentId = enrollData.id;
 
-    // Step 5b. Fetch course detail as eligible -> verify lessons content is populated
-    const eligibleCourseDetailRes = await fetch(`${API_BASE}/courses/${course29Id}`, { headers: HEADERS });
-    const eligibleCourseDetail = await eligibleCourseDetailRes.json() as any;
-    for (const l of eligibleCourseDetail.lessons) {
+    // Step 4. Retrieve course metadata -> Verify lessons content is populated/unlocked
+    const detailsRes2 = await fetch(`${API_BASE}/courses/${course29Id}`, {
+      headers: HEADERS,
+    });
+    assert.equal(detailsRes2.status, 200, "Expected 200 OK retrieving course details");
+    const detailsData2 = (await detailsRes2.json()) as any;
+    for (const l of detailsData2.lessons) {
       assert.ok(l.content !== null && l.content.length > 0, "Lesson content must be visible");
       assert.ok(l.contentBlocks.length > 0, "Lesson contentBlocks must be visible");
     }
 
-    // Step 5c. Update lesson progress for all 6 lessons -> expect 200 OK
-    for (const lesson of c29Lessons) {
-      const progressRes = await fetch(`${API_BASE}/progress/${enrollmentId}`, {
+    // Step 5. Progress through lessons sequentially
+    const lessons = await db
+      .select()
+      .from(lessonsTable)
+      .where(eq(lessonsTable.courseId, course29Id))
+      .orderBy(lessonsTable.orderIndex);
+
+    for (const lesson of lessons) {
+      const progRes = await fetch(`${API_BASE}/progress/${activeEnrollmentId}`, {
         method: "PATCH",
         headers: HEADERS,
         body: JSON.stringify({
@@ -266,15 +295,32 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
           completed: true,
         }),
       });
-      assert.equal(progressRes.status, 200, `Expected 200 OK updating progress for lesson ${lesson.title}`);
+      assert.equal(progRes.status, 200, `Expected 200 OK updating progress for lesson ${lesson.title}`);
     }
 
-    // 6. Quiz Submission & Badge Verification
-    // Step 6a. Submit failing quiz attempt (0%) -> expect passed: false, and no badge award
-    const dbQuestions = await db.select().from(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, course29Id));
-    const answersFail = dbQuestions.map((q) => ({
+    // Step 6. Complete quiz and earn certificate & badge
+    // First, verify we can retrieve quiz questions without answers
+    const quizGetRes2 = await fetch(`${API_BASE}/courses/${course29Id}/quiz`, {
+      headers: HEADERS,
+    });
+    assert.equal(quizGetRes2.status, 200, "Expected 200 OK retrieving quiz");
+    const quizPayload = (await quizGetRes2.json()) as any;
+    const quizQuestions = quizPayload.questions;
+    assert.equal(quizQuestions.length, 8, "Expected 8 questions");
+    for (const q of quizQuestions) {
+      assert.ok(!("correctOption" in q), "Quiz questions payload must not leak correct answers");
+    }
+
+    // Step 6a. Submit failing quiz attempt -> expect passed: false
+    const questionsDb = await db
+      .select()
+      .from(quizQuestionsTable)
+      .where(eq(quizQuestionsTable.courseId, course29Id))
+      .orderBy(quizQuestionsTable.orderIndex);
+
+    const answersFail = questionsDb.map((q) => ({
       questionId: q.id,
-      selectedOption: (q.correctOption + 1) % 4,
+      selectedOption: (q.correctOption + 1) % 4, // Intentionally incorrect
     }));
 
     let submitRes = await fetch(`${API_BASE}/courses/${course29Id}/quiz/submit`, {
@@ -282,16 +328,9 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
       headers: HEADERS,
       body: JSON.stringify({ answers: answersFail }),
     });
-    assert.equal(submitRes.status, 200, "Expected 200 OK submitting quiz");
+    assert.equal(submitRes.status, 200, "Expected 200 OK submitting failing quiz");
     const submitDataFail = (await submitRes.json()) as any;
     assert.equal(submitDataFail.passed, false, "Quiz should fail with incorrect answers");
-
-    const [badge] = await db
-      .select()
-      .from(badgeDefinitionsTable)
-      .where(eq(badgeDefinitionsTable.slug, "sustainable-operations-practitioner"))
-      .limit(1);
-    assert.ok(badge, "Badge Sustainable Operations Practitioner must exist in DB");
 
     let badgeAwards = await db
       .select()
@@ -302,10 +341,10 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
           eq(employeeBadgesTable.badgeId, badge.id)
         )
       );
-    assert.equal(badgeAwards.length, 0, "Should not award badge for failing quiz attempt");
+    assert.equal(badgeAwards.length, 0, "No badge should be awarded for a failing quiz attempt");
 
-    // Step 6b. Submit passing quiz attempt (100%) -> expect passed: true, and badge awarded exactly once
-    const answersPass = dbQuestions.map((q) => ({
+    // Step 6b. Submit passing quiz attempt -> expect passed: true, and badge is awarded
+    const answersPass = questionsDb.map((q) => ({
       questionId: q.id,
       selectedOption: q.correctOption,
     }));
@@ -328,10 +367,6 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
           eq(employeeBadgesTable.badgeId, badge.id)
         )
       );
-    console.log("=== E2E DEBUG ===");
-    console.log("employee.id:", employee.id);
-    console.log("badge.id:", badge.id);
-    console.log("badgeAwards:", badgeAwards);
     assert.equal(badgeAwards.length, 1, "Should have awarded exactly 1 badge for Course 29 completion");
     assert.equal(badgeAwards[0].employeeId, employee.id, "Badge award must belong to the correct employee");
 
@@ -352,11 +387,14 @@ test("Course 29 Full E2E Integration, Access Control, and Prerequisites Verifica
           eq(employeeBadgesTable.badgeId, badge.id)
         )
       );
-    assert.equal(badgeAwards.length, 1, "Idempotency: Repeating a successful submission must not duplicate employee badges");
+    assert.equal(badgeAwards.length, 1, "Re-submitting a passing quiz should not award duplicate badges");
 
   } finally {
+    // Shutdown server
     if (devServer) {
       devServer.kill("SIGTERM");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
+    await cleanDb();
   }
 });
