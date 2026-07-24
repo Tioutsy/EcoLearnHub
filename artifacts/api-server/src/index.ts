@@ -27,6 +27,7 @@ import { ensureSustainabilityForHrTeamsCourse } from "./lib/ensureSustainability
 import { ensureSustainabilityForFinanceTeamsCourse } from "./lib/ensureSustainabilityForFinanceTeamsCourse";
 import { ensureSustainabilityForOperationsTeamsCourse } from "./lib/ensureSustainabilityForOperationsTeamsCourse";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./lib/ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
+import { ensureSustainabilityForSalesAndMarketingTeamsCourse } from "./lib/ensureSustainabilityForSalesAndMarketingTeamsCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
@@ -118,6 +119,7 @@ async function start(): Promise<void> {
   await ensureSustainabilityForFinanceTeamsCourse();
   await ensureSustainabilityForOperationsTeamsCourse();
   await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
+  await ensureSustainabilityForSalesAndMarketingTeamsCourse();
   await ensureCoreSustainabilityPath();
   await ensureInsightsMigrated();
 
