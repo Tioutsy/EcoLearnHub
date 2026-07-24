@@ -11,7 +11,8 @@ import {
   usePlatformAdminUpdateInsightArticleStatus,
   usePlatformAdminListSectors,
   useListCourses,
-  usePlatformAdminListSdgContributions
+  usePlatformAdminListSdgContributions,
+  customFetch
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,8 +108,7 @@ export default function PlatformAdminInsights() {
 
   const fetchDashboardData = () => {
     setIsLoadingDashboard(true);
-    fetch("/api/platform-admin/insights/review-dashboard")
-      .then((res) => res.json())
+    customFetch("/api/platform-admin/insights/review-dashboard")
       .then((data) => {
         setDashboardData(data);
         setIsLoadingDashboard(false);
@@ -122,8 +122,7 @@ export default function PlatformAdminInsights() {
   // Fetch Resources Function
   const fetchResources = () => {
     setIsLoadingResources(true);
-    fetch("/api/platform-admin/insights/mauritius-resources")
-      .then((res) => res.json())
+    customFetch<any[]>("/api/platform-admin/insights/mauritius-resources")
       .then((data) => {
         setResources(data);
         setIsLoadingResources(false);
@@ -449,23 +448,17 @@ export default function PlatformAdminInsights() {
       ? "/api/platform-admin/insights/mauritius-resources"
       : `/api/platform-admin/insights/mauritius-resources/${editingResourceId}`;
 
-    fetch(url, {
+    customFetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
-      .then((res) => {
-        if (res.status === 200 || res.status === 201) {
-          toast.success("Resource saved successfully!");
-          fetchResources();
-          setViewMode("list");
-          resetResourceForm();
-          return null;
-        } else {
-          return res.json().then(e => { throw new Error(e.error || "Save failed"); });
-        }
+      .then(() => {
+        toast.success("Resource saved successfully!");
+        fetchResources();
+        setViewMode("list");
+        resetResourceForm();
       })
-      .catch((err) => toast.error(err.message));
+      .catch((err) => toast.error(err.message || "Save failed"));
   };
 
   const handleResourceStatusToggle = (id: number, current: string) => {
@@ -477,20 +470,15 @@ export default function PlatformAdminInsights() {
       next = "archived";
     }
 
-    fetch(`/api/platform-admin/insights/mauritius-resources/${id}/status`, {
+    customFetch(`/api/platform-admin/insights/mauritius-resources/${id}/status`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: next })
     })
-      .then((res) => {
-        if (res.status === 200) {
-          toast.success(`Resource status updated to ${next}`);
-          fetchResources();
-        } else {
-          toast.error("Failed to change resource status");
-        }
+      .then(() => {
+        toast.success(`Resource status updated to ${next}`);
+        fetchResources();
       })
-      .catch((err) => toast.error(err.message));
+      .catch((err) => toast.error(err.message || "Failed to change resource status"));
   };
 
   // Helper variables

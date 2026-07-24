@@ -5,6 +5,8 @@ import { ArrowLeft, Calendar, Building2, Globe, FileText, AlertTriangle, Briefca
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 
+import { customFetch } from "@workspace/api-client-react";
+
 interface MauritiusResource {
   id: number;
   title: string;
@@ -34,20 +36,17 @@ export default function MauritiusResourceDetail() {
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`/api/insights/mauritius-resources/${slug}`)
-      .then((res) => {
-        if (res.status === 404) {
-          setResource(null);
-          return null;
-        }
-        return res.json();
-      })
+    customFetch<MauritiusResource>(`/api/insights/mauritius-resources/${slug}`)
       .then((data) => {
-        if (data) setResource(data);
+        setResource(data);
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load resource detail", err);
+        if (err.status === 404) {
+          setResource(null);
+        } else {
+          console.error("Failed to load resource detail", err);
+        }
         setIsLoading(false);
       });
   }, [slug]);

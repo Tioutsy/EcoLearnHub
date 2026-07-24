@@ -4,6 +4,8 @@ import { Link } from "wouter";
 import { ArrowRight, Scale, ArrowLeft, Filter, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 
+import { customFetch } from "@workspace/api-client-react";
+
 interface MauritiusResource {
   id: number;
   title: string;
@@ -31,8 +33,7 @@ export default function MauritiusResourcesList() {
     if (selectedAuthority) url += `authority=${encodeURIComponent(selectedAuthority)}&`;
 
     setIsLoading(true);
-    fetch(url)
-      .then((res) => res.json())
+    customFetch<MauritiusResource[]>(url)
       .then((data) => {
         setResources(data);
         setIsLoading(false);

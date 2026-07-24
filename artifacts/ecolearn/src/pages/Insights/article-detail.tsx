@@ -5,6 +5,8 @@ import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 
+import { customFetch } from "@workspace/api-client-react";
+
 interface ArticlePost {
   id: number;
   title: string;
@@ -31,20 +33,17 @@ export default function InsightsArticleDetail() {
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`/api/insights/articles/${slug}`)
-      .then((res) => {
-        if (res.status === 404) {
-          setPost(null);
-          return null;
-        }
-        return res.json();
-      })
+    customFetch<ArticlePost>(`/api/insights/articles/${slug}`)
       .then((data) => {
-        if (data) setPost(data);
+        setPost(data);
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error("Failed to load article detail", err);
+        if (err.status === 404) {
+          setPost(null);
+        } else {
+          console.error("Failed to load article detail", err);
+        }
         setIsLoading(false);
       });
   }, [slug]);
@@ -55,8 +54,7 @@ export default function InsightsArticleDetail() {
       return;
     }
     
-    fetch("/api/insights/mauritius-resources")
-      .then((res) => res.json())
+    customFetch<any[]>("/api/insights/mauritius-resources")
       .then((data) => {
         const filtered = data.filter((r: any) => post.linkedResourceSlugs!.includes(r.slug));
         setRelatedResources(filtered);

@@ -5,6 +5,8 @@ import { ArrowRight, Calendar, User, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 
+import { customFetch } from "@workspace/api-client-react";
+
 interface ArticlePost {
   id: number;
   title: string;
@@ -20,8 +22,7 @@ export default function InsightsArticlesList() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/insights/articles")
-      .then((res) => res.json())
+    customFetch<ArticlePost[]>("/api/insights/articles")
       .then((data) => {
         setPosts(data);
         setIsLoading(false);
