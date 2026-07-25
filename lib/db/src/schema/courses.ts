@@ -64,6 +64,7 @@ export type Lesson = typeof lessonsTable.$inferSelect;
 export const coursePrerequisitesTable = pgTable("course_prerequisites", {
   courseId: integer("course_id").notNull(),
   prerequisiteCourseId: integer("prerequisite_course_id").notNull(),
+  requirementType: text("requirement_type").notNull().default("required"), // 'required' | 'recommended'
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.courseId, t.prerequisiteCourseId] }),
@@ -83,9 +84,30 @@ export const insertCoursePrerequisiteSchema = createInsertSchema(coursePrerequis
 export type InsertCoursePrerequisite = z.infer<typeof insertCoursePrerequisiteSchema>;
 export type CoursePrerequisite = typeof coursePrerequisitesTable.$inferSelect;
 
+export const courseCategoryAssignmentsTable = pgTable("course_category_assignments", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull(),
+  categoryId: integer("category_id").notNull(),
+  displayOrder: integer("display_order").notNull().default(0),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uniqueCourseCategory: unique("unique_course_category").on(t.courseId, t.categoryId),
+  courseFk: foreignKey({
+    columns: [t.courseId],
+    foreignColumns: [coursesTable.id],
+    name: "course_category_assignments_course_id_fk"
+  }).onDelete("cascade"),
+}));
+
+export const insertCourseCategoryAssignmentSchema = createInsertSchema(courseCategoryAssignmentsTable).omit({ id: true, createdAt: true });
+export type InsertCourseCategoryAssignment = z.infer<typeof insertCourseCategoryAssignmentSchema>;
+export type CourseCategoryAssignment = typeof courseCategoryAssignmentsTable.$inferSelect;
+
 export const systemSeedsTable = pgTable("system_seeds", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   version: integer("version").notNull().default(1),
   runAt: timestamp("run_at", { withTimezone: true }).notNull().defaultNow(),
 });
+

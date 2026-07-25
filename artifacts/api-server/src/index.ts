@@ -36,6 +36,7 @@ import { ensurePlans } from "./lib/ensurePlans";
 import { ensureChallenges } from "./lib/ensureChallenges";
 import { ensureAchievementDefinitions } from "./lib/achievementsService";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
+import { ensureCategoriesAndAssignments } from "./lib/ensureCategoriesAndAssignments";
 import { syncSequences } from "./lib/syncSequences";
 
 const rawPort = process.env["PORT"];
@@ -121,6 +122,7 @@ async function start(): Promise<void> {
   await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
   await ensureSustainabilityForSalesAndMarketingTeamsCourse();
   await ensureCoreSustainabilityPath();
+  await ensureCategoriesAndAssignments();
   await ensureInsightsMigrated();
 
 

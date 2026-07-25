@@ -309,6 +309,41 @@ export async function ensureSchemaModifications() {
       name: "Add next_review_at to mauritius_resources",
       check: () => columnExists("mauritius_resources", "next_review_at"),
       execute: () => db.execute(sql`ALTER TABLE "mauritius_resources" ADD COLUMN IF NOT EXISTS "next_review_at" timestamp with time zone;`)
+    },
+    {
+      name: "Add display_order to categories",
+      check: () => columnExists("categories", "display_order"),
+      execute: () => db.execute(sql`ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "display_order" integer DEFAULT 0 NOT NULL;`)
+    },
+    {
+      name: "Add is_visible to categories",
+      check: () => columnExists("categories", "is_visible"),
+      execute: () => db.execute(sql`ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "is_visible" boolean DEFAULT true NOT NULL;`)
+    },
+    {
+      name: "Add updated_at to categories",
+      check: () => columnExists("categories", "updated_at"),
+      execute: () => db.execute(sql`ALTER TABLE "categories" ADD COLUMN IF NOT EXISTS "updated_at" timestamp with time zone DEFAULT now() NOT NULL;`)
+    },
+    {
+      name: "Add requirement_type to course_prerequisites",
+      check: () => columnExists("course_prerequisites", "requirement_type"),
+      execute: () => db.execute(sql`ALTER TABLE "course_prerequisites" ADD COLUMN IF NOT EXISTS "requirement_type" text DEFAULT 'required' NOT NULL;`)
+    },
+    {
+      name: "Create course_category_assignments table",
+      check: () => tableExists("course_category_assignments"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "course_category_assignments" (
+          "id" serial PRIMARY KEY,
+          "course_id" integer NOT NULL REFERENCES "courses"("id") ON DELETE CASCADE,
+          "category_id" integer NOT NULL REFERENCES "categories"("id") ON DELETE CASCADE,
+          "display_order" integer DEFAULT 0 NOT NULL,
+          "is_primary" boolean DEFAULT false NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          CONSTRAINT "unique_course_category" UNIQUE("course_id", "category_id")
+        );
+      `)
     }
   ];
 

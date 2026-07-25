@@ -11,6 +11,7 @@ export type PrerequisiteStatus = {
   courseId: number;
   title: string;
   slug: string;
+  requirementType: "required" | "recommended";
   completed: boolean;
 };
 
@@ -18,6 +19,8 @@ export type EligibilityResult = {
   eligible: boolean;
   completedCount: number;
   totalCount: number;
+  completedRequiredCount: number;
+  totalRequiredCount: number;
   prerequisites: PrerequisiteStatus[];
 };
 
@@ -31,6 +34,7 @@ export async function checkCourseEligibility(
       courseId: coursesTable.id,
       title: coursesTable.title,
       slug: coursesTable.slug,
+      requirementType: coursePrerequisitesTable.requirementType,
     })
     .from(coursePrerequisitesTable)
     .innerJoin(
@@ -46,6 +50,8 @@ export async function checkCourseEligibility(
       eligible: true,
       completedCount: 0,
       totalCount: 0,
+      completedRequiredCount: 0,
+      totalRequiredCount: 0,
       prerequisites: [],
     };
   }
@@ -85,26 +91,43 @@ export async function checkCourseEligibility(
   }
 
   let completedCount = 0;
+  let completedRequiredCount = 0;
+  let totalRequiredCount = 0;
+
   const prerequisitesState: PrerequisiteStatus[] = prereqs.map(p => {
     const isCompleted = completedCourseIds.has(p.courseId);
+    const reqType = (p.requirementType === "recommended" ? "recommended" : "required") as "required" | "recommended";
+
     if (isCompleted) {
       completedCount++;
     }
+
+    if (reqType === "required") {
+      totalRequiredCount++;
+      if (isCompleted) {
+        completedRequiredCount++;
+      }
+    }
+
     if (!p.slug) {
       throw new Error(`Data integrity violation: Prerequisite course (ID: ${p.courseId}) is missing a unique URL slug.`);
     }
+
     return {
       courseId: p.courseId,
       title: p.title,
       slug: p.slug,
+      requirementType: reqType,
       completed: isCompleted,
     };
   });
 
   return {
-    eligible: completedCount === totalCount,
+    eligible: totalRequiredCount === 0 || completedRequiredCount === totalRequiredCount,
     completedCount,
     totalCount,
+    completedRequiredCount,
+    totalRequiredCount,
     prerequisites: prerequisitesState,
   };
 }

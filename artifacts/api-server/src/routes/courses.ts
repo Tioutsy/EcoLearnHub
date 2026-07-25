@@ -4,8 +4,9 @@ import {
   coursesTable,
   lessonsTable,
   categoriesTable,
+  courseCategoryAssignmentsTable,
 } from "@workspace/db";
-import { eq, like, and, desc } from "drizzle-orm";
+import { eq, like, and, desc, asc, inArray } from "drizzle-orm";
 import {
   ListCoursesQueryParams,
   CreateCourseBody,
@@ -13,8 +14,22 @@ import {
 } from "@workspace/api-zod";
 import { getCompanyAccess, CompanyAccess } from "../lib/access";
 import { checkCourseEligibility } from "../lib/prerequisites";
+import { getRecommendedNextCourse } from "../lib/recommendationService";
 
 const router = Router();
+
+// Recommended next course endpoint for current learner
+router.get("/recommendation", async (req, res): Promise<void> => {
+  let access: CompanyAccess | null = null;
+  try {
+    access = await getCompanyAccess(req);
+  } catch (e) {
+    // Guest access allowed
+  }
+
+  const recommendation = await getRecommendedNextCourse(access);
+  res.json({ recommendation });
+});
 
 router.get("/", async (req, res): Promise<void> => {
   const cleanQuery = Object.fromEntries(
@@ -27,9 +42,45 @@ router.get("/", async (req, res): Promise<void> => {
   }
   const { categoryId, search, featured } = params.data;
 
-  let query = db
+  // Determine allowed course IDs if filtering by category (to support cross-listing)
+  let allowedCourseIds: number[] | null = null;
+  if (categoryId) {
+    const assignments = await db
+      .select({ courseId: courseCategoryAssignmentsTable.courseId })
+      .from(courseCategoryAssignmentsTable)
+      .where(eq(courseCategoryAssignmentsTable.categoryId, categoryId));
+
+    allowedCourseIds = assignments.map(a => a.courseId);
+
+    // If no assignments found for category, also check primary categoryId field
+    if (allowedCourseIds.length === 0) {
+      const primaryCourses = await db
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(eq(coursesTable.categoryId, categoryId));
+      allowedCourseIds = primaryCourses.map(c => c.id);
+    }
+  }
+
+  const queryConditions = [
+    eq(coursesTable.isPublished, true),
+    search ? like(coursesTable.title, `%${search}%`) : undefined,
+    featured === true ? eq(coursesTable.isFeatured, true) : undefined,
+  ];
+
+  if (allowedCourseIds !== null) {
+    if (allowedCourseIds.length === 0) {
+      res.json([]);
+      return;
+    }
+    queryConditions.push(inArray(coursesTable.id, allowedCourseIds));
+  }
+
+  const courses = await db
     .select({
       id: coursesTable.id,
+      courseCode: coursesTable.courseCode,
+      slug: coursesTable.slug,
       title: coursesTable.title,
       description: coursesTable.description,
       categoryId: coursesTable.categoryId,
@@ -50,23 +101,54 @@ router.get("/", async (req, res): Promise<void> => {
     })
     .from(coursesTable)
     .leftJoin(categoriesTable, eq(coursesTable.categoryId, categoriesTable.id))
-    .where(
-      and(
-        eq(coursesTable.isPublished, true),
-        categoryId ? eq(coursesTable.categoryId, categoryId) : undefined,
-        search ? like(coursesTable.title, `%${search}%`) : undefined,
-        featured === true ? eq(coursesTable.isFeatured, true) : undefined,
-      ),
-    )
-    .orderBy(desc(coursesTable.isFeatured), desc(coursesTable.enrollmentCount));
+    .where(and(...queryConditions.filter((c): c is NonNullable<typeof c> => c !== undefined)))
+    .orderBy(asc(coursesTable.id));
 
-  const courses = await query;
+  // Load all category assignments for returned courses
+  const courseIds = courses.map(c => c.id);
+  let allAssignments: { courseId: number; categoryId: number; categoryName: string | null; isPrimary: boolean }[] = [];
+
+  if (courseIds.length > 0) {
+    allAssignments = await db
+      .select({
+        courseId: courseCategoryAssignmentsTable.courseId,
+        categoryId: courseCategoryAssignmentsTable.categoryId,
+        categoryName: categoriesTable.name,
+        isPrimary: courseCategoryAssignmentsTable.isPrimary,
+      })
+      .from(courseCategoryAssignmentsTable)
+      .leftJoin(categoriesTable, eq(courseCategoryAssignmentsTable.categoryId, categoriesTable.id))
+      .where(inArray(courseCategoryAssignmentsTable.courseId, courseIds));
+  }
+
+  const assignmentsMap = new Map<number, { categoryId: number; categoryName: string; isPrimary: boolean }[]>();
+  for (const a of allAssignments) {
+    if (!assignmentsMap.has(a.courseId)) {
+      assignmentsMap.set(a.courseId, []);
+    }
+    if (a.categoryName) {
+      assignmentsMap.get(a.courseId)!.push({
+        categoryId: a.categoryId,
+        categoryName: a.categoryName,
+        isPrimary: a.isPrimary,
+      });
+    }
+  }
+
   res.json(
-    courses.map((c) => ({
-      ...c,
-      priceUsd: parseFloat(c.priceUsd),
-      rating: c.rating ? parseFloat(c.rating) : null,
-    })),
+    courses.map((c) => {
+      const assignedCats = assignmentsMap.get(c.id) || [];
+      const primaryCat = assignedCats.find(a => a.isPrimary) || (c.categoryId && c.categoryName ? { categoryId: c.categoryId, categoryName: c.categoryName, isPrimary: true } : null);
+
+      return {
+        ...c,
+        categoryName: primaryCat?.categoryName || c.categoryName || "General Sustainability",
+        primaryCategory: primaryCat,
+        categoryAssignments: assignedCats,
+        priceUsd: parseFloat(c.priceUsd),
+        rating: c.rating ? parseFloat(c.rating) : null,
+      };
+    })
   );
 });
 
@@ -102,7 +184,7 @@ router.get("/featured", async (_req, res): Promise<void> => {
       ...c,
       priceUsd: parseFloat(c.priceUsd),
       rating: c.rating ? parseFloat(c.rating) : null,
-    })),
+    }))
   );
 });
 
@@ -114,7 +196,6 @@ router.get("/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  // Load access context if present to allow platform admins to preview unpublished courses
   let accessContext: CompanyAccess | null = null;
   let bypassFilter = false;
   try {
@@ -134,6 +215,8 @@ router.get("/:id", async (req, res): Promise<void> => {
   const [course] = await db
     .select({
       id: coursesTable.id,
+      courseCode: coursesTable.courseCode,
+      slug: coursesTable.slug,
       title: coursesTable.title,
       description: coursesTable.description,
       categoryId: coursesTable.categoryId,
@@ -184,6 +267,9 @@ router.get("/:id", async (req, res): Promise<void> => {
     rating: course.rating ? parseFloat(course.rating) : null,
     lessons: safeLessons,
     prerequisites: eligibility.prerequisites,
+    isEligible: eligibility.eligible,
+    completedRequiredCount: eligibility.completedRequiredCount,
+    totalRequiredCount: eligibility.totalRequiredCount,
   });
 });
 
