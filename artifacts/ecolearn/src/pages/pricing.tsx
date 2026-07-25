@@ -4,127 +4,423 @@ import {
   CheckCircle2,
   Building2,
   FileText,
+  Sparkles,
+  ShieldCheck,
+  Check,
+  X,
+  HelpCircle,
+  ArrowRight,
+  Layers,
+  Award,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@clerk/react";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
-import { PRICING_PLANS } from "@/config/pricing";
+import { useState, useEffect, useMemo } from "react";
+import { customFetch } from "@workspace/api-client-react";
+import { cn } from "@/lib/utils";
+
+interface PlanData {
+  id: number;
+  code: "ESSENTIAL" | "PROFESSIONAL" | "COMPLETE";
+  name: string;
+  description: string;
+  tagline: string | null;
+  displayOrder: number;
+  features: string[];
+}
+
+interface EmployeeBandData {
+  id: number;
+  code: string;
+  label: string;
+  minimumEmployees: number;
+  maximumEmployees: number | null;
+  requiresTailoredQuote: boolean;
+}
+
+interface PriceData {
+  id: number;
+  subscriptionPlanId: number;
+  employeeBandId: number;
+  planCode: string;
+  bandCode: string;
+  monthlyAmountMUR: number | null;
+  requiresTailoredQuote: boolean;
+}
 
 export default function Pricing() {
   const { isSignedIn } = useAuth();
+  const [selectedBandCode, setSelectedBandCode] = useState<string>("UP_TO_25");
+  const [plans, setPlans] = useState<PlanData[]>([]);
+  const [bands, setBands] = useState<EmployeeBandData[]>([]);
+  const [prices, setPrices] = useState<PriceData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    customFetch<{ plans: PlanData[]; employeeBands: EmployeeBandData[]; prices: PriceData[] }>("/api/subscriptions/public-plans")
+      .then((res) => {
+        if (isMounted && res) {
+          setPlans(res.plans || []);
+          setBands(res.employeeBands || []);
+          setPrices(res.prices || []);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setIsLoading(false);
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  // Map prices by planCode and bandCode
+  const priceMap = useMemo(() => {
+    const map = new Map<string, PriceData>();
+    for (const p of prices) {
+      map.set(`${p.planCode}_${p.bandCode}`, p);
+    }
+    return map;
+  }, [prices]);
+
+  const activeBand = bands.find(b => b.code === selectedBandCode);
+  const isOver120 = selectedBandCode === "OVER_120" || activeBand?.requiresTailoredQuote;
+
+  const comparisonRows = [
+    { name: "Core Sustainability Certificate (ELH-01 to ELH-12)", essential: true, professional: true, complete: true },
+    { name: "Sustainability Foundations & Environmental Compliance", essential: true, professional: true, complete: true },
+    { name: "Standard Certificates & Digital Badges", essential: true, professional: true, complete: true },
+    { name: "Learner Progress & Completion Tracking", essential: true, professional: true, complete: true },
+    { name: "Exportable Training & Compliance Records", essential: true, professional: true, complete: true },
+    { name: "Sustainability in Action Courses (ELH-13 to ELH-23)", essential: false, professional: true, complete: true },
+    { name: "Sustainability by Department Courses (ELH-24 to ELH-29)", essential: false, professional: true, complete: true },
+    { name: "Department-Level Progress Views & Recommendations", essential: false, professional: true, complete: true },
+    { name: "Enhanced Assignment & Engagement Reporting", essential: false, professional: true, complete: true },
+    { name: "Leadership and Sustainability Management Courses", essential: false, professional: false, complete: true },
+    { name: "Advanced ESG Organisational Reporting Pathways", essential: false, professional: false, complete: true },
+    { name: "Full Standard Catalogue Access & Future Additions", essential: false, professional: false, complete: true },
+  ];
 
   return (
     <Layout>
-      <div className="bg-primary/5 pt-20 pb-16 border-b">
-        <div className="container mx-auto px-4 text-center max-w-3xl">
-          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6 text-foreground">
-            Simple pricing for companies of every size
+      {/* Header Banner */}
+      <div className="bg-gradient-to-b from-emerald-900/10 via-background to-background pt-16 md:pt-24 pb-12 border-b">
+        <div className="container mx-auto px-4 text-center max-w-4xl">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full mb-4">
+            <Sparkles className="h-3.5 w-3.5" /> EcoLearnHub Hybrid Commercial Plans
+          </span>
+          <h1 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-foreground tracking-tight">
+            Choose the level of sustainability learning your organisation needs
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Give your employees practical sustainability training through one straightforward monthly company subscription. Choose the category that matches your total number of employees.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Select a commercial plan for your required course coverage, with transparent monthly pricing based on your total employee category.
           </p>
-          <p className="text-sm text-muted-foreground mb-8">
-            All prices are shown in Mauritian rupees and are charged monthly.
+          <p className="text-xs text-muted-foreground mt-3 font-medium">
+            All prices are shown in Mauritian Rupees (MUR) per month. Higher plans include all lower-plan course content.
           </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
-          {PRICING_PLANS.map((plan) => (
-            <div 
-              key={plan.id} 
-              className="relative bg-card border rounded-2xl p-6 flex flex-col shadow-sm transition-all"
-            >
-              <div className="mb-6">
-                <h3 className="text-xl font-bold font-serif mb-2">{plan.name}</h3>
-                <div className="h-20 flex flex-col justify-center">
-                  {!plan.requiresCustomQuote ? (
-                    <>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold">MUR {plan.monthlyPriceMUR?.toLocaleString()}</span>
-                      </div>
-                      <span className="text-muted-foreground font-medium text-sm mt-1">per month</span>
-                    </>
-                  ) : (
-                    <span className="text-xl font-bold text-foreground">Contact us for a tailored quote</span>
+      <div className="container mx-auto px-4 py-12 space-y-16">
+        {/* Employee Band Selector */}
+        <div className="max-w-3xl mx-auto space-y-4 text-center">
+          <label className="text-sm font-bold text-foreground uppercase tracking-wider block">
+            Step 1: Select your total employee category
+          </label>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 bg-muted/60 p-2 rounded-2xl border">
+            {(bands.length > 0 ? bands : [
+              { code: "UP_TO_25", label: "Up to 25" },
+              { code: "FROM_26_TO_50", label: "26–50" },
+              { code: "FROM_51_TO_80", label: "51–80" },
+              { code: "FROM_81_TO_120", label: "81–120" },
+              { code: "OVER_120", label: "Over 120" },
+            ]).map((b) => {
+              const isSelected = selectedBandCode === b.code;
+              return (
+                <button
+                  key={b.code}
+                  onClick={() => setSelectedBandCode(b.code)}
+                  className={cn(
+                    "px-3 py-3 rounded-xl text-sm font-semibold transition-all text-center flex flex-col items-center justify-center gap-0.5 border",
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary shadow-md"
+                      : "bg-card hover:bg-card/80 text-muted-foreground border-transparent hover:border-border"
                   )}
-                </div>
+                >
+                  <span>{b.label}</span>
+                  <span className={cn("text-[10px] font-mono opacity-80", isSelected ? "text-primary-foreground" : "text-muted-foreground")}>
+                    {b.code === "OVER_120" ? "Tailored quote" : "employees"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 3 Plan Cards */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
+          {/* ESSENTIAL PLAN */}
+          <div className="bg-card border rounded-3xl p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative">
+            <div className="space-y-6">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Plan 1</span>
+                <h3 className="text-2xl font-bold font-serif mt-1">Essential</h3>
+                <p className="text-xs text-muted-foreground mt-1">Core sustainability learning for every employee.</p>
               </div>
 
-              {!plan.requiresCustomQuote ? (
-                <Button 
-                  asChild
-                  className="w-full mb-6 h-11 text-sm bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                >
-                  <Link href={isSignedIn ? `/company/subscribe?planId=${plan.id}` : `/sign-up?redirect_url=/company/subscribe?planId=${plan.id}`}>
-                    Get started
+              <div className="pt-2 border-t border-b py-4">
+                {!isOver120 ? (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif">
+                        MUR {(priceMap.get(`ESSENTIAL_${selectedBandCode}`)?.monthlyAmountMUR || 3000).toLocaleString()}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">per month · billed for {activeBand?.label || "your team"}</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">Tailored pricing for 120+ employees</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider block">Course Access Included:</span>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>ELH-01 to ELH-12</strong> (Core Sustainability Certificate)</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Waste sorting, energy, water, green office & compliance</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Learner progress tracking & printable certificates</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Exportable compliance training records</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-8">
+              {!isOver120 ? (
+                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90">
+                  <Link href={isSignedIn ? `/company/subscribe?planCode=ESSENTIAL&bandCode=${selectedBandCode}` : `/sign-up?redirect_url=/company/subscribe?planCode=ESSENTIAL&bandCode=${selectedBandCode}`}>
+                    Choose Essential
                   </Link>
                 </Button>
               ) : (
                 <LeadCaptureDialog
                   interest="proposal"
-                  trigger={
-                    <Button
-                      variant="outline"
-                      className="w-full mb-6 h-11 text-sm"
-                    >
-                      Contact us
-                    </Button>
-                  }
+                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us</Button>}
                 />
               )}
+            </div>
+          </div>
 
-              <div className="flex-1">
-                <ul className="space-y-3">
-                  {plan.features?.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span className="leading-snug">{feature}</span>
-                    </li>
-                  ))}
+          {/* PROFESSIONAL PLAN (Recommended) */}
+          <div className="bg-card border-2 border-emerald-600 dark:border-emerald-500 rounded-3xl p-8 flex flex-col justify-between shadow-xl relative scale-[1.02]">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5" /> Recommended
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Plan 2</span>
+                <h3 className="text-2xl font-bold font-serif mt-1">Professional</h3>
+                <p className="text-xs text-muted-foreground mt-1">Practical learning for workplace action and departments.</p>
+              </div>
+
+              <div className="pt-2 border-t border-b py-4">
+                {!isOver120 ? (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif text-emerald-700 dark:text-emerald-400">
+                        MUR {(priceMap.get(`PROFESSIONAL_${selectedBandCode}`)?.monthlyAmountMUR || 4500).toLocaleString()}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">per month · billed for {activeBand?.label || "your team"}</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">Tailored pricing for 120+ employees</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider block">Includes Everything in Essential, plus:</span>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2 text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Sustainability in Action</strong> courses (ELH-13 to ELH-23)</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Departmental Courses</strong> (HR, Finance, Ops, Facilities, Sales)</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Department-level progress views & recommendations</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Enhanced assignment & engagement reporting</span>
+                  </li>
                 </ul>
               </div>
             </div>
-          ))}
+
+            <div className="pt-8">
+              {!isOver120 ? (
+                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
+                  <Link href={isSignedIn ? `/company/subscribe?planCode=PROFESSIONAL&bandCode=${selectedBandCode}` : `/sign-up?redirect_url=/company/subscribe?planCode=PROFESSIONAL&bandCode=${selectedBandCode}`}>
+                    Choose Professional
+                  </Link>
+                </Button>
+              ) : (
+                <LeadCaptureDialog
+                  interest="proposal"
+                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us</Button>}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* COMPLETE PLAN */}
+          <div className="bg-card border rounded-3xl p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative">
+            <div className="space-y-6">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Plan 3</span>
+                <h3 className="text-2xl font-bold font-serif mt-1">Complete</h3>
+                <p className="text-xs text-muted-foreground mt-1">Full learning access for sustainability leadership and reporting.</p>
+              </div>
+
+              <div className="pt-2 border-t border-b py-4">
+                {!isOver120 ? (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif">
+                        MUR {(priceMap.get(`COMPLETE_${selectedBandCode}`)?.monthlyAmountMUR || 6000).toLocaleString()}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">per month · billed for {activeBand?.label || "your team"}</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">Tailored pricing for 120+ employees</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider block">Includes Everything in Professional, plus:</span>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2 text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Leadership & Management</strong> learning pathways</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-foreground font-medium">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span><strong>Full Standard Catalogue</strong> access & future additions</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Advanced organisational reporting & executive summaries</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>Management-level completion & ESG evidence exports</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-8">
+              {!isOver120 ? (
+                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Link href={isSignedIn ? `/company/subscribe?planCode=COMPLETE&bandCode=${selectedBandCode}` : `/sign-up?redirect_url=/company/subscribe?planCode=COMPLETE&bandCode=${selectedBandCode}`}>
+                    Choose Complete
+                  </Link>
+                </Button>
+              ) : (
+                <LeadCaptureDialog
+                  interest="proposal"
+                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us</Button>}
+                />
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-24 max-w-3xl mx-auto border-t pt-16">
-          <div className="text-center mb-10">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-secondary/10 text-secondary mb-6">
-              <Building2 className="h-8 w-8" />
+        {/* Plan Comparison Matrix */}
+        <div className="max-w-5xl mx-auto space-y-6 pt-8 border-t">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold font-serif">Compare Plan Entitlements & Features</h2>
+            <p className="text-muted-foreground text-sm">Review full course coverage and administrative capabilities across plans.</p>
+          </div>
+
+          <div className="border rounded-2xl overflow-x-auto bg-card shadow-sm">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b bg-muted/50 text-xs font-bold text-foreground uppercase tracking-wider">
+                  <th className="py-4 px-6">Capability / Course Coverage</th>
+                  <th className="py-4 px-4 text-center w-32">Essential</th>
+                  <th className="py-4 px-4 text-center w-32 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400">Professional</th>
+                  <th className="py-4 px-4 text-center w-32">Complete</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y text-muted-foreground">
+                {comparisonRows.map((row, i) => (
+                  <tr key={i} className="hover:bg-muted/30 transition-colors">
+                    <td className="py-3.5 px-6 font-medium text-foreground text-sm">{row.name}</td>
+                    <td className="py-3.5 px-4 text-center">
+                      {row.essential ? <Check className="h-5 w-5 text-emerald-600 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
+                    </td>
+                    <td className="py-3.5 px-4 text-center bg-emerald-500/5">
+                      {row.professional ? <Check className="h-5 w-5 text-emerald-600 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      {row.complete ? <Check className="h-5 w-5 text-emerald-600 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground/30 mx-auto" />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Corporate Proposal Callout for >120 employees */}
+        <div className="max-w-4xl mx-auto border rounded-3xl p-8 bg-gradient-to-r from-muted/50 to-card shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 max-w-xl">
+            <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider">
+              <Building2 className="h-4 w-4" /> Enterprise & Large Organisations
             </div>
-            <h2 className="text-3xl font-bold font-serif mb-4">
-              More than 120 employees?
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Contact us to discuss your workforce, training requirements and reporting needs.
+            <h3 className="text-xl font-bold font-serif">More than 120 employees?</h3>
+            <p className="text-sm text-muted-foreground">
+              We offer tailored corporate agreements, custom departmental rollouts, and volume pricing for large workforces across Mauritius.
             </p>
           </div>
-          <div className="max-w-md mx-auto">
-            <div className="border rounded-2xl p-8 bg-card shadow-sm flex flex-col items-center text-center">
-              <FileText className="h-8 w-8 text-primary mb-4" />
-              <h3 className="text-xl font-semibold font-serif mb-2">
-                Request a corporate proposal
-              </h3>
-              <p className="text-muted-foreground mb-6 flex-1">
-                Get tailored pricing and a rollout plan built around your team
-                size and sustainability goals.
-              </p>
-              <LeadCaptureDialog
-                interest="proposal"
-                trigger={
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-12 w-full"
-                  >
-                    Request proposal
-                  </Button>
-                }
-              />
-            </div>
-          </div>
+
+          <LeadCaptureDialog
+            interest="proposal"
+            trigger={
+              <Button size="lg" variant="outline" className="shrink-0 font-semibold rounded-xl gap-2">
+                <span>Request Corporate Proposal</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            }
+          />
         </div>
       </div>
     </Layout>

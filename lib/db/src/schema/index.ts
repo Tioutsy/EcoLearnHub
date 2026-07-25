@@ -18,3 +18,5 @@ export * from "./recycling";
 export * from "./sectors";
 export * from "./sdg";
 export * from "./companyServices";
+export * from "./subscriptionPlans";
+

@@ -10,6 +10,9 @@ import { useCompanyLmsOverview } from "@/lib/lms-api";
 import { RecyclingImpactSection } from "@/components/recycling/RecyclingImpactSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { customFetch } from "@workspace/api-client-react";
+import { cn } from "@/lib/utils";
 import {
   Building2,
   Users,
@@ -22,6 +25,7 @@ import {
   ClipboardList,
   ClipboardCheck,
   CheckCircle2,
+  Lock,
   Clock,
   Gauge,
   AlertTriangle,
@@ -138,6 +142,11 @@ export default function CompanyDashboard() {
     Platinum: "bg-cyan-100 text-cyan-700",
   };
 
+  const [subData, setSubData] = useState<any>(null);
+  useEffect(() => {
+    customFetch("/api/subscriptions/company").then(res => setSubData(res)).catch(() => {});
+  }, []);
+
   return (
     <Layout>
       <div className="bg-primary/5 border-b py-8">
@@ -182,6 +191,51 @@ export default function CompanyDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Your Learning Access Subscription Banner */}
+        <div className="bg-card border rounded-2xl p-6 shadow-sm mb-8 bg-gradient-to-r from-emerald-950/5 via-card to-card">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  {subData?.planName || "Complete"} Plan Active
+                </span>
+                <span className="text-xs text-muted-foreground font-mono font-medium">
+                  {subData?.bandLabel || "Up to 25 employees"}
+                </span>
+              </div>
+              <h2 className="text-xl font-bold font-serif">Your Commercial Learning Access</h2>
+              <p className="text-sm text-muted-foreground">
+                Current Contracted Subscription: <strong className="text-foreground">{subData?.planName || "Complete"}</strong> • Agreed Price: <strong className="text-foreground">{subData?.agreedMonthlyAmountMUR ? `MUR ${subData.agreedMonthlyAmountMUR.toLocaleString()}/mo` : "Standard Agreement"}</strong>
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className="px-3 py-1.5 rounded-xl border bg-muted/40 font-medium text-foreground flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Core Certificate</span>
+              </div>
+              <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", (subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
+                {(subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
+                <span>Sustainability in Action</span>
+              </div>
+              <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", (subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
+                {(subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
+                <span>Department Courses</span>
+              </div>
+              <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", subData?.planCode === "COMPLETE" ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
+                {subData?.planCode === "COMPLETE" ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
+                <span>Leadership</span>
+              </div>
+              
+              <Link href="/pricing">
+                <Button variant="outline" size="sm" className="ml-2 gap-1 rounded-xl text-xs">
+                  <span>Change Plan</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
         {/* Executive KPI cards */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-10">
           <KpiCard

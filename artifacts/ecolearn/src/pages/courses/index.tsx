@@ -19,7 +19,8 @@ import {
   ShieldAlert,
   Award,
   Layers,
-  Info
+  Info,
+  Building2
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -47,15 +48,20 @@ interface PrerequisiteItem {
   requirementType: "required" | "recommended";
 }
 
+interface CompanySubscriptionData {
+  planCode: "ESSENTIAL" | "PROFESSIONAL" | "COMPLETE";
+  entitledCourseIds: number[];
+}
+
 export default function Courses() {
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all"); // 'all' | 'completed' | category slug
   const [recommendation, setRecommendation] = useState<RecommendationData | null>(null);
   const [isLoadingRec, setIsLoadingRec] = useState<boolean>(true);
+  const [companySub, setCompanySub] = useState<CompanySubscriptionData | null>(null);
 
   const { data: categories, isLoading: isLoadingCategories } = useListCategories();
   
-  // Map filter selection to category ID query
   const activeCategoryId = useMemo(() => {
     if (selectedFilter === "all" || selectedFilter === "completed") return null;
     const cat = categories?.find(c => c.slug === selectedFilter);
@@ -80,10 +86,11 @@ export default function Courses() {
     return map;
   }, [enrollments]);
 
-  // Fetch recommendation
+  // Fetch recommendation and company subscription context
   useEffect(() => {
     let isMounted = true;
     setIsLoadingRec(true);
+    
     customFetch<{ recommendation: RecommendationData | null }>("/api/courses/recommendation")
       .then((res) => {
         if (isMounted) {
@@ -97,6 +104,17 @@ export default function Courses() {
           setIsLoadingRec(false);
         }
       });
+
+    customFetch<CompanySubscriptionData>("/api/subscriptions/company")
+      .then((res) => {
+        if (isMounted && res) {
+          setCompanySub(res);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setCompanySub(null);
+      });
+
     return () => { isMounted = false; };
   }, []);
 
@@ -110,7 +128,6 @@ export default function Courses() {
     { slug: "completed", label: "Completed", description: "Courses you have successfully completed" },
   ];
 
-  // Filtered courses depending on selected tab
   const displayedCourses = useMemo(() => {
     if (!courses) return [];
     if (selectedFilter === "completed") {
@@ -119,13 +136,11 @@ export default function Courses() {
     return courses;
   }, [courses, selectedFilter, enrollmentMap]);
 
-  // Compute Category Progress Summary
   const getCategoryProgressSummary = (catSlug: string) => {
     if (!courses || !categories) return null;
     const cat = categories.find(c => c.slug === catSlug);
     if (!cat) return null;
 
-    // Filter courses assigned to this category
     const catCourses = courses.filter(c => {
       if ((c as any).categoryAssignments) {
         return (c as any).categoryAssignments.some((a: any) => a.categoryId === cat.id);
@@ -337,26 +352,30 @@ export default function Courses() {
                 const isOverdue = enrollment?.dueDate && new Date(enrollment.dueDate) < new Date() && !isCompleted;
                 const isAssigned = !!enrollment?.dueDate;
 
+                // Commercial Subscription Plan Entitlement Evaluation
+                const reqPlanCode = (course as any).requiredPlanCode || "ESSENTIAL";
+                const reqPlanName = (course as any).requiredPlanName || "Essential";
+                
+                let isPlanLocked = false;
+                if (companySub) {
+                  isPlanLocked = !companySub.entitledCourseIds.includes(course.id) && !isCompleted;
+                }
+
                 // Dynamic Prerequisite Lock Check for ALL Courses
                 const prereqsList: PrerequisiteItem[] = (course as any).prerequisites || [];
-                
-                // Uncompleted Required Prerequisites
                 const missingRequiredPrereqs = prereqsList.filter(p => 
                   p.requirementType === "required" && enrollmentMap.get(p.prerequisiteCourseId)?.status !== "completed"
                 );
-
-                // Uncompleted Recommended Prerequisites
                 const missingRecommendedPrereqs = prereqsList.filter(p => 
                   p.requirementType === "recommended" && enrollmentMap.get(p.prerequisiteCourseId)?.status !== "completed"
                 );
 
-                // For ELH-12 specifically: also check if 11 core courses are completed
                 const isElh12 = (course as any).courseCode === "ELH-12";
                 const coreCompletedCount = Array.from(enrollmentMap.entries())
                   .filter(([_, e]) => e.status === "completed").length;
                 const elh12CoreLocked = isElh12 && coreCompletedCount < 11;
 
-                const isLocked = !isCompleted && (missingRequiredPrereqs.length > 0 || elh12CoreLocked);
+                const isPrereqLocked = !isCompleted && (missingRequiredPrereqs.length > 0 || elh12CoreLocked);
 
                 // Determine primary status text
                 let statusLabel = "Ready to start";
@@ -365,6 +384,9 @@ export default function Courses() {
                 if (isCompleted) {
                   statusLabel = "Completed";
                   statusBadgeClass = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30";
+                } else if (isPlanLocked) {
+                  statusLabel = `Available with ${reqPlanName}`;
+                  statusBadgeClass = "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/30 font-semibold";
                 } else if (isOverdue) {
                   statusLabel = "Assigned · Overdue";
                   statusBadgeClass = "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30";
@@ -377,22 +399,25 @@ export default function Courses() {
                 } else if (isInProgress) {
                   statusLabel = "In progress";
                   statusBadgeClass = "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30";
-                } else if (isLocked) {
+                } else if (isPrereqLocked) {
                   statusLabel = "Locked · Prerequisite Required";
                   statusBadgeClass = "bg-blue-600/10 text-blue-800 dark:text-blue-300 border-blue-500/40 font-semibold";
                 }
 
-                // Determine primary action button text & link
+                // Primary action button text & link
                 let actionText = "Start course";
                 let actionHref = `/courses/${course.id}`;
 
                 if (isCompleted) {
                   actionText = "Review course";
                   actionHref = enrollment ? `/learn/${enrollment.id}` : `/courses/${course.id}`;
+                } else if (isPlanLocked) {
+                  actionText = "View plan";
+                  actionHref = `/pricing`;
                 } else if (isInProgress && enrollment) {
                   actionText = "Continue course";
                   actionHref = `/learn/${enrollment.id}`;
-                } else if (isLocked) {
+                } else if (isPrereqLocked) {
                   actionText = "View prerequisite";
                   const firstMissing = missingRequiredPrereqs[0];
                   actionHref = firstMissing ? `/courses/${firstMissing.prerequisiteCourseId}` : `/courses/${course.id}`;
@@ -403,7 +428,7 @@ export default function Courses() {
                 return (
                   <div key={course.id} className={cn(
                     "group bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full",
-                    isLocked ? "border-blue-300 dark:border-blue-800/60 bg-blue-50/20 dark:bg-blue-950/10" : "hover:border-primary/40"
+                    isPlanLocked ? "border-purple-300 dark:border-purple-800/60 bg-purple-50/10 dark:bg-purple-950/10" : isPrereqLocked ? "border-blue-300 dark:border-blue-800/60 bg-blue-50/20 dark:bg-blue-950/10" : "hover:border-primary/40"
                   )}>
                     {/* Thumbnail Header */}
                     <div className="relative aspect-video overflow-hidden bg-muted">
@@ -413,7 +438,7 @@ export default function Courses() {
                           alt={course.title}
                           className={cn(
                             "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105",
-                            isLocked && "opacity-85 grayscale-[20%]"
+                            (isPrereqLocked || isPlanLocked) && "opacity-85 grayscale-[20%]"
                           )}
                         />
                       ) : (
@@ -443,7 +468,8 @@ export default function Courses() {
                         <div className="flex items-center justify-between text-xs gap-2">
                           <span className={cn("px-2.5 py-0.5 rounded-md font-semibold border text-xs flex items-center gap-1", statusBadgeClass)}>
                             {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
-                            {isLocked && <Lock className="h-3.5 w-3.5 shrink-0 text-blue-700 dark:text-blue-400" />}
+                            {isPlanLocked && <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600" />}
+                            {isPrereqLocked && <Lock className="h-3.5 w-3.5 shrink-0 text-blue-700 dark:text-blue-400" />}
                             {statusLabel}
                           </span>
                           <span className="flex items-center gap-1 text-muted-foreground font-medium">
@@ -460,8 +486,19 @@ export default function Courses() {
                         </p>
                       </div>
 
+                      {/* Commercial Subscription Plan Lock Notice */}
+                      {isPlanLocked && (
+                        <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-xs text-purple-900 dark:text-purple-200 space-y-1">
+                          <div className="font-semibold flex items-center gap-1.5 text-purple-800 dark:text-purple-300">
+                            <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600" />
+                            <span>Included in {reqPlanName} Plan</span>
+                          </div>
+                          <p>This course is included in your company's <span className="font-semibold">{reqPlanName}</span> plan. Contact your company administrator to upgrade access.</p>
+                        </div>
+                      )}
+
                       {/* Blue Prerequisite Locked Notice Card */}
-                      {isLocked && (
+                      {!isPlanLocked && isPrereqLocked && (
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 text-xs text-blue-900 dark:text-blue-200 space-y-1">
                           <div className="font-semibold flex items-center gap-1.5 text-blue-800 dark:text-blue-300">
                             <Lock className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
@@ -478,7 +515,7 @@ export default function Courses() {
                       )}
 
                       {/* Blue Recommended Prerequisite Notice Card */}
-                      {!isLocked && !isCompleted && missingRecommendedPrereqs.length > 0 && (
+                      {!isPlanLocked && !isPrereqLocked && !isCompleted && missingRecommendedPrereqs.length > 0 && (
                         <div className="bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 text-xs text-sky-900 dark:text-sky-200 space-y-1">
                           <div className="font-semibold flex items-center gap-1.5 text-sky-800 dark:text-sky-300">
                             <Info className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
@@ -492,11 +529,12 @@ export default function Courses() {
                       <div className="pt-3 border-t">
                         <Link href={actionHref}>
                           <Button
-                            variant={isCompleted ? "outline" : isLocked ? "secondary" : "default"}
+                            variant={isCompleted ? "outline" : isPlanLocked ? "secondary" : isPrereqLocked ? "secondary" : "default"}
                             className={cn(
                               "w-full justify-between font-medium rounded-xl text-sm transition-all",
-                              isLocked && "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
-                              !isCompleted && !isLocked && "bg-primary text-primary-foreground hover:bg-primary/90"
+                              isPlanLocked && "bg-purple-700 text-white hover:bg-purple-800 shadow-sm",
+                              !isPlanLocked && isPrereqLocked && "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
+                              !isCompleted && !isPlanLocked && !isPrereqLocked && "bg-primary text-primary-foreground hover:bg-primary/90"
                             )}
                           >
                             <span>{actionText}</span>

@@ -6,6 +6,8 @@ import {
   categoriesTable,
   courseCategoryAssignmentsTable,
   coursePrerequisitesTable,
+  planCourseEntitlementsTable,
+  subscriptionPlansTable,
 } from "@workspace/db";
 import { eq, like, and, desc, asc, inArray } from "drizzle-orm";
 import {
@@ -16,6 +18,7 @@ import {
 import { getCompanyAccess, CompanyAccess } from "../lib/access";
 import { checkCourseEligibility } from "../lib/prerequisites";
 import { getRecommendedNextCourse } from "../lib/recommendationService";
+import { evaluateCourseAccess } from "../lib/courseAccessService";
 
 const router = Router();
 
@@ -43,7 +46,6 @@ router.get("/", async (req, res): Promise<void> => {
   }
   const { categoryId, search, featured } = params.data;
 
-  // Determine allowed course IDs if filtering by category (to support cross-listing)
   let allowedCourseIds: number[] | null = null;
   if (categoryId) {
     const assignments = await db
@@ -53,7 +55,6 @@ router.get("/", async (req, res): Promise<void> => {
 
     allowedCourseIds = assignments.map(a => a.courseId);
 
-    // If no assignments found for category, also check primary categoryId field
     if (allowedCourseIds.length === 0) {
       const primaryCourses = await db
         .select({ id: coursesTable.id })
@@ -105,7 +106,6 @@ router.get("/", async (req, res): Promise<void> => {
     .where(and(...queryConditions.filter((c): c is NonNullable<typeof c> => c !== undefined)))
     .orderBy(asc(coursesTable.id));
 
-  // Load all category assignments for returned courses
   const courseIds = courses.map(c => c.id);
   let allAssignments: { courseId: number; categoryId: number; categoryName: string | null; isPrimary: boolean }[] = [];
   let allPrereqs: {
@@ -116,6 +116,7 @@ router.get("/", async (req, res): Promise<void> => {
     prerequisiteSlug: string | null;
     requirementType: "required" | "recommended";
   }[] = [];
+  let planEntitlementMap = new Map<number, { requiredPlanCode: string; requiredPlanName: string }>();
 
   if (courseIds.length > 0) {
     allAssignments = await db
@@ -150,6 +151,25 @@ router.get("/", async (req, res): Promise<void> => {
       prerequisiteSlug: p.prerequisiteSlug,
       requirementType: (p.requirementType === "recommended" ? "recommended" : "required") as "required" | "recommended",
     }));
+
+    // Entitlement plans mapping
+    const rawEntitlements = await db
+      .select({
+        courseId: planCourseEntitlementsTable.courseId,
+        planCode: subscriptionPlansTable.code,
+        planName: subscriptionPlansTable.name,
+        displayOrder: subscriptionPlansTable.displayOrder,
+      })
+      .from(planCourseEntitlementsTable)
+      .innerJoin(subscriptionPlansTable, eq(planCourseEntitlementsTable.subscriptionPlanId, subscriptionPlansTable.id))
+      .where(inArray(planCourseEntitlementsTable.courseId, courseIds))
+      .orderBy(asc(subscriptionPlansTable.displayOrder));
+
+    for (const e of rawEntitlements) {
+      if (!planEntitlementMap.has(e.courseId)) {
+        planEntitlementMap.set(e.courseId, { requiredPlanCode: e.planCode, requiredPlanName: e.planName });
+      }
+    }
   }
 
   const assignmentsMap = new Map<number, { categoryId: number; categoryName: string; isPrimary: boolean }[]>();
@@ -179,6 +199,7 @@ router.get("/", async (req, res): Promise<void> => {
       const assignedCats = assignmentsMap.get(c.id) || [];
       const primaryCat = assignedCats.find(a => a.isPrimary) || (c.categoryId && c.categoryName ? { categoryId: c.categoryId, categoryName: c.categoryName, isPrimary: true } : null);
       const coursePrereqs = prereqsMap.get(c.id) || [];
+      const entitlement = planEntitlementMap.get(c.id) || { requiredPlanCode: "COMPLETE", requiredPlanName: "Complete" };
 
       return {
         ...c,
@@ -186,6 +207,8 @@ router.get("/", async (req, res): Promise<void> => {
         primaryCategory: primaryCat,
         categoryAssignments: assignedCats,
         prerequisites: coursePrereqs,
+        requiredPlanCode: entitlement.requiredPlanCode,
+        requiredPlanName: entitlement.requiredPlanName,
         priceUsd: parseFloat(c.priceUsd),
         rating: c.rating ? parseFloat(c.rating) : null,
       };
@@ -246,7 +269,7 @@ router.get("/:id", async (req, res): Promise<void> => {
       bypassFilter = true;
     }
   } catch (e) {
-    // Ignore auth errors for guest/learner accesses
+    // Guest access
   }
 
   const whereClause = bypassFilter 
@@ -291,10 +314,10 @@ router.get("/:id", async (req, res): Promise<void> => {
     .where(eq(lessonsTable.courseId, id))
     .orderBy(lessonsTable.orderIndex);
 
-  const eligibility = await checkCourseEligibility(id, accessContext);
+  const accessDecision = await evaluateCourseAccess(id, accessContext);
 
   let safeLessons = lessons;
-  if (!eligibility.eligible && accessContext?.role !== "platform_admin") {
+  if (!accessDecision.allowed && accessContext?.role !== "platform_admin") {
     safeLessons = lessons.map((l) => ({
       ...l,
       content: null,
@@ -307,10 +330,9 @@ router.get("/:id", async (req, res): Promise<void> => {
     priceUsd: parseFloat(course.priceUsd),
     rating: course.rating ? parseFloat(course.rating) : null,
     lessons: safeLessons,
-    prerequisites: eligibility.prerequisites,
-    isEligible: eligibility.eligible,
-    completedRequiredCount: eligibility.completedRequiredCount,
-    totalRequiredCount: eligibility.totalRequiredCount,
+    accessDecision,
+    isEligible: accessDecision.allowed,
+    prerequisites: accessDecision.prerequisiteDetails || [],
   });
 });
 

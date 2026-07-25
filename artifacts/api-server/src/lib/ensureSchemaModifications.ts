@@ -344,6 +344,112 @@ export async function ensureSchemaModifications() {
           CONSTRAINT "unique_course_category" UNIQUE("course_id", "category_id")
         );
       `)
+    },
+    {
+      name: "Create subscription_plans table",
+      check: () => tableExists("subscription_plans"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "subscription_plans" (
+          "id" serial PRIMARY KEY,
+          "code" text NOT NULL UNIQUE,
+          "name" text NOT NULL,
+          "description" text NOT NULL,
+          "tagline" text,
+          "display_order" integer DEFAULT 0 NOT NULL,
+          "is_active" boolean DEFAULT true NOT NULL,
+          "is_public" boolean DEFAULT true NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+      `)
+    },
+    {
+      name: "Create employee_bands table",
+      check: () => tableExists("employee_bands"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "employee_bands" (
+          "id" serial PRIMARY KEY,
+          "code" text NOT NULL UNIQUE,
+          "label" text NOT NULL,
+          "minimum_employees" integer NOT NULL,
+          "maximum_employees" integer,
+          "display_order" integer DEFAULT 0 NOT NULL,
+          "requires_tailored_quote" boolean DEFAULT false NOT NULL,
+          "is_active" boolean DEFAULT true NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+      `)
+    },
+    {
+      name: "Create plan_prices table",
+      check: () => tableExists("plan_prices"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "plan_prices" (
+          "id" serial PRIMARY KEY,
+          "subscription_plan_id" integer NOT NULL REFERENCES "subscription_plans"("id") ON DELETE CASCADE,
+          "employee_band_id" integer NOT NULL REFERENCES "employee_bands"("id") ON DELETE CASCADE,
+          "currency" text DEFAULT 'MUR' NOT NULL,
+          "monthly_amount" numeric(10,2),
+          "requires_tailored_quote" boolean DEFAULT false NOT NULL,
+          "is_active" boolean DEFAULT true NOT NULL,
+          "effective_from" timestamp with time zone DEFAULT now() NOT NULL,
+          "effective_until" timestamp with time zone,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+      `)
+    },
+    {
+      name: "Create plan_course_entitlements table",
+      check: () => tableExists("plan_course_entitlements"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "plan_course_entitlements" (
+          "id" serial PRIMARY KEY,
+          "subscription_plan_id" integer NOT NULL REFERENCES "subscription_plans"("id") ON DELETE CASCADE,
+          "course_id" integer NOT NULL REFERENCES "courses"("id") ON DELETE CASCADE,
+          "access_type" text DEFAULT 'INCLUDED' NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          CONSTRAINT "unique_plan_course" UNIQUE("subscription_plan_id", "course_id")
+        );
+      `)
+    },
+    {
+      name: "Create plan_feature_entitlements table",
+      check: () => tableExists("plan_feature_entitlements"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "plan_feature_entitlements" (
+          "id" serial PRIMARY KEY,
+          "subscription_plan_id" integer NOT NULL REFERENCES "subscription_plans"("id") ON DELETE CASCADE,
+          "feature_code" text NOT NULL,
+          "is_enabled" boolean DEFAULT true NOT NULL,
+          "limits_json" text,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          CONSTRAINT "unique_plan_feature" UNIQUE("subscription_plan_id", "feature_code")
+        );
+      `)
+    },
+    {
+      name: "Create company_subscriptions table",
+      check: () => tableExists("company_subscriptions"),
+      execute: () => db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "company_subscriptions" (
+          "id" serial PRIMARY KEY,
+          "company_id" integer NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
+          "subscription_plan_id" integer NOT NULL REFERENCES "subscription_plans"("id") ON DELETE CASCADE,
+          "employee_band_id" integer NOT NULL REFERENCES "employee_bands"("id") ON DELETE CASCADE,
+          "status" text DEFAULT 'ACTIVE' NOT NULL,
+          "currency" text DEFAULT 'MUR' NOT NULL,
+          "agreed_monthly_amount" numeric(10,2),
+          "pricing_source" text DEFAULT 'STANDARD' NOT NULL,
+          "starts_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "current_period_starts_at" timestamp with time zone,
+          "current_period_ends_at" timestamp with time zone,
+          "cancelled_at" timestamp with time zone,
+          "access_ends_at" timestamp with time zone,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+      `)
     }
   ];
 

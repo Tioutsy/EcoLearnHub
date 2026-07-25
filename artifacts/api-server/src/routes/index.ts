@@ -26,6 +26,8 @@ import recyclingRouter from "./recycling";
 import platformAdminRouter from "./platformAdmin";
 import managerTrainingRouter from "./managerTraining";
 
+import subscriptionsRouter from "./subscriptions";
+
 const router: IRouter = Router();
 
 router.use(healthRouter);
@@ -40,7 +42,7 @@ router.use("/certificates", certificatesRouter);
 router.use("/company", companiesRouter);
 router.use("/companies", companiesRouter);
 router.use("/plans", plansRouter);
-router.use("/subscriptions", plansRouter);
+router.use("/subscriptions", subscriptionsRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/impact", impactRouter);
 router.use("/esg", esgRouter);
