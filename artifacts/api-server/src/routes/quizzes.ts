@@ -55,6 +55,20 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
   }
 
   if (!bypassFilter) {
+    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+    const accessDecision = await evaluateCourseAccess(courseId, accessContext);
+    if (!accessDecision.allowed) {
+      res.status(403).json({
+        error: accessDecision.reason,
+        message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+          ? `Quiz is restricted. This course requires the ${accessDecision.requiredPlanName} plan.`
+          : "Access denied.",
+        requiredPlanCode: accessDecision.requiredPlanCode,
+        requiredPlanName: accessDecision.requiredPlanName,
+      });
+      return;
+    }
+
     const { checkCourseEligibility } = await import("../lib/prerequisites");
     const eligibility = await checkCourseEligibility(courseId, accessContext);
     if (!eligibility.eligible) {
@@ -124,6 +138,20 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
     }
 
     if (!bypassFilter) {
+      const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+      const accessDecision = await evaluateCourseAccess(courseId, access);
+      if (!accessDecision.allowed) {
+        res.status(403).json({
+          error: accessDecision.reason,
+          message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+            ? `Quiz submission blocked. This course requires the ${accessDecision.requiredPlanName} plan.`
+            : "Access denied.",
+          requiredPlanCode: accessDecision.requiredPlanCode,
+          requiredPlanName: accessDecision.requiredPlanName,
+        });
+        return;
+      }
+
       const { checkCourseEligibility } = await import("../lib/prerequisites");
       const eligibility = await checkCourseEligibility(courseId, access);
       if (!eligibility.eligible) {

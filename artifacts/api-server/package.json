@@ -7,7 +7,7 @@
     "dev": "export NODE_ENV=development && pnpm run build && node --env-file=.env --enable-source-maps ./dist/index.mjs",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
-    "test": "node --test --test-concurrency=1 --import tsx ./src/**/*.test.ts",
+    "test": "node --env-file=.env --test --test-concurrency=1 --import tsx ./src/**/*.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "db:verify": "tsx src/scripts/verifyDatabaseSchema.ts",
     "db:repair": "tsx src/scripts/repairProductionSchema.ts"

@@ -34,6 +34,9 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    css: {
+      transformer: 'postcss',
+    },
     build: {
       outDir: path.resolve(import.meta.dirname, "dist"),
       emptyOutDir: true,

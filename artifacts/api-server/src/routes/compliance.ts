@@ -229,6 +229,22 @@ router.post("/assignments", async (req, res): Promise<void> => {
       return;
     }
 
+    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+    for (const cId of courseIds) {
+      const accessDecision = await evaluateCourseAccess(cId, access);
+      if (!accessDecision.allowed) {
+        res.status(403).json({
+          error: accessDecision.reason,
+          message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+            ? `Course ID ${cId} is available with the ${accessDecision.requiredPlanName} plan. Upgrade your company subscription to assign this course.`
+            : "Access denied.",
+          requiredPlanCode: accessDecision.requiredPlanCode,
+          requiredPlanName: accessDecision.requiredPlanName,
+        });
+        return;
+      }
+    }
+
     const employeeIds = parseNumberArray(body["employeeIds"]);
     const department: string | undefined =
       typeof body["department"] === "string" && body["department"].trim()

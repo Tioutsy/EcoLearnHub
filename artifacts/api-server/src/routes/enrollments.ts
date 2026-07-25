@@ -84,15 +84,17 @@ router.post("/", async (req, res): Promise<void> => {
       return;
     }
 
-    const { checkCourseEligibility } = await import("../lib/prerequisites");
-    const eligibility = await checkCourseEligibility(parsed.data.courseId, access);
-    if (!eligibility.eligible) {
-      res.status(403).json({ 
-        error: "PREREQUISITES_INCOMPLETE",
-        message: "You must complete all prerequisite courses before enrolling.",
-        completedCount: eligibility.completedCount,
-        totalCount: eligibility.totalCount,
-        prerequisites: eligibility.prerequisites,
+    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+    const accessDecision = await evaluateCourseAccess(parsed.data.courseId, access);
+
+    if (!accessDecision.allowed) {
+      res.status(403).json({
+        error: accessDecision.reason,
+        message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+          ? `This course is available with the ${accessDecision.requiredPlanName} plan. Contact your company administrator to upgrade your subscription.`
+          : "Access denied.",
+        requiredPlanCode: accessDecision.requiredPlanCode,
+        requiredPlanName: accessDecision.requiredPlanName,
       });
       return;
     }

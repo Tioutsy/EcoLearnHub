@@ -29,6 +29,22 @@ router.get("/:enrollmentId", async (req, res): Promise<void> => {
   const access = await getCompanyAccess(req);
   const isPlatformAdmin = access.role === "platform_admin";
 
+  if (!isPlatformAdmin) {
+    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+    const accessDecision = await evaluateCourseAccess(enrollment.courseId, access);
+    if (!accessDecision.allowed) {
+      res.status(403).json({
+        error: accessDecision.reason,
+        message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+          ? `Progress is locked. This course requires the ${accessDecision.requiredPlanName} plan.`
+          : "Access denied.",
+        requiredPlanCode: accessDecision.requiredPlanCode,
+        requiredPlanName: accessDecision.requiredPlanName,
+      });
+      return;
+    }
+  }
+
   const { checkCourseEligibility } = await import("../lib/prerequisites");
   const eligibility = await checkCourseEligibility(enrollment.courseId, access);
   if (!eligibility.eligible && !isPlatformAdmin) {
@@ -78,6 +94,22 @@ router.patch("/:enrollmentId", async (req, res): Promise<void> => {
   const { getCompanyAccess } = await import("../lib/access");
   const access = await getCompanyAccess(req);
   const isPlatformAdmin = access.role === "platform_admin";
+
+  if (!isPlatformAdmin) {
+    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+    const accessDecision = await evaluateCourseAccess(enr.courseId, access);
+    if (!accessDecision.allowed) {
+      res.status(403).json({
+        error: accessDecision.reason,
+        message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+          ? `Progress update blocked. This course requires the ${accessDecision.requiredPlanName} plan.`
+          : "Access denied.",
+        requiredPlanCode: accessDecision.requiredPlanCode,
+        requiredPlanName: accessDecision.requiredPlanName,
+      });
+      return;
+    }
+  }
 
   const { checkCourseEligibility } = await import("../lib/prerequisites");
   const eligibility = await checkCourseEligibility(enr.courseId, access);

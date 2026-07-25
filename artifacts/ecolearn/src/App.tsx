@@ -55,6 +55,7 @@ import PlatformAdminLearningPaths from "@/pages/platform-admin/learningPaths";
 import PlatformAdminCourses from "@/pages/platform-admin/courses";
 import AdminCoursePreview from "@/pages/platform-admin/preview";
 import PlatformAdminSdgMapping from "@/pages/platform-admin/sdgMapping";
+import PlatformAdminSubscriptions from "@/pages/platform-admin/subscriptions";
 
 const queryClient = new QueryClient();
 
@@ -265,7 +266,8 @@ function ClerkProviderWithRoutes() {
             <Route path="/platform-admin/sectors" component={PlatformAdminSectors} />
             <Route path="/platform-admin/learning-paths" component={PlatformAdminLearningPaths} />
             <Route path="/platform-admin/courses" component={PlatformAdminCourses} />
-            <Route path="/platform-admin/courses/:id/preview" component={AdminCoursePreview} />
+            <Route path="/platform-admin/subscriptions" component={PlatformAdminSubscriptions} />
+            <Route path="/platform-admin/preview/:id" component={AdminCoursePreview} />
             <Route path="/platform-admin/sdg-mapping" component={PlatformAdminSdgMapping} />
             <Route component={NotFound} />
                 </Switch>
