@@ -62,7 +62,7 @@ const ACTION_CODES = [
 ];
 
 const DEPARTMENT_CODES = [
-  "ELH-24", "ELH-25", "ELH-27", "ELH-28", "ELH-29"
+  "ELH-24", "ELH-25", "ELH-26", "ELH-27", "ELH-28", "ELH-29"
 ];
 
 const LEADERSHIP_CODES = [
@@ -74,6 +74,7 @@ const RECOMMENDED_PREREQUISITES: { targetCode: string; prereqCode: string }[] = 
   { targetCode: "ELH-23", prereqCode: "ELH-13" },
   { targetCode: "ELH-19", prereqCode: "ELH-18" },
   { targetCode: "ELH-22", prereqCode: "ELH-21" },
+  { targetCode: "ELH-26", prereqCode: "ELH-05" },
 ];
 
 export async function ensureCategoriesAndAssignments(): Promise<void> {

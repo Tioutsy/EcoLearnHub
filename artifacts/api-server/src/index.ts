@@ -25,6 +25,7 @@ import { ensureEffectiveGreenTeamsCourse } from "./lib/ensureEffectiveGreenTeams
 import { ensureWorkplaceSustainabilityInitiativesCourse } from "./lib/ensureWorkplaceSustainabilityInitiativesCourse";
 import { ensureSustainabilityForHrTeamsCourse } from "./lib/ensureSustainabilityForHrTeamsCourse";
 import { ensureSustainabilityForFinanceTeamsCourse } from "./lib/ensureSustainabilityForFinanceTeamsCourse";
+import { ensureSustainabilityForProcurementAndPurchasingTeamsCourse } from "./lib/ensureSustainabilityForProcurementAndPurchasingTeamsCourse";
 import { ensureSustainabilityForOperationsAndFrontlineTeamsCourse } from "./lib/ensureSustainabilityForOperationsAndFrontlineTeamsCourse";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./lib/ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
 import { ensureSustainabilityForSalesAndMarketingTeamsCourse } from "./lib/ensureSustainabilityForSalesAndMarketingTeamsCourse";
@@ -120,6 +121,7 @@ async function start(): Promise<void> {
   await ensureWorkplaceSustainabilityInitiativesCourse();
   await ensureSustainabilityForHrTeamsCourse();
   await ensureSustainabilityForFinanceTeamsCourse();
+  await ensureSustainabilityForProcurementAndPurchasingTeamsCourse();
   await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
   await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
   await ensureSustainabilityForSalesAndMarketingTeamsCourse();
