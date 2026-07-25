@@ -83,11 +83,19 @@ export async function getRecommendedNextCourse(
 
   const now = new Date();
 
+  // Helper to check if a candidate course is commercially accessible
+  const isAccessible = async (courseId: number): Promise<boolean> => {
+    if (!access) return true;
+    const { evaluateCourseAccess } = await import("./courseAccessService");
+    const decision = await evaluateCourseAccess(courseId, access);
+    return decision.allowed;
+  };
+
   // Priority 1: Overdue assigned course
   const overdueEnrollment = userEnrollments.find(
     e => e.status !== "completed" && e.dueDate && new Date(e.dueDate) < now
   );
-  if (overdueEnrollment) {
+  if (overdueEnrollment && await isAccessible(overdueEnrollment.courseId)) {
     const course = await getCourseById(overdueEnrollment.courseId);
     if (course) {
       return {
@@ -108,7 +116,7 @@ export async function getRecommendedNextCourse(
 
   // Priority 2: Assigned course in progress
   const assignedInProgress = userEnrollments.find(e => e.status === "in_progress" && e.dueDate);
-  if (assignedInProgress) {
+  if (assignedInProgress && await isAccessible(assignedInProgress.courseId)) {
     const course = await getCourseById(assignedInProgress.courseId);
     if (course) {
       return {
@@ -129,7 +137,7 @@ export async function getRecommendedNextCourse(
 
   // Priority 3: Assigned course not yet started
   const assignedNotStarted = userEnrollments.find(e => e.status === "not_started" && e.dueDate);
-  if (assignedNotStarted) {
+  if (assignedNotStarted && await isAccessible(assignedNotStarted.courseId)) {
     const course = await getCourseById(assignedNotStarted.courseId);
     if (course) {
       return {
@@ -150,7 +158,7 @@ export async function getRecommendedNextCourse(
 
   // Priority 4: General in-progress course
   const anyInProgress = userEnrollments.find(e => e.status === "in_progress");
-  if (anyInProgress) {
+  if (anyInProgress && await isAccessible(anyInProgress.courseId)) {
     const course = await getCourseById(anyInProgress.courseId);
     if (course) {
       return {
@@ -190,28 +198,30 @@ export async function getRecommendedNextCourse(
   // Priority 5: Next unfinished core course (ELH-01 to ELH-11)
   for (const c of coreCourses) {
     if (c.courseCode !== "ELH-12" && !completedSet.has(c.id)) {
-      const isFirst = c.courseCode === "ELH-01";
-      return {
-        courseId: c.id,
-        courseCode: c.courseCode,
-        title: c.title,
-        slug: c.slug,
-        thumbnailUrl: c.thumbnailUrl,
-        reasonHeading: isFirst ? "Start your sustainability journey" : "Next core course",
-        reasonDescription: isFirst
-          ? "Begin with Sustainability Foundations, the first course in your Core Sustainability Certificate."
-          : `Continue your Core Sustainability Certificate with ${c.title}.`,
-        actionText: "Start course",
-        actionHref: `/courses/${c.id}`,
-        isLocked: false,
-        lockReason: null,
-      };
+      if (await isAccessible(c.id)) {
+        const isFirst = c.courseCode === "ELH-01";
+        return {
+          courseId: c.id,
+          courseCode: c.courseCode,
+          title: c.title,
+          slug: c.slug,
+          thumbnailUrl: c.thumbnailUrl,
+          reasonHeading: isFirst ? "Start your sustainability journey" : "Next core course",
+          reasonDescription: isFirst
+            ? "Begin with Sustainability Foundations, the first course in your Core Sustainability Certificate."
+            : `Continue your Core Sustainability Certificate with ${c.title}.`,
+          actionText: "Start course",
+          actionHref: `/courses/${c.id}`,
+          isLocked: false,
+          lockReason: null,
+        };
+      }
     }
   }
 
   // Priority 6: ELH-12 if all ELH-01..11 are completed and ELH-12 is unfinished
   const elh12 = coreCourses.find(c => c.courseCode === "ELH-12");
-  if (elh12 && !completedSet.has(elh12.id)) {
+  if (elh12 && !completedSet.has(elh12.id) && await isAccessible(elh12.id)) {
     const core1to11Count = coreCourses.filter(c => c.courseCode !== "ELH-12" && completedSet.has(c.id)).length;
     const allCoreDone = core1to11Count >= 11;
 
@@ -246,7 +256,7 @@ export async function getRecommendedNextCourse(
     .limit(1)
     .then(rows => rows[0]);
 
-  if (elh13 && !completedSet.has(elh13.id)) {
+  if (elh13 && !completedSet.has(elh13.id) && await isAccessible(elh13.id)) {
     return {
       courseId: elh13.id,
       courseCode: elh13.courseCode,
@@ -262,7 +272,7 @@ export async function getRecommendedNextCourse(
     };
   }
 
-  // Default: First incomplete published course
+  // Default: First incomplete accessible published course
   const firstIncomplete = await db
     .select({
       id: coursesTable.id,
@@ -275,21 +285,22 @@ export async function getRecommendedNextCourse(
     .where(eq(coursesTable.isPublished, true))
     .orderBy(asc(coursesTable.id));
 
-  const nextUnfinished = firstIncomplete.find(c => !completedSet.has(c.id));
-  if (nextUnfinished) {
-    return {
-      courseId: nextUnfinished.id,
-      courseCode: nextUnfinished.courseCode,
-      title: nextUnfinished.title,
-      slug: nextUnfinished.slug,
-      thumbnailUrl: nextUnfinished.thumbnailUrl,
-      reasonHeading: "Expand your expertise",
-      reasonDescription: `Explore ${nextUnfinished.title} to further develop your workplace sustainability skills.`,
-      actionText: "Start course",
-      actionHref: `/courses/${nextUnfinished.id}`,
-      isLocked: false,
-      lockReason: null,
-    };
+  for (const nextUnfinished of firstIncomplete) {
+    if (!completedSet.has(nextUnfinished.id) && await isAccessible(nextUnfinished.id)) {
+      return {
+        courseId: nextUnfinished.id,
+        courseCode: nextUnfinished.courseCode,
+        title: nextUnfinished.title,
+        slug: nextUnfinished.slug,
+        thumbnailUrl: nextUnfinished.thumbnailUrl,
+        reasonHeading: "Expand your expertise",
+        reasonDescription: `Explore ${nextUnfinished.title} to further develop your workplace sustainability skills.`,
+        actionText: "Start course",
+        actionHref: `/courses/${nextUnfinished.id}`,
+        isLocked: false,
+        lockReason: null,
+      };
+    }
   }
 
   return null;

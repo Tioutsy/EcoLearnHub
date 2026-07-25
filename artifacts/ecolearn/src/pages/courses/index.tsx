@@ -118,6 +118,35 @@ export default function Courses() {
     return () => { isMounted = false; };
   }, []);
 
+  // Synchronize filter from URL query params on initial load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    const status = params.get("status");
+    if (status === "completed") {
+      setSelectedFilter("completed");
+    } else if (cat) {
+      const valid = categoryFilters.find(f => f.slug === cat);
+      if (valid) setSelectedFilter(cat);
+    }
+  }, []);
+
+  const handleSelectFilter = (slug: string) => {
+    setSelectedFilter(slug);
+    const url = new URL(window.location.href);
+    if (slug === "completed") {
+      url.searchParams.set("status", "completed");
+      url.searchParams.delete("category");
+    } else if (slug === "all") {
+      url.searchParams.delete("category");
+      url.searchParams.delete("status");
+    } else {
+      url.searchParams.set("category", slug);
+      url.searchParams.delete("status");
+    }
+    window.history.replaceState({}, "", url.pathname + url.search);
+  };
+
   // Filter categories order
   const categoryFilters = [
     { slug: "all", label: "All Courses", description: "Browse the complete EcoLearnHub catalogue" },
@@ -241,7 +270,7 @@ export default function Courses() {
                 return (
                   <button
                     key={filter.slug}
-                    onClick={() => setSelectedFilter(filter.slug)}
+                    onClick={() => handleSelectFilter(filter.slug)}
                     className={cn(
                       "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2 shrink-0 border",
                       isActive
