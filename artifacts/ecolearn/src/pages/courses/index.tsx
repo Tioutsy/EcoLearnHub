@@ -18,7 +18,8 @@ import {
   ArrowRight,
   ShieldAlert,
   Award,
-  Layers
+  Layers,
+  Info
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,15 @@ interface RecommendationData {
   actionHref: string;
   isLocked: boolean;
   lockReason: string | null;
+}
+
+interface PrerequisiteItem {
+  courseId: number;
+  prerequisiteCourseId: number;
+  prerequisiteCourseCode: string | null;
+  prerequisiteTitle: string;
+  prerequisiteSlug: string | null;
+  requirementType: "required" | "recommended";
 }
 
 export default function Courses() {
@@ -327,15 +337,30 @@ export default function Courses() {
                 const isOverdue = enrollment?.dueDate && new Date(enrollment.dueDate) < new Date() && !isCompleted;
                 const isAssigned = !!enrollment?.dueDate;
 
-                // Lock check (e.g. ELH-12 without core completed)
+                // Dynamic Prerequisite Lock Check for ALL Courses
+                const prereqsList: PrerequisiteItem[] = (course as any).prerequisites || [];
+                
+                // Uncompleted Required Prerequisites
+                const missingRequiredPrereqs = prereqsList.filter(p => 
+                  p.requirementType === "required" && enrollmentMap.get(p.prerequisiteCourseId)?.status !== "completed"
+                );
+
+                // Uncompleted Recommended Prerequisites
+                const missingRecommendedPrereqs = prereqsList.filter(p => 
+                  p.requirementType === "recommended" && enrollmentMap.get(p.prerequisiteCourseId)?.status !== "completed"
+                );
+
+                // For ELH-12 specifically: also check if 11 core courses are completed
                 const isElh12 = (course as any).courseCode === "ELH-12";
                 const coreCompletedCount = Array.from(enrollmentMap.entries())
                   .filter(([_, e]) => e.status === "completed").length;
-                const isLocked = isElh12 && coreCompletedCount < 11 && !isCompleted;
+                const elh12CoreLocked = isElh12 && coreCompletedCount < 11;
+
+                const isLocked = !isCompleted && (missingRequiredPrereqs.length > 0 || elh12CoreLocked);
 
                 // Determine primary status text
                 let statusLabel = "Ready to start";
-                let statusBadgeClass = "bg-muted text-muted-foreground border-muted-foreground/20";
+                let statusBadgeClass = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
                 
                 if (isCompleted) {
                   statusLabel = "Completed";
@@ -353,13 +378,14 @@ export default function Courses() {
                   statusLabel = "In progress";
                   statusBadgeClass = "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30";
                 } else if (isLocked) {
-                  statusLabel = "Locked";
-                  statusBadgeClass = "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30";
+                  statusLabel = "Locked · Prerequisite Required";
+                  statusBadgeClass = "bg-blue-600/10 text-blue-800 dark:text-blue-300 border-blue-500/40 font-semibold";
                 }
 
-                // Determine primary action button text
+                // Determine primary action button text & link
                 let actionText = "Start course";
                 let actionHref = `/courses/${course.id}`;
+
                 if (isCompleted) {
                   actionText = "Review course";
                   actionHref = enrollment ? `/learn/${enrollment.id}` : `/courses/${course.id}`;
@@ -368,20 +394,27 @@ export default function Courses() {
                   actionHref = `/learn/${enrollment.id}`;
                 } else if (isLocked) {
                   actionText = "View prerequisite";
-                  actionHref = `/courses/${course.id}`;
+                  const firstMissing = missingRequiredPrereqs[0];
+                  actionHref = firstMissing ? `/courses/${firstMissing.prerequisiteCourseId}` : `/courses/${course.id}`;
                 }
 
                 const primaryCategoryName = (course as any).categoryName || (course as any).primaryCategory?.categoryName || "General Sustainability";
 
                 return (
-                  <div key={course.id} className="group bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-primary/40 transition-all flex flex-col h-full">
+                  <div key={course.id} className={cn(
+                    "group bg-card border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full",
+                    isLocked ? "border-blue-300 dark:border-blue-800/60 bg-blue-50/20 dark:bg-blue-950/10" : "hover:border-primary/40"
+                  )}>
                     {/* Thumbnail Header */}
                     <div className="relative aspect-video overflow-hidden bg-muted">
                       {course.thumbnailUrl ? (
                         <img
                           src={course.thumbnailUrl}
                           alt={course.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className={cn(
+                            "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105",
+                            isLocked && "opacity-85 grayscale-[20%]"
+                          )}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-emerald-950 to-teal-900 flex items-center justify-center p-4 text-center">
@@ -409,8 +442,8 @@ export default function Courses() {
                         {/* Status Badge & Duration */}
                         <div className="flex items-center justify-between text-xs gap-2">
                           <span className={cn("px-2.5 py-0.5 rounded-md font-semibold border text-xs flex items-center gap-1", statusBadgeClass)}>
-                            {isCompleted && <CheckCircle2 className="h-3 w-3 shrink-0" />}
-                            {isLocked && <Lock className="h-3 w-3 shrink-0" />}
+                            {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
+                            {isLocked && <Lock className="h-3.5 w-3.5 shrink-0 text-blue-700 dark:text-blue-400" />}
                             {statusLabel}
                           </span>
                           <span className="flex items-center gap-1 text-muted-foreground font-medium">
@@ -427,14 +460,31 @@ export default function Courses() {
                         </p>
                       </div>
 
-                      {/* Lock Explanation Notice */}
+                      {/* Blue Prerequisite Locked Notice Card */}
                       {isLocked && (
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-800 dark:text-amber-300 space-y-1">
-                          <div className="font-semibold flex items-center gap-1.5">
-                            <Lock className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-                            <span>Prerequisite Required</span>
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+                          <div className="font-semibold flex items-center gap-1.5 text-blue-800 dark:text-blue-300">
+                            <Lock className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                            <span>Prerequisite Required to Unlock</span>
                           </div>
-                          <p>Complete the remaining Core Sustainability Certificate courses ({coreCompletedCount}/11 completed) to unlock this course.</p>
+                          {isElh12 && coreCompletedCount < 11 ? (
+                            <p>Complete all 11 Core Sustainability Certificate courses ({coreCompletedCount}/11 finished) to unlock this certification.</p>
+                          ) : missingRequiredPrereqs.length > 0 ? (
+                            <p>Complete <span className="font-semibold">{missingRequiredPrereqs.map(p => p.prerequisiteTitle).join(", ")}</span> to unlock this course.</p>
+                          ) : (
+                            <p>Complete required prerequisite courses before taking this course.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Blue Recommended Prerequisite Notice Card */}
+                      {!isLocked && !isCompleted && missingRecommendedPrereqs.length > 0 && (
+                        <div className="bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 text-xs text-sky-900 dark:text-sky-200 space-y-1">
+                          <div className="font-semibold flex items-center gap-1.5 text-sky-800 dark:text-sky-300">
+                            <Info className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
+                            <span>Recommended First</span>
+                          </div>
+                          <p>Recommended before starting: <span className="font-semibold">{missingRecommendedPrereqs.map(p => p.prerequisiteTitle).join(", ")}</span>.</p>
                         </div>
                       )}
 
@@ -444,7 +494,8 @@ export default function Courses() {
                           <Button
                             variant={isCompleted ? "outline" : isLocked ? "secondary" : "default"}
                             className={cn(
-                              "w-full justify-between font-medium rounded-xl text-sm",
+                              "w-full justify-between font-medium rounded-xl text-sm transition-all",
+                              isLocked && "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
                               !isCompleted && !isLocked && "bg-primary text-primary-foreground hover:bg-primary/90"
                             )}
                           >

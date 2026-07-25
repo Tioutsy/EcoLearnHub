@@ -5,6 +5,7 @@ import {
   lessonsTable,
   categoriesTable,
   courseCategoryAssignmentsTable,
+  coursePrerequisitesTable,
 } from "@workspace/db";
 import { eq, like, and, desc, asc, inArray } from "drizzle-orm";
 import {
@@ -107,6 +108,14 @@ router.get("/", async (req, res): Promise<void> => {
   // Load all category assignments for returned courses
   const courseIds = courses.map(c => c.id);
   let allAssignments: { courseId: number; categoryId: number; categoryName: string | null; isPrimary: boolean }[] = [];
+  let allPrereqs: {
+    courseId: number;
+    prerequisiteCourseId: number;
+    prerequisiteCourseCode: string | null;
+    prerequisiteTitle: string;
+    prerequisiteSlug: string | null;
+    requirementType: "required" | "recommended";
+  }[] = [];
 
   if (courseIds.length > 0) {
     allAssignments = await db
@@ -119,6 +128,28 @@ router.get("/", async (req, res): Promise<void> => {
       .from(courseCategoryAssignmentsTable)
       .leftJoin(categoriesTable, eq(courseCategoryAssignmentsTable.categoryId, categoriesTable.id))
       .where(inArray(courseCategoryAssignmentsTable.courseId, courseIds));
+
+    const rawPrereqs = await db
+      .select({
+        courseId: coursePrerequisitesTable.courseId,
+        prerequisiteCourseId: coursePrerequisitesTable.prerequisiteCourseId,
+        prerequisiteCourseCode: coursesTable.courseCode,
+        prerequisiteTitle: coursesTable.title,
+        prerequisiteSlug: coursesTable.slug,
+        requirementType: coursePrerequisitesTable.requirementType,
+      })
+      .from(coursePrerequisitesTable)
+      .leftJoin(coursesTable, eq(coursePrerequisitesTable.prerequisiteCourseId, coursesTable.id))
+      .where(inArray(coursePrerequisitesTable.courseId, courseIds));
+
+    allPrereqs = rawPrereqs.map(p => ({
+      courseId: p.courseId,
+      prerequisiteCourseId: p.prerequisiteCourseId,
+      prerequisiteCourseCode: p.prerequisiteCourseCode,
+      prerequisiteTitle: p.prerequisiteTitle || "Prerequisite Course",
+      prerequisiteSlug: p.prerequisiteSlug,
+      requirementType: (p.requirementType === "recommended" ? "recommended" : "required") as "required" | "recommended",
+    }));
   }
 
   const assignmentsMap = new Map<number, { categoryId: number; categoryName: string; isPrimary: boolean }[]>();
@@ -135,16 +166,26 @@ router.get("/", async (req, res): Promise<void> => {
     }
   }
 
+  const prereqsMap = new Map<number, typeof allPrereqs>();
+  for (const p of allPrereqs) {
+    if (!prereqsMap.has(p.courseId)) {
+      prereqsMap.set(p.courseId, []);
+    }
+    prereqsMap.get(p.courseId)!.push(p);
+  }
+
   res.json(
     courses.map((c) => {
       const assignedCats = assignmentsMap.get(c.id) || [];
       const primaryCat = assignedCats.find(a => a.isPrimary) || (c.categoryId && c.categoryName ? { categoryId: c.categoryId, categoryName: c.categoryName, isPrimary: true } : null);
+      const coursePrereqs = prereqsMap.get(c.id) || [];
 
       return {
         ...c,
         categoryName: primaryCat?.categoryName || c.categoryName || "General Sustainability",
         primaryCategory: primaryCat,
         categoryAssignments: assignedCats,
+        prerequisites: coursePrereqs,
         priceUsd: parseFloat(c.priceUsd),
         rating: c.rating ? parseFloat(c.rating) : null,
       };
