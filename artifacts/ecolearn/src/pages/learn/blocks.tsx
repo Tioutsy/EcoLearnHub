@@ -47,7 +47,7 @@ export type DecisionBlock = {
   scenarios: DecisionScenario[];
 };
 
-export type CommitmentOption = { value: string; label: string; description: string };
+export type CommitmentOption = { value?: string; slug?: string; id?: string; label: string; description?: string };
 export type CommitmentBlock = {
   type: "commitment";
   instruction: string;
@@ -406,13 +406,14 @@ export function CommitmentView({
     <Card className="p-5">
       <p className="mb-4 text-sm font-medium text-foreground">{block.instruction}</p>
       <div className="space-y-3">
-        {block.options.map((opt) => {
-          const on = selected.has(opt.value);
+        {block.options.map((opt, idx) => {
+          const optValue = opt.value || opt.slug || opt.id || opt.label || `commitment-${idx}`;
+          const on = selected.has(optValue);
           return (
             <button
-              key={opt.value}
+              key={optValue}
               type="button"
-              onClick={() => onToggle(opt.value)}
+              onClick={() => onToggle(optValue)}
               className={cn(
                 "flex w-full items-start gap-3 rounded-lg border p-4 text-left transition-colors",
                 on ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40" : "border-border hover:bg-muted",
@@ -425,7 +426,7 @@ export function CommitmentView({
               )}
               <span>
                 <span className="block text-sm font-semibold text-foreground">{opt.label}</span>
-                <span className="block text-sm text-muted-foreground">{opt.description}</span>
+                {opt.description && <span className="block text-sm text-muted-foreground">{opt.description}</span>}
               </span>
             </button>
           );

@@ -926,7 +926,7 @@ function CompletionScreen({
               for (const l of lessons) {
                 const cBlock = (l.contentBlocks as any[])?.find((b: any) => b.type === "commitment");
                 if (cBlock?.commitmentOptions) {
-                  const opt = cBlock.commitmentOptions.find((o: any) => o.value === cValue);
+                  const opt = cBlock.commitmentOptions.find((o: any) => (o.value || o.slug || o.id || o.label) === cValue);
                   if (opt) {
                     label = opt.label;
                     break;
