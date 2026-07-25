@@ -39,7 +39,7 @@ import {
 } from "./blocks";
 
 function isDatabaseInteractive(block: any): boolean {
-  return ["multiple_choice", "decision_scenario", "commitment"].includes(block.type);
+  return ["multiple_choice", "decision_scenario", "commitment", "scenario"].includes(block.type);
 }
 
 type Phase = "modules" | "quiz" | "complete";
@@ -53,8 +53,8 @@ export default function DatabaseCoursePlayer({
   isPreview?: boolean;
   previewCourseId?: number;
 }) {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // 1. Queries and Mutations (Conditional on preview mode)
   const { data: rawEnrollment, isLoading: isEnrollmentLoading } = useGetEnrollment(enrollmentId || 0, {
@@ -265,14 +265,42 @@ export default function DatabaseCoursePlayer({
   function renderDatabaseBlock(block: any, i: number) {
     switch (block.type) {
       case "heading":
-        return <TextView key={i} block={{ type: "text", heading: block.headingText, body: "" }} />;
+        return <TextView key={i} block={{ type: "text", heading: block.headingText || block.heading, body: "" }} />;
+      case "text":
       case "short_text":
-        return <TextView key={i} block={{ type: "text", body: block.bodyText }} />;
+        return <TextView key={i} block={{ type: "text", heading: block.headingText || block.heading, body: block.bodyText || block.content || block.body || "" }} />;
       case "key_message":
       case "workplace_example":
       case "mauritian_example":
       case "practical_action":
-        return <CalloutView key={i} block={{ type: "callout", title: block.headingText || "Key Concept", body: block.bodyText }} />;
+        return <CalloutView key={i} block={{ type: "callout", title: block.headingText || block.title || "Key Concept", body: block.bodyText || block.content || block.body || "" }} />;
+      case "bulleted-list":
+        return (
+          <div key={i} className="space-y-2">
+            {block.headingText || block.title ? <h4 className="font-semibold text-foreground">{block.headingText || block.title}</h4> : null}
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground text-base">
+              {(block.items || []).map((item: string, idx: number) => (
+                <li key={idx}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        );
+      case "scenario":
+        return (
+          <ScenarioView
+            key={i}
+            block={{
+              type: "scenario",
+              prompt: block.scenarioText || block.prompt || "",
+              choices: (block.options || block.choices || []).map((c: any) => ({
+                label: c.text || c.label,
+                feedback: c.feedback,
+                ideal: c.isCorrect ?? c.correct
+              }))
+            }}
+            onResolved={() => markResolved(i)}
+          />
+        );
       case "multiple_choice":
         return (
           <CheckView
@@ -310,7 +338,7 @@ export default function DatabaseCoursePlayer({
             block={{
               type: "commitment",
               instruction: block.commitmentInstruction || "Select commitments:",
-              options: block.commitmentOptions || []
+              options: block.commitmentOptions || block.options || []
             }}
             selected={commitmentSel}
             onToggle={(value) =>
