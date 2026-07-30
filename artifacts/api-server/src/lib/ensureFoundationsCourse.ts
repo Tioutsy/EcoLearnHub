@@ -13,7 +13,7 @@ import { logger } from "./logger";
 const COURSE_SLUG = "sustainability-foundations";
 const COURSE_TITLE = "Sustainability Foundations";
 const BADGE_SLUG = "sustainability-starter";
-const SEED_NAME = "sustainability-foundations-pilot-v2";
+const SEED_NAME = "sustainability-foundations-pilot-v3";
 
 const COURSE_META = {
   description:
@@ -94,7 +94,14 @@ const NEW_LESSONS = [
     blocks: [
       { id: "dim-h1", type: "heading", position: 1, headingText: "Environmental, Social, and Economic Pillars" },
       { id: "dim-t1", type: "short_text", position: 2, bodyText: "Sustainability rests on three connected pillars. We care for the environment, we support people and communities, and we keep the business healthy. When these three work together, everyone benefits." },
-      { id: "dim-k1", type: "key_message", position: 3, headingText: "The Three Pillars", bodyText: "Environmental: protect nature and resources. Social (People): build fair, safe, and positive workplaces. Economic (Business): stay profitable and trusted for the long term." },
+      {
+        id: "dim-f1",
+        type: "memorable_fact",
+        position: 3,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "Did You Know? Electronic appliances and screens left in standby mode overnight continue to consume up to 10% of their total operating power. Switching equipment off at the socket at the end of the workday prevents silent energy loss and lowers carbon emissions."
+      },
+      { id: "dim-k1", type: "key_message", position: 4, headingText: "The Three Pillars", bodyText: "Environmental: protect nature and resources. Social (People): build fair, safe, and positive workplaces. Economic (Business): stay profitable and trusted for the long term." },
       {
         id: "dim-d1",
         type: "decision_scenario",
@@ -374,6 +381,27 @@ const NEW_QUIZ = [
       "Incorrect. Sustainable culture relies on respect and support, not policing colleagues.",
       "Incorrect. Small positive choices made by everyone add up to substantial environmental and financial savings."
     ]
+  },
+  {
+    order: 6,
+    question: "Visual Identification Question: Look at the workplace scene description. An air conditioner unit is running on maximum cooling while an office window directly beside it is open. Which operational issue does this scene represent?",
+    imageUrl: "/images/courses/visual-workplace-waste-check.png",
+    questionType: "visual_identification",
+    options: [
+      "Severe energy loss caused by cooled air escaping through the open window",
+      "Proper ventilation complying with fresh air guidelines",
+      "An acceptable setup that increases AC cooling efficiency",
+      "A routine maintenance procedure that requires no action"
+    ],
+    correct: 0,
+    correctExplanation: "Correct! Operating air conditioning while windows are open causes massive energy waste as conditioned air escapes directly outside.",
+    incorrectExplanation: "Incorrect. Running an air conditioner with open windows wastes electricity.",
+    optionFeedback: [
+      "Correct. Closing windows while running AC prevents thermal loss and reduces energy consumption.",
+      "Incorrect. Ventilation should be managed properly without wasting active cooling energy.",
+      "Incorrect. Open windows force the AC compressor to work harder, increasing energy costs.",
+      "Incorrect. This is an operational inefficiency that should be corrected or reported."
+    ]
   }
 ];
 
@@ -431,7 +459,7 @@ export async function ensureFoundationsCourse(): Promise<void> {
       .from(quizQuestionsTable)
       .where(eq(quizQuestionsTable.courseId, courseId));
 
-    if (existingQuestions.length !== 6 || existingQuestions.some(q => q.question.includes("[DRAFT SKELETON]"))) {
+    if (existingQuestions.length < 7 || existingQuestions.some(q => q.question.includes("[DRAFT SKELETON]"))) {
       needsRepair = true;
     }
 
@@ -475,7 +503,9 @@ export async function ensureFoundationsCourse(): Promise<void> {
           const hasDraftText = matchingDbLesson.content?.includes("[DRAFT SKELETON]") || 
                                JSON.stringify(matchingDbLesson.contentBlocks).includes("[DRAFT SKELETON]");
 
-          if (isEmpty || isV1Placeholder || hasDraftText || (matchingDbLesson.contentBlocks as any[]).length < newLesson.blocks.length) {
+          const isMissingFact = newLesson.blocks.some(b => b.type === "memorable_fact") && !JSON.stringify(matchingDbLesson.contentBlocks).includes("memorable_fact");
+
+          if (isEmpty || isV1Placeholder || hasDraftText || isMissingFact || (matchingDbLesson.contentBlocks as any[]).length < newLesson.blocks.length) {
             await tx
               .update(lessonsTable)
               .set({
@@ -512,7 +542,7 @@ export async function ensureFoundationsCourse(): Promise<void> {
       const hasAdminQuizEdits = existingQuizQuestions.some(
         (q) => q.correctExplanation !== null || q.optionFeedback !== null
       );
-      const isPlaceholderQuiz = existingQuizQuestions.length !== 6 || 
+      const isPlaceholderQuiz = existingQuizQuestions.length < 7 || 
                                 existingQuizQuestions.some(q => q.question.includes("[DRAFT SKELETON]"));
 
       if (!hasAdminQuizEdits || isPlaceholderQuiz) {
