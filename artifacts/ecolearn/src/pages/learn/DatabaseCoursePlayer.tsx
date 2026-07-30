@@ -351,6 +351,33 @@ export default function DatabaseCoursePlayer({
             }
           />
         );
+      case "memorable_fact":
+        return (
+          <CalloutView
+            key={i}
+            block={{
+              type: "callout",
+              title: block.headingText || "Did You Know? (Worth Knowing)",
+              body: block.bodyText || block.body || ""
+            }}
+          />
+        );
+      case "image":
+      case "visual_question":
+        return (
+          <div key={i} className="my-6 overflow-hidden rounded-xl border bg-card shadow-sm">
+            {block.imageUrl || block.url ? (
+              <img
+                src={block.imageUrl || block.url}
+                alt={block.imageAlt || block.caption || "Course illustration"}
+                className="w-full max-h-[450px] object-cover"
+              />
+            ) : null}
+            {block.caption ? (
+              <p className="p-3 text-center text-xs text-muted-foreground bg-muted/30 border-t">{block.caption}</p>
+            ) : null}
+          </div>
+        );
       default:
         return null;
     }
@@ -754,7 +781,16 @@ function FinalQuiz({
       </div>
 
       <Card className="p-6">
-        <h2 className="text-xl font-medium leading-relaxed mb-6">{question.question}</h2>
+        <h2 className="text-xl font-medium leading-relaxed mb-4">{question.question}</h2>
+        {(question as any).imageUrl && (
+          <div className="mb-6 overflow-hidden rounded-xl border bg-card shadow-sm">
+            <img
+              src={(question as any).imageUrl}
+              alt={(question as any).imageAltText || (question as any).imageAlt || "Visual question illustration"}
+              className="w-full max-h-[420px] object-cover"
+            />
+          </div>
+        )}
         <div className="space-y-3 mb-8">
           {question.options.map((option: string, index: number) => {
             const isSelected = answers[question.id] === index;

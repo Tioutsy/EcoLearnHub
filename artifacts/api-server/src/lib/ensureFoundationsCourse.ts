@@ -13,7 +13,7 @@ import { logger } from "./logger";
 const COURSE_SLUG = "sustainability-foundations";
 const COURSE_TITLE = "Sustainability Foundations";
 const BADGE_SLUG = "sustainability-starter";
-const SEED_NAME = "sustainability-foundations-pilot-v3";
+const SEED_NAME = "sustainability-foundations-pilot-v4";
 
 const COURSE_META = {
   description:
@@ -167,6 +167,14 @@ const NEW_LESSONS = [
       { id: "mau-h1", type: "heading", position: 1, headingText: "Local Island Realities" },
       { id: "mau-t1", type: "short_text", position: 2, bodyText: "Living on an island like Mauritius, resource constraints are immediate and visible. Whether you work in an office in Port Louis, a hotel, a retail outlet, a warehouse, or a manufacturing facility, your choices have local consequences." },
       { id: "mau-k1", type: "key_message", position: 3, headingText: "Three Local Challenges", bodyText: "* Limited Landfill Capacity: Our main landfill site at Mare Chicose is facing volume capacity limits, making waste prevention and sorting critical.\n* Freshwater Pressures: Fresh water resources are under pressure, especially during the dry season, making leak reporting vital.\n* Grid Energy: A major portion of our grid electricity is generated from imported fossil fuels, so saving power at work directly reduces energy imports." },
+      {
+        id: "mau-img1",
+        type: "image",
+        position: 4,
+        imageUrl: "/images/courses/visual-workplace-waste-check.png",
+        caption: "Workplace Inspection: An air conditioner running beside an open window causes severe energy waste in a Mauritian corporate office.",
+        imageAlt: "Realistic photograph of a Mauritian office with a wall-mounted AC unit running next to an open glass window overlooking a tropical garden."
+      },
       {
         id: "mau-d1",
         type: "decision_scenario",
