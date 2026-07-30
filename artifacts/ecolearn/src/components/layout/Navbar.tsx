@@ -19,7 +19,7 @@ export function Navbar() {
     { href: "/courses", label: "Courses", icon: BookOpen },
     // { href: "/learning-paths", label: "Learning Paths", icon: RouteIcon },
     { href: "/challenges", label: "Challenges", icon: Target },
-    { href: "/insights", label: "Insights", icon: Leaf },
+    { href: "/mauritius-rules-resources", label: "Mauritius Rules & Resources", icon: Leaf },
     { href: "/impact", label: "Impact", icon: BarChart3 },
     { href: "/pricing", label: "Pricing", icon: Building2 },
   ];

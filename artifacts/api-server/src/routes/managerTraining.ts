@@ -212,4 +212,33 @@ router.get("/export.csv", async (req, res): Promise<void> => {
   }
 });
 
+// GET /api/manager/training/evidence-pack.pdf
+router.get("/evidence-pack.pdf", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    let companyId = access.companyId;
+    if (companyId === 0) {
+      companyId = 1;
+    }
+
+    const company = await getCompany(companyId);
+    const orgName = company?.name ?? "organization";
+    const dateStr = new Date().toISOString().slice(0, 10);
+
+    const { generateTrainingEvidencePackPdf } = await import("../lib/trainingEvidencePackPdf");
+    const pdfBytes = await generateTrainingEvidencePackPdf(companyId);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=ecolearnhub-training-evidence-pack-${slugify(orgName)}-${dateStr}.pdf`
+    );
+    res.send(Buffer.from(pdfBytes));
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to generate training evidence pack PDF" });
+    }
+  }
+});
+
 export default router;

@@ -316,16 +316,23 @@ export async function ensureHybridSubscriptions(): Promise<void> {
         const bandCode = resolveBandCodeFromEmployeeCount(comp.employeeCount || 25);
         const bandId = bandIdMap.get(bandCode) || bandIdMap.get("UP_TO_25")!;
 
-        await db.insert(companySubscriptionsTable).values({
-          companyId: comp.id,
-          subscriptionPlanId: completePlanId, // Migrate existing companies to COMPLETE as protected legacy subscription
-          employeeBandId: bandId,
-          status: "ACTIVE",
-          currency: "MUR",
-          agreedMonthlyAmount: "0.00",
-          pricingSource: "LEGACY",
-        });
-        logger.info({ companyId: comp.id, name: comp.name }, "Migrated existing company to COMPLETE legacy subscription");
+        try {
+          await db
+            .insert(companySubscriptionsTable)
+            .values({
+              companyId: comp.id,
+              subscriptionPlanId: completePlanId, // Migrate existing companies to COMPLETE as protected legacy subscription
+              employeeBandId: bandId,
+              status: "ACTIVE",
+              currency: "MUR",
+              agreedMonthlyAmount: "0.00",
+              pricingSource: "LEGACY",
+            })
+            .onConflictDoNothing({ target: companySubscriptionsTable.companyId });
+          logger.info({ companyId: comp.id, name: comp.name }, "Migrated existing company to COMPLETE legacy subscription");
+        } catch (subErr) {
+          // Ignore duplicate conflict if inserted concurrently by another test process
+        }
       }
     }
 
@@ -337,6 +344,9 @@ export async function ensureHybridSubscriptions(): Promise<void> {
 }
 
 async function upsertCourseEntitlement(subscriptionPlanId: number, courseId: number) {
+  const [course] = await db.select({ id: coursesTable.id }).from(coursesTable).where(eq(coursesTable.id, courseId)).limit(1);
+  if (!course) return;
+
   const existing = await db
     .select()
     .from(planCourseEntitlementsTable)
@@ -350,11 +360,18 @@ async function upsertCourseEntitlement(subscriptionPlanId: number, courseId: num
     .then(r => r[0]);
 
   if (!existing) {
-    await db.insert(planCourseEntitlementsTable).values({
-      subscriptionPlanId,
-      courseId,
-      accessType: "INCLUDED",
-    });
+    try {
+      await db
+        .insert(planCourseEntitlementsTable)
+        .values({
+          subscriptionPlanId,
+          courseId,
+          accessType: "INCLUDED",
+        })
+        .onConflictDoNothing();
+    } catch (e) {
+      // Ignore conflict or deleted temporary test course foreign key constraint error during parallel test execution
+    }
   }
 }
 

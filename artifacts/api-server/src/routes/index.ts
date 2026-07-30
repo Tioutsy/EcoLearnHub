@@ -24,9 +24,14 @@ import adminRouter from "./admin";
 import blogRouter from "./blog";
 import recyclingRouter from "./recycling";
 import platformAdminRouter from "./platformAdmin";
+import platformAdminHealthRouter from "./platformAdminHealth";
+import pilotsRouter from "./pilots";
 import managerTrainingRouter from "./managerTraining";
-
 import subscriptionsRouter from "./subscriptions";
+import invitationsRouter from "./invitations";
+import remindersRouter from "./reminders";
+import notificationsRouter from "./notifications";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -41,6 +46,10 @@ router.use("/progression", progressionRouter);
 router.use("/certificates", certificatesRouter);
 router.use("/company", companiesRouter);
 router.use("/companies", companiesRouter);
+router.use("/invitations", invitationsRouter);
+router.use("/reminders", remindersRouter);
+router.use("/notifications", notificationsRouter);
+router.use("/analytics", analyticsRouter);
 router.use("/plans", plansRouter);
 router.use("/subscriptions", subscriptionsRouter);
 router.use("/dashboard", dashboardRouter);
@@ -56,8 +65,9 @@ router.use("/leads", leadsRouter);
 router.use("/admin", adminRouter);
 router.use("/recycling", recyclingRouter);
 router.use("/platform-admin", platformAdminRouter);
+router.use("/platform-admin", platformAdminHealthRouter);
+router.use("/platform-admin/pilots", pilotsRouter);
 router.use("/manager/training", managerTrainingRouter);
 router.use(blogRouter);
 
 export default router;
-

@@ -19,4 +19,14 @@ export * from "./sectors";
 export * from "./sdg";
 export * from "./companyServices";
 export * from "./subscriptionPlans";
+export * from "./departments";
+export * from "./auditLogs";
+export * from "./notificationDeliveryLogs";
+export * from "./notificationPreferences";
+export * from "./trainingInterventions";
+export * from "./learnerCommitments";
+export * from "./pilotCompanies";
+export * from "./pilotLearningPlans";
+export * from "./pilotFeedback";
+export * from "./pilotIssues";
 

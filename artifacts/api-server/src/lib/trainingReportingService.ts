@@ -9,7 +9,7 @@ import {
   companiesTable,
   quizAttemptsTable,
 } from "@workspace/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, isNull, sql } from "drizzle-orm";
 import { calculateEmployeeAverageScore } from "./lms";
 
 export interface ManagerTrainingFilters {
@@ -756,4 +756,47 @@ export async function generateAuditCsv(companyId: number, filters: ManagerTraini
   });
 
   return rows.map((r) => r.map(escapeCsvValue).join(",")).join("\n");
+}
+
+export async function getCompanyTrainingRecords(params: {
+  companyId: number;
+  filters?: ManagerTrainingFilters;
+  requesterRole?: string;
+}) {
+  const { companyId, filters = {} } = params;
+  const overview = await getTrainingOverviewData(companyId);
+  const employeeRecords = await getFilteredEmployeeRecords(companyId, filters);
+  const company = await getCompany(companyId);
+
+  return {
+    companyId,
+    companyName: company?.name ?? "EcoLearn Organization",
+    overview,
+    employeeRecords,
+    generatedAt: new Date(),
+  };
+}
+
+export async function backfillLegacyCompletedVersions() {
+  const legacyCompleted = await db
+    .select()
+    .from(enrollmentsTable)
+    .where(and(eq(enrollmentsTable.status, "completed"), isNull(enrollmentsTable.completedVersion)));
+
+  let backfilledCount = 0;
+  for (const enr of legacyCompleted) {
+    const [course] = await db
+      .select({ version: coursesTable.version })
+      .from(coursesTable)
+      .where(eq(coursesTable.id, enr.courseId))
+      .limit(1);
+
+    await db
+      .update(enrollmentsTable)
+      .set({ completedVersion: course?.version ?? 1 })
+      .where(eq(enrollmentsTable.id, enr.id));
+    backfilledCount++;
+  }
+
+  return backfilledCount;
 }

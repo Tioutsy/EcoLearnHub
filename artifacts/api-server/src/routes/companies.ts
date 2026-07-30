@@ -9,7 +9,7 @@ import {
   enrollmentsTable,
   courseAssignmentsTable,
 } from "@workspace/db";
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, inArray, or, sql } from "drizzle-orm";
 import {
   CreateCompanyBody,
   UpdateMyCompanyBody,
@@ -594,6 +594,560 @@ router.delete("/employees/:id", async (req, res): Promise<void> => {
     if (!sendHttpError(res, err)) {
       req.log?.error({ err }, "Failed to delete employee");
       res.status(500).json({ error: "Failed to delete employee" });
+    }
+  }
+});
+
+// GET /company/onboarding-status — Server-side onboarding readiness
+router.get("/onboarding-status", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { getCompanyOnboardingStatus } = await import("../lib/companyOnboardingService");
+    const status = await getCompanyOnboardingStatus(access.companyId);
+    res.json(status);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to load onboarding status" });
+    }
+  }
+});
+
+// GET /company/employees/import-template — Download CSV template
+router.get("/employees/import-template", async (_req, res): Promise<void> => {
+  const templateCsv = "first_name,last_name,email,role,department,job_title\nJean,Valjean,jean.valjean@example.com,employee,Operations,Frontline Operator\nMarie,Curie,marie.curie@example.com,manager,Sustainability,Green Lead\n";
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", "attachment; filename=ecolearnhub-employee-import-template.csv");
+  res.send(templateCsv);
+});
+
+// POST /company/employees/bulk-import — Validate & import employees via CSV
+router.post("/employees/bulk-import", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { csvContent } = req.body;
+    if (!csvContent || typeof csvContent !== "string") {
+      res.status(400).json({ error: "csvContent string is required" });
+      return;
+    }
+
+    const { getCompanyOnboardingStatus } = await import("../lib/companyOnboardingService");
+    const status = await getCompanyOnboardingStatus(access.companyId);
+
+    const currentEmployees = await getCompanyEmployees(access.companyId);
+
+    const { parseAndValidateEmployeeCsv, executeEmployeeImport } = await import("../lib/employeeImportService");
+    const validation = parseAndValidateEmployeeCsv(
+      csvContent,
+      currentEmployees,
+      status.employeeCapacity.remaining
+    );
+
+    if (validation.capacityLimitExceeded) {
+      res.status(422).json({
+        error: `Import exceeds employee band limit. Remaining capacity is ${validation.remainingCapacity} employees, but ${validation.validRows.length} valid rows were submitted.`,
+        validation,
+      });
+      return;
+    }
+
+    if (validation.validRows.length === 0 && validation.invalidRows.length > 0) {
+      res.status(400).json({
+        error: "No valid employee records found in CSV",
+        validation,
+      });
+      return;
+    }
+
+    const importResult = await executeEmployeeImport(access.companyId, validation.validRows);
+
+    res.status(201).json({
+      message: `Successfully imported ${importResult.importedCount} employees`,
+      importedCount: importResult.importedCount,
+      validation,
+      employees: importResult.employees,
+    });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to process bulk employee import" });
+    }
+  }
+});
+
+// POST /company/employees/:id/resend — Resend invitation
+router.post("/employees/:id/resend", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+
+    const { createOrRefreshInvitation } = await import("../lib/invitationService");
+    const result = await createOrRefreshInvitation(access.companyId, id);
+
+    res.json({
+      message: "Invitation refreshed successfully",
+      ...result,
+      invitationLink: buildInviteLink(req, result.token),
+    });
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to resend invitation" });
+    }
+  }
+});
+
+// POST /company/employees/:id/revoke — Revoke invitation
+router.post("/employees/:id/revoke", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+
+    const { revokeInvitation } = await import("../lib/invitationService");
+    const result = await revokeInvitation(access.companyId, id);
+
+    res.json({
+      message: "Invitation revoked successfully",
+      ...result,
+    });
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to revoke invitation" });
+    }
+  }
+});
+
+// GET /company/admin-overview — Authoritative server-side company admin overview
+router.get("/admin-overview", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { getCompanyAdminOverview } = await import("../lib/adminOverviewService");
+    const overview = await getCompanyAdminOverview(access.companyId);
+    res.json(overview);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to load company admin overview" });
+    }
+  }
+});
+
+// POST /company/employees/:id/deactivate — Deactivate employee safely
+router.post("/employees/:id/deactivate", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+
+    const [updated] = await db
+      .update(employeesTable)
+      .set({ status: "deactivated" })
+      .where(and(eq(employeesTable.id, id), eq(employeesTable.companyId, access.companyId)))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "Employee not found" });
+      return;
+    }
+
+    const { logAuditEvent } = await import("../lib/auditLogService");
+    await logAuditEvent({
+      companyId: access.companyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "employee.deactivated",
+      targetType: "employee",
+      targetId: updated.id,
+      metadata: { name: updated.name, email: updated.email },
+    });
+
+    res.json({ message: "Employee deactivated successfully", employee: updated });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to deactivate employee" });
+    }
+  }
+});
+
+// POST /company/employees/:id/reactivate — Reactivate employee safely with capacity check
+router.post("/employees/:id/reactivate", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+
+    const { getCompanyOnboardingStatus } = await import("../lib/companyOnboardingService");
+    const status = await getCompanyOnboardingStatus(access.companyId);
+    if (status.employeeCapacity.remaining <= 0) {
+      res.status(422).json({ error: "Cannot reactivate employee: Company employee band limit reached." });
+      return;
+    }
+
+    const [updated] = await db
+      .update(employeesTable)
+      .set({ status: "active" })
+      .where(and(eq(employeesTable.id, id), eq(employeesTable.companyId, access.companyId)))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "Employee not found" });
+      return;
+    }
+
+    const { logAuditEvent } = await import("../lib/auditLogService");
+    await logAuditEvent({
+      companyId: access.companyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "employee.reactivated",
+      targetType: "employee",
+      targetId: updated.id,
+      metadata: { name: updated.name, email: updated.email },
+    });
+
+    res.json({ message: "Employee reactivated successfully", employee: updated });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to reactivate employee" });
+    }
+  }
+});
+
+// GET /company/departments — List company departments
+router.get("/departments", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { getCompanyDepartments } = await import("../lib/departmentService");
+    const depts = await getCompanyDepartments(access.companyId);
+    res.json(depts);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to list departments" });
+    }
+  }
+});
+
+// POST /company/departments — Create department
+router.post("/departments", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { name, code, managerEmployeeId } = req.body;
+    if (!name || typeof name !== "string") {
+      res.status(400).json({ error: "Department name is required" });
+      return;
+    }
+
+    const { createDepartment } = await import("../lib/departmentService");
+    const dept = await createDepartment({
+      companyId: access.companyId,
+      name,
+      code,
+      managerEmployeeId,
+    });
+
+    const { logAuditEvent } = await import("../lib/auditLogService");
+    await logAuditEvent({
+      companyId: access.companyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "department.created",
+      targetType: "department",
+      targetId: dept.id,
+      metadata: { name: dept.name, code: dept.code },
+    });
+
+    res.status(201).json(dept);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to create department" });
+    }
+  }
+});
+
+// PATCH /company/departments/:id — Update/archive department
+router.patch("/departments/:id", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+
+    const { updateDepartment } = await import("../lib/departmentService");
+    const dept = await updateDepartment({
+      companyId: access.companyId,
+      id,
+      ...req.body,
+    });
+
+    const { logAuditEvent } = await import("../lib/auditLogService");
+    await logAuditEvent({
+      companyId: access.companyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "department.updated",
+      targetType: "department",
+      targetId: dept.id,
+      metadata: req.body,
+    });
+
+    res.json(dept);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to update department" });
+    }
+  }
+});
+
+// POST /company/training/assign — Server-side training assignment engine
+router.post("/training/assign", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { assignTrainingToCompanyEmployees } = await import("../lib/assignmentService");
+    
+    const dueDateValue = readText(req.body.dueDate);
+    const dueDate = dueDateValue ? new Date(dueDateValue) : null;
+
+    const summary = await assignTrainingToCompanyEmployees({
+      companyId: access.companyId,
+      assignedByUserId: access.userId,
+      assignedByRole: access.role,
+      courseIds: req.body.courseIds,
+      learningPathId: req.body.learningPathId,
+      employeeIds: req.body.employeeIds,
+      department: req.body.department,
+      dueDate,
+      assignmentSource: req.body.assignmentSource ?? "required",
+    });
+
+    res.status(201).json(summary);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to assign training" });
+    }
+  }
+});
+
+// GET /company/audit-logs — Immutable administrative audit logs
+router.get("/audit-logs", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { auditLogsTable } = await import("@workspace/db");
+    const logs = await db
+      .select()
+      .from(auditLogsTable)
+      .where(eq(auditLogsTable.companyId, access.companyId))
+      .orderBy(sql`${auditLogsTable.createdAt} DESC`);
+    res.json(logs);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to list audit logs" });
+    }
+  }
+});
+
+// GET /company/engagement-overview — Company-admin engagement metrics & delivery health
+router.get("/engagement-overview", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { getLearnerEngagementSummary } = await import("../lib/learnerEngagementService");
+    const { employeesTable, notificationDeliveryLogsTable } = await import("@workspace/db");
+
+    const employees = await db
+      .select()
+      .from(employeesTable)
+      .where(eq(employeesTable.companyId, access.companyId));
+
+    const deliveryLogs = await db
+      .select()
+      .from(notificationDeliveryLogsTable)
+      .where(eq(notificationDeliveryLogsTable.companyId, access.companyId));
+
+    let activatedCount = 0;
+    let pendingInvitationCount = 0;
+    let inProgressCount = 0;
+    let overdueCount = 0;
+    let completedCount = 0;
+
+    for (const emp of employees) {
+      if (emp.status === "deactivated") continue;
+      const summary = await getLearnerEngagementSummary(access.companyId, emp.id);
+      if (emp.invitationStatus === "accepted") activatedCount++;
+      else if (emp.invitationStatus === "invited") pendingInvitationCount++;
+
+      if (summary.primaryState === "overdue") overdueCount++;
+      else if (summary.primaryState === "in_progress" || summary.primaryState === "inactive_in_progress") inProgressCount++;
+      else if (summary.primaryState === "completed") completedCount++;
+    }
+
+    const totalActive = employees.filter((e) => e.status !== "deactivated").length;
+    const activationRatePct = totalActive > 0 ? Math.round((activatedCount / totalActive) * 100) : 0;
+    const completionRatePct = totalActive > 0 ? Math.round((completedCount / totalActive) * 100) : 0;
+
+    const deliveredLogs = deliveryLogs.filter((l) => l.status === "delivered").length;
+    const failedLogs = deliveryLogs.filter((l) => l.status === "failed").length;
+
+    res.json({
+      companyId: access.companyId,
+      totalActiveEmployees: totalActive,
+      activatedCount,
+      pendingInvitationCount,
+      inProgressCount,
+      overdueCount,
+      completedCount,
+      activationRatePct,
+      completionRatePct,
+      reminderDeliveryHealth: {
+        totalAttempted: deliveryLogs.length,
+        deliveredLogs,
+        failedLogs,
+      },
+    });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to load engagement overview" });
+    }
+  }
+});
+
+// GET /company/manager/engagement — Manager-scoped employee engagement dashboard
+router.get("/manager/engagement", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    if (!access.companyId) {
+      res.status(403).json({ error: "Company membership required" });
+      return;
+    }
+
+    const { getLearnerEngagementSummary } = await import("../lib/learnerEngagementService");
+    const { employeesTable } = await import("@workspace/db");
+
+    let employees = await db
+      .select()
+      .from(employeesTable)
+      .where(eq(employeesTable.companyId, access.companyId));
+
+    // Scoped to manager department if role is manager
+    if (((access.role as string) === "manager" || access.employee?.role === "manager") && access.employee?.department) {
+      employees = employees.filter((e) => e.department === access.employee?.department);
+    }
+
+    const summaries = [];
+    for (const emp of employees) {
+      if (emp.status === "deactivated") continue;
+      const sum = await getLearnerEngagementSummary(access.companyId, emp.id);
+      summaries.push(sum);
+    }
+
+    res.json(summaries);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to load manager engagement view" });
+    }
+  }
+});
+
+// POST /company/manager/remind — Manager-requested approved reminder dispatch
+router.post("/manager/remind", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    if (!access.companyId) {
+      res.status(403).json({ error: "Company membership required" });
+      return;
+    }
+
+    const { employeeId, reminderCategory } = req.body;
+    if (!employeeId || typeof employeeId !== "number") {
+      res.status(400).json({ error: "employeeId is required" });
+      return;
+    }
+
+    const { employeesTable } = await import("@workspace/db");
+    const [emp] = await db
+      .select()
+      .from(employeesTable)
+      .where(and(eq(employeesTable.id, employeeId), eq(employeesTable.companyId, access.companyId)))
+      .limit(1);
+
+    if (!emp) {
+      res.status(404).json({ error: "Employee not found in your company" });
+      return;
+    }
+
+    if (((access.role as string) === "manager" || access.employee?.role === "manager") && access.employee?.department && emp.department !== access.employee.department) {
+      res.status(403).json({ error: "Cannot send reminder outside assigned department scope" });
+      return;
+    }
+
+    const { sendNotification } = await import("../lib/notificationService");
+    const { logAuditEvent } = await import("../lib/auditLogService");
+
+    const dispatched = await sendNotification({
+      companyId: access.companyId,
+      recipientEmail: emp.email,
+      recipientName: emp.name,
+      type: "course_assigned",
+      title: "Manager Reminder: EcoLearnHub Training Action Requested",
+      message: `Hello ${emp.name}, your manager ${access.employee?.name ?? "Administrator"} has sent a reminder regarding your training assignments.`,
+    });
+
+    await logAuditEvent({
+      companyId: access.companyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "manager.reminder_sent",
+      targetType: "employee",
+      targetId: emp.id,
+      metadata: { reminderCategory: reminderCategory ?? "manual_reminder" },
+    });
+
+    res.json({ message: "Reminder dispatched successfully", delivered: dispatched.delivered });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to dispatch manager reminder" });
+    }
+  }
+});
+
+// GET /company/notification-logs — Company-admin notification delivery health logs
+router.get("/notification-logs", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { notificationDeliveryLogsTable } = await import("@workspace/db");
+
+    const logs = await db
+      .select({
+        id: notificationDeliveryLogsTable.id,
+        notificationType: notificationDeliveryLogsTable.notificationType,
+        channel: notificationDeliveryLogsTable.channel,
+        recipient: notificationDeliveryLogsTable.recipient,
+        status: notificationDeliveryLogsTable.status,
+        attemptedAt: notificationDeliveryLogsTable.attemptedAt,
+        deliveredAt: notificationDeliveryLogsTable.deliveredAt,
+        retryCount: notificationDeliveryLogsTable.retryCount,
+        failureCode: notificationDeliveryLogsTable.failureCode,
+        failureMessage: notificationDeliveryLogsTable.failureMessage,
+        createdAt: notificationDeliveryLogsTable.createdAt,
+      })
+      .from(notificationDeliveryLogsTable)
+      .where(eq(notificationDeliveryLogsTable.companyId, access.companyId))
+      .orderBy(sql`${notificationDeliveryLogsTable.createdAt} DESC`);
+
+    res.json(logs);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to list notification logs" });
     }
   }
 });

@@ -190,36 +190,29 @@ router.post("/onboard", async (req, res): Promise<void> => {
 
   const isTailored = band.requiresTailoredQuote || !priceRecord || priceRecord.requiresTailoredQuote;
 
-  // Check if subscription already exists
-  const existingSub = await db.select().from(companySubscriptionsTable).where(eq(companySubscriptionsTable.companyId, companyId)).then(r => r[0]);
-
-  let sub;
-  if (existingSub) {
-    [sub] = await db
-      .update(companySubscriptionsTable)
-      .set({
+  const [sub] = await db
+    .insert(companySubscriptionsTable)
+    .values({
+      companyId,
+      subscriptionPlanId: plan.id,
+      employeeBandId: band.id,
+      status: isTailored ? "PENDING" : "ACTIVE",
+      currency: "MUR",
+      agreedMonthlyAmount: isTailored ? null : priceRecord?.monthlyAmount || null,
+      pricingSource: isTailored ? "TAILORED" : "STANDARD",
+    })
+    .onConflictDoUpdate({
+      target: [companySubscriptionsTable.companyId],
+      set: {
         subscriptionPlanId: plan.id,
         employeeBandId: band.id,
         status: isTailored ? "PENDING" : "ACTIVE",
         agreedMonthlyAmount: isTailored ? null : priceRecord?.monthlyAmount || null,
         pricingSource: isTailored ? "TAILORED" : "STANDARD",
-      })
-      .where(eq(companySubscriptionsTable.id, existingSub.id))
-      .returning();
-  } else {
-    [sub] = await db
-      .insert(companySubscriptionsTable)
-      .values({
-        companyId,
-        subscriptionPlanId: plan.id,
-        employeeBandId: band.id,
-        status: isTailored ? "PENDING" : "ACTIVE",
-        currency: "MUR",
-        agreedMonthlyAmount: isTailored ? null : priceRecord?.monthlyAmount || null,
-        pricingSource: isTailored ? "TAILORED" : "STANDARD",
-      })
-      .returning();
-  }
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
 
   res.status(201).json({
     subscription: sub,
@@ -321,10 +314,11 @@ router.patch("/admin/:companyId", async (req, res): Promise<void> => {
   if (status) updateData.status = status;
   if (pricingSource) updateData.pricingSource = pricingSource;
 
+  updateData.updatedAt = new Date();
   const [updated] = await db
     .update(companySubscriptionsTable)
     .set(updateData)
-    .where(eq(companySubscriptionsTable.id, existingSub.id))
+    .where(eq(companySubscriptionsTable.companyId, companyId))
     .returning();
 
   res.json(updated);

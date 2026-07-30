@@ -1,0 +1,235 @@
+# Active Database Course Audit Raw Log
+Total Courses: 29
+
+## ID: 1 | Code: ELH-01 | Slug: sustainability-foundations
+- Title: Sustainability Foundations
+- Published: true | Status: published | Level: beginner | Duration: 20m | PassScore: 80%
+- Badge: "Sustainability Starter" — "Awarded for completing the Sustainability Foundations course and making a personal workplace commitment."
+- Objectives Count: 4
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 6 (Invalid: 0)
+
+## ID: 2 | Code: ELH-02 | Slug: waste-sorting-mauritian-bin-system
+- Title: Waste Sorting & the Mauritian Bin System
+- Published: true | Status: published | Level: Foundation | Duration: 20m | PassScore: 80%
+- Badge: "Sorting Champion" — "Awarded for completing the Waste Sorting & the Mauritian Bin System course."
+- Objectives Count: 5
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 3 | Code: ELH-03 | Slug: energy-efficiency-at-work
+- Title: Energy Efficiency at Work
+- Published: true | Status: published | Level: Foundation | Duration: 20m | PassScore: 80%
+- Badge: "Energy Saver" — "Awarded for completing Energy Efficiency at Work and committing to practical workplace energy-saving actions."
+- Objectives Count: 4
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 4 | Code: ELH-04 | Slug: water-conservation
+- Title: Water Conservation
+- Published: true | Status: published | Level: Foundation | Duration: 18m | PassScore: 80%
+- Badge: "Water Wise at Work" — "Awarded for demonstrating practical workplace water-conservation awareness and responsible leak-reporting decisions."
+- Objectives Count: 5
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 5 | Code: ELH-05 | Slug: sustainable-procurement
+- Title: Sustainable Procurement
+- Published: true | Status: published | Level: Level 2 | Duration: 18m | PassScore: 80%
+- Badge: "Responsible Purchasing" — "Awarded for applying balanced purchasing judgement across need, cost, quality, lifespan, supplier evidence and operational requirements."
+- Objectives Count: 6
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 6 | Code: ELH-06 | Slug: green-office-practices
+- Title: Green Office Practices
+- Published: true | Status: published | Level: Foundation | Duration: 20m | PassScore: 80%
+- Badge: "Green Office Champion" — "Awarded for mastering everyday sustainable habits in the office."
+- Objectives Count: 4
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 6 (Invalid: 0)
+
+## ID: 7 | Code: ELH-07 | Slug: carbon-footprint-awareness
+- Title: Carbon Footprint Awareness
+- Published: true | Status: published | Level: Foundation | Duration: 20m | PassScore: 80%
+- Badge: "Carbon Aware" — "Awarded for completing the Carbon Footprint Awareness course."
+- Objectives Count: 4
+- Lessons Count: 6 (Empty: 6)
+- Quiz Questions Count: 5 (Invalid: 0)
+
+## ID: 8 | Code: ELH-08 | Slug: biodiversity-in-mauritius
+- Title: Biodiversity in Mauritius
+- Published: true | Status: published | Level: Foundation | Duration: 20m | PassScore: 80%
+- Badge: "Biodiversity Aware" — "Awarded for completing the Biodiversity in Mauritius course."
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 5 (Invalid: 0)
+
+## ID: 9 | Code: ELH-09 | Slug: esg-basics
+- Title: ESG Basics
+- Published: true | Status: published | Level: ESG and Compliance | Duration: 20m | PassScore: 80%
+- Badge: "ESG Fundamentals" — "Recognises an understanding of Environmental, Social and Governance fundamentals, accurate workplace evidence and responsible handling of ESG-related information."
+- Objectives Count: 5
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 10 | Code: ELH-10 | Slug: environmental-compliance
+- Title: Environmental Compliance
+- Published: true | Status: published | Level: ESG and Compliance | Duration: 20m | PassScore: 80%
+- Badge: "Environmental Responsibility" — "Awarded for completing the Environmental Compliance course."
+- Objectives Count: 6
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 11 | Code: ELH-11 | Slug: circular-economy
+- Title: Circular Economy
+- Published: true | Status: published | Level: advanced | Duration: 20m | PassScore: 80%
+- Badge: "Circular Thinking" — "Awarded for completing the Circular Economy course."
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 10 (Invalid: 0)
+
+## ID: 12 | Code: ELH-12 | Slug: final-sustainability-certification
+- Title: Final Sustainability Certification
+- Published: true | Status: draft | Level: advanced | Duration: 45m | PassScore: 80%
+- Badge: "Core Sustainability Certified" — "Awarded to learners who pass the cumulative 30-question certification, demonstrating a solid understanding of everyday resource management, responsible workplace practice, and ESG compliance."
+- Objectives Count: 3
+- Lessons Count: 1 (Empty: 0)
+- Quiz Questions Count: 30 (Invalid: 0)
+
+## ID: 13 | Code: ELH-13 | Slug: sustainability-action-planning
+- Title: Sustainability Action Planning
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 20m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 6 (Invalid: 0)
+
+## ID: 14 | Code: ELH-14 | Slug: setting-departmental-sustainability-goals
+- Title: Setting Departmental Sustainability Goals
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 8
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 102 | Code: ELH-21 | Slug: building-employee-engagement-in-sustainability
+- Title: Building Employee Engagement in Sustainability
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 6
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 114 | Code: ELH-16 | Slug: communicating-sustainability-at-work
+- Title: Communicating Sustainability at Work
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 120 | Code: ELH-18 | Slug: sustainability-data-collection-and-evidence
+- Title: Sustainability Data Collection and Evidence
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 20m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 143 | Code: ELH-22 | Slug: creating-and-running-effective-green-teams
+- Title: Creating and Running Effective Green Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 161 | Code: ELH-19 | Slug: reviewing-sustainability-performance-and-corrective-action
+- Title: Reviewing Sustainability Performance and Taking Corrective Action
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 20m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 8
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 162 | Code: ELH-15 | Slug: building-workplace-sustainability-team
+- Title: Building a Workplace Sustainability Team
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 6
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 163 | Code: ELH-17 | Slug: tracking-sustainability-actions-and-progress
+- Title: Tracking Sustainability Actions and Progress
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 8
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 164 | Code: ELH-20 | Slug: sustainability-roles-responsibilities-and-accountability
+- Title: Sustainability Roles, Responsibilities and Accountability
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 20m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 8
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 165 | Code: ELH-23 | Slug: planning-and-delivering-workplace-sustainability-initiatives
+- Title: Planning and Delivering Workplace Sustainability Initiatives
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 20m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 166 | Code: ELH-24 | Slug: sustainability-for-hr-teams
+- Title: Sustainability for HR Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 6
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 167 | Code: ELH-25 | Slug: sustainability-for-finance-teams
+- Title: Sustainability for Finance Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 7
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 168 | Code: ELH-26 | Slug: sustainability-for-procurement-and-purchasing-teams
+- Title: Sustainability for Procurement and Purchasing Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 10
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 169 | Code: ELH-29 | Slug: sustainability-for-operations-and-frontline-teams
+- Title: Sustainability for Operations and Frontline Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 6
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 170 | Code: ELH-27 | Slug: sustainability-for-facilities-and-property-teams
+- Title: Sustainability for Facilities and Property Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 19m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 8
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+
+## ID: 171 | Code: ELH-28 | Slug: sustainability-for-sales-and-marketing-teams
+- Title: Sustainability for Sales and Marketing Teams
+- Published: true | Status: published | Level: Applied Workplace Practice | Duration: 18m | PassScore: 80%
+- Badge: "" — ""
+- Objectives Count: 8
+- Lessons Count: 6 (Empty: 0)
+- Quiz Questions Count: 8 (Invalid: 0)
+

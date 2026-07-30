@@ -72,7 +72,7 @@ export default function MauritiusResourceDetail() {
       <Layout>
         <div className="container mx-auto px-4 py-24 text-center">
           <h2 className="text-2xl font-bold mb-4 font-serif">Resource not found</h2>
-          <Link href="/insights/mauritius-resources" className="text-primary font-medium hover:underline cursor-pointer">
+          <Link href="/mauritius-rules-resources" className="text-primary font-medium hover:underline cursor-pointer">
             Back to Mauritius Rules & Resources
           </Link>
         </div>
@@ -86,7 +86,7 @@ export default function MauritiusResourceDetail() {
         {/* Header */}
         <header className="bg-primary/5 pt-12 pb-10 border-b">
           <div className="container mx-auto px-4 max-w-4xl">
-            <Link href="/insights/mauritius-resources" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-6 transition-colors cursor-pointer">
+            <Link href="/mauritius-rules-resources" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-6 transition-colors cursor-pointer">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Rules & Resources
             </Link>
             

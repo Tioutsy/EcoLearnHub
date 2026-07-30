@@ -88,14 +88,33 @@ router.post("/", async (req, res): Promise<void> => {
     const accessDecision = await evaluateCourseAccess(parsed.data.courseId, access);
 
     if (!accessDecision.allowed) {
-      res.status(403).json({
-        error: accessDecision.reason,
+      const errorResponse: Record<string, any> = {
+        error: accessDecision.reason === "PREREQUISITE_REQUIRED"
+          ? "PREREQUISITES_INCOMPLETE"
+          : accessDecision.reason,
         message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
           ? `This course is available with the ${accessDecision.requiredPlanName} plan. Contact your company administrator to upgrade your subscription.`
+          : accessDecision.reason === "PREREQUISITE_REQUIRED"
+          ? "You must complete all prerequisite courses before enrolling in this course."
+          : accessDecision.reason === "COMPANY_NOT_ASSIGNED"
+          ? "Your account is not assigned to an active company subscription."
+          : accessDecision.reason === "SUBSCRIPTION_INACTIVE"
+          ? "Your company subscription is inactive."
           : "Access denied.",
-        requiredPlanCode: accessDecision.requiredPlanCode,
-        requiredPlanName: accessDecision.requiredPlanName,
-      });
+      };
+      if (accessDecision.requiredPlanCode) {
+        errorResponse.requiredPlanCode = accessDecision.requiredPlanCode;
+      }
+      if (accessDecision.requiredPlanName) {
+        errorResponse.requiredPlanName = accessDecision.requiredPlanName;
+      }
+      if (accessDecision.missingPrerequisiteCourseIds) {
+        errorResponse.missingPrerequisiteCourseIds = accessDecision.missingPrerequisiteCourseIds;
+      }
+      if (accessDecision.prerequisiteDetails) {
+        errorResponse.prerequisites = accessDecision.prerequisiteDetails;
+      }
+      res.status(403).json(errorResponse);
       return;
     }
 
@@ -191,8 +210,6 @@ router.get("/:id", async (req, res): Promise<void> => {
       return;
     }
 
-
-
     // Block non-admin learners from accessing unpublished courses
     const isPlatformAdmin = access.role === "platform_admin";
     if (!course.isPublished && !isPlatformAdmin) {
@@ -200,12 +217,16 @@ router.get("/:id", async (req, res): Promise<void> => {
       return;
     }
 
-    const { checkCourseEligibility } = await import("../lib/prerequisites");
-    const eligibility = await checkCourseEligibility(enrollment.courseId, access);
-    if (!eligibility.eligible && !isPlatformAdmin) {
+    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+    const accessDecision = await evaluateCourseAccess(enrollment.courseId, access);
+    if (!accessDecision.allowed) {
       res.status(403).json({
-        error: "PREREQUISITES_INCOMPLETE",
-        message: "You must complete all prerequisite courses before accessing this course content."
+        error: accessDecision.reason === "PREREQUISITE_REQUIRED" ? "PREREQUISITES_INCOMPLETE" : accessDecision.reason,
+        message: accessDecision.reason === "PREREQUISITE_REQUIRED"
+          ? "You must complete all prerequisite courses before accessing this course content."
+          : "Access denied.",
+        requiredPlanCode: accessDecision.requiredPlanCode,
+        requiredPlanName: accessDecision.requiredPlanName,
       });
       return;
     }

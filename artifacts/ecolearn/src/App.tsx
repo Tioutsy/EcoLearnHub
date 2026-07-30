@@ -236,19 +236,31 @@ function ClerkProviderWithRoutes() {
             <Route path="/impact" component={ImpactDashboard} />
             <Route path="/pricing" component={Pricing} />
             <Route path="/made-for-mauritius">
-              <Redirect to="/insights/mauritius-resources" />
+              <Redirect to="/mauritius-rules-resources" />
             </Route>
             <Route path="/blog">
-              <Redirect to="/insights/articles" />
+              <Redirect to="/mauritius-rules-resources" />
             </Route>
             <Route path="/blog/:slug">
-              {(params) => <Redirect to={`/insights/articles/${params.slug}`} />}
+              <Redirect to="/mauritius-rules-resources" />
             </Route>
-            <Route path="/insights" component={InsightsLanding} />
-            <Route path="/insights/articles" component={InsightsArticlesList} />
-            <Route path="/insights/articles/:slug" component={InsightsArticleDetail} />
-            <Route path="/insights/mauritius-resources" component={MauritiusResourcesList} />
-            <Route path="/insights/mauritius-resources/:slug" component={MauritiusResourceDetail} />
+            <Route path="/insights">
+              <Redirect to="/mauritius-rules-resources" />
+            </Route>
+            <Route path="/insights/articles">
+              <Redirect to="/mauritius-rules-resources" />
+            </Route>
+            <Route path="/insights/articles/:slug">
+              <Redirect to="/mauritius-rules-resources" />
+            </Route>
+            <Route path="/insights/mauritius-resources">
+              <Redirect to="/mauritius-rules-resources" />
+            </Route>
+            <Route path="/insights/mauritius-resources/:slug">
+              {(params) => <Redirect to={`/mauritius-rules-resources/${params.slug}`} />}
+            </Route>
+            <Route path="/mauritius-rules-resources" component={MauritiusResourcesList} />
+            <Route path="/mauritius-rules-resources/:slug" component={MauritiusResourceDetail} />
             <Route path="/company" component={CompanyDashboard} />
             <Route path="/company/subscribe" component={Subscribe} />
             <Route path="/company/challenges-review" component={ChallengesReview} />
@@ -266,6 +278,9 @@ function ClerkProviderWithRoutes() {
             <Route path="/platform-admin/sectors" component={PlatformAdminSectors} />
             <Route path="/platform-admin/learning-paths" component={PlatformAdminLearningPaths} />
             <Route path="/platform-admin/courses" component={PlatformAdminCourses} />
+            <Route path="/platform-admin/courses/:id/preview">
+              {(params) => <Redirect to={`/platform-admin/preview/${params.id}`} replace />}
+            </Route>
             <Route path="/platform-admin/subscriptions" component={PlatformAdminSubscriptions} />
             <Route path="/platform-admin/preview/:id" component={AdminCoursePreview} />
             <Route path="/platform-admin/sdg-mapping" component={PlatformAdminSdgMapping} />

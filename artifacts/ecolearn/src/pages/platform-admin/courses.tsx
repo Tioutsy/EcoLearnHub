@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { PlatformAdminLayout } from "@/components/layout/PlatformAdminLayout";
 import {
   usePlatformAdminListCourses,
@@ -632,14 +633,25 @@ export default function PlatformAdminCourses() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditClick(course)}
-                          className="flex items-center gap-1 ml-auto text-primary hover:text-primary-hover"
-                        >
-                          <Edit className="h-4 w-4" /> Manage Course
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link href={`/platform-admin/preview/${course.id}`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-1 text-slate-600"
+                            >
+                              <Eye className="h-4 w-4" /> Preview
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditClick(course)}
+                            className="flex items-center gap-1 text-primary hover:text-primary-hover"
+                          >
+                            <Edit className="h-4 w-4" /> Manage Course
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

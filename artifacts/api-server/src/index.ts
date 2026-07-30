@@ -29,6 +29,7 @@ import { ensureSustainabilityForProcurementAndPurchasingTeamsCourse } from "./li
 import { ensureSustainabilityForOperationsAndFrontlineTeamsCourse } from "./lib/ensureSustainabilityForOperationsAndFrontlineTeamsCourse";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./lib/ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
 import { ensureSustainabilityForSalesAndMarketingTeamsCourse } from "./lib/ensureSustainabilityForSalesAndMarketingTeamsCourse";
+import { ensureAppliedCourseBadges } from "./lib/ensureAppliedCourseBadges";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
@@ -125,6 +126,7 @@ async function start(): Promise<void> {
   await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
   await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
   await ensureSustainabilityForSalesAndMarketingTeamsCourse();
+  await ensureAppliedCourseBadges();
   await ensureCoreSustainabilityPath();
   await ensureCategoriesAndAssignments();
   await ensureHybridSubscriptions();

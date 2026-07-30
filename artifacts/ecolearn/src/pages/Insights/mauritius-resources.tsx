@@ -79,14 +79,14 @@ export default function MauritiusResourcesList() {
     <Layout>
       <div className="bg-primary/5 py-12 border-b">
         <div className="container mx-auto px-4 max-w-5xl">
-          <Link href="/insights" className="inline-flex items-center text-sm text-primary font-medium hover:underline mb-4 cursor-pointer">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Insights
-          </Link>
           <h1 className="text-3xl md:text-4xl font-bold font-serif mb-4 flex items-center gap-3">
             <Scale className="h-8 w-8 text-primary" /> Mauritius Rules & Resources
           </h1>
-          <p className="text-lg text-muted-foreground">
-            This is a curated directory of Mauritius sustainability, environmental and ESG rules relevant to organisations. It does not represent every law or regulation in Mauritius.
+          <p className="text-lg text-muted-foreground mb-3">
+            Find verified Mauritian environmental rules, official guidance and practical resources that can help organisations understand their workplace sustainability responsibilities.
+          </p>
+          <p className="text-xs text-muted-foreground bg-background/80 border p-3 rounded-lg">
+            Information is presented for general awareness and workplace guidance. Organisations should consult the relevant authority or a qualified professional when formal legal interpretation is required.
           </p>
         </div>
       </div>
@@ -156,14 +156,14 @@ export default function MauritiusResourcesList() {
         ) : resources.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground border rounded-2xl max-w-xl mx-auto bg-muted/20">
             <p className="text-lg font-medium text-foreground mb-1">
-              Mauritius-specific laws, regulations and official resources are currently being prepared.
+              No matching rules or resources were found.
             </p>
-            <p className="text-sm">We are preparing new regulatory resources for this section.</p>
+            <p className="text-sm">Try changing your search or clearing the selected filters.</p>
           </div>
         ) : (
           <div className="space-y-6">
             {resources.map((res) => (
-              <Link key={res.id} href={`/insights/mauritius-resources/${res.slug}`}>
+              <Link key={res.id} href={`/mauritius-rules-resources/${res.slug}`}>
                 <div className="group border rounded-2xl p-6 bg-card hover:shadow-sm hover:border-primary/45 transition-all cursor-pointer flex flex-col justify-between">
                   <div>
                     <div className="flex flex-wrap items-center gap-3 mb-3">

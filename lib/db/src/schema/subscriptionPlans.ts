@@ -82,7 +82,9 @@ export const companySubscriptionsTable = pgTable("company_subscriptions", {
   accessEndsAt: timestamp("access_ends_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
-});
+}, (t) => ({
+  uniqueCompanySubscription: unique("unique_company_subscription").on(t.companyId),
+}));
 
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlansTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;

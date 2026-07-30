@@ -165,6 +165,18 @@ router.get("/:id/pdf", async (req, res): Promise<void> => {
     return;
   }
 
+  const access = await getCompanyAccess(req);
+  const isOwner =
+    cert.userId === access.userId ||
+    (access.employee && cert.employeeId === access.employee.id) ||
+    (access.companyId && cert.companyId === access.companyId) ||
+    access.role === "platform_admin";
+
+  if (!isOwner) {
+    res.status(403).json({ error: "Access denied to this certificate" });
+    return;
+  }
+
   try {
     const pdfBytes = await generateCertificatePdf(toCertificateData(cert));
     res.setHeader("Content-Type", "application/pdf");
@@ -197,6 +209,19 @@ router.get("/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Certificate not found" });
     return;
   }
+
+  const access = await getCompanyAccess(req);
+  const isOwner =
+    cert.userId === access.userId ||
+    (access.employee && cert.employeeId === access.employee.id) ||
+    (access.companyId && cert.companyId === access.companyId) ||
+    access.role === "platform_admin";
+
+  if (!isOwner) {
+    res.status(403).json({ error: "Access denied to this certificate" });
+    return;
+  }
+
   res.json(cert);
 });
 

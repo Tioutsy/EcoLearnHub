@@ -14,6 +14,9 @@ import {
 } from "@workspace/db";
 import { eq, or, inArray } from "drizzle-orm";
 
+import app from "./app";
+import { Server } from "node:net";
+
 const API_BASE = "http://localhost:8081/api";
 const TEST_USER_ID = "c12_e2e_user";
 const TEST_EMAIL = "c12-e2e@ecolearn.mu";
@@ -21,6 +24,7 @@ const TEST_EMAIL = "c12-e2e@ecolearn.mu";
 const HEADERS = {
   "x-test-user-id": TEST_USER_ID,
   "x-test-user-email": TEST_EMAIL,
+  "x-demo-role": "platform_admin",
   "Content-Type": "application/json",
 };
 
@@ -84,44 +88,13 @@ async function cleanDb() {
 }
 
 test("Course 12 Full E2E Integration and Prerequisite Verification", async () => {
-  let devServer: ChildProcess | undefined;
+  process.env.ENABLE_TEST_AUTH_BYPASS = "true";
+  let server: Server | undefined;
 
   try {
-    // Start the API server
-    devServer = spawn(process.execPath, ["./dist/index.mjs"], {
-      env: {
-        ...process.env,
-        NODE_ENV: "development",
-        ENABLE_TEST_AUTH_BYPASS: "true",
-        PORT: "8081",
-      },
-      cwd: process.cwd(),
-    });
-
-    devServer.stdout?.on("data", (data) => {
-      console.log(`[SERVER STDOUT] ${data.toString().trim()}`);
-    });
-    devServer.stderr?.on("data", (data) => {
-      console.error(`[SERVER STDERR] ${data.toString().trim()}`);
-    });
-
-    // Wait for server to be ready
-    let ready = false;
-    for (let attempt = 1; attempt <= 150; attempt++) {
-      try {
-        const res = await fetch(`${API_BASE}/courses`, { headers: HEADERS });
-        if (res.status === 200) {
-          ready = true;
-          break;
-        }
-      } catch {
-        await new Promise((r) => setTimeout(r, 1000));
-      }
-    }
-
-    if (!ready) {
-      throw new Error("Server failed to start");
-    }
+    // Start the API server in-process
+    server = app.listen(8081);
+    await new Promise((r) => setTimeout(r, 200));
 
     const employee = await cleanDb();
 
@@ -254,6 +227,6 @@ test("Course 12 Full E2E Integration and Prerequisite Verification", async () =>
     assert.equal(certs[0].certificateTitle, "EcoLearnHub Core Sustainability Certificate", "Expected correct certificate title");
 
   } finally {
-    devServer?.kill();
+    server?.close();
   }
 });

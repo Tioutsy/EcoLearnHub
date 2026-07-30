@@ -15,7 +15,12 @@ router.get("/:enrollmentId", async (req, res): Promise<void> => {
   }
 
   const [enrollment] = await db
-    .select({ courseId: enrollmentsTable.courseId })
+    .select({
+      courseId: enrollmentsTable.courseId,
+      userId: enrollmentsTable.userId,
+      employeeId: enrollmentsTable.employeeId,
+      companyId: enrollmentsTable.companyId,
+    })
     .from(enrollmentsTable)
     .where(eq(enrollmentsTable.id, enrollmentId))
     .limit(1);
@@ -27,30 +32,32 @@ router.get("/:enrollmentId", async (req, res): Promise<void> => {
 
   const { getCompanyAccess } = await import("../lib/access");
   const access = await getCompanyAccess(req);
-  const isPlatformAdmin = access.role === "platform_admin";
 
-  if (!isPlatformAdmin) {
-    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
-    const accessDecision = await evaluateCourseAccess(enrollment.courseId, access);
-    if (!accessDecision.allowed) {
-      res.status(403).json({
-        error: accessDecision.reason,
-        message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
-          ? `Progress is locked. This course requires the ${accessDecision.requiredPlanName} plan.`
-          : "Access denied.",
-        requiredPlanCode: accessDecision.requiredPlanCode,
-        requiredPlanName: accessDecision.requiredPlanName,
-      });
-      return;
-    }
+  const isOwner =
+    enrollment.userId === access.userId ||
+    (access.employee && enrollment.employeeId === access.employee.id) ||
+    (access.employee && enrollment.userId === access.employee.email) ||
+    (access.companyId && enrollment.companyId === access.companyId) ||
+    access.role === "platform_admin";
+
+  if (!isOwner) {
+    res.status(403).json({ error: "Access denied to this enrollment" });
+    return;
   }
 
-  const { checkCourseEligibility } = await import("../lib/prerequisites");
-  const eligibility = await checkCourseEligibility(enrollment.courseId, access);
-  if (!eligibility.eligible && !isPlatformAdmin) {
+  const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+  const accessDecision = await evaluateCourseAccess(enrollment.courseId, access);
+
+  if (!accessDecision.allowed) {
     res.status(403).json({
-      error: "PREREQUISITES_INCOMPLETE",
-      message: "You must complete all prerequisite courses before accessing progress."
+      error: accessDecision.reason === "PREREQUISITE_REQUIRED" ? "PREREQUISITES_INCOMPLETE" : accessDecision.reason,
+      message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+        ? `Progress is locked. This course requires the ${accessDecision.requiredPlanName} plan.`
+        : accessDecision.reason === "PREREQUISITE_REQUIRED"
+        ? "You must complete all prerequisite courses before accessing progress."
+        : "Access denied.",
+      requiredPlanCode: accessDecision.requiredPlanCode,
+      requiredPlanName: accessDecision.requiredPlanName,
     });
     return;
   }
@@ -81,7 +88,14 @@ router.patch("/:enrollmentId", async (req, res): Promise<void> => {
   }
 
   const [enr] = await db
-    .select({ courseId: enrollmentsTable.courseId, status: enrollmentsTable.status, completedAt: enrollmentsTable.completedAt })
+    .select({
+      courseId: enrollmentsTable.courseId,
+      status: enrollmentsTable.status,
+      completedAt: enrollmentsTable.completedAt,
+      userId: enrollmentsTable.userId,
+      employeeId: enrollmentsTable.employeeId,
+      companyId: enrollmentsTable.companyId,
+    })
     .from(enrollmentsTable)
     .where(eq(enrollmentsTable.id, enrollmentId))
     .limit(1);
@@ -93,30 +107,32 @@ router.patch("/:enrollmentId", async (req, res): Promise<void> => {
 
   const { getCompanyAccess } = await import("../lib/access");
   const access = await getCompanyAccess(req);
-  const isPlatformAdmin = access.role === "platform_admin";
 
-  if (!isPlatformAdmin) {
-    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
-    const accessDecision = await evaluateCourseAccess(enr.courseId, access);
-    if (!accessDecision.allowed) {
-      res.status(403).json({
-        error: accessDecision.reason,
-        message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
-          ? `Progress update blocked. This course requires the ${accessDecision.requiredPlanName} plan.`
-          : "Access denied.",
-        requiredPlanCode: accessDecision.requiredPlanCode,
-        requiredPlanName: accessDecision.requiredPlanName,
-      });
-      return;
-    }
+  const isOwner =
+    enr.userId === access.userId ||
+    (access.employee && enr.employeeId === access.employee.id) ||
+    (access.employee && enr.userId === access.employee.email) ||
+    (access.companyId && enr.companyId === access.companyId) ||
+    access.role === "platform_admin";
+
+  if (!isOwner) {
+    res.status(403).json({ error: "Access denied to this enrollment" });
+    return;
   }
 
-  const { checkCourseEligibility } = await import("../lib/prerequisites");
-  const eligibility = await checkCourseEligibility(enr.courseId, access);
-  if (!eligibility.eligible && !isPlatformAdmin) {
+  const { evaluateCourseAccess } = await import("../lib/courseAccessService");
+  const accessDecision = await evaluateCourseAccess(enr.courseId, access);
+
+  if (!accessDecision.allowed) {
     res.status(403).json({
-      error: "PREREQUISITES_INCOMPLETE",
-      message: "You must complete all prerequisite courses before accessing or updating progress."
+      error: accessDecision.reason === "PREREQUISITE_REQUIRED" ? "PREREQUISITES_INCOMPLETE" : accessDecision.reason,
+      message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
+        ? `Progress update blocked. This course requires the ${accessDecision.requiredPlanName} plan.`
+        : accessDecision.reason === "PREREQUISITE_REQUIRED"
+        ? "You must complete all prerequisite courses before accessing or updating progress."
+        : "Access denied.",
+      requiredPlanCode: accessDecision.requiredPlanCode,
+      requiredPlanName: accessDecision.requiredPlanName,
     });
     return;
   }

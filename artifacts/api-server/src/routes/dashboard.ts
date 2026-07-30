@@ -9,6 +9,8 @@ import {
 } from "@workspace/db";
 import { eq, count, sum, sql, and } from "drizzle-orm";
 
+import { getCompanyAccess } from "../lib/access";
+
 const router = Router();
 
 async function getPrimaryCompany() {
@@ -16,9 +18,22 @@ async function getPrimaryCompany() {
   return companies[0] ?? null;
 }
 
-router.get("/stats", async (_req, res): Promise<void> => {
-  const company = await getPrimaryCompany();
-  if (!company) {
+router.get("/stats", async (req, res): Promise<void> => {
+  let targetCompanyId: number | null = null;
+  try {
+    const access = await getCompanyAccess(req);
+    if (access.companyId && access.companyId > 0) {
+      targetCompanyId = access.companyId;
+    }
+  } catch (e) {
+    // Fall back to primary company if unauthenticated/guest
+  }
+
+  if (!targetCompanyId) {
+    const primary = await getPrimaryCompany();
+    targetCompanyId = primary?.id ?? 1;
+  }
+  if (!targetCompanyId) {
     res.json({
       totalEmployees: 0,
       activeEmployees: 0,
@@ -52,13 +67,13 @@ router.get("/stats", async (_req, res): Promise<void> => {
       avgScore: sql<number>`coalesce(round(avg(${employeesTable.avgScore}) filter (where ${employeesTable.completedCourses} > 0)), 0)`,
     })
     .from(employeesTable)
-    .where(eq(employeesTable.companyId, company.id));
+    .where(eq(employeesTable.companyId, targetCompanyId));
 
   // Challenge metrics calculations
   const participations = await db
     .select()
     .from(challengeParticipantsTable)
-    .where(eq(challengeParticipantsTable.companyId, company.id));
+    .where(eq(challengeParticipantsTable.companyId, targetCompanyId));
 
   const uniqueParticipants = new Set(participations.map((p) => p.userId));
   const employeesParticipatingInChallenges = uniqueParticipants.size;

@@ -13,7 +13,7 @@ const COURSE_ID = 10; // Carbon Footprint Awareness originally ID 10 in skeleton
 const COURSE_SLUG = "carbon-footprint-awareness";
 const COURSE_TITLE = "Carbon Footprint Awareness";
 const BADGE_SLUG = "carbon-aware";
-const SEED_NAME = "carbon-footprint-awareness-v1";
+const SEED_NAME = "carbon-footprint-awareness-v2";
 const SKELETON_BADGE_SLUG = "carbon-aware"; // Needs to match whatever the skeleton generated
 
 const COURSE_META = {
@@ -487,7 +487,7 @@ export async function ensureCarbonFootprintCourse(): Promise<void> {
         orderIndex: lesson.order,
         durationMinutes: lesson.minutes,
         content: JSON.stringify(lesson),
-        contentBlocks: [],
+        contentBlocks: lesson.blocks || [],
       }));
       await tx.insert(lessonsTable).values(lessonsToInsert);
 

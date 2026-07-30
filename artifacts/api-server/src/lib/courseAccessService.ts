@@ -5,9 +5,10 @@ import {
   subscriptionPlansTable,
   planCourseEntitlementsTable,
 } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { CompanyAccess } from "./access";
 import { checkCourseEligibility } from "./prerequisites";
+import { logger } from "./logger";
 
 export interface CourseAccessDecision {
   allowed: boolean;
@@ -15,6 +16,7 @@ export interface CourseAccessDecision {
     | "INCLUDED_IN_PLAN"
     | "PLAN_UPGRADE_REQUIRED"
     | "SUBSCRIPTION_INACTIVE"
+    | "COMPANY_NOT_ASSIGNED"
     | "PREREQUISITE_REQUIRED"
     | "COURSE_UNAVAILABLE"
     | "UNAUTHORISED";
@@ -28,18 +30,8 @@ export async function evaluateCourseAccess(
   courseId: number,
   accessContext: CompanyAccess | null
 ): Promise<CourseAccessDecision> {
-  // 1. Platform admins always have full access
+  // 1. Authenticated platform administrators have immediate, full course access override
   if (accessContext && accessContext.role === "platform_admin") {
-    const eligibility = await checkCourseEligibility(courseId, accessContext);
-    if (!eligibility.eligible) {
-      const missingIds = eligibility.prerequisites.filter(p => p.requirementType === "required" && !p.completed).map(p => p.courseId);
-      return {
-        allowed: false,
-        reason: "PREREQUISITE_REQUIRED",
-        missingPrerequisiteCourseIds: missingIds,
-        prerequisiteDetails: eligibility.prerequisites,
-      };
-    }
     return { allowed: true, reason: "INCLUDED_IN_PLAN" };
   }
 
@@ -75,32 +67,50 @@ export async function evaluateCourseAccess(
   const requiredPlanCode = (lowestEntitledPlan?.planCode || "COMPLETE") as "ESSENTIAL" | "PROFESSIONAL" | "COMPLETE";
   const requiredPlanName = lowestEntitledPlan?.planName || "Complete";
 
-  // 3. Resolve Company Subscription
-  let companyPlanCode: string = "COMPLETE"; // Default for guest or individual learners if no company ID bound
-  let isSubscriptionActive = true;
-
-  if (accessContext && accessContext.companyId) {
-    const subscription = await db
-      .select({
-        status: companySubscriptionsTable.status,
-        planCode: subscriptionPlansTable.code,
-        planOrder: subscriptionPlansTable.displayOrder,
-      })
-      .from(companySubscriptionsTable)
-      .innerJoin(subscriptionPlansTable, eq(companySubscriptionsTable.subscriptionPlanId, subscriptionPlansTable.id))
-      .where(eq(companySubscriptionsTable.companyId, accessContext.companyId))
-      .limit(1)
-      .then(r => r[0]);
-
-    if (subscription) {
-      companyPlanCode = subscription.planCode;
-      if (subscription.status !== "ACTIVE" && subscription.status !== "PENDING") {
-        isSubscriptionActive = false;
-      }
-    }
+  // 3. Resolve Company & Subscription (Fail closed: No implicit COMPLETE fallback)
+  if (!accessContext || !accessContext.companyId) {
+    return {
+      allowed: false,
+      reason: "COMPANY_NOT_ASSIGNED",
+      requiredPlanCode,
+      requiredPlanName,
+    };
   }
 
-  if (!isSubscriptionActive) {
+  const matchingSubs = await db
+    .select({
+      status: companySubscriptionsTable.status,
+      planCode: subscriptionPlansTable.code,
+      planOrder: subscriptionPlansTable.displayOrder,
+    })
+    .from(companySubscriptionsTable)
+    .innerJoin(subscriptionPlansTable, eq(companySubscriptionsTable.subscriptionPlanId, subscriptionPlansTable.id))
+    .where(eq(companySubscriptionsTable.companyId, accessContext.companyId))
+    .orderBy(
+      desc(companySubscriptionsTable.updatedAt),
+      desc(companySubscriptionsTable.id)
+    );
+
+  if (matchingSubs.length > 1) {
+    logger.warn(
+      { companyId: accessContext.companyId, count: matchingSubs.length },
+      "Multiple company subscriptions found during course access evaluation. Selecting deterministic latest record."
+    );
+  }
+
+  const subscription = matchingSubs[0];
+
+  if (!subscription) {
+    return {
+      allowed: false,
+      reason: "SUBSCRIPTION_INACTIVE",
+      requiredPlanCode,
+      requiredPlanName,
+    };
+  }
+
+  const companyPlanCode = subscription.planCode;
+  if (subscription.status !== "ACTIVE" && subscription.status !== "PENDING") {
     return {
       allowed: false,
       reason: "SUBSCRIPTION_INACTIVE",
@@ -121,7 +131,7 @@ export async function evaluateCourseAccess(
     };
   }
 
-  // 5. Hard Prerequisites Check
+  // 5. Learner Prerequisites Check
   const eligibility = await checkCourseEligibility(courseId, accessContext);
   if (!eligibility.eligible) {
     const missingIds = eligibility.prerequisites.filter(p => p.requirementType === "required" && !p.completed).map(p => p.courseId);

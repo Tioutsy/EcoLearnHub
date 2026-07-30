@@ -1,6 +1,7 @@
 import { db } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { logger } from "./logger";
+import { detectAndResolveDuplicateCompanySubscriptions } from "./subscriptionDiagnostics";
 
 async function columnExists(table: string, column: string): Promise<boolean> {
   try {
@@ -23,6 +24,26 @@ async function tableExists(table: string): Promise<boolean> {
       WHERE table_schema = 'public' AND table_name = '${table}'
     `));
     return res.rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function constraintExists(constraintName: string): Promise<boolean> {
+  try {
+    const res = await db.execute(sql.raw(`
+      SELECT 1 
+      FROM pg_constraint 
+      WHERE conname = '${constraintName}'
+    `));
+    if (res.rows.length > 0) return true;
+
+    const idxRes = await db.execute(sql.raw(`
+      SELECT 1 
+      FROM pg_class 
+      WHERE relname = '${constraintName}'
+    `));
+    return idxRes.rows.length > 0;
   } catch {
     return false;
   }
@@ -447,11 +468,273 @@ export async function ensureSchemaModifications() {
           "cancelled_at" timestamp with time zone,
           "access_ends_at" timestamp with time zone,
           "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-          "updated_at" timestamp with time zone DEFAULT now() NOT NULL
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          CONSTRAINT "unique_company_subscription" UNIQUE("company_id")
         );
       `)
+    },
+    {
+      name: "Ensure unique_company_subscription constraint",
+      check: () => constraintExists("unique_company_subscription"),
+      execute: async () => {
+        await detectAndResolveDuplicateCompanySubscriptions();
+        await db.execute(sql`
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint WHERE conname = 'unique_company_subscription'
+            ) AND NOT EXISTS (
+              SELECT 1 FROM pg_class WHERE relname = 'unique_company_subscription'
+            ) THEN
+              ALTER TABLE "company_subscriptions" ADD CONSTRAINT "unique_company_subscription" UNIQUE("company_id");
+            END IF;
+          END $$;
+        `);
+      }
+    },
+    {
+      name: "Ensure employees table status column",
+      check: async () => await columnExists("employees", "status"),
+      execute: async () => {
+        await db.execute(sql`ALTER TABLE "employees" ADD COLUMN IF NOT EXISTS "status" text NOT NULL DEFAULT 'active';`);
+      }
+    },
+    {
+      name: "Ensure departments table",
+      check: async () => await tableExists("departments"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "departments" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL,
+            "name" text NOT NULL,
+            "code" text,
+            "status" text NOT NULL DEFAULT 'active',
+            "manager_employee_id" integer,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure audit_logs table",
+      check: async () => await tableExists("audit_logs"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "audit_logs" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL,
+            "actor_user_id" text NOT NULL,
+            "actor_role" text NOT NULL,
+            "action" text NOT NULL,
+            "target_type" text NOT NULL,
+            "target_id" text,
+            "metadata" text,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure notification_delivery_logs table",
+      check: async () => await tableExists("notification_delivery_logs"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "notification_delivery_logs" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL,
+            "employee_id" integer,
+            "user_id" text,
+            "assignment_id" integer,
+            "notification_type" text NOT NULL,
+            "channel" text NOT NULL DEFAULT 'email',
+            "recipient" text NOT NULL,
+            "deduplication_key" text NOT NULL UNIQUE,
+            "scheduled_for" timestamp with time zone,
+            "attempted_at" timestamp with time zone,
+            "delivered_at" timestamp with time zone,
+            "status" text NOT NULL DEFAULT 'pending',
+            "retry_count" integer NOT NULL DEFAULT 0,
+            "failure_code" text,
+            "failure_message" text,
+            "provider_message_id" text,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure notification_preferences table",
+      check: async () => await tableExists("notification_preferences"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "notification_preferences" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL,
+            "employee_id" integer,
+            "user_id" text,
+            "optional_engagement_reminders" boolean NOT NULL DEFAULT true,
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure training_interventions table",
+      check: async () => await tableExists("training_interventions"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "training_interventions" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL,
+            "employee_id" integer NOT NULL,
+            "assignment_id" integer,
+            "intervention_type" text NOT NULL,
+            "status" text NOT NULL DEFAULT 'pending',
+            "initiated_by_user_id" text NOT NULL,
+            "initiated_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "completed_at" timestamp with time zone,
+            "due_at" timestamp with time zone,
+            "reason_code" text,
+            "internal_note" text,
+            "related_notification_log_id" integer,
+            "outcome_code" text,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure learner_commitments table",
+      check: async () => await tableExists("learner_commitments"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "learner_commitments" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL,
+            "employee_id" integer NOT NULL,
+            "course_id" integer NOT NULL,
+            "course_version" integer NOT NULL DEFAULT 1,
+            "enrollment_id" integer,
+            "commitment_type" text NOT NULL DEFAULT 'suggested',
+            "commitment_text" text NOT NULL,
+            "target_date" timestamp with time zone,
+            "status" text NOT NULL DEFAULT 'planned',
+            "completed_at" timestamp with time zone,
+            "learner_reflection" text,
+            "manager_confirmation_status" text NOT NULL DEFAULT 'unrequested',
+            "manager_confirmed_by_user_id" text,
+            "manager_confirmed_at" timestamp with time zone,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure pilot_companies table",
+      check: () => tableExists("pilot_companies"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "pilot_companies" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
+            "pilot_status" text NOT NULL DEFAULT 'candidate',
+            "pilot_stage" text NOT NULL DEFAULT 'initial_contact',
+            "approved_by_user_id" text,
+            "approved_at" timestamp with time zone,
+            "planned_start_date" timestamp with time zone,
+            "actual_start_date" timestamp with time zone,
+            "planned_end_date" timestamp with time zone,
+            "actual_end_date" timestamp with time zone,
+            "target_learner_count" integer NOT NULL DEFAULT 20,
+            "approved_learner_limit" integer NOT NULL DEFAULT 50,
+            "selected_course_ids" integer[] NOT NULL DEFAULT '{}',
+            "primary_contact_name" text,
+            "primary_contact_email" text,
+            "internal_owner_user_id" text,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure pilot_learning_plans table",
+      check: () => tableExists("pilot_learning_plans"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "pilot_learning_plans" (
+            "id" serial PRIMARY KEY,
+            "pilot_company_id" integer NOT NULL,
+            "company_id" integer NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
+            "name" text NOT NULL,
+            "description" text,
+            "course_ids" integer[] NOT NULL DEFAULT '{}',
+            "required_course_ids" integer[] NOT NULL DEFAULT '{}',
+            "default_due_days" integer NOT NULL DEFAULT 30,
+            "commitment_enabled" boolean NOT NULL DEFAULT true,
+            "created_by_user_id" text,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure pilot_feedback_responses table",
+      check: () => tableExists("pilot_feedback_responses"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "pilot_feedback_responses" (
+            "id" serial PRIMARY KEY,
+            "pilot_company_id" integer,
+            "company_id" integer NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
+            "respondent_user_id" text NOT NULL,
+            "respondent_role" text NOT NULL DEFAULT 'learner',
+            "feedback_stage" text NOT NULL DEFAULT 'midpoint',
+            "overall_rating" integer NOT NULL DEFAULT 5,
+            "ease_of_use_rating" integer NOT NULL DEFAULT 5,
+            "content_relevance_rating" integer NOT NULL DEFAULT 5,
+            "reporting_usefulness_rating" integer,
+            "free_text_feedback" text,
+            "consent_for_follow_up" boolean NOT NULL DEFAULT false,
+            "submitted_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
+    },
+    {
+      name: "Ensure pilot_issues table",
+      check: () => tableExists("pilot_issues"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "pilot_issues" (
+            "id" serial PRIMARY KEY,
+            "pilot_company_id" integer,
+            "company_id" integer NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
+            "reported_by_user_id" text NOT NULL,
+            "issue_type" text NOT NULL DEFAULT 'content',
+            "severity" text NOT NULL DEFAULT 'medium',
+            "status" text NOT NULL DEFAULT 'new',
+            "title" text NOT NULL,
+            "description" text,
+            "affected_course_id" integer,
+            "assigned_owner_user_id" text,
+            "reported_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "resolved_at" timestamp with time zone,
+            "resolution_summary" text,
+            "release_blocking" boolean NOT NULL DEFAULT false,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+        `);
+      }
     }
   ];
+
+  await detectAndResolveDuplicateCompanySubscriptions();
 
   const summary = {
     checked: 0,

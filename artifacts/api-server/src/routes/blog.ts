@@ -5,45 +5,17 @@ import { eq, and } from "drizzle-orm";
 
 const router = Router();
 
-// Public Articles list (Insights)
+// Deprecated Article endpoints (Returns empty array / 410 Deprecated for public article requests)
 router.get("/insights/articles", async (_req, res): Promise<void> => {
-  try {
-    const posts = await db
-      .select()
-      .from(blogPostsTable)
-      .where(eq(blogPostsTable.status, "published"))
-      .orderBy(blogPostsTable.publishedAt);
-    res.json(posts);
-  } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
-  }
+  res.json([]);
 });
 
-// Public Single Article (Insights)
-router.get("/insights/articles/:slug", async (req, res): Promise<void> => {
-  try {
-    const raw = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
-    const [post] = await db
-      .select()
-      .from(blogPostsTable)
-      .where(
-        and(
-          eq(blogPostsTable.slug, raw),
-          eq(blogPostsTable.status, "published")
-        )
-      );
-    if (!post) {
-      res.status(404).json({ error: "Article not found" });
-      return;
-    }
-    res.json(post);
-  } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
-  }
+router.get("/insights/articles/:slug", async (_req, res): Promise<void> => {
+  res.status(410).json({ error: "Article section retired. Please refer to /mauritius-rules-resources." });
 });
 
-// Public Mauritius resources list
-router.get("/insights/mauritius-resources", async (req, res): Promise<void> => {
+// Public Mauritius resources list (canonical + legacy aliases)
+const handleMauritiusResources = async (req: any, res: any): Promise<void> => {
   try {
     const { resourceType, sector, authority } = req.query;
     const conditions = [eq(mauritiusResourcesTable.status, "published")];
@@ -68,10 +40,9 @@ router.get("/insights/mauritius-resources", async (req, res): Promise<void> => {
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
-});
+};
 
-// Public Single Mauritius resource
-router.get("/insights/mauritius-resources/:slug", async (req, res): Promise<void> => {
+const handleMauritiusResourceDetail = async (req: any, res: any): Promise<void> => {
   try {
     const raw = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
     const [resource] = await db
@@ -92,7 +63,12 @@ router.get("/insights/mauritius-resources/:slug", async (req, res): Promise<void
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }
-});
+};
+
+router.get("/mauritius-resources", handleMauritiusResources);
+router.get("/insights/mauritius-resources", handleMauritiusResources);
+router.get("/mauritius-resources/:slug", handleMauritiusResourceDetail);
+router.get("/insights/mauritius-resources/:slug", handleMauritiusResourceDetail);
 
 // Deprecated /blog legacy compatibility endpoint
 router.get("/blog", async (_req, res): Promise<void> => {

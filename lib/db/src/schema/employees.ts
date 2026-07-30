@@ -11,6 +11,7 @@ export const employeesTable = pgTable("employees", {
   department: text("department"),
   jobTitle: text("job_title"),
   role: text("role").notNull().default("employee"),
+  status: text("status").notNull().default("active"), // "active" | "deactivated"
   invitationStatus: text("invitation_status").notNull().default("not_invited"),
   invitationToken: text("invitation_token"),
   invitationSentAt: timestamp("invitation_sent_at", { withTimezone: true }),
