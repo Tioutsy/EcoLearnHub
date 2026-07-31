@@ -6,20 +6,20 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
 } from "@workspace/db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_ID = 2;
 const COURSE_SLUG = "waste-sorting-mauritian-bin-system";
 const COURSE_TITLE = "Waste Sorting & the Mauritian Bin System";
 const BADGE_SLUG = "sorting-champion";
-const SEED_NAME = "waste-sorting-mauritian-bin-system-v1";
+const SEED_NAME = "waste-sorting-mauritian-bin-system-v2";
 
 const COURSE_META = {
   description:
-    "Help employees identify common workplace waste, make better sorting decisions, reduce contamination and understand that recycling arrangements can differ between workplaces and collection providers.",
+    "Help employees identify common workplace waste, make better sorting decisions, reduce contamination, and understand that recycling rules depend on your employer's designated waste collector.",
   fullDescription:
-    "This course covers simple habits and systems that can lower environmental impact through correct waste separation and recycling. Tailored specifically for Mauritian workplaces, it highlights the local island realities and explains why you must follow workplace labels rather than guessing.",
+    "This course covers simple habits and practical systems that lower environmental impact through correct waste separation and recycling. Tailored specifically for Mauritian workplaces, it highlights local island constraints—such as Mare Chicose landfill limits—and explains why you must always follow workplace bin labels rather than assuming a single universal national color scheme.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "1400.00",
@@ -27,11 +27,11 @@ const COURSE_META = {
   isFeatured: false,
   thumbnailUrl: "/images/courses/waste-sorting.png",
   learningObjectives: [
-    "Distinguish between recyclable, non-recyclable, organic and potentially hazardous workplace waste.",
-    "Identify common causes of recycling contamination.",
-    "Use workplace bin labels and collection instructions correctly.",
-    "Make appropriate sorting decisions in realistic Mauritian workplace situations.",
-    "Take one practical action to improve waste sorting at work."
+    "Identify common workplace waste categories and clean recyclable materials.",
+    "Separate clean, accepted materials from contaminated or unsuitable items.",
+    "Follow workplace-specific bin labels and approved collector instructions.",
+    "Recognise special waste (like batteries and e-waste) that requires escalation.",
+    "Take practical action to reduce sorting mistakes and avoid landfill contamination."
   ],
   includesCertificate: true,
   passingScore: 80,
@@ -44,21 +44,21 @@ const NEW_LESSONS = [
     order: 0,
     title: "The Workplace Bin Decision",
     minutes: 3,
-    content: "Understand why checking bin labels is the golden rule.",
+    content: "Understand why checking bin labels is the golden rule in Mauritian workplaces.",
     blocks: [
       { id: "ws1-h1", type: "heading", position: 1, headingText: "Where Does This Go?" },
-      { id: "ws1-t1", type: "short_text", position: 2, bodyText: "When you have waste to dispose of at work, how do you decide which bin to use? Guess-based sorting often leads to contamination, which means recyclable items end up in Mare Chicose landfill instead." },
-      { id: "ws1-k1", type: "key_message", position: 3, headingText: "Follow Workplace Labels First", bodyText: "Different companies use different waste collectors and bin systems. The golden rule is always to follow the labels on your bins rather than guessing or assuming a generic color system applies." },
+      { id: "ws1-t1", type: "short_text", position: 2, bodyText: "You are standing at a workplace waste station holding a plastic bottle, a takeaway container with food residue, a used battery, and a paper napkin. You have only a few seconds to decide where each item belongs. Guessing leads to recycling contamination." },
+      { id: "ws1-k1", type: "key_message", position: 3, headingText: "Follow Workplace Labels First", bodyText: "Different companies in Mauritius contract different waste collection services. There is no single universal national color scheme for commercial bins across all facilities. Always follow the explicit printed labels on your site's bins rather than assuming a generic color rule applies." },
       {
         id: "ws1-d1",
         type: "decision_scenario",
         position: 4,
-        decisionIntro: "Try this workplace decision scenario:",
-        decisionPrompt: "You have a lunch container that has some plastic parts but also paper labels. You are not sure which recycling bin it belongs to. What do you do?",
+        decisionIntro: "Workplace decision scenario:",
+        decisionPrompt: "You have a lunch packaging box with paper labels and plastic lining. You are unsure which recycling stream accepts it at your workplace. What should you do?",
         decisionChoices: [
-          { label: "Read the labels on the kitchen sorting station bins before discarding it", correct: true, feedback: "Perfect! Workplace labels are the most accurate guide for your specific site's waste collection." },
-          { label: "Throw it in the nearest yellow bin because it looks mostly like plastic", correct: false, feedback: "Incorrect. Guessing can lead to recycling contamination." },
-          { label: "Throw it in the general waste bin to avoid thinking about it", correct: false, feedback: "That goes straight to Mare Chicose. It is better to check the labels first." }
+          { label: "Check the printed bin label and workplace waste guide before discarding it", correct: true, feedback: "Perfect! Workplace labels and collector guidelines are the only authoritative guide for your site." },
+          { label: "Toss it into the yellow bin because it looks mostly like plastic", correct: false, feedback: "Incorrect. Guessing can contaminate an entire clean batch of recyclable packaging." },
+          { label: "Throw it in general waste to avoid thinking about it", correct: false, feedback: "This sends recyclable material straight to Mare Chicose landfill. Check site labels first." }
         ]
       },
       {
@@ -67,208 +67,166 @@ const NEW_LESSONS = [
         position: 5,
         mcqQuestion: "Why should you always follow your workplace labels instead of relying on a general color rule?",
         mcqOptions: [
-          "Bin colors and accepted materials can vary between sites and collection providers",
-          "Workplaces do not really care about recycling",
-          "All offices use the exact same waste collector",
-          "Only organic waste is collected in Mauritius"
+          "Bin labels and accepted items vary between commercial sites and waste collectors",
+          "Mauritian companies do not bother sorting waste",
+          "All Mauritian offices share one national waste collection truck",
+          "Only food scraps are sorted in Mauritian offices"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Recycling arrangements are set by specific companies and their chosen waste collectors. Always follow local labels.",
-        mcqIncorrectExplanation: "Incorrect. Bin systems can differ between sites and collectors."
+        mcqCorrectExplanation: "Commercial waste arrangements depend on your employer's contracted waste service provider. Always follow local site instructions.",
+        mcqIncorrectExplanation: "Incorrect. Collection rules and bin systems vary by collector and site."
       }
     ]
   },
   {
     order: 1,
-    title: "What Happens After We Throw Something Away?",
+    title: "The Journey of Waste & Mauritian Island Realities",
     minutes: 3,
-    content: "Discover why clean separation matters.",
+    content: "Discover why clean separation matters on an island.",
     blocks: [
-      { id: "ws2-h1", type: "heading", position: 1, headingText: "The Journey of Waste" },
-      { id: "ws2-t1", type: "short_text", position: 2, bodyText: "When you drop something in a bin, its journey is just beginning. How we sort it determines whether it is recovered as a resource or buried in the ground." },
-      { id: "ws2-k1", type: "key_message", position: 3, headingText: "The Waste Journey in Mauritius", bodyText: "Mixed general waste goes to the Mare Chicose landfill, which has limited capacity. Clean, sorted materials are taken by approved collectors to processing centres to be recycled into new products." },
+      { id: "ws2-h1", type: "heading", position: 1, headingText: "The Journey of Waste in Mauritius" },
+      { id: "ws2-t1", type: "short_text", position: 2, bodyText: "On an island like Mauritius, land and freshwater resources are finite. When waste is thrown into a general bin, its destination is the Mare Chicose landfill, which faces strict capacity constraints." },
+      {
+        id: "ws2-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Three Sorting Perspectives",
+        bodyText: "• Employee Relevance: Clear sorting habits prevent messy kitchen areas and reduce handling confusion.\n• Business Relevance: Clean, sorted waste reduces waste management fees and supports company ESG compliance.\n• Environmental Relevance: Keeping clean recyclables out of Mare Chicose extends landfill life and reduces green-house emissions."
+      },
       {
         id: "ws2-d1",
         type: "decision_scenario",
         position: 4,
-        decisionIntro: "A logistics scenario:",
-        decisionPrompt: "You see the cleaning team collecting trash, and they notice recyclables are mixed with organic food scraps. What is the impact?",
+        decisionIntro: "Workplace canteen scenario:",
+        decisionPrompt: "The cleaning team notices organic food scraps mixed into a bin of dry paper. What is the operational impact?",
         decisionChoices: [
-          { label: "The entire batch may be rejected and sent to the landfill", correct: true, feedback: "Exactly. Mixed food residue contaminates paper and cardboard, making them unrecyclable." },
-          { label: "They will sort it out piece by piece at the truck", correct: false, feedback: "Collectors do not hand-separate contaminated waste; it goes to landfill." },
-          { label: "It will naturally biodegrade in the plastic bin", correct: false, feedback: "Plastic bins do not biodegrade, and mixed waste doesn't decompose properly in landfills." }
+          { label: "The entire batch of paper may be rejected by the collector and sent to landfill", correct: true, feedback: "Correct! Food grease and moisture spoil paper fibers, rendering them unrecyclable." },
+          { label: "The waste collector will wash and dry the paper by hand", correct: false, feedback: "Collectors do not hand-wash contaminated paper; dirty paper is discarded to landfill." },
+          { label: "It naturally turns into compost inside the plastic bin", correct: false, feedback: "Paper mixed with plastic packaging in sealed bins does not compost properly." }
         ]
-      },
-      {
-        id: "ws2-m1",
-        type: "multiple_choice",
-        position: 5,
-        mcqQuestion: "What happens to a bin of recyclable paper if it is mixed with food scraps?",
-        mcqOptions: [
-          "It is sent to the landfill because food residue contaminates the paper",
-          "It is washed and recycled anyway",
-          "It is turned into organic compost",
-          "It is exported for free"
-        ],
-        mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Food residue spoils paper fibers, making them impossible to recycle.",
-        mcqIncorrectExplanation: "Incorrect. Contamination ruins paper recycling."
       }
     ]
   },
   {
     order: 2,
-    title: "Recognising Common Workplace Waste",
-    minutes: 3,
-    content: "Learn how typical workplace materials are classified.",
+    title: "Understanding Waste Categories & Contamination",
+    minutes: 4,
+    content: "Learn material classifications and how contamination spoils recycling.",
     blocks: [
-      { id: "ws3-h1", type: "heading", position: 1, headingText: "Material Classifications" },
-      { id: "ws3-t1", type: "short_text", position: 2, bodyText: "Typical workplace materials belong in different streams. Let's look at how they are classified." },
+      { id: "ws3-h1", type: "heading", position: 1, headingText: "Material Classifications & Contamination Rules" },
+      { id: "ws3-t1", type: "short_text", position: 2, bodyText: "Not everything made of paper or plastic can be recycled together. Contamination occurs when dirty or non-accepted items spoil clean recyclable streams." },
       {
-        id: "ws3-k1",
-        type: "key_message",
+        id: "ws3-f1",
+        type: "memorable_fact",
         position: 3,
-        headingText: "Common Material Categories",
-        bodyText: "• Clean recyclables: Clean paper, cardboard, plastic bottles, glass jars, and aluminium cans.\n• General/Residual waste: Food-contaminated packaging, greasy boxes, and soiled tissues.\n• Special waste: Batteries, electronic equipment, and printer cartridges."
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "Food-soiled cardboard (like greasy pizza boxes or oil-stained takeaway containers) cannot be recycled with clean office paper. The oil breaks down paper fibers during repulping. Always tear off clean cardboard tops for recycling and place greasy bottoms in general waste!"
       },
       {
         id: "ws3-w1",
         type: "workplace_example",
         position: 4,
-        headingText: "Approved Collectors Dictate Rules",
-        bodyText: "Always check your workplace instructions. What is accepted for recycling at one office might not be accepted at another because they use different waste collection providers."
+        headingText: "Empty, Separate & Clean",
+        bodyText: "Before placing containers in recycling streams: 1) Empty remaining liquids, 2) Remove heavy food residue, 3) Separate mixed materials (such as plastic lids from glass bottles)."
       },
       {
         id: "ws3-m1",
         type: "multiple_choice",
         position: 5,
-        mcqQuestion: "Which of the following is considered special waste and should never be put in general or recycling bins?",
+        mcqQuestion: "Which item is most likely to ruin a batch of clean paper recycling?",
         mcqOptions: [
-          "Used printer cartridges and batteries",
-          "Clean plastic bottles",
-          "Aluminium cans",
-          "Fruit peels"
+          "A greasy cardboard takeaway box with leftover sauce",
+          "A clean, flattened office envelope",
+          "A dry cardboard shipping box",
+          "A printed white paper memo"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Batteries and electronics contain hazardous materials and must go to a dedicated special collection point.",
-        mcqIncorrectExplanation: "Incorrect. Batteries and e-waste require specialized handling."
+        mcqCorrectExplanation: "Oil and food grease permeate paper fibers, making them impossible to repulp cleanly.",
+        mcqIncorrectExplanation: "Incorrect. Dry paper and cardboard are recyclable; oil and grease cause contamination."
       }
     ]
   },
   {
     order: 3,
-    title: "Contamination — When One Wrong Item Affects the Bin",
+    title: "Inspecting Your Workplace Sorting Station",
     minutes: 4,
-    content: "See how food residue and liquids ruin recycling.",
+    content: "Practice identifying workplace waste items and special disposal requirements.",
     blocks: [
-      { id: "ws4-h1", type: "heading", position: 1, headingText: "Contamination and How to Prevent It" },
-      { id: "ws4-t1", type: "short_text", position: 2, bodyText: "Contamination happens when non-recyclable or dirty items are placed in recycling bins, spoiling clean materials." },
+      { id: "ws4-h1", type: "heading", position: 1, headingText: "Workplace Waste Inspection" },
+      { id: "ws4-t1", type: "short_text", position: 2, bodyText: "Examine a real Mauritian workplace waste sorting station. Notice the labelled bins for Paper & Cardboard, Plastics & Cans, and General Waste." },
       {
-        id: "ws4-w1",
-        type: "workplace_example",
+        id: "ws4-img1",
+        type: "visual_question",
         position: 3,
-        headingText: "Mauritian Workplace Contamination",
-        bodyText: "In a hotel restaurant or office canteen, putting a half-empty fruit juice box into the paper bin will soak and ruin the clean cardboard around it."
+        imageUrl: "/images/courses/visual-workplace-waste-station.png",
+        caption: "Workplace Waste Station Inspection: Clearly labelled bins for Paper & Cardboard, Plastics & Cans, and General Waste, with items on the adjacent counter.",
+        imageAlt: "Realistic photograph of a modern Mauritian workplace waste sorting station featuring clear printed labels for Paper & Cardboard, Plastics & Cans, and General Waste, with clean recyclables and a used battery on the adjacent counter."
       },
       {
-        id: "ws4-d1",
-        type: "decision_scenario",
+        id: "ws4-m1",
+        type: "multiple_choice",
         position: 4,
-        decisionIntro: "Cafeteria scenario:",
-        decisionPrompt: "You have a plastic bottle that is half-full of soda. What do you do before discarding it?",
-        decisionChoices: [
-          { label: "Empty the liquid, rinse if possible, and place in the plastic recycling bin", correct: true, feedback: "Perfect! Emptying and rinsing prevents liquid from leaking and contaminating other materials." },
-          { label: "Throw it directly in the recycling bin with the soda inside", correct: false, feedback: "Incorrect. Liquids leak and contaminate dry recyclables like paper." },
-          { label: "Leave it on the table for the cleaners to empty", correct: false, feedback: "Cleaners may not have time to empty individual bottles; do it yourself." }
-        ]
-      },
-      {
-        id: "ws4-d2",
-        type: "decision_scenario",
-        position: 5,
-        decisionIntro: "Catering scenario:",
-        decisionPrompt: "You have a cardboard pizza box from team lunch that has some cheese and oil stuck to the bottom. What do you do?",
-        decisionChoices: [
-          { label: "Tear off the clean top part for recycling, and throw the greasy bottom in general waste", correct: true, feedback: "Excellent. Separating clean cardboard from grease-soiled parts maximizes recycling." },
-          { label: "Throw the entire greasy box in the paper recycling bin", correct: false, feedback: "Incorrect. Grease ruins paper recycling processes." },
-          { label: "Throw the entire box in the organic bin", correct: false, feedback: "Cardboard with synthetic liners or excessive grease cannot easily be composted unless specified." }
-        ]
-      },
-      {
-        id: "ws4-p1",
-        type: "practical_action",
-        position: 6,
-        headingText: "Empty, Separate, and Clean",
-        bodyText: "Before recycling, perform these actions: empty liquids, separate different materials (like plastic caps from glass jars), and keep recyclables dry."
+        mcqQuestion: "In the workplace waste station scene above, which item must NEVER be placed in standard recycling or general waste bins without checking special disposal procedures?",
+        mcqOptions: [
+          "The used AA battery on the counter",
+          "The clean PET plastic water bottle",
+          "The flattened cardboard box",
+          "The aluminium beverage can"
+        ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Batteries contain corrosive chemicals and heavy metals. They pose fire and contamination hazards and require special e-waste/battery drop-off points.",
+        mcqIncorrectExplanation: "Incorrect. Clean bottles, cardboard, and cans are standard recyclables; batteries require dedicated hazardous waste escalation."
       }
     ]
   },
   {
     order: 4,
-    title: "Sorting in Real Workplace Situations",
-    minutes: 4,
-    content: "Apply sorting choices in canteens, canteens, and maintenance areas.",
+    title: "Practical Workplace Sorting & Escalation",
+    minutes: 3,
+    content: "Apply sorting choices in canteens, offices, and maintenance areas.",
     blocks: [
-      { id: "ws5-h1", type: "heading", position: 1, headingText: "Workplace Case Studies" },
-      { id: "ws5-t1", type: "short_text", position: 2, bodyText: "Let's apply waste sorting rules in different workplace environments in Mauritius." },
+      { id: "ws5-h1", type: "heading", position: 1, headingText: "Handling Uncertainty & Hazardous Items" },
+      { id: "ws5-t1", type: "short_text", position: 2, bodyText: "When sorting waste at work, you will encounter items that are unclear or hazardous. Never guess—follow escalation protocols." },
       {
         id: "ws5-d1",
         type: "decision_scenario",
         position: 3,
-        decisionIntro: "Restaurant & Canteen Situation:",
-        decisionPrompt: "You work in a staff canteen and are clearing plates. You have vegetable scraps, clean drink cans, and broken ceramic plates. How do you sort them?",
+        decisionIntro: "Office canteen scenario:",
+        decisionPrompt: "A new waste bin has missing or unreadable text labels, and colleagues are throwing mixed items inside. What is the best action?",
         decisionChoices: [
-          { label: "Vegetables in organic, cans in recycling, and broken ceramics in general waste", correct: true, feedback: "Perfect. Ceramics are not recyclable in standard bins, vegetables can be composted, and cans are recyclable." },
-          { label: "Put everything together in the black bin to clear tables faster", correct: false, feedback: "This wastes valuable organic compost and recyclable metal." },
-          { label: "Recycle the ceramics and cans together", correct: false, feedback: "Ceramics contaminate glass/metal recycling streams." }
+          { label: "Report the unreadable label to facilities/management and follow site instructions", correct: true, feedback: "Excellent! Resolving infrastructure and label clarity prevents site-wide sorting errors." },
+          { label: "Ignore the issue and throw whatever you want inside", correct: false, feedback: "Unclear labels cause contamination across the entire workplace waste stream." },
+          { label: "Remove the bin and throw all waste out the window", correct: false, feedback: "Never discard waste unsafely." }
         ]
       },
       {
-        id: "ws5-d2",
-        type: "decision_scenario",
+        id: "ws5-p1",
+        type: "practical_action",
         position: 4,
-        decisionIntro: "Retail & Warehouse Situation:",
-        decisionPrompt: "You are unpacking inventory in a retail warehouse. You have large clean cardboard boxes and plastic shipping straps. The blue bin is labeled 'Cardboard only'. What do you do?",
-        decisionChoices: [
-          { label: "Place only the cardboard in the blue bin, and throw the plastic straps in general waste", correct: true, feedback: "Excellent. Adhering strictly to collector instructions ensures the cardboard batch remains clean." },
-          { label: "Throw both cardboard and plastic straps in the blue bin", correct: false, feedback: "Plastic straps contaminate the cardboard recycling stream." },
-          { label: "Leave them mixed on the warehouse floor", correct: false, feedback: "This is a safety hazard and creates clutter." }
-        ]
-      },
-      {
-        id: "ws5-d3",
-        type: "decision_scenario",
-        position: 5,
-        decisionIntro: "Maintenance workshop:",
-        decisionPrompt: "You find empty aerosol spray cans and dried paint pots in the maintenance workshop. How do you dispose of them?",
-        decisionChoices: [
-          { label: "Separate them and check the hazardous/special waste instructions", correct: true, feedback: "Exactly. Aerosols and paint pots are special waste and require dedicated safety disposal." },
-          { label: "Throw them in the general waste bin", correct: false, feedback: "This poses safety and environmental risks in the general landfill." },
-          { label: "Place them in the yellow recycling bin", correct: false, feedback: "Aerosols and paint contaminate standard packaging recycling." }
-        ]
+        headingText: "Items Requiring Special Escalation",
+        bodyText: "Always escalate these items to your supervisor or facilities contact: 1) Batteries and e-waste, 2) Fluorescent light tubes, 3) Chemical container residues, 4) Medical or sharp objects."
       }
     ]
   },
   {
     order: 5,
-    title: "Your Waste-Sorting Commitment",
+    title: "Your Workplace Waste Commitment",
     minutes: 3,
-    content: "Make your workplace pledges.",
+    content: "Pledge practical workplace waste habits.",
     blocks: [
       { id: "ws6-h1", type: "heading", position: 1, headingText: "Pledge to Act" },
-      { id: "ws6-t1", type: "short_text", position: 2, bodyText: "Great work! You have finished the lessons. Now choose the habits you will carry forward in your workplace." },
+      { id: "ws6-t1", type: "short_text", position: 2, bodyText: "Congratulations on completing the waste sorting module! Select the daily habits you commit to practice in your workplace." },
       {
         id: "ws6-c1",
         type: "commitment",
         position: 3,
-        commitmentInstruction: "Select the commitments you will practice at work. Choose at least one:",
+        commitmentInstruction: "Select your daily workplace commitments (choose at least one):",
         commitmentOptions: [
-          { value: "check-label", label: "Check the label before using a bin", description: "Always read the label to ensure the item is accepted." },
-          { value: "keep-food-out", label: "Keep food and liquids out of dry-recycling bins", description: "Empty and rinse containers to avoid contamination." },
-          { value: "ask-unsure", label: "Ask when I am unsure", description: "Consult your team or supervisor instead of guessing." },
-          { value: "report-unclear", label: "Report unclear or missing bin labels", description: "Help your colleagues make correct sorting choices." },
-          { value: "reduce-single-use", label: "Reduce unnecessary single-use items", description: "Prevent waste before it starts by using reusables." },
-          { value: "keep-tidy", label: "Help keep the waste area tidy", description: "Ensure bin lids are closed and materials are neatly sorted." }
+          { value: "check-label", label: "Check printed bin labels before sorting unfamiliar items", description: "Always read site bin labels rather than guessing." },
+          { value: "empty-liquids", label: "Empty liquids and rinse containers before recycling", description: "Prevent liquid leakage and paper stream contamination." },
+          { value: "separate-cardboard", label: "Separate clean cardboard from food-greasy parts", description: "Keep dry paper streams clean and free of grease." },
+          { value: "escalate-batteries", label: "Escalate batteries and e-waste to special collection points", description: "Never dispose of hazardous batteries in standard bins." },
+          { value: "report-unclear", label: "Report missing or unreadable bin labels to facilities", description: "Help maintain clear sorting infrastructure for your team." }
         ]
       }
     ]
@@ -276,14 +234,71 @@ const NEW_LESSONS = [
 ];
 
 const NEW_QUIZ = [
-  { order: 1, question: "Where does most unsorted workplace waste in Mauritius end up?", options: ["The Mare Chicose landfill", "A local community compost site", "Exported to international recycling markets", "Incinerated at sea"], correct: 0, correctExplanation: "Most unsorted waste in Mauritius goes to the Mare Chicose landfill, making prevention and sorting critical to reduce landfill pressure.", incorrectExplanation: "Incorrect. Mare Chicose is the central landfill for the island." },
-  { order: 2, question: "Why should you always check the label on your workplace bins instead of assuming a color rule?", options: ["Workplace recycling rules depend on the chosen waste collector and may vary by site", "Workplace bins are only decorative", "Workplace waste is not sorted by hand", "Colors are randomly chosen by the cleaners"], correct: 0, correctExplanation: "Bin systems and accepted materials are determined by the company's approved collector, which differs across sites.", incorrectExplanation: "Incorrect. Specific sites contract specific collection services with distinct guidelines." },
-  { order: 3, question: "A paper recycling bin has been contaminated with organic food scraps. What is the most likely consequence?", options: ["The entire batch of paper may be rejected and sent to the landfill", "The paper is washed and recycled normally", "The food is separated manually at the truck", "The paper turns into compost"], correct: 0, correctExplanation: "Food grease and liquids contaminate paper fibers, making them unrecyclable. The contaminated batch is discarded.", incorrectExplanation: "Incorrect. Liquid and food residue contaminate cardboard and paper beyond recovery." },
-  { order: 4, question: "Which of the following is considered special waste and must never be thrown in general or recycling bins?", options: ["Used printer cartridges and batteries", "Empty glass water bottles", "Clean cardboard packaging", "Rinsed plastic containers"], correct: 0, correctExplanation: "E-waste, batteries, and cartridges contain hazardous elements and need specialized collection points.", incorrectExplanation: "Incorrect. Printer cartridges and batteries contain chemicals requiring hazardous waste management." },
-  { order: 5, question: "You have a clean glass container and a plastic cap. The bin is labeled 'Plastic and Glass'. What is the best practice?", options: ["Separate the plastic cap from the glass container, then recycle both", "Throw them in general waste to save sorting time", "Keep the plastic cap screwed tightly onto the glass container", "Recycle only the glass container and throw the cap away"], correct: 0, correctExplanation: "Separating different materials makes sorting at the processing facility much easier and cleaner.", incorrectExplanation: "Incorrect. Removing caps and separating components facilitates processing." },
-  { order: 6, question: "A plastic bottle contains some leftover soft drink. What should you do before placing it in the recycling bin?", options: ["Empty the liquid completely, rinse if possible, and recycle", "Throw it in recycling with the liquid inside", "Place it in the organic compost bin", "Throw it in general waste immediately"], correct: 0, correctExplanation: "Emptying and rinsing prevents liquids from leaking and contaminating other dry recyclables.", incorrectExplanation: "Incorrect. Remaining liquids can leak out and soil other clean packaging in the bin." },
-  { order: 7, question: "You have a cardboard food box that is heavily soiled with grease. How should it be sorted?", options: ["General waste bin, or tear off any clean parts for recycling", "Yellow recycling bin with the clean paper", "Organic bin for composting", "Hazardous special waste drop-off point"], correct: 0, correctExplanation: "Grease ruins paper recycling. Clean parts can be recycled, but heavily soiled parts must go to general waste.", incorrectExplanation: "Incorrect. Grease and oil residue disrupt the paper repulping process." },
-  { order: 8, question: "According to the waste hierarchy, which action is the most preferred environmental choice?", options: ["Refusing single-use cups and reducing unnecessary packaging", "Recycling plastic bottles in the yellow bin", "Burying waste in a double-lined landfill", "Recovering energy from waste incineration"], correct: 0, correctExplanation: "Refusing and reducing waste lies at the top of the hierarchy because preventing waste is always better than managing it.", incorrectExplanation: "Incorrect. Waste prevention (refusing/reducing) is always preferred over recycling or disposal." }
+  {
+    order: 1,
+    question: "Where does unsorted general waste in Mauritius ultimately end up?",
+    options: [
+      "The Mare Chicose landfill",
+      "Community compost facilities across the island",
+      "Exported for international recycling",
+      "Incinerated for renewable grid electricity"
+    ],
+    correct: 0,
+    correctExplanation: "Most unsorted waste in Mauritius goes to Mare Chicose landfill, making waste reduction and proper sorting essential.",
+    incorrectExplanation: "Incorrect. Mare Chicose is the central landfill site in Mauritius."
+  },
+  {
+    order: 2,
+    question: "Why must employees follow explicit workplace bin labels instead of assuming a universal national color scheme?",
+    options: [
+      "Waste collection rules depend on the specific collector contracted by your employer",
+      "Commercial bins are only decorative",
+      "All Mauritian workplaces use identical private recycling trucks",
+      "Only organic food waste is collected in Mauritius"
+    ],
+    correct: 0,
+    correctExplanation: "Different employers contract different waste collection services with unique guidelines and accepted items.",
+    incorrectExplanation: "Incorrect. Bin systems and accepted materials vary by employer and waste collector."
+  },
+  {
+    order: 3,
+    question: "How does food grease or residual liquid affect a bin of clean paper and cardboard?",
+    options: [
+      "It ruins paper fibers during repulping, often causing the entire batch to be sent to landfill",
+      "It gets washed off automatically during industrial paper recycling",
+      "It turns the paper into organic compost instantly",
+      "It increases the commercial value of recycled paper"
+    ],
+    correct: 0,
+    correctExplanation: "Grease and moisture disrupt repulping processes, contaminating dry paper streams beyond recovery.",
+    incorrectExplanation: "Incorrect. Food oil and moisture permanently spoil recyclable paper streams."
+  },
+  {
+    order: 4,
+    question: "Which item requires special hazardous waste handling and should NEVER go into standard office recycling or general bins?",
+    options: [
+      "Used batteries and electronic waste",
+      "Clean PET plastic water bottles",
+      "Flattened cardboard shipping boxes",
+      "Clean aluminum soda cans"
+    ],
+    correct: 0,
+    correctExplanation: "Batteries contain hazardous heavy metals and chemicals that require dedicated collection procedures.",
+    incorrectExplanation: "Incorrect. Batteries and e-waste must be escalated to special collection points."
+  },
+  {
+    order: 5,
+    question: "What is the best action when preparing a plastic bottle containing leftover liquid for recycling?",
+    options: [
+      "Empty all liquid, rinse if possible, and place in the plastic recycling bin",
+      "Throw it into the recycling bin with the liquid inside",
+      "Throw it into the paper recycling bin",
+      "Leave it on your desk for cleaning staff to handle"
+    ],
+    correct: 0,
+    correctExplanation: "Emptying liquids prevents leaks that destroy adjacent paper and cardboard recyclables.",
+    incorrectExplanation: "Incorrect. Liquids must be emptied before placing containers into recycling streams."
+  }
 ];
 
 export async function ensureWasteSortingCourse(): Promise<void> {
@@ -332,34 +347,26 @@ export async function ensureWasteSortingCourse(): Promise<void> {
         .from(quizQuestionsTable)
         .where(eq(quizQuestionsTable.courseId, courseId));
 
-      // 3. Evaluate integrity violations (incomplete or placeholder checks)
+      // 3. Evaluate integrity violations
       const hasMissingLessons = existingLessons.length !== 6;
       const hasEmptyBlocks = existingLessons.some(
         (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
       );
-      const hasPlaceholderText = existingLessons.some(
-        (l) => l.title.includes("[DRAFT SKELETON]") || (l.content || "").includes("[DRAFT SKELETON]")
-      );
-      const hasMissingQuiz = existingQuizQuestions.length !== 8;
-      const hasPlaceholderQuiz = existingQuizQuestions.some(
-        (q) => q.question.includes("[DRAFT SKELETON]")
-      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 5;
       const hasIncorrectSlug = course.slug !== COURSE_SLUG;
 
       const needsRepair = !existingSeed ||
                           hasMissingLessons ||
                           hasEmptyBlocks ||
-                          hasPlaceholderText ||
                           hasMissingQuiz ||
-                          hasPlaceholderQuiz ||
                           hasIncorrectSlug;
 
       if (!needsRepair) {
-        logger.info({ courseId, slug: COURSE_SLUG }, "Waste Sorting course content and integrity verified. Skipping repair to preserve administrator edits...");
+        logger.info({ courseId, slug: COURSE_SLUG }, "Waste Sorting course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
         return;
       }
 
-      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing seed detected for Course 2. Re-seeding course content and lessons transactionally...");
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course 2. Re-seeding course content and lessons transactionally...");
 
       // 4. Resolve next recommended course dynamically by slug
       const [nextCourse] = await tx
@@ -395,7 +402,6 @@ export async function ensureWasteSortingCourse(): Promise<void> {
         .where(eq(coursesTable.id, courseId));
 
       // 6. Seed/re-seed lessons with exact position block arrays
-      // To preserve admin manual modifications to lesson orders, only insert/overwrite our specific 6 lessons
       await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
       for (const newLesson of NEW_LESSONS) {
         await tx.insert(lessonsTable).values({
@@ -450,11 +456,13 @@ export async function ensureWasteSortingCourse(): Promise<void> {
       if (!existingSeed) {
         await tx.insert(systemSeedsTable).values({
           name: SEED_NAME,
-          version: 1,
+          version: 2,
         });
+      } else {
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      logger.info({ courseId, slug: COURSE_SLUG }, "Waste Sorting & Mauritian Bin System course seed / repair transaction completed successfully.");
+      logger.info({ courseId, slug: COURSE_SLUG }, "Waste Sorting & Mauritian Bin System course v2 seed / repair transaction completed successfully.");
     });
   } catch (err) {
     logger.error({ err }, "Failed to execute idempotent seeding/repair of Waste Sorting course");
