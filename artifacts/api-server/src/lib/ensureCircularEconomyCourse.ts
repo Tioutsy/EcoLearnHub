@@ -5,571 +5,398 @@ import {
   quizQuestionsTable,
   badgeDefinitionsTable,
   systemSeedsTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
-import { eq, or, inArray } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_ID = 11;
 const COURSE_SLUG = "circular-economy";
 const COURSE_TITLE = "Circular Economy";
 const BADGE_SLUG = "circular-economy-practitioner";
-const SEED_NAME = "circular-economy-v1";
-const SKELETON_BADGE_SLUG = "circular-economy-badge";
+const SEED_NAME = "circular-economy-v2";
+const SKELETON_BADGE_SLUG = "circular-economy-badge"; // catalogue skeleton slug — do not delete
 
 const COURSE_META = {
-  description: "Learn how workplaces can prevent waste, extend the useful life of products and equipment, retain material value and make more circular operational decisions.",
-  fullDescription: "Learn how workplaces can prevent waste, extend the useful life of products and equipment, retain material value and make more circular operational decisions.",
+  description:
+    "Learn how workplaces can prevent waste, extend product useful life, retain material value, and make circular operational decisions beyond basic recycling.",
+  fullDescription:
+    "This course provides employees across all roles with a practical, workplace-focused introduction to circular economy principles. Learn how organizations transition from linear 'take-make-dispose' habits to value-retention practices, apply the 9-step Circular Value Hierarchy, execute the CHECK–USE–CARE–SHARE–RECOVER protocol, and protect product safety and data security.",
   categoryId: 1,
-  durationMinutes: 20,
-  priceUsd: "0.00",
-  level: "advanced",
+  durationMinutes: 18,
+  priceUsd: "1400.00",
+  level: "ESG and Compliance",
   isFeatured: false,
   thumbnailUrl: "/images/courses/circular-economy.jpg",
   learningObjectives: [
-    "Explain the difference between a linear economy and a circular economy.",
-    "Recognise that recycling is only one part of circularity.",
-    "Identify ways to avoid waste before it is created.",
-    "Select options that keep products, equipment and materials useful for longer.",
-    "Consider the full workplace life cycle of an item, from need identification to end-of-use.",
-    "Recognise how purchasing, maintenance, operations and suppliers contribute to circular outcomes.",
-    "Identify one realistic circular-economy action for their own workplace."
+    "Explain the difference between a linear economy and a circular economy in plain workplace language.",
+    "Distinguish high-value circular actions (repair, reuse, refurbishment) from lower-value material recycling.",
+    "Apply the 9-step Circular Value Hierarchy across purchasing, maintenance, operations, and asset disposal.",
+    "Execute the 5-step CHECK–USE–CARE–SHARE–RECOVER operational protocol.",
+    "Avoid high-risk mistakes such as ordering duplicates without checking stock, discarding repairable equipment, or donating IT devices without data wipes.",
+    "Evaluate role-based micro-decisions across general staff, facilities, procurement, finance, HR, IT, operations, sales, managers, and contractors.",
+    "Select one practical workplace circular commitment to prevent waste and retain product value."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Circular Economy. You can now identify where workplace value is being lost and recognise practical opportunities to prevent waste, extend product life and improve end-of-use decisions.",
-  badgeName: "Circular Economy Practitioner",
-  badgeDescription: "Recognises the ability to identify practical opportunities to prevent waste, extend product life and retain value in workplace systems.",
-  recommendedNextCourseId: 12,
+  completionMessage:
+    "You have completed Circular Economy. You can now recognize where workplace products retain value, prioritize repair and reuse over disposal, and apply CHECK–USE–CARE–SHARE–RECOVER protocols safely.",
+  badgeName: "Circular Workplace Practitioner",
+  badgeDescription:
+    "Awarded for demonstrating practical awareness of circular economy principles, value retention, equipment maintenance, and responsible material recovery.",
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Lesson content
-// ─────────────────────────────────────────────────────────────────────────────
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "From Linear to Circular",
+    title: "Linear vs. Circular: Retaining Workplace Value",
     minutes: 3,
-    content: "Introduce the difference between a linear and circular economy.",
+    content: "Learn how linear habits destroy value and why circular thinking prevents waste before it is created.",
     blocks: [
+      { id: "ce1-h1", type: "heading", position: 1, headingText: "Where Does Workplace Value Go?" },
+      { id: "ce1-t1", type: "short_text", position: 2, bodyText: "A commercial company storeroom contains functional office chairs scheduled for dumping due to minor armrest scratches, unopened cleaning chemicals nearing expiry, unassessed electronic equipment, and discarded single-use cardboard delivery boxes. Simultaneously, procurement receives urgent requests to order brand-new chairs and chemicals." },
+      { id: "ce1-k1", type: "key_message", position: 3, headingText: "Linear vs. Circular Economy", bodyText: "• Linear Economy ('Take–Make–Dispose'): Raw materials are extracted, manufactured into products, used briefly, and thrown away as waste.\n• Circular Economy ('Prevent–Use–Care–Share–Recover'): Workplace systems keep products, components, and materials at their highest utility and value for as long as possible through repair, reuse, refurbishment, and responsible recovery." },
       {
-        id: "c11-l1-b1",
-        type: "heading",
-        content: "Where does value go?",
+        id: "ce1-d1",
+        type: "decision_scenario",
+        position: 4,
+        decisionIntro: "Evaluating office chair disposal scenario:",
+        decisionPrompt: "A company plans to replace 30 office chairs. Inspection shows 20 are fully functional, 5 need minor bolt tightening, and 5 are severely broken. What is the most circular response?",
+        decisionChoices: [
+          { label: "Inspect and clean the 20 good chairs, repair the 5 minor defects, and order replacement parts or new units only for the 5 broken ones", correct: true, feedback: "Outstanding! This preserves maximum financial and material value while preventing unnecessary expenditure and landfill waste." },
+          { label: "Dispose of all 30 chairs in a landfill skip to ensure matching new furniture", correct: false, feedback: "Incorrect! Throwing away functioning assets destroys embodied material value and wastes company capital." },
+          { label: "Send all 30 chairs directly to a plastic recycler without assessing repair", correct: false, feedback: "Incorrect. Recycling shreds materials and loses manufacturing value; repair and reuse must come first!" }
+        ]
       },
       {
-        id: "c11-l1-b2",
-        type: "text",
-        content: "A company replaces office chairs every few years. Some are damaged, some only need minor repairs and some are still fully usable. The entire batch is replaced because buying new chairs seems easier.",
-      },
-      {
-        id: "c11-l1-b3",
-        type: "text",
-        content: "This is the traditional linear pattern: **Take resources, make a product, use it and dispose of it.**\n\nIn contrast, a circular approach seeks to:\n- Prevent unnecessary consumption\n- Keep products and materials useful for longer\n- Recover value responsibly when continued use is no longer possible\n\nCircularity is not a perfect closed loop and does not mean that nothing is ever discarded. But a circular workplace asks how value can be preserved before deciding to discard and replace.",
-      },
-      {
-        id: "c11-l1-b4",
-        type: "scenario",
-        scenarioText: "Which of the following responses preserves the most value from the office chairs?",
-        options: [
-          {
-            id: "opt-1",
-            text: "Throw all chairs away and buy cheaper replacements.",
-            isCorrect: false,
-            feedback: "This loses all existing value and consumes new resources unnecessarily.",
-          },
-          {
-            id: "opt-2",
-            text: "Donate all chairs to charity.",
-            isCorrect: false,
-            feedback: "Donating unusable or broken items simply transfers the disposal problem to the charity.",
-          },
-          {
-            id: "opt-3",
-            text: "Inspect the chairs, repair where practical, reallocate usable ones, and purchase replacements only where needed.",
-            isCorrect: true,
-            feedback: "Correct. This approach separates safe reusable chairs from repairable and unusable ones, preserving maximum value.",
-          },
-          {
-            id: "opt-4",
-            text: "Send all chairs to a local recycling facility.",
-            isCorrect: false,
-            feedback: "Recycling should only be considered after repair and reuse options have been exhausted.",
-          }
+        id: "ce1-m1",
+        type: "multiple_choice",
+        position: 5,
+        mcqQuestion: "Why is material recycling considered a lower-value option than repair or reuse in a circular economy?",
+        mcqOptions: [
+          "Recycling breaks down products into raw materials, losing the embodied labor, manufacturing energy, and functional value retained by repair or reuse",
+          "Recycling is strictly illegal in all commercial workplaces",
+          "Recycling requires all employees to hold engineering degrees",
+          "Recycling automatically creates toxic air pollution in office canteens"
         ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Recycling shreds products into raw materials, destroying the manufacturing and functional value preserved by repair or reuse.",
+        mcqIncorrectExplanation: "Incorrect. Repair and reuse preserve functional utility and manufacturing energy far better than recycling."
       }
-    ],
+    ]
   },
   {
     order: 1,
-    title: "Keep Products and Materials in Use",
-    minutes: 3,
-    content: "Explain the practical hierarchy of circular actions.",
+    title: "The 9-Step Circular Value Hierarchy",
+    minutes: 4,
+    content: "Master the 9-level circular value hierarchy to guide operational purchasing and asset decisions.",
     blocks: [
+      { id: "ce2-h1", type: "heading", position: 1, headingText: "The Value Retention Order" },
+      { id: "ce2-t1", type: "short_text", position: 2, bodyText: "When evaluating workplace products, equipment, and packaging, follow the 9-step value retention hierarchy:" },
       {
-        id: "c11-l2-b1",
-        type: "heading",
-        content: "The Circular Hierarchy",
+        id: "ce2-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "The 9-Step Circular Hierarchy",
+        bodyText: "1. Question the Need: Avoid unnecessary purchases.\n2. Reduce: Minimize material use per operation.\n3. Choose Durable: Purchase long-lasting, repairable items.\n4. Maintain: Conduct routine preventative maintenance.\n5. Repair: Fix broken components promptly.\n6. Reuse / Redistribute: Share usable items across departments.\n7. Refurbish: Restore worn assets to original condition.\n8. Recover Materials (Recycle): Process materials responsibly when reuse ends.\n9. Safe Disposal: Landfill or incinerate only as an absolute last resort."
       },
       {
-        id: "c11-l2-b2",
-        type: "text",
-        content: "The most circular option often occurs before an item becomes waste. When considering how to handle workplace products and equipment, follow this practical hierarchy:\n\n1. Question whether the item is needed\n2. Reduce unnecessary use\n3. Share or reallocate\n4. Maintain\n5. Reuse\n6. Repair\n7. Refurbish\n8. Recover parts or materials\n9. Recycle where an appropriate stream exists\n10. Dispose responsibly when no safe alternative remains",
-      },
-      {
-        id: "c11-l2-b3",
-        type: "text",
-        content: "This is not a rigid universal rule. Safety, hygiene, product quality and technical requirements must still be respected. For example, replacing a failed component rather than an entire unit is excellent, but only if the repair is technically appropriate and safe.",
-      },
-      {
-        id: "c11-l2-b4",
-        type: "scenario",
-        scenarioText: "Which of the following actions represents extending product life before it becomes waste?",
-        options: [
-          {
-            id: "opt-1",
-            text: "Sending used printer cartridges to a recycling centre.",
-            isCorrect: false,
-            feedback: "This is material recovery (recycling), not extending the product's functional life.",
-          },
-          {
-            id: "opt-2",
-            text: "Maintaining air-conditioning equipment instead of waiting for avoidable failure.",
-            isCorrect: true,
-            feedback: "Correct. Preventive maintenance keeps equipment operating efficiently and extends its useful life before it needs replacement.",
-          },
-          {
-            id: "opt-3",
-            text: "Using disposable cups but ensuring they are made from recycled paper.",
-            isCorrect: false,
-            feedback: "Using disposable items, even recycled ones, drives a linear take-make-dispose pattern.",
-          },
-          {
-            id: "opt-4",
-            text: "Throwing away usable furniture because it doesn't match the new office decor.",
-            isCorrect: false,
-            feedback: "This represents premature disposal and value loss.",
-          }
-        ],
+        id: "ce2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to the United Nations Environment Programme (UNEP) and the European Commission Circular Economy Action Plan, over 80% of a product's environmental impacts across its lifecycle are determined during the initial design and procurement phase! Extending product useful life by just 1–2 years reduces emissions and resource demand far more than recycling alone."
       }
-    ],
+    ]
   },
   {
     order: 2,
-    title: "Think Across the Workplace Life Cycle",
-    minutes: 3,
-    content: "Help learners consider circularity at each stage of a workplace item’s life.",
+    title: "The CHECK–USE–CARE–SHARE–RECOVER Protocol",
+    minutes: 4,
+    content: "Inspect facility asset assessment areas and apply the 5-step operational protocol.",
     blocks: [
+      { id: "ce3-h1", type: "heading", position: 1, headingText: "The 5-Step Operational Protocol" },
+      { id: "ce3-t1", type: "short_text", position: 2, bodyText: "Apply the 5-step CHECK–USE–CARE–SHARE–RECOVER framework across daily workplace activities:" },
       {
-        id: "c11-l3-b1",
-        type: "heading",
-        content: "It starts before purchase",
+        id: "ce3-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "CHECK–USE–CARE–SHARE–RECOVER",
+        bodyText: "• CHECK: Check existing stock and internal availability before ordering new items.\n• USE: Use equipment, chemicals, and supplies efficiently without wasteful excess.\n• CARE: Maintain equipment and store items properly to prevent premature damage.\n• SHARE: Redistribute surplus functional items or return reusable transport packaging.\n• RECOVER: Send genuine end-of-life materials to authorized recovery partners."
       },
       {
-        id: "c11-l3-b2",
-        type: "text",
-        content: "Circularity begins before purchase and continues throughout use, maintenance and end-of-use. Decisions made early in the life cycle determine whether an item can later be repaired, reused or recovered.\n\nConsider the workplace life cycle stages:\n1. Need identification\n2. Product or service design\n3. Purchasing\n4. Delivery and packaging\n5. Use\n6. Maintenance\n7. Reallocation\n8. Repair or refurbishment\n9. End-of-use decision\n10. Evidence and learning",
+        id: "ce3-img1",
+        type: "visual_question",
+        position: 4,
+        imageUrl: "/images/courses/visual-circular-economy.png",
+        caption: "Facility Asset Assessment Area: Repair & refurbishing workbench (left), reusable delivery crates & stock shelves by expiry (center), locked IT data sanitization cage (right), and logistics manager logging asset tags.",
+        imageAlt: "Realistic photograph of a Mauritian commercial facility storeroom showing a labelled repair workbench with tools and chairs, stacked reusable delivery crates, shelves with expiry dates, a lockable wire cage holding IT computer hardware, and a facility manager inspecting asset tags on a tablet."
       },
       {
-        id: "c11-l3-b3",
-        type: "text",
-        content: "Compare two approaches to acquiring a new printer:\n\n**Approach A:** Bought mainly on initial price. Consumables are difficult to obtain, repair information is unavailable, spare parts are limited, and the unit is simply replaced after a fault.\n\n**Approach B:** Need and expected use are assessed first. Durability and maintenance are considered, parts are available, repair responsibility is clear, and the equipment is only replaced when justified.",
-      },
-      {
-        id: "c11-l3-b4",
-        type: "scenario",
-        scenarioText: "Which question is the MOST important to ask during the 'Need identification' stage before acquiring equipment?",
-        options: [
-          {
-            id: "opt-1",
-            text: "How quickly can the supplier deliver it?",
-            isCorrect: false,
-            feedback: "Speed of delivery does not determine if the item is actually needed or circular.",
-          },
-          {
-            id: "opt-2",
-            text: "What colour will look best in the office?",
-            isCorrect: false,
-            feedback: "Aesthetics do not address the fundamental need or utility of the asset.",
-          },
-          {
-            id: "opt-3",
-            text: "Can the need be met through sharing or reallocation of an existing underused item?",
-            isCorrect: true,
-            feedback: "Correct. The most circular choice is avoiding an unnecessary purchase by utilising existing resources better.",
-          },
-          {
-            id: "opt-4",
-            text: "What is the cheapest model available online?",
-            isCorrect: false,
-            feedback: "The cheapest model may lack durability and spare parts, leading to premature disposal.",
-          }
+        id: "ce3-m1",
+        type: "multiple_choice",
+        position: 5,
+        mcqQuestion: "In the facility asset assessment scene above, why is computer hardware kept in a lockable wire cage marked for data sanitization before reuse or recycling?",
+        mcqOptions: [
+          "To protect confidential company and client data through certified data wiping before computers are redistributed or recycled",
+          "To hide old computers so inspectors think the facility owns no electronics",
+          "Because computers generate magnetic radiation that ruins wooden pallets",
+          "To prevent employees from playing video games during lunch breaks"
         ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Data-bearing electronics require certified data sanitization and physical security to prevent confidential data breaches during circular reuse or recycling.",
+        mcqIncorrectExplanation: "Incorrect. Data-bearing hardware requires secure storage and certified data wiping before reuse or recovery."
       }
-    ],
+    ]
   },
   {
     order: 3,
-    title: "Circular Economy in Mauritian Workplaces",
+    title: "Worked Resort Scenario & Material Safeguards",
     minutes: 4,
-    content: "Apply circular-economy thinking to realistic Mauritian business settings.",
+    content: "Analyze a worked Mauritian resort scenario and review safety, hygiene, and data protection safeguards.",
     blocks: [
+      { id: "ce4-h1", type: "heading", position: 1, headingText: "Hotel Asset Refurbishment Worked Example" },
+      { id: "ce4-t1", type: "short_text", position: 2, bodyText: "Examine how a Mauritian beach resort manages room refurbishment:" },
       {
-        id: "c11-l4-b1",
-        type: "heading",
-        content: "The Island Context",
+        id: "ce4-w1",
+        type: "workplace_example",
+        position: 3,
+        headingText: "Worked Example: Resort Refurbishment & Reusable Crates",
+        bodyText: "A resort updates 50 guest rooms:\n• Wooden Furniture: Inspected and re-varnished on-site by maintenance (Refurbishment).\n• Linens & Towels: Cleaned, graded, and repurposed as kitchen cleaning rags (Repurposing).\n• Supplier Deliveries: Drinks and dry goods delivered in heavy-duty reusable plastic crates returned to vendors (Circular Packaging).\n• Mattresses: Unusable worn mattresses sent to licensed foam recyclers (Responsible Recovery)."
       },
       {
-        id: "c11-l4-b2",
-        type: "text",
-        content: "Mauritius is an island economy where many products, components and materials may travel significant distances before reaching a workplace.\n\nPreventing avoidable replacement and extending useful product life can be particularly relevant where supply chains, storage, transport and replacement lead times affect business operations.",
-      },
-      {
-        id: "c11-l4-b3",
-        type: "text",
-        content: "Circularity requires collaboration. It is not the responsibility of the cleaning team or sustainability officer alone. Circular systems depend on coordination between the people who request, purchase, use, maintain and retire workplace assets.\n\nFor example:\n- **Retail:** Using reusable supplier crates, discussing packaging reduction, and repairing shop fittings.\n- **Manufacturing:** Implementing preventive maintenance, recovering suitable components, and using reusable internal transport packaging.\n- **Property Management:** Maintaining accurate asset registers, planned maintenance, and reallocating equipment between sites.",
-      },
-      {
-        id: "c11-l4-b4",
-        type: "scenario",
-        scenarioText: "A hotel is looking to implement a circular approach for its guest room linens. Which approach demonstrates cross-departmental coordination?",
-        options: [
-          {
-            id: "opt-1",
-            text: "The purchasing department buys the cheapest linens available to save money.",
-            isCorrect: false,
-            feedback: "This isolates the decision to purchasing and often ignores durability and maintenance needs.",
-          },
-          {
-            id: "opt-2",
-            text: "Housekeeping discards any linen with minor stains without telling anyone.",
-            isCorrect: false,
-            feedback: "This loses value and prevents the business from identifying the root cause of the damage.",
-          },
-          {
-            id: "opt-3",
-            text: "Purchasing sources durable linens, housekeeping rotates stock and spots minor damage early, and maintenance repairs washing equipment to prevent fabric tearing.",
-            isCorrect: true,
-            feedback: "Correct. This shows how purchasing, operations, and maintenance must coordinate to extend the life of the assets.",
-          },
-          {
-            id: "opt-4",
-            text: "The sustainability officer asks guests to reuse their towels.",
-            isCorrect: false,
-            feedback: "While beneficial, this relies entirely on the guest and does not represent internal operational coordination for the linen life cycle.",
-          }
-        ],
+        id: "ce4-d1",
+        type: "decision_scenario",
+        position: 4,
+        decisionIntro: "Urgent room clearance scenario:",
+        decisionPrompt: "A manager orders an employee to 'dump everything in the storeroom into a waste skip immediately' because a VIP client is arriving in 30 minutes. The storeroom contains spare furniture, unopened lightbulbs, and old laptops. What is the correct response?",
+        decisionChoices: [
+          { label: "Secure the storeroom door, move items neatly to designated asset zones (repair, stock, IT lockup), and explain the asset preservation steps to the manager", correct: true, feedback: "Correct! Securing and organizing assets prevents valuable stock destruction and protects IT data security." },
+          { label: "Throw all items, including laptops and unopened stock, into the outdoor trash skip", correct: false, feedback: "NEVER destroy valuable stock or data-bearing IT equipment for quick appearance!" },
+          { label: "Give the laptops away to strangers on the street without wiping hard drives", correct: false, feedback: "NEVER distribute data-bearing IT devices without certified data sanitization!" }
+        ]
       }
-    ],
+    ]
   },
   {
     order: 4,
-    title: "Make the Better Circular Decision",
-    minutes: 4,
-    content: "Develop decision-making rather than simple recall.",
+    title: "High-Risk Mistakes & Role-Based Micro-Decisions",
+    minutes: 3,
+    content: "Avoid prohibited circular mistakes and practice role-based decisions across corporate departments.",
     blocks: [
+      { id: "ce5-h1", type: "heading", position: 1, headingText: "Prohibited Circular Mistakes" },
+      { id: "ce5-t1", type: "short_text", position: 2, bodyText: "NEVER engage in these high-risk operational behaviors:" },
       {
-        id: "c11-l5-b1",
-        type: "heading",
-        content: "Navigating complexity",
+        id: "ce5-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Prohibited Actions",
+        bodyText: "• DO NOT order new equipment or supplies without checking existing stock or internal asset registries.\n• DO NOT discard repairable furniture, tools, or appliances without technical assessment.\n• DO NOT donate or transfer data-bearing electronics without certified data sanitization.\n• DO NOT perform unapproved repairs on safety-critical equipment (electrical panels, pressure vessels, lifting gear).\n• DO NOT label single-use plastic items as 'fully circular' merely because they are theoretically recyclable."
       },
       {
-        id: "c11-l5-b2",
-        type: "text",
-        content: "A company is renovating part of its workplace. There are desks in good condition, chairs with mixed levels of damage, storage cabinets that do not match the new design, old electrical equipment, packaging from new deliveries, and items containing confidential company information.\n\nThe most responsible process is not to blindly reuse everything, nor to blindly throw everything in the bin.",
-      },
-      {
-        id: "c11-l5-b3",
-        type: "text",
-        content: "A strong decision process includes:\n1. Creating an inventory before removal.\n2. Assessing condition, ownership and safety.\n3. Reallocating usable items internally.\n4. Protecting confidential information and company data.\n5. Asking suppliers about suitable packaging recovery.\n6. Separating items requiring specialist handling (like e-waste).\n7. Buying replacements only after the actual gap is known.",
-      },
-      {
-        id: "c11-l5-b4",
-        type: "scenario",
-        scenarioText: "During the renovation, you find a batch of old company laptops. What is the appropriate circular decision?",
-        options: [
-          {
-            id: "opt-1",
-            text: "Donate them immediately to a local school to extend their life.",
-            isCorrect: false,
-            feedback: "Data-bearing devices must follow secure data-handling procedures before leaving the organisation, regardless of how good the intention is.",
-          },
-          {
-            id: "opt-2",
-            text: "Throw them in the general waste bin to save time.",
-            isCorrect: false,
-            feedback: "Electrical and electronic equipment requires specialist assessment and responsible disposal.",
-          },
-          {
-            id: "opt-3",
-            text: "Verify the devices with the IT department for secure data wiping, assess them for internal reallocation, and only then consider authorised external recovery or specialist recycling.",
-            isCorrect: true,
-            feedback: "Correct. This balances circularity (reallocation/recovery) with crucial operational constraints like information security.",
-          },
-          {
-            id: "opt-4",
-            text: "Hide them in a storage closet indefinitely.",
-            isCorrect: false,
-            feedback: "Storing items indefinitely provides no circular value and wastes storage space.",
-          }
-        ],
+        id: "ce5-d1",
+        type: "decision_scenario",
+        position: 4,
+        decisionIntro: "IT & Facilities Micro-Decision:",
+        decisionPrompt: "An IT department is replacing 15 desktop monitors. The old monitors work perfectly but are 3 years old. What is the most circular IT action?",
+        decisionChoices: [
+          { label: "Wipe data logs, test electrical safety, and reallocate the working monitors to training rooms or branch offices needing upgrades", correct: true, feedback: "Outstanding! Internal redistribution extends asset life, saves capital, and avoids electronic waste." },
+          { label: "Smash the monitors with a hammer and dump them in a general waste bin", correct: false, feedback: "Incorrect! Smashing working monitors causes electronic waste pollution and hazardous glass breakage." },
+          { label: "Store the monitors in a wet outdoor shed until they rust and break", correct: false, feedback: "Incorrect. Improper storage damages usable assets; reallocate or store them properly!" }
+        ]
       }
-    ],
+    ]
   },
   {
     order: 5,
-    title: "Build a Small Circular Action",
+    title: "Your Circular Economy Commitment & Disclaimer",
     minutes: 3,
-    content: "Convert the course into a practical workplace commitment.",
+    content: "Select practical daily workplace commitments and review the circular economy disclaimer.",
     blocks: [
+      { id: "ce6-h1", type: "heading", position: 1, headingText: "Pledge to Act" },
+      { id: "ce6-t1", type: "short_text", position: 2, bodyText: "Congratulations on completing the lessons! Select the circular habits you commit to practice in your daily work routine." },
       {
-        id: "c11-l6-b1",
-        type: "heading",
-        content: "Start small, learn and expand",
-      },
-      {
-        id: "c11-l6-b2",
-        type: "text",
-        content: "To build a circular workplace, start with a simple action-planning method:\n1. Choose one product, material or process.\n2. Identify where value is currently being lost.\n3. Identify who is involved.\n4. Select one realistic improvement.\n5. Decide what evidence will show progress.\n6. Review the result before expanding it.",
-      },
-      {
-        id: "c11-l6-b3",
+        id: "ce6-c1",
         type: "commitment",
-        commitmentInstruction: "Select one practical circular-economy commitment you can implement in your workplace role:",
+        position: 3,
+        commitmentInstruction: "Select your daily workplace circular economy commitments (choose at least one):",
         commitmentOptions: [
-          {
-            value: "repair-check",
-            label: "Create a repair-before-replacement check",
-            description: "I will establish a brief checklist to assess whether an item can be safely repaired before a replacement purchase is authorised.",
-          },
-          {
-            value: "reallocate-furniture",
-            label: "Identify unused furniture for reallocation",
-            description: "I will survey my department for unused or underused furniture and coordinate its reallocation to areas of need.",
-          },
-          {
-            value: "supplier-packaging",
-            label: "Discuss reusable packaging with a supplier",
-            description: "I will contact one regular supplier to discuss transitioning from single-use delivery packaging to a reusable crate or take-back system.",
-          },
-          {
-            value: "maintenance-checklist",
-            label: "Add maintenance to an operational checklist",
-            description: "I will integrate basic preventive maintenance checks into our team's regular operational routines to extend equipment life.",
-          }
+          { value: "apply-check-use-care", label: "Apply the CHECK–USE–CARE–SHARE–RECOVER protocol before requesting new purchases", description: "Verify existing stock and asset availability before buying new items." },
+          { value: "prioritize-repair-refurbishment", label: "Prioritize equipment maintenance, repair, and refurbishment over immediate replacement", description: "Extend product useful life and retain material value." },
+          { value: "protect-data-security", label: "Ensure data-bearing IT devices undergo certified data wiping before reuse or recycling", description: "Safeguard company and customer data privacy." },
+          { value: "return-reusable-packaging", label: "Return reusable delivery crates, pallets, and containers to suppliers promptly", description: "Support circular supply-chain packaging loops." },
+          { value: "report-circular-opportunities", label: "Report idle, surplus, or repairable assets to department leads for internal redistribution", description: "Prevent unnecessary waste and reduce corporate expenditure." }
         ]
+      },
+      {
+        id: "ce6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Course Disclaimer",
+        bodyText: "DISCLAIMER: This course provides general workplace awareness. Specific technical, safety, data security, and waste regulations vary by facility and sector. Employees must follow their organisation's approved procedures and obtain appropriate technical or safety authorization before modifying or transferring equipment."
       }
-    ],
+    ]
   }
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Quiz content
-// ─────────────────────────────────────────────────────────────────────────────
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "Which action best represents circular thinking?",
+    order: 1,
+    question: "What is the core difference between a Linear Economy and a Circular Economy?",
     options: [
-      { text: "Buying products that are slightly cheaper to replace them more often", isCorrect: false, feedback: "This drives a linear 'take-make-dispose' model and destroys value quickly." },
-      { text: "Preserving value through need assessment, maintenance, reuse or repair before replacement", isCorrect: true, feedback: "Correct. Circularity is fundamentally about retaining the value of resources for as long as possible." },
-      { text: "Throwing everything into a mixed recycling bin", isCorrect: false, feedback: "Recycling is only a recovery step; circular thinking aims to prevent waste and reuse items before recycling is needed." },
-      { text: "Printing on one side of the paper only", isCorrect: false, feedback: "This wastes resources and does not represent circular systems thinking." }
+      "Linear economies follow a 'Take–Make–Dispose' model; Circular economies keep products, components, and materials at high value through prevention, maintenance, repair, reuse, and recovery",
+      "Linear economies only operate in round office buildings; Circular economies only operate in straight lines",
+      "Linear economies ban all electricity; Circular economies require all staff to ride bicycles",
+      "There is no difference; both terms mean dumping waste into rivers"
     ],
-    correctExplanation: "The circular economy focuses on preventing waste by rethinking needs and keeping assets in productive use.",
-    incorrectExplanation: "Many environmental actions are helpful, but circularity specifically targets the preservation of product and material value.",
-    practicalTakeaway: "Before replacing an item, always ask if it is truly needed, or if it can be maintained or repaired.",
+    correct: 0,
+    correctExplanation: "Linear economies dispose of products rapidly; Circular economies retain product utility and material value for as long as possible.",
+    incorrectExplanation: "Incorrect. Circular economies prioritize value retention, repair, and reuse over rapid disposal."
   },
   {
-    question: "What is the role of recycling in a circular economy?",
+    order: 2,
+    question: "In the 9-step Circular Value Hierarchy, which action should be taken BEFORE sending a damaged item to a material recycler?",
     options: [
-      { text: "It is the only action required to make a business fully circular", isCorrect: false, feedback: "Recycling is the last resort for materials, not the primary goal." },
-      { text: "It is a way to avoid maintaining or repairing equipment", isCorrect: false, feedback: "Maintenance and repair are higher priorities than recycling." },
-      { text: "It is an important recovery option, but circular decisions should also prevent waste and keep products useful for longer", isCorrect: true, feedback: "Correct. Recycling recovers raw materials but loses the energy and labor invested in the finished product." },
-      { text: "Recycling has no place in a circular economy", isCorrect: false, feedback: "Recycling is still essential for handling materials at the true end of their usable life." }
+      "Inspect the item to evaluate whether it can be maintained, repaired, reused, or refurbished",
+      "Immediately burn the item to generate ash for gardens",
+      "Throw the item into a river so water washes it away",
+      "Order five new replacements before checking the damaged item"
     ],
-    correctExplanation: "Recycling loops are necessary but less efficient than inner loops like sharing, maintaining, and reusing.",
-    incorrectExplanation: "Do not confuse circularity entirely with recycling; waste prevention comes first.",
-    practicalTakeaway: "Recycle responsibly, but aim to reuse and repair first.",
+    correct: 0,
+    correctExplanation: "Maintenance, repair, reuse, and refurbishment retain higher functional value than material recycling.",
+    incorrectExplanation: "Incorrect. Repair and reuse options must always be evaluated before material recycling."
   },
   {
-    question: "A department has several unused desks. What is the most circular approach?",
+    order: 3,
+    question: "What essential safeguard MUST be completed before surplus company laptop computers are redistributed or sent for external recycling?",
     options: [
-      { text: "Send them to a landfill immediately to free up space", isCorrect: false, feedback: "This destroys the value of perfectly usable assets." },
-      { text: "Assess their condition, reallocate them to teams that need them, repair any minor damage, and only buy new desks to cover the actual shortfall", isCorrect: true, feedback: "Correct. This maximizes the utility of existing assets and minimizes unnecessary purchasing." },
-      { text: "Leave them in a hallway indefinitely", isCorrect: false, feedback: "Unused assets slowly degrade and represent trapped value." },
-      { text: "Donate them to charity without checking if other internal departments need them", isCorrect: false, feedback: "While charitable, it forces the business to buy new desks for internal teams, wasting company resources." }
+      "Certified data sanitization (data wiping) and electrical safety testing to protect confidential information and user safety",
+      "Painting all laptop screens bright green",
+      "Removing all keys from the keyboard so no one can type",
+      "Dipping the laptops in sea water to wash off dust"
     ],
-    correctExplanation: "Internal reallocation ensures assets are fully utilized, preventing premature disposal and unnecessary procurement.",
-    incorrectExplanation: "Leaving assets idle or discarding them ignores their remaining value.",
-    practicalTakeaway: "Always check for available internal resources before initiating a new purchase.",
+    correct: 0,
+    correctExplanation: "Data-bearing electronics require certified data wiping and safety testing before reuse or recycling.",
+    incorrectExplanation: "Incorrect. Certified data wiping is mandatory for data protection compliance."
   },
   {
-    question: "When purchasing new workplace equipment, which decision-making approach is the most circular?",
+    order: 4,
+    question: "A company facility receives weekly deliveries of dry goods. Which packaging arrangement represents a circular economy practice?",
     options: [
-      { text: "Choosing the lowest initial purchase price regardless of quality", isCorrect: false, feedback: "Cheap equipment often breaks quickly and lacks repair options." },
-      { text: "Buying the most technologically advanced model even if the features are not needed", isCorrect: false, feedback: "Over-specifying equipment wastes resources and money." },
-      { text: "Considering the actual need, durability, ease of maintenance, availability of spare parts, and end-of-use options", isCorrect: true, feedback: "Correct. Life-cycle thinking ensures the asset will provide long-term value and won't prematurely become waste." },
-      { text: "Only buying equipment that comes in green packaging", isCorrect: false, feedback: "Packaging is important, but the durability and repairability of the equipment itself has a much larger impact." }
+      "Using heavy-duty reusable plastic crates that are collected, cleaned, and refilled by the supplier on each delivery run",
+      "Using single-use cardboard boxes and throwing them in a general trash skip after one use",
+      "Wrapping every box in ten layers of non-recyclable plastic foil and burning it behind the warehouse",
+      "Demanding suppliers deliver goods in unlabelled glass jars with no lids"
     ],
-    correctExplanation: "A circular purchase evaluates the total life cycle of the product, ensuring it can be maintained and recovered.",
-    incorrectExplanation: "Focusing solely on price or superficial 'green' features ignores the long-term impact of the asset.",
-    practicalTakeaway: "Ask suppliers about spare parts, warranties, and take-back schemes before buying.",
+    correct: 0,
+    correctExplanation: "Reusable transport crates collected and refilled by suppliers create a closed-loop circular packaging system.",
+    incorrectExplanation: "Incorrect. Reusable delivery crates refilled by suppliers represent circular packaging."
   },
   {
-    question: "A piece of heavy industrial equipment has a damaged safety guard. What is the correct circular response?",
+    order: 5,
+    question: "What is the first step in the CHECK–USE–CARE–SHARE–RECOVER protocol when a staff member needs additional office supplies?",
     options: [
-      { text: "Continue using it as normal to extend its life", isCorrect: false, feedback: "Safety cannot be compromised in the pursuit of circularity." },
-      { text: "Attempt a makeshift repair using tape to save money", isCorrect: false, feedback: "Unauthorised or unsafe repairs introduce severe operational risks." },
-      { text: "Assess whether a safe, authorised repair can be made using proper parts, rather than automatically discarding the entire machine", isCorrect: true, feedback: "Correct. Safe repair extends the asset's life without endangering operators." },
-      { text: "Immediately discard the entire machine and buy a new one", isCorrect: false, feedback: "Discarding the entire machine for one damaged component is a massive loss of value." }
+      "CHECK: Check existing storeroom stock and internal asset availability before requesting new purchases",
+      "RECOVER: Dump old supplies in a skip to make room for new boxes",
+      "SHARE: Take supplies from a neighboring business without asking",
+      "CARE: Hide supplies under your desk so others cannot see them"
     ],
-    correctExplanation: "Circularity promotes repair, but it must always be conducted safely and to appropriate technical standards.",
-    incorrectExplanation: "Never compromise health, safety, or quality when extending the life of a product.",
-    practicalTakeaway: "Ensure repairs are conducted safely by qualified personnel using appropriate parts.",
-  },
-  {
-    question: "A company receives daily deliveries in single-use cardboard boxes. What is the strongest circular response?",
-    options: [
-      { text: "Fold the boxes neatly before putting them in the general waste", isCorrect: false, feedback: "This does not recover any value or prevent waste." },
-      { text: "Ensure the cardboard is placed in a recycling bin", isCorrect: false, feedback: "Recycling is better than landfill, but it doesn't address the root cause of the continuous waste generation." },
-      { text: "Discuss packaging reduction, reusable delivery crates, or take-back options with the supplier, ensuring it is operationally feasible", isCorrect: true, feedback: "Correct. This addresses the waste at its source and builds a circular system with the supplier." },
-      { text: "Refuse all deliveries until the supplier uses zero packaging", isCorrect: false, feedback: "This is likely operationally impossible and will disrupt the business." }
-    ],
-    correctExplanation: "Engaging the supply chain to switch to reusable systems prevents waste from entering the facility in the first place.",
-    incorrectExplanation: "Relying purely on recycling or demanding impossible immediate changes misses the opportunity for systemic improvement.",
-    practicalTakeaway: "Talk to suppliers; many already offer reusable transport packaging if requested.",
-  },
-  {
-    question: "During an office renovation, what is the best first step to handle existing furniture and equipment?",
-    options: [
-      { text: "Order a large skip bin and clear everything out", isCorrect: false, feedback: "This guarantees maximum value loss." },
-      { text: "Order all new furniture immediately so it arrives on time", isCorrect: false, feedback: "Ordering before knowing what you already have leads to over-purchasing." },
-      { text: "Create an inventory to assess condition, ownership, and safety before deciding what to keep, reallocate, repair, or discard", isCorrect: true, feedback: "Correct. An inventory provides the data needed to make responsible circular decisions." },
-      { text: "Allow staff to take whatever they want home", isCorrect: false, feedback: "This bypasses asset tracking, safety checks, and data security protocols." }
-    ],
-    correctExplanation: "An inventory enables an organization to maximize reuse and strategically plan for any necessary disposal.",
-    incorrectExplanation: "Acting without assessing existing assets leads to waste and unnecessary expense.",
-    practicalTakeaway: "Know what you have before deciding you need something new.",
-  },
-  {
-    question: "Who is responsible for circularity in an organisation?",
-    options: [
-      { text: "Only the purchasing department", isCorrect: false, feedback: "Purchasing cannot maintain equipment or ensure it is used correctly." },
-      { text: "Only the facilities or maintenance team", isCorrect: false, feedback: "Maintenance teams cannot control poor purchasing decisions." },
-      { text: "Only the sustainability officer", isCorrect: false, feedback: "A single officer cannot oversee every operational decision across the business." },
-      { text: "It requires coordination across purchasing, operations, maintenance, users, management, and suppliers", isCorrect: true, feedback: "Correct. Circular systems rely on the entire life cycle, which touches almost every department." }
-    ],
-    correctExplanation: "Value is preserved when the people who buy, use, and maintain an asset communicate and coordinate.",
-    incorrectExplanation: "Siloed responsibility leads to linear outcomes because decisions are made in isolation.",
-    practicalTakeaway: "Collaborate with other departments to ensure assets are managed effectively throughout their life cycle.",
-  },
-  {
-    question: "Which of the following is the best practical evidence that a workplace is becoming more circular?",
-    options: [
-      { text: "A single percentage showing how much waste is recycled", isCorrect: false, feedback: "Recycling rates do not capture waste prevention, reuse, or product life extension." },
-      { text: "Tracking items repaired, assets reallocated, product life extended, and avoided duplicate purchases", isCorrect: true, feedback: "Correct. These metrics demonstrate active value preservation and waste prevention." },
-      { text: "The number of new items purchased each month", isCorrect: false, feedback: "Purchasing volume alone does not explain whether those purchases were necessary or circular." },
-      { text: "The amount of money spent on waste disposal", isCorrect: false, feedback: "Disposal costs can fluctuate for many reasons unrelated to circularity." }
-    ],
-    correctExplanation: "Evidence of circularity should reflect actions that extend product life and prevent waste, not just end-of-pipe disposal metrics.",
-    incorrectExplanation: "Relying on a single metric often obscures the real systemic changes happening in the workplace.",
-    practicalTakeaway: "Measure the activities that keep products in use, like repair logs and reallocation requests.",
-  },
-  {
-    question: "What is the best way to start building a circular workplace?",
-    options: [
-      { text: "Attempt to completely eliminate all waste across the business by next week", isCorrect: false, feedback: "This is unrealistic and will lead to frustration and failure." },
-      { text: "Initiate a specific, manageable pilot linked to an actual workplace problem, assign a responsible owner, and review the results", isCorrect: true, feedback: "Correct. Small, measurable pilots build confidence and provide lessons before scaling up." },
-      { text: "Wait until the government passes new circular economy laws", isCorrect: false, feedback: "Businesses can achieve significant operational and financial benefits by acting proactively." },
-      { text: "Rewrite all company policies before making any practical changes", isCorrect: false, feedback: "Policy is important, but practical action shouldn't be delayed endlessly by bureaucracy." }
-    ],
-    correctExplanation: "Starting small allows teams to test solutions, adjust to challenges, and demonstrate success without overwhelming operations.",
-    incorrectExplanation: "Over-ambitious or overly bureaucratic approaches often stall before achieving any real impact.",
-    practicalTakeaway: "Pick one clear opportunity, test it, learn from it, and then expand.",
+    correct: 0,
+    correctExplanation: "Checking existing inventory prevents buying duplicates and saves company capital.",
+    incorrectExplanation: "Incorrect. The first step is CHECK existing stock before placing new purchase orders."
   }
 ];
 
-export async function ensureCircularEconomyCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureCircularEconomyCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent administrator edits and quiz attempts.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Ensure Course Exists (resolve skeleton dynamically)
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.slug, COURSE_SLUG),
-      });
+      // 1. Resolve Course 11 by courseCode "ELH-11", slug, or ID
+      let course = null;
+      
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-11"))
+        .limit(1);
 
-      if (!existingCourse) {
-        const byId = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, COURSE_ID),
-        });
-        if (byId) {
-          if (!byId.slug) {
-            throw new Error(`Data integrity violation: Course (ID: ${COURSE_ID}) is missing a unique slug.`);
-          }
-          if (byId.slug === COURSE_SLUG) {
-            existingCourse = byId;
-          } else if (byId.slug.includes('circular')) {
-            existingCourse = byId;
-          }
-        }
-      }
-
-      let actualCourseId = existingCourse ? existingCourse.id : COURSE_ID;
-
-      // 2. Ensure the Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG),
-      });
-      if (!existingBadge) {
-        // Safe placeholder replacement
-        const skeletonBadge = await tx.query.badgeDefinitionsTable.findFirst({
-            where: eq(badgeDefinitionsTable.slug, SKELETON_BADGE_SLUG),
-        });
-        if (skeletonBadge) {
-            await tx.delete(badgeDefinitionsTable).where(eq(badgeDefinitionsTable.slug, SKELETON_BADGE_SLUG));
-        }
-
-        await tx.insert(badgeDefinitionsTable).values({
-          slug: BADGE_SLUG,
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          icon: "award",
-          criteriaType: "all_courses",
-          threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 15,
-        });
+      if (byCode) {
+        course = byCode;
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        if (bySlug) {
+          course = bySlug;
+        } else {
+          const [byId] = await tx
+            .select()
+            .from(coursesTable)
+            .where(eq(coursesTable.id, COURSE_ID))
+            .limit(1);
+          course = byId ?? null;
+        }
       }
 
-      const badgeRecord = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG),
-      });
-
-      if (!badgeRecord) {
-        throw new Error(`Failed to create or retrieve badge ${BADGE_SLUG}`);
+      if (!course) {
+        throw new Error("Course ELH-11 / circular-economy not seeded by catalogue skeletons bootstrap!");
       }
 
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          slug: COURSE_SLUG,
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 5;
+      const hasIncorrectSlug = course.slug !== COURSE_SLUG;
+
+      const needsRepair = !existingSeed ||
+                          hasMissingLessons ||
+                          hasEmptyBlocks ||
+                          hasMissingQuiz ||
+                          hasIncorrectSlug;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Circular Economy course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-11. Re-seeding course content and lessons transactionally...");
+
+      // 4. Resolve next recommended course dynamically by slug
+      const [nextCourse] = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "industrial-symbiosis-mauritius"))
+        .limit(1);
+      const nextCourseId = nextCourse?.id ?? null;
+
+      // 5. Update course record slug, title, and metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
+          slug: COURSE_SLUG,
+          courseCode: "ELH-11",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -582,127 +409,78 @@ export async function ensureCircularEconomyCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).returning();
-        
-        actualCourseId = inserted.id;
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
 
-        await tx.update(badgeDefinitionsTable).set({
-            courseIds: [actualCourseId]
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
-      } else {
-        await tx
-          .update(coursesTable)
-          .set({
-            title: COURSE_TITLE,
-            slug: COURSE_SLUG,
-            description: COURSE_META.description,
-            fullDescription: COURSE_META.fullDescription,
-            categoryId: COURSE_META.categoryId,
-            durationMinutes: COURSE_META.durationMinutes,
-            priceUsd: COURSE_META.priceUsd,
-            level: COURSE_META.level,
-            isFeatured: COURSE_META.isFeatured,
-            thumbnailUrl: COURSE_META.thumbnailUrl,
-            learningObjectives: COURSE_META.learningObjectives,
-            includesCertificate: COURSE_META.includesCertificate,
-            passingScore: COURSE_META.passingScore,
-            completionMessage: COURSE_META.completionMessage,
-            recommendedNextCourseId: COURSE_META.recommendedNextCourseId,
-            status: "published",
-            isPublished: true,
-          })
-          .where(eq(coursesTable.id, actualCourseId));
-      }
-
-      // 3. Seed Lessons - with strict preservation logic
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId),
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(
-          (l) => l.content && l.content.includes("[DRAFT SKELETON]"),
-        );
-
-      // Verify no lesson progress exists before deleting lessons
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map((l) => l.id)),
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
         });
       }
 
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
+      // 7. Seed/re-seed quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
 
-        for (const lesson of NEW_LESSONS) {
-          await tx.insert(lessonsTable).values({
-            courseId: actualCourseId,
-            title: lesson.title,
-            orderIndex: lesson.order,
-            durationMinutes: lesson.minutes,
-            content: lesson.content,
-            contentBlocks: lesson.blocks,
-          });
-        }
+      // 8. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
+          slug: BADGE_SLUG,
+          name: COURSE_META.badgeName,
+          description: COURSE_META.badgeDescription,
+          icon: "refresh-cw",
+          criteriaType: "all_courses",
+          threshold: 0,
+          courseIds: [courseId],
+          orderIndex: 16,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 9. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
+        });
+      } else {
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 4. Seed Quiz Questions - with strict preservation logic
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId),
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(
-          (q) => q.question && q.question.includes("[DRAFT SKELETON]"),
-        );
-
-      // Verify attempts before deleting
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId),
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const correctOptionIndex = q.options.findIndex((o) => o.isCorrect);
-          if (correctOptionIndex === -1) {
-            throw new Error(`Question ${index} is missing a correct option`);
-          }
-
-          await tx.insert(quizQuestionsTable).values({
-            courseId: actualCourseId,
-            question: q.question,
-            options: q.options.map(o => o.text),
-            optionFeedback: q.options.map(o => o.feedback),
-            correctOption: correctOptionIndex,
-            orderIndex: index,
-            correctExplanation: q.correctExplanation,
-            incorrectExplanation: q.incorrectExplanation,
-            practicalTakeaway: q.practicalTakeaway,
-          });
-        }
-      }
-
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Circular Economy course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Circular Economy course");
   }
 }
