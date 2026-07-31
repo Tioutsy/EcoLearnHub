@@ -6,8 +6,6 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
@@ -15,13 +13,14 @@ import { logger } from "./logger";
 const COURSE_SLUG = "tracking-sustainability-actions-and-progress";
 const COURSE_TITLE = "Tracking Sustainability Actions and Progress";
 const BADGE_SLUG = "sustainability-progress-tracker";
-const BADGE_CODE = "COURSE_ELH_17_COMPLETE";
-const SEED_NAME = "tracking-sustainability-actions-and-progress-v1";
+const SEED_NAME = "tracking-sustainability-actions-and-progress-v2";
 
 const COURSE_META = {
   courseCode: "ELH-17",
-  description: "Learn how to turn sustainability goals into trackable workplace actions with clear owners, deadlines, progress indicators and proportionate evidence.",
-  fullDescription: "Learn how to turn sustainability goals into trackable workplace actions with clear owners, deadlines, progress indicators and proportionate evidence. This course enables learners to maintain a reliable view of sustainability actions, identify delays early and communicate progress accurately.",
+  description:
+    "Learn how to maintain clear, current, and evidence-supported records of workplace sustainability actions using structured action registers and consistent status disciplines.",
+  fullDescription:
+    "Maintaining an action register turns committee decisions and departmental goals into trackable workplace delivery. This course teaches employees, action owners, and supervisors how to convert decisions into clear action statements, assign one accountable owner, track target dates, use consistent statuses (Not Started, In Progress, Blocked, Overdue, Completed, Deferred, Cancelled), distinguish activity from completion evidence, and escalate delays transparently.",
   categoryId: 1,
   durationMinutes: 18,
   priceUsd: "0.00",
@@ -30,20 +29,19 @@ const COURSE_META = {
   thumbnailUrl: "/images/courses/tracking-sustainability-actions-and-progress.jpg",
   intendedRoles: ["employees", "managers", "department representatives", "sustainability teams", "HR teams", "operations leads", "facilities coordinators"],
   learningObjectives: [
-    "Convert a broad sustainability goal into specific trackable actions.",
-    "Assign one accountable owner while identifying supporting contributors.",
-    "Set realistic deadlines, milestones and review dates.",
-    "Apply consistent action-status definitions.",
-    "Select simple and relevant progress indicators.",
-    "Identify suitable evidence for different workplace actions.",
-    "Recognise delayed, blocked or poorly defined actions.",
-    "Prepare a basic sustainability action tracker and progress update."
+    "Convert approved sustainability decisions into clear, trackable action statements.",
+    "Assign one accountable action owner while identifying supporting roles and approvers.",
+    "Apply the TRACE action framework (Turn decision into action, Record owner/date, Add updates/evidence, Check status, Escalate delays).",
+    "Distinguish between activity, output, outcome, and verifiable completion evidence.",
+    "Maintain transparent action registers with consistent statuses and change histories."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Tracking Sustainability Actions and Progress. You can now establish and maintain a reliable view of sustainability actions, identify delays early, and report progress accurately.",
-  badgeName: "Sustainability Progress Tracker",
-  badgeDescription: "Awarded for completing Tracking Sustainability Actions and Progress and demonstrating the ability to assign ownership, monitor delivery, use suitable indicators and maintain credible evidence.",
+  completionMessage:
+    "Congratulations! You have passed Tracking Sustainability Actions and Progress. You can now write trackable action statements, assign single accountable owners, maintain evidence-backed status logs, and escalate delays transparently.",
+  badgeName: "Sustainability Action Tracker",
+  badgeDescription:
+    "Awarded for demonstrating practical mastery of workplace action registers, single-owner accountability, evidence verification, and transparent status tracking.",
 };
 
 const NEW_LESSONS = [
@@ -51,484 +49,372 @@ const NEW_LESSONS = [
     order: 0,
     title: "A Goal Is Not Yet an Action",
     minutes: 3,
-    content: "Explain that a broad goal needs to be broken down into specific tasks. Understand the key concepts: Goal, Action, Owner, Deadline, Indicator, and Evidence, and learn how to write trackable actions.",
+    content: "Understand why broad goals fail without specific trackable action statements, owners, and target dates.",
     blocks: [
+      { id: "ta1-h1", type: "heading", position: 1, headingText: "Goals Require Specific Action Tracking" },
+      { id: "ta1-t1", type: "short_text", position: 2, bodyText: "A committee agrees: 'Improve waste sorting and reduce energy draw.' Three months later, the action register shows vague notes: 'Improve waste sorting — ongoing', 'Reduce electricity use — almost done', 'Speak to supplier — completed.' Nobody knows who owned the task, when it was due, what evidence proves completion, or what management needs to resolve. A goal is an intended result; a trackable action is a specific deliverable with one named owner and a deadline." },
+      { id: "ta1-k1", type: "key_message", position: 3, headingText: "Trackable Action Rule", bodyText: "A trackable action statement defines the task deliverable, names one accountable owner, sets a target date, and specifies required completion evidence." },
       {
-        id: "c17-l1-b1",
-        type: "heading",
-        headingText: "A Goal Is Not Yet an Action"
-      },
-      {
-        id: "c17-l1-b2",
-        type: "short_text",
-        bodyText: "A department agrees to: 'Reduce unnecessary electricity use.' Three months later, nothing has changed, and nobody knows who was responsible, when it should have started, or how progress was measured. This is because a goal is not yet an action.\n\nTo track progress, we must convert broad goals into specific tasks. A goal is the intended result. An action is a specific task contributing to the goal. Every action needs one accountable owner, a deadline, a simple indicator, and proportionate evidence."
-      },
-      {
-        id: "c17-l1-b3",
-        type: "key_message",
-        headingText: "Trackable Action Rule",
-        bodyText: "A trackable action must define the task, name a single owner, specify a deadline, and declare a clear completion condition."
-      },
-      {
-        id: "c17-l1-b4",
+        id: "ta1-d1",
         type: "decision_scenario",
-        decisionIntro: "A company wants to reduce paper waste. Which action is most trackable?",
-        decisionPrompt: "Select the most trackable option:",
+        position: 4,
+        decisionIntro: "Evaluating Action Statement Quality:",
+        decisionPrompt: "Which of the following represents a TRACKABLE ACTION STATEMENT?",
         decisionChoices: [
-          {
-            label: "Avoid wasting paper in the office",
-            correct: false,
-            feedback: "Incorrect. This is a general behavior plea, not a specific, trackable task."
-          },
-          {
-            label: "Reduce printing whenever possible",
-            correct: false,
-            feedback: "Incorrect. This has no owner, no deadline, and no clear way to verify completion."
-          },
-          {
-            label: "Office Administrator to activate double-sided printing as default on all shared printers by 15 October and confirm completion through a printer-settings check",
-            correct: true,
-            feedback: "Correct. This defines the task, a single owner, a clear deadline, and verifiable evidence of completion."
-          },
-          {
-            label: "Become a paperless office by the end of the year",
-            correct: false,
-            feedback: "Incorrect. This is a high-level goal, not a specific action task."
-          }
+          { label: "Facilities Lead M. Govinden to audit all washroom taps in Building A, record leak locations, and submit repair purchase requests by 15 August", correct: true, feedback: "Correct! It specifies the exact task, deliverable, single owner, scope, deadline, and evidence." },
+          { label: "Everyone should try to conserve water in washrooms", correct: false, feedback: "Incorrect. General pleas without assigned owners or dates are not trackable actions." },
+          { label: "Reduce company water consumption by 20%", correct: false, feedback: "Incorrect. This is an overarching goal, not a specific action task." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "One Action, One Accountable Owner",
+    title: "Why Action Tracking Matters & Core Vocabulary",
     minutes: 3,
-    content: "Clarify ownership without excluding collaboration. Understand the difference between owners, contributors, approvers, reviewers, and sponsors, and learn why actions should never be assigned to a group.",
+    content: "Explore the operational benefits of reliable action tracking and master core action-register terms.",
     blocks: [
+      { id: "ta2-h1", type: "heading", position: 1, headingText: "Operational Tracking & Vocabulary" },
+      { id: "ta2-t1", type: "short_text", position: 2, bodyText: "Disciplined action tracking ensures committee meetings produce results. It prevents tasks from being forgotten, surfaces cross-departmental blockers early, and provides transparent evidence for performance reviews." },
       {
-        id: "c17-l2-b1",
-        type: "heading",
-        headingText: "One Action, One Accountable Owner"
-      },
-      {
-        id: "c17-l2-b2",
-        type: "short_text",
-        bodyText: "An action may involve several people, but only one person should be accountable for coordinating and ensuring it progresses. Assigning an action to 'everyone', 'the sustainability team', or 'management' leads to shared ambiguity and zero progress.\n\nDistinguish roles: the Owner ensures the action progresses, Contributors complete parts of the work, Approvers authorize decisions/costs, Reviewers check results, and Sponsors remove organizational barriers."
-      },
-      {
-        id: "c17-l2-b3",
+        id: "ta2-k1",
         type: "key_message",
-        headingText: "Clear Accountability",
-        bodyText: "Shared work does not require shared ambiguity. Record contributors to show who is helping, but maintain exactly one named owner who is accountable."
+        position: 3,
+        headingText: "Action-Tracking Vocabulary",
+        bodyText: "• Action Statement: The concise definition of the task deliverable and scope.\n• Action Owner: The single named individual accountable for delivering the action.\n• Supporting Role: Contributors who provide assistance without replacing single owner accountability.\n• Status: The current condition (Not Started, In Progress, Blocked, Overdue, Completed, Deferred, Cancelled).\n• Activity: The task step performed (e.g. Sent an email request).\n• Output: The immediate deliverable produced (e.g. 3 vendor quotes received).\n• Outcome: The measured environmental result (e.g. 15% reduction in electricity draw).\n• Completion Evidence: Factual proof verifying deliverable completion (e.g. Work sign-off certificate, audit log)."
       },
       {
-        id: "c17-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A waste sorting update requires Procurement to buy labels, Facilities to install them, cleaning contractors to receive instructions, and HR to notify staff. Who should own the overall action?",
-        decisionPrompt: "Select the most appropriate owner:",
-        decisionChoices: [
-          {
-            label: "Assign the action to 'all departments' to ensure complete alignment",
-            correct: false,
-            feedback: "Incorrect. Assigning to 'all departments' means no single department is responsible for tracking or driving it."
-          },
-          {
-            label: "Assign it to the Facilities Coordinator as the Owner, and list Procurement, HR, and the Cleaning Supervisor as Contributors",
-            correct: true,
-            feedback: "Correct. This gives one role the responsibility to coordinate the tasks and track progress, while clarifying who else needs to help."
-          },
-          {
-            label: "Do not assign an owner and let the sustainability committee review progress monthly",
-            correct: false,
-            feedback: "Incorrect. Without an owner, the committee will have no results to review; someone must drive the action."
-          },
-          {
-            label: "Assign it to the CEO since it involves multiple departments",
-            correct: false,
-            feedback: "Incorrect. The CEO is a sponsor, not the operational coordinator. Ownership should sit at the coordinate level."
-          }
-        ]
+        id: "ta2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to ISO 14001 / ISO 9001 Clause 9 and the UN Global Compact, organizations that maintain documented action registers with single named owners, target dates, and verified completion evidence achieve over 75% higher project delivery success compared to informal tracking!"
       }
     ]
   },
   {
     order: 2,
-    title: "Deadlines, Milestones and Review Dates",
-    minutes: 3,
-    content: "Learn how to use milestones, review dates, and dependencies to manage long-term sustainability actions, ensuring delays or obstacles are caught and resolved early.",
+    title: "The TRACE Action Framework",
+    minutes: 4,
+    content: "Master the 5-step TRACE framework: Turn, Record, Add, Check, Escalate.",
     blocks: [
+      { id: "ta3-h1", type: "heading", position: 1, headingText: "The TRACE Action Framework" },
+      { id: "ta3-t1", type: "short_text", position: 2, bodyText: "Use the TRACE framework to maintain a reliable workplace action register:" },
       {
-        id: "c17-l3-b1",
-        type: "heading",
-        headingText: "Deadlines, Milestones and Review Dates"
-      },
-      {
-        id: "c17-l3-b2",
-        type: "short_text",
-        bodyText: "Long-term actions cannot be completed overnight. Relying only on a distant final deadline hides delays until it is too late. Milestones represent important intermediate checkpoints that make progress or blocks visible earlier.\n\nUse Review Dates to formally check progress, and map out Dependencies (things that must happen before an action can proceed) to plan work sequences logically."
-      },
-      {
-        id: "c17-l3-b3",
+        id: "ta3-k1",
         type: "key_message",
-        headingText: "Sequence Example",
-        bodyText: "Action: Introduce reusable delivery crates with a supplier. Milestones: 1. Confirm operational requirements. 2. Obtain supplier proposal. 3. Approve trial. 4. Run one-month pilot. 5. Review metrics. 6. Decide on expansion."
+        position: 3,
+        headingText: "TRACE Framework Breakdown",
+        bodyText: "• T — Turn decision into clear action: Define the exact deliverable, scope, and location.\n• R — Record one owner & target date: Assign single accountability and a realistic deadline.\n• A — Add updates, dependencies & evidence: Record progress notes, cross-department needs, and proof.\n• C — Check status & completion honestly: Use consistent status labels; do not mark complete without evidence.\n• E — Escalate delays & preserve history: Promptly report blocked tasks to management and archive change logs."
       },
       {
-        id: "c17-l3-b4",
+        id: "ta3-d1",
         type: "decision_scenario",
-        decisionIntro: "Which milestone sequence is most logical for implementing a water-leak inspection program?",
-        decisionPrompt: "Select the logical milestone order:",
+        position: 4,
+        decisionIntro: "Practice: Activity vs Completion Evidence",
+        decisionPrompt: "A procurement officer sends an email requesting quotes for reusable delivery crates. How should this be recorded?",
         decisionChoices: [
-          {
-            label: "1. Run inspector briefings. 2. Purchase equipment. 3. Finalize inspection route. 4. Perform check and log evidence",
-            correct: false,
-            feedback: "Incorrect. You cannot brief inspectors effectively on the route before it is finalized or before equipment is selected."
-          },
-          {
-            label: "1. Finalize inspection route and select equipment. 2. Brief inspectors on route and log tool usage. 3. Perform Q1 checks and log evidence",
-            correct: true,
-            feedback: "Correct. This defines the process and tools first, trains the staff next, and then schedules execution and evidence collection."
-          },
-          {
-            label: "1. Conduct the inspections. 2. Plan the route. 3. Purchase tools. 4. Record evidence",
-            correct: false,
-            feedback: "Incorrect. You cannot conduct structured inspections before planning the route or buying the necessary tools."
-          },
-          {
-            label: "1. Report progress to managers. 2. Do checks. 3. Set up the log files",
-            correct: false,
-            feedback: "Incorrect. Setting up the log and doing the checks must happen before you can report progress to managers."
-          }
+          { label: "Record as 'In Progress' with a progress note: 'Quote request emailed to 3 vendors on 10 July'", correct: true, feedback: "Correct! Sending an email is an activity step, so the action remains In Progress until quotes are received and verified." },
+          { label: "Mark the action 'Completed' because an email was sent", correct: false, feedback: "Incorrect. Sending an email is an activity step, not proof of deliverable completion." },
+          { label: "Delete the action from the register to keep it short", correct: false, feedback: "Incorrect. Action history must be preserved until deliverables are verified." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Use Statuses Consistently",
-    minutes: 3,
-    content: "Apply consistent action-status definitions: Not started, In progress, Blocked, Delayed, Completed, and Cancelled. Avoid optimism and base status strictly on factual progress.",
+    title: "Visual Action Register & High-Risk Mistakes",
+    minutes: 4,
+    content: "Inspect a realistic Mauritian action register board and review critical safeguards.",
     blocks: [
+      { id: "ta4-h1", type: "heading", position: 1, headingText: "Visual Action Register Inspection" },
+      { id: "ta4-t1", type: "short_text", position: 2, bodyText: "Examine the Mauritian workplace action board below (`visual-sustainability-action-register.png`). Observe how the board tracks Action Statement, Owner, Supporting Role, Target Date, Status, Latest Update, Dependency, Evidence, and Escalation." },
       {
-        id: "c17-l4-b1",
-        type: "heading",
-        headingText: "Use Statuses Consistently"
+        id: "ta4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-sustainability-action-register.png",
+        caption: "Sustainability Action Register Board: Displaying action statements, owners, target dates, statuses, update logs, dependencies, and evidence.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace office with a whiteboard titled Sustainability Action Register Board showing action statements, single owners, target dates, statuses, updates, and evidence while facilities managers inspect the board."
       },
       {
-        id: "c17-l4-b2",
-        type: "short_text",
-        bodyText: "Using a consistent set of status definitions ensures progress reports are accurate. Status must be based on facts, not optimism. An action is not 'in progress' merely because it has been discussed.\n\nUse: Not started (no work begun), In progress (work active), Blocked (stuck due to decision, resource, or dependency), Delayed (active but behind schedule), Completed (completion condition achieved), Cancelled (formally stopped)."
-      },
-      {
-        id: "c17-l4-b3",
+        id: "ta4-k1",
         type: "key_message",
-        headingText: "Handling Blockers",
-        bodyText: "When an action is 'Blocked,' always record what is blocking it, who must make the decision, and the escalation date. Do not leave blocked actions marked as 'in progress.'"
-      },
-      {
-        id: "c17-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A supplier proposal for new waste bins has been received, but budget approval has been pending with the finance manager for six weeks and work cannot proceed. What is the correct status?",
-        decisionPrompt: "Select the most accurate status:",
-        decisionChoices: [
-          {
-            label: "In progress - because we are waiting for the proposal to be reviewed",
-            correct: false,
-            feedback: "Incorrect. The proposal is received; work is completely stopped waiting for approval. Marking it 'in progress' hides the delay."
-          },
-          {
-            label: "Blocked - because budget approval is pending with Finance and no operational steps can continue",
-            correct: true,
-            feedback: "Correct. This accurately flags that progress has stopped due to an external decision/dependency, making it clear where action is needed."
-          },
-          {
-            label: "Delayed - because the final delivery date will be missed",
-            correct: false,
-            feedback: "Incorrect. While it may be delayed eventually, the immediate state is 'Blocked' because it cannot progress until the budget is approved."
-          },
-          {
-            label: "Completed - because the proposal phase is finished",
-            correct: false,
-            feedback: "Incorrect. The action was to install the bins, not just collect proposals; the work is far from complete."
-          }
-        ]
+        position: 4,
+        headingText: "High-Risk Tracking Mistakes to Avoid",
+        bodyText: "• DO NOT assign multiple owners to a single action (e.g. 'Sarah & Rajiv'); assign one primary owner.\n• DO NOT leave target dates blank or use permanent 'ongoing' status without review dates.\n• DO NOT mark blocked actions as 'in progress' to hide delays from management.\n• DO NOT mark actions 'completed' without attaching or linking verifiable evidence.\n• DO NOT delete old actions or overwrite target dates without recording change history."
       }
     ]
   },
   {
     order: 4,
-    title: "Indicators and Evidence That Are Useful",
-    minutes: 3,
-    content: "Distinguish activity indicators from result indicators. Select relevant, proportionate evidence (photos, invoices, logs, meter readings) to back up progress claims without creating unnecessary paperwork.",
+    title: "Worked Mauritian Scenario & Applied Decision",
+    minutes: 2,
+    content: "Study a hotel multi-action tracking scenario and solve an applied commercial property decision.",
     blocks: [
+      { id: "ta5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Hotel Action Register" },
       {
-        id: "c17-l5-b1",
-        type: "heading",
-        headingText: "Indicators and Evidence That Are Useful"
+        id: "ta5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Tracking Three Distinct Actions",
+        bodyText: "A hotel committee tracks 3 actions:\n1. Leak Repairs: Owner: Facilities Lead (M. Govinden) | Target: 10 Aug | Status: Completed | Evidence: Plumbing repair sign-off log.\n2. Kitchen Sorting: Owner: Head Chef (L. Seetaram) | Target: 20 Aug | Status: In Progress | Evidence: Bin audit photo & staff briefing roster.\n3. Amenities Switch: Owner: Procurement Officer (R. Ramtohul) | Target: 30 Aug | Status: Blocked | Dependency: Supplier contract review | Escalation: General Manager."
       },
       {
-        id: "c17-l5-b2",
-        type: "short_text",
-        bodyText: "Indicators check if progress is occurring. Activity indicators show what was done (e.g. number of staff trained). Result indicators show what changed (e.g. waste contamination rates).\n\nProgress claims should be backed by proportionate evidence (attendance logs, invoices, photos, meter logs, purchasing receipts). Collect only what is useful; do not create unnecessary administrative paperwork."
-      },
-      {
-        id: "c17-l5-b3",
-        type: "key_message",
-        headingText: "Evidence Principle",
-        bodyText: "Evidence should fit the action. A photo of a bin is enough to verify installation; a complex engineering report is not needed for simple changes."
-      },
-      {
-        id: "c17-l5-b4",
+        id: "ta5-d1",
         type: "decision_scenario",
-        decisionIntro: "Which combination of indicator and evidence is most relevant for a workplace water-leak inspection program?",
-        decisionPrompt: "Select the best indicator/evidence mix:",
+        position: 3,
+        decisionIntro: "Applied Commercial Property Decision:",
+        decisionPrompt: "A property management team wants to eliminate air conditioning waste caused by open doors. The current register entry reads: 'Security and Facilities to solve door problem — ongoing.' Security briefed guards, but Facilities has not checked door closer hardware and Tenant Relations was not involved. What is the correct tracking fix?",
         decisionChoices: [
-          {
-            label: "Indicator: Number of plumbing catalogs reviewed. Evidence: Catalog list.",
-            correct: false,
-            feedback: "Incorrect. Reviewing catalogs is research, not an action that tracks leak inspections or water savings."
-          },
-          {
-            label: "Indicator: Percentage of bathrooms inspected weekly. Evidence: Signed bathroom log sheets and repair invoices.",
-            correct: true,
-            feedback: "Correct. Bathroom inspection rate is a direct activity indicator, and log sheets/invoices provide verifiable evidence of action."
-          },
-          {
-            label: "Indicator: Annual Mauritian rainfall statistics. Evidence: Meteorological report.",
-            correct: false,
-            feedback: "Incorrect. Rainfall is external weather data and does not measure the company's leak repair performance."
-          },
-          {
-            label: "Indicator: Total number of office taps. Evidence: Map of sinks.",
-            correct: false,
-            feedback: "Incorrect. Sinks count is static asset data; it does not indicate whether leaks are being inspected or repaired."
-          }
+          { label: "Split into 2 clear actions: (1) Facilities Lead to inspect/adjust door closers by 15 Aug; (2) Tenant Manager to issue door policy guidance by 20 Aug, with single owners and target dates", correct: true, feedback: "Outstanding! Splitting vague group entries into single-owner actions with specific deliverables and deadlines restores operational control." },
+          { label: "Leave the entry as 'Security and Facilities — ongoing' because both teams are working on it", correct: false, feedback: "NEVER leave shared group entries with 'ongoing' status; shared ownership leads to zero accountability." },
+          { label: "Mark the action 'Completed' because Security guards were briefed", correct: false, feedback: "Incorrect. Briefing guards is a supporting activity, not proof of door hardware or tenant policy resolution." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Build and Review the Action Tracker",
-    minutes: 3,
-    content: "Examine the fields of a simple action tracker. Learn how to conduct a progress review, identify poorly defined tasks, and choose a practical tracking improvement to implement in your workplace.",
+    title: "Your Tracking Commitment & Badge",
+    minutes: 2,
+    content: "Select your daily action-tracking commitments and complete the course.",
     blocks: [
+      { id: "ta6-h1", type: "heading", position: 1, headingText: "Action Tracking Commitment" },
+      { id: "ta6-t1", type: "short_text", position: 2, bodyText: "Select the action-tracking commitments you pledge to practice in your workplace." },
       {
-        id: "c17-l6-b1",
-        type: "heading",
-        headingText: "Build and Review the Action Tracker"
-      },
-      {
-        id: "c17-l6-b2",
-        type: "short_text",
-        bodyText: "A simple action tracker holds: Goal, Action, Owner, Contributors, Deadline, Milestones, Status, Indicator, Evidence, and Blockers.\n\nRegular progress reviews check what has been completed, what is delayed/blocked, what decisions are needed, and what happens next. If a team claims 80% progress but has no defined owners or deadlines, the percentage is not reliable because the actions are poorly defined."
-      },
-      {
-        id: "c17-l6-b3",
-        type: "key_message",
-        headingText: "Review Questions",
-        bodyText: "At each progress review, focus on: Completed actions (backed by evidence) and Delayed/Blocked actions (to resolve obstacles)."
-      },
-      {
-        id: "c17-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Which tracking improvement would be most useful in your workplace?",
-        commitmentChoices: [
-          "Clarify an action owner",
-          "Add a realistic deadline",
-          "Define a completion condition",
-          "Identify suitable evidence",
-          "Record a blocker",
-          "Schedule a progress review"
+        id: "ta6-c1",
+        type: "commitment",
+        position: 3,
+        commitmentInstruction: "Select your tracking commitments (choose at least one):",
+        commitmentOptions: [
+          { value: "assign-single-owner", label: "Assign exactly one primary accountable owner to every workplace action statement", description: "Prevent shared ambiguity and vague team assignments." },
+          { value: "require-completion-evidence", label: "Attach or cite verifiable evidence before marking any action as completed", description: "Ensure status updates are backed by factual proof." },
+          { value: "escalate-blocked-status", label: "Mark blocked actions accurately and escalate resource or authority barriers promptly", description: "Surface delays to management early." },
+          { value: "preserve-change-history", label: "Preserve target date change history and progress update notes transparently", description: "Maintain an honest audit trail." }
         ]
+      },
+      {
+        id: "ta6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: This course provides operational guidance for tracking workplace sustainability actions. It does not constitute independent assurance, environmental accreditation, legal auditing, or statutory compliance certification."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "A department has agreed to reduce unnecessary printing. Which action represents the most trackable workplace action?",
+    order: 1,
+    question: "Why is a vague register entry like 'Improve recycling — ongoing' ineffective?",
     options: [
-      { text: "Employees should avoid wasting paper.", isCorrect: false, feedback: "Incorrect. This is a general advice plea, not a specific, trackable action." },
-      { text: "Reduce printing whenever possible.", isCorrect: false, feedback: "Incorrect. This has no owner, deadline, or completion condition." },
-      { text: "Office Administrator to activate double-sided printing as the default on all shared printers by 15 October and confirm completion through a printer-settings check.", isCorrect: true, feedback: "Correct. This defines the task, a single owner, a clear deadline, and verifiable evidence." },
-      { text: "Become a paperless office.", isCorrect: false, feedback: "Incorrect. This is a goal description, not a trackable operational action." }
+      "Because it lacks a specific task deliverable, a single accountable owner, a target date, and verifiable completion evidence",
+      "Because recycling is prohibited in commercial workplaces",
+      "Because action registers must only contain financial statistics",
+      "Because ongoing tasks can never be recorded in computers"
     ],
-    correctExplanation: "Trackable actions define a specific task, a single accountable owner, a deadline, and clear completion evidence.",
-    incorrectExplanation: "Vague slogans, advice pleas, or high-level goals lack the accountability structure needed for progress tracking.",
-    practicalTakeaway: "Convert vague goals into tasks with one owner, a deadline, and a verifiable completion condition."
+    correct: 0,
+    correctExplanation: "Vague entries lack single-owner accountability, specific deliverables, target dates, and evidence.",
+    incorrectExplanation: "Incorrect. Trackable actions require specific deliverables, single owners, deadlines, and evidence."
   },
   {
-    question: "Who should be recorded as the owner when a waste-reduction initiative involves tasks across multiple departments?",
+    order: 2,
+    question: "What does the 'R' in the TRACE action framework stand for?",
     options: [
-      { text: "Assign the action to 'all departments' to ensure shared responsibility.", isCorrect: false, feedback: "Incorrect. Assigning it to 'everyone' leads to a lack of individual accountability." },
-      { text: "One named role or coordinator who is accountable for coordinating the action, listing other department roles as contributors.", isCorrect: true, feedback: "Correct. One owner must drive coordination, even if multiple contributors perform specific steps." },
-      { text: "The CEO, to make sure all departments comply.", isCorrect: false, feedback: "Incorrect. The CEO is a sponsor, not the operational coordinator who tracks daily actions." },
-      { text: "The external cleaning contractor supervisor.", isCorrect: false, feedback: "Incorrect. External contractors support the action but are not accountable for the company's internal coordination." }
+      "Record one owner & target date (assign single accountability and a realistic deadline)",
+      "Remove all overdue tasks from the spreadsheet",
+      "Refuse to answer manager questions about delays",
+      "Replace internal staff with external contractors"
     ],
-    correctExplanation: "To prevent ambiguity, every action must have exactly one accountable owner, regardless of how many contributors are involved.",
-    incorrectExplanation: "Group assignments, executive sponsors, or external parties do not replace the need for a single, accountable coordinator.",
-    practicalTakeaway: "Never leave an action without a single owner. Use contributors to list supporting roles."
+    correct: 0,
+    correctExplanation: "R = Record one owner & target date, ensuring clear personal accountability.",
+    incorrectExplanation: "Incorrect. R = Record one owner & target date."
   },
   {
-    question: "A facilities coordinator needs to install energy-saving LED lighting but requires budget approval from the finance manager. Who is the owner and who is the approver?",
+    order: 3,
+    question: "Why should an action statement have only ONE primary accountable owner?",
     options: [
-      { text: "The finance manager is the owner, and the facilities coordinator is the contributor.", isCorrect: false, feedback: "Incorrect. The facilities coordinator is driving the task; the finance manager only approves funding." },
-      { text: "The facilities coordinator is the owner, and the finance manager is the approver.", isCorrect: true, feedback: "Correct. The coordinator is accountable for delivering the installation, and the finance manager authorizes the cost." },
-      { text: "They are co-owners of the action to ensure cost-efficiency.", isCorrect: false, feedback: "Incorrect. Co-ownership dilutes responsibility. The operational lead must own the action." },
-      { text: "The electrical supplier is the owner, and the facilities coordinator is the reviewer.", isCorrect: false, feedback: "Incorrect. The external supplier is a contributor; the coordinator owns the task." }
+      "Because when multiple owners or entire departments are assigned, no single individual feels accountable for follow-through",
+      "Because only managers are allowed to work on actions",
+      "Because software spreadsheets can only store one name per row",
+      "Because supporting contributors are forbidden from helping"
     ],
-    correctExplanation: "The person driving and coordinating the task is the Owner. The person authorizing budget or decisions is the Approver.",
-    incorrectExplanation: "Co-ownership or making the approver/supplier the owner creates operational confusion.",
-    practicalTakeaway: "Keep ownership with the operational driver, and list budget sign-off roles as Approvers."
+    correct: 0,
+    correctExplanation: "Single ownership prevents shared ambiguity; supporting roles can contribute without diluting ownership.",
+    incorrectExplanation: "Incorrect. Assigning one primary owner ensures clear accountability for completion."
   },
   {
-    question: "Why should a six-month energy efficiency project include intermediate milestones?",
+    order: 4,
+    question: "In the visual action register board (`visual-sustainability-action-register.png`), what weakness is highlighted by the red arrow?",
     options: [
-      { text: "To hide delays from senior management until the final deadline.", isCorrect: false, feedback: "Incorrect. Milestones increase transparency and show delays early." },
-      { text: "To replace the final completion deadline entirely.", isCorrect: false, feedback: "Incorrect. Milestones support the final deadline, they do not replace it." },
-      { text: "To break down a long-term goal and make obstacles or delays visible early.", isCorrect: true, feedback: "Correct. Checking milestones allows teams to catch delays and adjust plans before the final date is missed." },
-      { text: "To double the project budget.", isCorrect: false, feedback: "Incorrect. Milestones track progress, they do not impact budget allocations." }
+      "An overdue action assigned to two owners (Sarah J. & Rajiv M.) without single-owner clarity or evidence verification",
+      "A completed action that cost too much money",
+      "A missing building floor plan map",
+      "An action written in the wrong font style"
     ],
-    correctExplanation: "Milestones serve as checkpoints during long-term actions, allowing teams to identify and resolve issues early.",
-    incorrectExplanation: "Hiding delays, replacing deadlines, or budget adjustments are not the purpose of milestones.",
-    practicalTakeaway: "Use milestones to catch delays early. Do not rely solely on a distant final deadline."
+    correct: 0,
+    correctExplanation: "The highlighted entry shows an overdue task with dual ownership, creating accountability ambiguity.",
+    incorrectExplanation: "Incorrect. It highlights an overdue task assigned to two owners without evidence."
   },
   {
-    question: "A recycling bin installation is on hold because the supplier has run out of stock and cannot deliver for four weeks. What is the correct status?",
+    order: 5,
+    question: "What is the difference between an ACTIVITY and COMPLETION EVIDENCE?",
     options: [
-      { text: "In progress - because we have selected the supplier.", isCorrect: false, feedback: "Incorrect. Work has stopped because we cannot get the bins. Hiding this blocker is misleading." },
-      { text: "Delayed - because the final date is uncertain.", isCorrect: false, feedback: "Incorrect. While it may be delayed, the immediate cause is an external dependency that is blocking further steps." },
-      { text: "Blocked - because progress cannot continue due to an external supply dependency.", isCorrect: true, feedback: "Correct. This flags that work is completely stopped due to a dependency, highlighting where attention is needed." },
-      { text: "Completed - because the order has been placed.", isCorrect: false, feedback: "Incorrect. The bins are not installed; the action is incomplete." }
+      "An activity is a task step performed (e.g. sending a quote request email); completion evidence is factual proof that the deliverable was achieved (e.g. signed supplier contract)",
+      "An activity is an official fine; completion evidence is a verbal rumor",
+      "Activity and completion evidence mean the exact same thing",
+      "An activity is performed by computers; evidence is performed by humans"
     ],
-    correctExplanation: "An action is Blocked when progress has stopped entirely due to an external decision, resource shortage, or dependency.",
-    incorrectExplanation: "Marking blocked actions as 'in progress' or 'delayed' hides the specific obstacle stopping the work.",
-    practicalTakeaway: "Mark stopped actions as 'Blocked' and record the obstacle, decision needed, and next review date."
+    correct: 0,
+    correctExplanation: "Activities are task steps performed; completion evidence is factual proof that the deliverable is finished.",
+    incorrectExplanation: "Incorrect. Activity = task step performed; Completion Evidence = factual proof of deliverable."
   },
   {
-    question: "What is the difference between an activity indicator and a result indicator in sustainability tracking?",
+    order: 6,
+    question: "When should an action status be marked as BLOCKED?",
     options: [
-      { text: "Activity indicators measure what was done; result indicators measure what changed.", isCorrect: true, feedback: "Correct. Activity tracks task execution (e.g. training completed), while result tracks impact (e.g. energy saved)." },
-      { text: "Activity indicators are for employees; result indicators are only for CEOs.", isCorrect: false, feedback: "Incorrect. Both indicators are useful at all organizational levels to monitor action progress." },
-      { text: "Activity indicators use numbers; result indicators only use text descriptions.", isCorrect: false, feedback: "Incorrect. Both indicator types should use specific, supportable data." },
-      { text: "There is no difference; the terms are interchangeable.", isCorrect: false, feedback: "Incorrect. Distinguishing them helps check if actions are achieving their intended outcomes." }
+      "When progress cannot continue due to an external dependency, resource constraint, or unapproved budget requiring escalation",
+      "Whenever an action is completed ahead of schedule",
+      "When an employee goes on annual leave for two days",
+      "When the action register file is locked for editing"
     ],
-    correctExplanation: "Activity indicators track task completion (inputs/actions). Result indicators track the environmental impact (outputs/outcomes).",
-    incorrectExplanation: "Role-based limits, data formats, or treating them as identical are incorrect descriptions.",
-    practicalTakeaway: "Track both: activity indicators prove the action occurred, and result indicators prove it worked."
+    correct: 0,
+    correctExplanation: "Mark 'Blocked' when external dependencies or resource constraints prevent progress, triggering escalation.",
+    incorrectExplanation: "Incorrect. Blocked status indicates an unresolved barrier requiring escalation."
   },
   {
-    question: "A department is tracking an action: 'Inspect all plumbing fixtures for water leaks weekly.' What is the most proportionate evidence to support this?",
+    order: 7,
+    question: "Why is silently replacing an overdue target date with a new future date without explanation a high-risk mistake?",
     options: [
-      { text: "A detailed engineering study of Mauritian water infrastructure.", isCorrect: false, feedback: "Incorrect. This is external research and does not verify weekly inspection tasks." },
-      { text: "Signed weekly inspection logs showing dates, rooms checked, and any repairs made.", isCorrect: true, feedback: "Correct. signed logs directly verify weekly inspections and repair details without excess paperwork." },
-      { text: "An verbal statement from the manager saying everything is fine.", isCorrect: false, feedback: "Incorrect. Verbal statements are not verifiable records and do not represent credible evidence." },
-      { text: "A video of every single bathroom faucet.", isCorrect: false, feedback: "Incorrect. Taking weekly videos of all taps is excessive and creates unnecessary administration." }
+      "Because it conceals operational delays and destroys change history, preventing management from understanding root causes",
+      "Because target dates can never be changed under any circumstances",
+      "Because spreadsheets automatically crash when dates are edited",
+      "Because target dates are legally binding court orders"
     ],
-    correctExplanation: "Evidence must be proportionate to the action. Signed logs and repair logs verify inspections cleanly without administrative waste.",
-    incorrectExplanation: "Infrastructure reports (irrelevant), verbal claims (unverifiable), or video logs (excessive) are not proportionate.",
-    practicalTakeaway: "Keep evidence simple and proportionate—such as a checklist log, photo, or invoice."
+    correct: 0,
+    correctExplanation: "Target dates can be revised, but the change history and reason for delay must be preserved transparently.",
+    incorrectExplanation: "Incorrect. Revisions require transparent notes to preserve change history and record reasons for delay."
   },
   {
-    question: "During a progress review, a team reports 80% of its actions are 'in progress,' but none has an owner, deadline, or completion condition. How should the manager respond?",
+    order: 8,
+    question: "What should a sustainability committee coordinator do when an action owner reports an unmanaged budget barrier?",
     options: [
-      { text: "Accept the update and congratulate the team on their progress.", isCorrect: false, feedback: "Incorrect. The 80% is not reliable because the actions are not defined." },
-      { text: "Tell the team that the progress percentage is unreliable, and work with them to define owners, deadlines, and completion conditions.", isCorrect: true, feedback: "Correct. Vague actions cannot be tracked. Defining owners and deadlines makes the tracking data reliable." },
-      { text: "Cancel the initiative immediately due to poor reporting.", isCorrect: false, feedback: "Incorrect. This is too severe; the constructive step is to clarify the action tracker." },
-      { text: "Increase the goal to 100% to force them to complete the work.", isCorrect: false, feedback: "Incorrect. Raising targets on undefined actions only increases confusion." }
+      "Update status to 'Blocked', record the specific budget barrier note, and escalate to the Team Sponsor for management review",
+      "Mark the action 'Completed' so the register looks good",
+      "Delete the action row from the database",
+      "Tell the action owner to pay for the equipment personally"
     ],
-    correctExplanation: "Progress tracking metrics are meaningless if the underlying actions lack owners, deadlines, and clear completion criteria.",
-    incorrectExplanation: "Accepting unreliable numbers, cancelling, or raising targets fails to establish the necessary task structure.",
-    practicalTakeaway: "Never track vague actions. Ensure every task has a named owner, deadline, and completion evidence."
+    correct: 0,
+    correctExplanation: "Update status to Blocked, record the barrier note, and escalate to the Sponsor for management review.",
+    incorrectExplanation: "Incorrect. Record Blocked status and escalate to the Sponsor for management decision."
+  },
+  {
+    order: 9,
+    question: "How does ELH-17 (Tracking Actions) connect to ELH-18 (Data Collection)?",
+    options: [
+      "ELH-17 identifies what evidence is needed and links it to action records; ELH-18 teaches how to collect and validate that quantitative data",
+      "ELH-17 replaces ELH-18 so data collection is no longer necessary",
+      "ELH-17 is for external auditors; ELH-18 is for receptionists",
+      "There is no connection between tracking actions and data collection"
+    ],
+    correct: 0,
+    correctExplanation: "ELH-17 specifies evidence requirements on action logs; ELH-18 teaches technical data collection protocols.",
+    incorrectExplanation: "Incorrect. ELH-17 links evidence to tasks; ELH-18 teaches how to collect and validate data."
+  },
+  {
+    order: 10,
+    question: "What is the primary takeaway of the TRACE Action Framework?",
+    options: [
+      "Applying TRACE (Turn to action, Record owner/date, Add updates/evidence, Check status, Escalate delays) ensures workplace actions are delivered transparently",
+      "Action tracking is optional and has no impact on project completion",
+      "Actions should be marked complete as soon as an email is sent",
+      "Action registers should be kept secret from department heads"
+    ],
+    correct: 0,
+    correctExplanation: "The TRACE framework provides disciplined recordkeeping that turns decisions into verified workplace results.",
+    incorrectExplanation: "Incorrect. TRACE provides the structure needed for evidence-backed action delivery."
   }
 ];
 
-export async function ensureTrackingSustainabilityActionsCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureTrackingSustainabilityActionsCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      // 1. Resolve Course 17 by courseCode "ELH-17" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-17"))
+        .limit(1);
 
-      // 2. Resolve Course 16
-      let course16 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-16")
-      });
-      if (!course16) {
-        course16 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "communicating-sustainability-at-work")
-        });
-      }
-
-      if (!course16) {
-        throw new Error("Data integrity error: Course 16 (ELH-16) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 17
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
-        actualCourseId = inserted.id;
+      if (byCode) {
+        course = byCode;
       } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course ELH-17 / tracking-sustainability-actions-and-progress not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Tracking Sustainability Actions course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-17. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-18 or null if not yet seeded)
+      const [course18] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "sustainability-data-collection"))
+        .limit(1);
+      const nextCourseId = course18 ? course18.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
           slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
+          courseCode: "ELH-17",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -541,185 +427,108 @@ export async function ensureTrackingSustainabilityActionsCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
       }
 
-      // 4. Update Course 16 recommendedNextCourseId to point to Course 17 preserving admin edits
-      let isSystemManaged = false;
-      if (course16.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course16.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-17") {
-          isSystemManaged = true;
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entries in coursePrerequisitesTable (ELH-12, ELH-13, ELH-14, ELH-15, ELH-16 -> ELH-17)
+      const prereqs = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(inArray(coursesTable.slug, [
+          "final-sustainability-certification",
+          "sustainability-action-planning",
+          "setting-departmental-sustainability-goals",
+          "building-workplace-sustainability-team",
+          "communicating-sustainability-at-work"
+        ]));
+
+      for (const prereq of prereqs) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: prereq.id,
+          });
         }
       }
 
-      if (course16.recommendedNextCourseId === null || course16.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course16.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 16 currently recommends course ID ${course16.recommendedNextCourseId} instead of Course 17 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          icon: "check-square",
+          icon: "check-circle",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 20,
-          code: BADGE_CODE,
+          courseIds: [courseId],
+          orderIndex: 22,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 16
-      const existingPrereq16 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course16.id)
-        )
-      });
-      if (!existingPrereq16) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course16.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order if they don't already exist or are skeletons
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Tracking Sustainability Actions course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Tracking Sustainability Actions course");
   }
 }
