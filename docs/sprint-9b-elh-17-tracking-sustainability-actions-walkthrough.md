@@ -1,6 +1,6 @@
 # Sprint 9B Walkthrough — ELH-17 Tracking Sustainability Actions Course Upgrade
 
-Sprint 9B has successfully reviewed, corrected, and upgraded **ELH-17 — Tracking Sustainability Actions** to meet the 13-part EcoLearnHub Course Quality Standard established in Sprint 8K.
+Sprint 9B (including Sprint 9B-C source correction) has successfully reviewed, corrected, and upgraded **ELH-17 — Tracking Sustainability Actions** to meet the 13-part EcoLearnHub Course Quality Standard established in Sprint 8K.
 
 ---
 
@@ -17,7 +17,8 @@ Sprint 9B has successfully reviewed, corrected, and upgraded **ELH-17 — Tracki
 3. **13-Part Applied Course Progression Implemented**:
    - **Opening Hook**: Mauritian workplace scenario where an action register lists vague notes ("Improve waste sorting — ongoing", "Reduce electricity use — almost done", "Speak to supplier — completed") without owners, dates, deliverables, evidence, or update timestamps.
    - **Why Action Tracking Matters**: Follow-through after meetings, clear accountability, early escalation, honest communication, data collection, and audit-ready continuity.
-   - **Sourced Memorable Fact ("Did You Know?")**: Sourced block from ISO 14001 / ISO 9001 Clause 9 & UN Global Compact showing documented action registers with single named owners and verified completion evidence increase project delivery success by over 75%.
+   - **Sourced Memorable Fact ("Did You Know?")**: Added a source-safe explanation that an action marked completed is not automatically verified. Reliable completion records identify the deliverable, responsible owner, completion date, and supporting evidence. The lesson connects this practice to ISO 14001 Clause 9.1 & ISO 9001 Clause 9.1 management-system principles concerning monitoring, evaluation, and retaining appropriate documented information without making unsupported performance claims.
+   - **Correction Note (Sprint 9B-C)**: The initial draft contained an inadequately supported percentage ("over 75%"). During final quality review, this claim was identified, removed, and replaced with defensible ISO 14001 / ISO 9001 Clause 9.1 guidance, strengthening alignment with EcoLearnHub's evidence-quality standard.
    - **The TRACE Action Framework**: 5-step operational framework (**T**urn decision into clear action, **R**ecord one owner & target date, **A**dd updates, dependencies & evidence, **C**heck status & completion honestly, **E**scalate delays & preserve history).
    - **Distinguishing Activity vs Output vs Outcome vs Evidence**: Clear breakdown showing why sending an email (activity) or getting supplier quotes (output) is not completion evidence or environmental outcome.
    - **High-Risk Mistakes & Safeguards**: Explicit rules against vague task wording, multiple owners, missing target dates, silently replacing deadlines, marking blocked tasks as 'in progress', or deleting historical change logs.

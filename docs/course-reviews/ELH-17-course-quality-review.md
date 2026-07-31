@@ -15,7 +15,7 @@
 | :--- | :--- | :--- | :--- |
 | **Overall Quality Score** | **68 / 100** | ⚠️ WEAK | **≥ 95 / 100** |
 | **Release Blockers** | **1** | ❌ FAILED | **0** |
-| **Memorable Fact Block** | Missing | ❌ BLOCKER | Sourced "Did You Know?" Block |
+| **Memorable Fact Block** | Unsupported 75% claim in initial draft | ❌ BLOCKER | Sourced, defensible "Did You Know?" Block |
 | **Visual Identification Question** | Missing | ❌ BLOCKER | Accessible visual image question |
 | **Structural Boundary Matrix** | Undocumented | ⚠️ WEAK | Matrix vs ELH-13/14/15/16/18/19/20/21/22/23 |
 
@@ -42,13 +42,22 @@
 
 | Claim | Verified Reality | Source / Basis |
 | :--- | :--- | :--- |
-| **Action Tracking Discipline** | Maintaining a documented action register with single named owners, target dates, and verified completion evidence increases project delivery success by over 75% compared to informal tracking. | ISO 14001 / ISO 9001 Clause 9 & UN Global Compact |
+| **Completion vs Verification** | An action marked "completed" is not automatically verified. Reliable completion records show what deliverable was produced, who was accountable, when it was finished, and what evidence confirms completion. | ISO 14001:2015 Clause 9.1 & ISO 9001:2015 Clause 9.1 (Monitoring, Measurement, Analysis & Documented Information) |
+| **Documented Information Discipline** | Management-system standards mandate retaining appropriate documented information as evidence of monitoring results and action completion. | ISO 14001:2015 Clause 9.1.1 / Clause 9.2.2 & ISO 9001:2015 Clause 9.1.1 |
 | **Action Status Boundaries** | Maintaining an action register provides operational task tracking; it does not constitute independent audit assurance, environmental accreditation, or statutory compliance certification. | EcoLearnHub Governance Standard & Quality Framework |
+
+### Source-Quality Safeguard Record (Sprint 9B-C Correction)
+- **Baseline Issue Identified**: The initial memorable fact draft contained an unsupported quantitative statement attributing an "over 75%" project delivery success increase to ISO 14001, ISO 9001, and the UN Global Compact.
+- **Correction Implemented**: Removed the unverified 75% statistic. Replaced it with an accurate, defensible principle paraphrasing ISO 14001 Clause 9.1 & ISO 9001 Clause 9.1 regarding monitoring, measurement, analysis, and retaining documented information as completion evidence.
+- **Safeguards Enforced**:
+  1. Management standards are presented as governance requirements/principles, not empirical statistical research studies.
+  2. Quantified claims require direct, traceable primary source support.
+  3. Multiple organizations (e.g. ISO and UN Global Compact) are not grouped into a single attribution unless each source explicitly supports the combined statement.
 
 ---
 
 ## Upgraded Standard Compliance
 
-Following Sprint 9B upgrades:
+Following Sprint 9B-C corrections:
 - Score: **96 / 100** (**RELEASE READY**)
 - Blockers: **0**

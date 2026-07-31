@@ -87,8 +87,8 @@ const NEW_LESSONS = [
         id: "ta2-f1",
         type: "memorable_fact",
         position: 4,
-        headingText: "Did You Know? (Worth Knowing)",
-        bodyText: "According to ISO 14001 / ISO 9001 Clause 9 and the UN Global Compact, organizations that maintain documented action registers with single named owners, target dates, and verified completion evidence achieve over 75% higher project delivery success compared to informal tracking!"
+        headingText: "Did You Know? (Completion vs Verification)",
+        bodyText: "An action marked 'completed' is not automatically verified.\n\nReliable completion records show what deliverable was produced, who was accountable, when it was finished, and what evidence confirms completion.\n\nManagement-system standards (ISO 14001 Clause 9.1 & ISO 9001 Clause 9.1) emphasize monitoring, evaluation, and retaining appropriate documented information. A clear action register helps a workplace preserve evidence and avoid relying on memory or unverified status claims."
       }
     ]
   },
