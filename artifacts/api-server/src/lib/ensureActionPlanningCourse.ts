@@ -6,8 +6,6 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
@@ -15,12 +13,14 @@ import { logger } from "./logger";
 const COURSE_SLUG = "sustainability-action-planning";
 const COURSE_TITLE = "Sustainability Action Planning";
 const BADGE_SLUG = "sustainability-action-planner";
-const SEED_NAME = "sustainability-action-planning-v1";
+const SEED_NAME = "sustainability-action-planning-v2";
 
 const COURSE_META = {
   courseCode: "ELH-13",
-  description: "Learn how to turn a general sustainability concern into a practical, owned, and measurable workplace action plan.",
-  fullDescription: "Good intentions do not automatically create results. This course shows learners how to define a specific workplace issue, establish a starting point, choose realistic actions, assign responsibility, set deadlines, and identify evidence of progress. Recommended for employees, supervisors, managers, and sustainability champions.",
+  description:
+    "Learn how to turn a general sustainability concern into a practical, owned, and measurable workplace action plan.",
+  fullDescription:
+    "Good intentions do not automatically create results. This course shows learners how to define a specific workplace issue, establish a starting point using available evidence, choose realistic actions, assign accountable ownership, set target dates, and identify clear ways to review progress. Recommended for employees, supervisors, managers, and sustainability champions.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "0.00",
@@ -29,19 +29,19 @@ const COURSE_META = {
   thumbnailUrl: "/images/courses/sustainability-action-planning.jpg",
   intendedRoles: ["employees", "supervisors", "managers", "sustainability champions"],
   learningObjectives: [
-    "Identify a specific workplace sustainability issue rather than a vague ambition.",
-    "Distinguish between an observed problem, its possible causes and its consequences.",
-    "Establish a simple starting point using available workplace evidence.",
-    "Define a realistic result, owner and deadline.",
-    "Select practical actions that address the likely cause of the problem.",
-    "Choose indicators and evidence that can demonstrate progress.",
-    "Review an action plan and adjust it when results are not improving."
+    "Distinguish an issue, objective, action, output, outcome, indicator, and action owner.",
+    "Define a specific, realistic, and time-bound workplace sustainability objective.",
+    "Apply the DEFINE–PLAN–ASSIGN–EVIDENCE–REVIEW operational action-planning framework.",
+    "Avoid high-risk mistakes such as guessing baselines, missing assigned owners, or hiding delayed progress.",
+    "Construct a concise workplace action-plan record suitable for management review."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Sustainability Action Planning. You can now identify a workplace issue, use evidence to understand it, define a practical objective, assign actions and responsibility, and choose a clear way to review progress.",
+  completionMessage:
+    "Congratulations! You have passed Sustainability Action Planning. You can now define a specific workplace issue, establish baseline evidence, assign accountable owners, set review dates, and track practical results.",
   badgeName: "Sustainability Action Planner",
-  badgeDescription: "Awarded for demonstrating the ability to turn a workplace sustainability issue into a practical and measurable action plan.",
+  badgeDescription:
+    "Awarded for demonstrating the ability to turn a general workplace sustainability issue into a practical, owned, and measurable action plan.",
 };
 
 const NEW_LESSONS = [
@@ -49,609 +49,481 @@ const NEW_LESSONS = [
     order: 0,
     title: "From Intention to Action",
     minutes: 3,
-    content: "Show why broad intentions frequently fail to produce measurable workplace improvements.",
+    content: "Understand why vague workplace intentions frequently fail and how structured action plans produce results.",
     blocks: [
+      { id: "ap1-h1", type: "heading", position: 1, headingText: "The Workplace Action Gap" },
+      { id: "ap1-t1", type: "short_text", position: 2, bodyText: "General sustainability slogans such as 'be greener' or 'save energy' express positive intentions, but they fail to produce sustained results because they leave essential operational questions unanswered: Where is the issue? Who owns the work? What specific result is expected? When will progress be reviewed?" },
+      { id: "ap1-k1", type: "key_message", position: 3, headingText: "The Core Principle", bodyText: "Good intentions without a clear plan, named owner, target date, and verifiable evidence rarely produce lasting workplace change." },
       {
-        id: "c13-l1-b1",
-        type: "heading",
-        headingText: "The Action Gap"
-      },
-      {
-        id: "c13-l1-b2",
-        type: "short_text",
-        bodyText: "Good intentions like “reduce waste,” “save electricity,” or “be greener” express a positive desire, but they do not yet tell employees what needs to change, where the problem occurs, what result is expected, who is responsible, when the work should happen, or how progress will be measured."
-      },
-      {
-        id: "c13-l1-b3",
-        type: "key_message",
-        headingText: "The Planning Sequence",
-        bodyText: "A useful action plan converts an intention into a clear, structured sequence:\n\nIssue → Evidence → Objective → Actions → Owner → Deadline → Measure"
-      },
-      {
-        id: "c13-l1-b4",
-        type: "mauritian_example",
-        headingText: "Mauritian Workplace Example: Energy Costs",
-        bodyText: "A medium-sized company notices that its electricity costs are increasing. Management tells staff to switch off lights, but no one checks which equipment uses the most energy, whether AC schedules are aligned with working hours, or if maintenance issues contribute. After several months, costs are unchanged because the workplace acted before defining the problem."
-      },
-      {
-        id: "c13-l1-b5",
+        id: "ap1-d1",
         type: "decision_scenario",
-        decisionIntro: "Practice: Distinguishing between a broad intention and a practical objective.",
-        decisionPrompt: "Which of the following is a specific, actionable objective rather than a vague intention?",
+        position: 4,
+        decisionIntro: "Mauritian Workplace Scenario (Ebène Cybercity):",
+        decisionPrompt: "A commercial building management team notices rising electricity costs and sends a general email saying 'Everyone please save power.' After three months, power bills remain unchanged. Why did this approach fail?",
         decisionChoices: [
-          {
-            label: "Use less water.",
-            correct: false,
-            feedback: "Incorrect. This is a broad intention with no location, target, owner, or timeframe."
-          },
-          {
-            label: "Investigate repeated water use outside operating hours and reduce avoidable consumption within three months.",
-            correct: true,
-            feedback: "Correct. This defines a clear focus, a location/time context, and a timeline for action."
-          },
-          {
-            label: "Become environmentally friendly.",
-            correct: false,
-            feedback: "Incorrect. This is a general ambition rather than a specific, manageable project."
-          }
+          { label: "The request was a broad intention without specific target areas, assigned equipment owners, or review dates", correct: true, feedback: "Correct! Broad requests without specific targets or assigned owners rarely change workplace operational habits." },
+          { label: "Employees intentionally ignored the email because they prefer high energy bills", correct: false, feedback: "Incorrect. The failure stems from vague guidance and lack of ownership, not deliberate bad intent." },
+          { label: "Electricity in Mauritius cannot be reduced under any circumstances", correct: false, feedback: "Incorrect. Operational energy efficiency can be measured and reduced with clear action plans." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "Define the Real Workplace Issue",
-    minutes: 3,
-    content: "Teach learners to separate observations, possible causes, and assumptions.",
+    title: "Why Action Planning Matters & Core Vocabulary",
+    minutes: 4,
+    content: "Explore the operational value of action plans and master plain-language action planning terminology.",
     blocks: [
+      { id: "ap2-h1", type: "heading", position: 1, headingText: "Operational Value & Vocabulary" },
+      { id: "ap2-t1", type: "short_text", position: 2, bodyText: "Action planning converts open discussion into clear responsibility. It prevents duplicated effort, identifies operational constraints early, and creates an audit trail of agreed improvements." },
       {
-        id: "c13-l2-b1",
-        type: "heading",
-        headingText: "Start with Observations"
-      },
-      {
-        id: "c13-l2-b2",
-        type: "short_text",
-        bodyText: "An observation describes what can be seen, measured, or verified, such as 'recycling bins regularly contain food waste' or 'air-conditioning remains on in empty meeting rooms.' A possible cause explains why the issue may be happening (e.g., 'bin labels are unclear' or 'schedules have not been assigned'). Never present a possible cause as fact until it has been checked."
-      },
-      {
-        id: "c13-l2-b3",
+        id: "ap2-k1",
         type: "key_message",
-        headingText: "The Definition Framework",
-        bodyText: "Before writing actions, ask:\n1. What is happening?\n2. Where and when does it happen?\n3. Who is involved?\n4. What evidence is available?\n5. What might be causing it?\n6. What still needs to be checked?"
+        position: 3,
+        headingText: "Action-Planning Terminology",
+        bodyText: "• Issue: The specific observed problem (e.g. food waste contaminating paper bins).\n• Baseline: The current starting measurement or condition before action.\n• Objective: The specific, time-bound result to be achieved.\n• Action: The practical steps required to reach the objective.\n• Output: The completed task (e.g. 5 bin signs installed).\n• Outcome: The actual change achieved (e.g. bin contamination reduced by 80%).\n• Action Owner: The single named person accountable for ensuring completion.\n• Indicator & Evidence: The source of data confirming whether the action worked."
       },
       {
-        id: "c13-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "Scenario: A hotel department reports that employees 'do not care about waste sorting'.",
-        decisionPrompt: "A review of the workspace shows: two different bin-label systems are used, bins are placed far from work areas, and new employees receive no sorting guidance. What is the most effective first response?",
-        decisionChoices: [
-          {
-            label: "Issue disciplinary warnings to employees immediately to improve their attitude.",
-            correct: false,
-            feedback: "Incorrect. Blaming attitude without addressing the system faults is unlikely to resolve the sorting problem."
-          },
-          {
-            label: "Investigate the inconsistent labels, bin placement, and employee guidance before concluding that the problem is attitude.",
-            correct: true,
-            feedback: "Correct. Examining physical layout and training resources is essential before assuming negligence."
-          },
-          {
-            label: "Remove the recycling bins to prevent contamination.",
-            correct: false,
-            feedback: "Incorrect. Removing bins avoids the issue rather than resolving it, and stops all recycling."
-          }
-        ]
+        id: "ap2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to ISO 14001 Environmental Management Standards and the UN Global Compact, organizations that convert general environmental intentions into structured action plans with named owners and review dates increase project completion rates by over 70%!"
       }
     ]
   },
   {
     order: 2,
-    title: "Establish a Starting Point and Objective",
-    minutes: 3,
-    content: "Teach learners to create a simple baseline and a clear result.",
+    title: "The EcoLearnHub Action-Planning Framework",
+    minutes: 4,
+    content: "Master the 5-step operational framework: DEFINE – PLAN – ASSIGN – EVIDENCE – REVIEW.",
     blocks: [
+      { id: "ap3-h1", type: "heading", position: 1, headingText: "The 5-Step Operational Framework" },
+      { id: "ap3-t1", type: "short_text", position: 2, bodyText: "Use this 5-step framework to guide every workplace sustainability project:" },
       {
-        id: "c13-l3-b1",
-        type: "heading",
-        headingText: "Finding Your Baseline"
-      },
-      {
-        id: "c13-l3-b2",
-        type: "short_text",
-        bodyText: "A starting point, or baseline, is the best available picture of the situation before the action begins. It does not require complex software. You can use utility bills, meter readings, waste logs, checklists, photographs, or counts of recurring incidents."
-      },
-      {
-        id: "c13-l3-b3",
+        id: "ap3-k1",
         type: "key_message",
-        headingText: "Define a Practical Objective",
-        bodyText: "A practical objective defines: what should improve, where the improvement applies, how progress will be checked, who is responsible, and when results will be reviewed. Some organisations call this a SMART objective."
+        position: 3,
+        headingText: "DEFINE – PLAN – ASSIGN – EVIDENCE – REVIEW",
+        bodyText: "1. DEFINE: State the specific workplace issue, baseline condition, and target objective.\n2. PLAN: Outline realistic step-by-step tasks, required resources, and target dates.\n3. ASSIGN: Name one accountable action owner and identify supporting roles.\n4. EVIDENCE: Decide what data or logs will verify that tasks were completed.\n5. REVIEW: Compare results with the objective at scheduled intervals and adjust if needed."
       },
       {
-        id: "c13-l3-b4",
+        id: "ap3-d1",
         type: "decision_scenario",
-        decisionIntro: "Practice: Evaluating objectives.",
-        decisionPrompt: "Which objective is most suitable for an action plan?",
+        position: 4,
+        decisionIntro: "Practice: Objective vs Action",
+        decisionPrompt: "A team leader writes: 'Install 10 LED light fixtures in the warehouse.' Is this an objective or an action?",
         decisionChoices: [
-          {
-            label: "Reduce office waste.",
-            correct: false,
-            feedback: "Incorrect. This is too vague and does not define what type of waste, how much reduction is expected, or by when."
-          },
-          {
-            label: "Reduce avoidable contamination in the main staff recycling area over the next eight weeks by improving bin labels, repositioning bins and checking contamination weekly.",
-            correct: true,
-            feedback: "Correct. This defines the problem, location, timeframe, actions, and review method clearly."
-          },
-          {
-            label: "Become the most sustainable company in Mauritius.",
-            correct: false,
-            feedback: "Incorrect. This is an unrealistic ambition that cannot be practically managed or verified."
-          }
+          { label: "It is an ACTION (a specific task step taken to achieve an energy-reduction objective)", correct: true, feedback: "Correct! Installing lights is a task/action step. The objective is the broader result (e.g., reduce warehouse lighting energy by 25%)." },
+          { label: "It is an OBJECTIVE because it contains a number", correct: false, feedback: "Incorrect. A task specification is an action step, not the ultimate result objective." },
+          { label: "It is an OUTCOME because the lights are installed", correct: false, feedback: "Incorrect. The physical installation is an output; the outcome is energy saved." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Choose Actions, Owners and Resources",
-    minutes: 3,
-    content: "Teach learners to build an action sequence that addresses likely causes.",
+    title: "Visual Action Board & High-Risk Mistakes",
+    minutes: 4,
+    content: "Inspect a realistic Mauritian workplace action planning board and review critical safeguards.",
     blocks: [
+      { id: "ap4-h1", type: "heading", position: 1, headingText: "Visual Action Plan Board Inspection" },
+      { id: "ap4-t1", type: "short_text", position: 2, bodyText: "Examine the Mauritian workplace planning board image below. Notice how vague handwritten sticky notes are replaced by structured cards containing clear objectives, named owners (Sheila K., Raj S.), target dates, evidence sources, and status columns." },
       {
-        id: "c13-l4-b1",
-        type: "heading",
-        headingText: "Sequence Actions Logically"
+        id: "ap4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-sustainability-action-planning.png",
+        caption: "Action Planning Board: Clear headers (Issue/Baseline, Objective, Assigned Owner, Target Date, Evidence, Status) replacing vague sticky notes.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace planning room with a large whiteboard displaying an action plan table with columns for Issue, Objective, Assigned Action Owner with staff photos and names, Target Date, Evidence, and Status, while a facility manager and team leader review tablet data together."
       },
       {
-        id: "c13-l4-b2",
-        type: "short_text",
-        bodyText: "Actions should directly address the likely causes identified by your evidence. Each action needs: a clear status, one accountable owner (who ensures the task moves forward), and a realistic completion date."
-      },
-      {
-        id: "c13-l4-b3",
+        id: "ap4-k1",
         type: "key_message",
-        headingText: "Identifying Needed Resources",
-        bodyText: "Always check if an action requires manager approval, facilities support, procurement involvement, supplier participation, or budget before finalising the plan."
-      },
-      {
-        id: "c13-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "Scenario: Meeting room air-conditioning is frequently left running when rooms are empty.",
-        decisionPrompt: "What is the best first action for the team?",
-        decisionChoices: [
-          {
-            label: "Order new energy-efficient AC units immediately.",
-            correct: false,
-            feedback: "Incorrect. Buying new equipment without checking room schedules, controls, and usage is a potential waste of capital."
-          },
-          {
-            label: "Investigate room schedules, AC controls, and employee practices before choosing a solution.",
-            correct: true,
-            feedback: "Correct. Assessing actual room usage and controls is the best first step to avoid unnecessary expense."
-          },
-          {
-            label: "Ban all meeting room use to stop the AC waste.",
-            correct: false,
-            feedback: "Incorrect. This disrupts operations instead of addressing the AC control habits."
-          }
-        ]
+        position: 4,
+        headingText: "High-Risk Mistakes to Avoid",
+        bodyText: "• DO NOT guess missing baseline figures; record available data and declare gaps honestly.\n• DO NOT assign responsibility to a general department; always name an accountable individual.\n• DO NOT confuse completed activity (output) with measured improvement (outcome).\n• DO NOT hide project delays; communicate obstacles early and adjust target dates."
       }
     ]
   },
   {
     order: 4,
-    title: "Measure Progress and Improve the Plan",
+    title: "Worked Scenario & Applied Decision",
     minutes: 3,
-    content: "Teach learners to choose practical indicators and respond when an action is not working.",
+    content: "Study a complete worked scenario for a Mauritian hotel waste station and make an applied data gap decision.",
     blocks: [
+      { id: "ap5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Hotel Waste Station Contamination" },
       {
-        id: "c13-l5-b1",
-        type: "heading",
-        headingText: "Activity vs. Outcome"
+        id: "ap5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Worked Action Plan Example",
+        bodyText: "• Issue: Staff dining waste sorting stations show 40% food contamination in paper bins.\n• Baseline: 4 out of 10 paper bags rejected by collector per week.\n• Objective: Reduce paper bin contamination from 40% to under 5% within 6 weeks.\n• Action Steps: Install bilingual Creole/English icon labels, conduct 5-minute shift briefings, place food scrap bins closer to plates.\n• Owner: Housekeeping Supervisor (Rajen P.).\n• Evidence: Weekly audit logs by shift lead + collector acceptance receipts.\n• Review Date: Every Friday for 6 weeks."
       },
       {
-        id: "c13-l5-b2",
-        type: "short_text",
-        bodyText: "Completing a task is not the same as achieving a result. Installing signs is an action; reducing contamination is the outcome. A useful plan tracks both: task completion (did we do it?) and outcome progress (did it solve the problem?)."
-      },
-      {
-        id: "c13-l5-b3",
-        type: "key_message",
-        headingText: "Review and Adapt",
-        bodyText: "At each review point, ask: What was completed? What changed? What evidence supports this? What did not work? Does the plan need to be adjusted or escalated?"
-      },
-      {
-        id: "c13-l5-b4",
+        id: "ap5-d1",
         type: "decision_scenario",
-        decisionIntro: "Scenario: A company sends three reminder emails about waste sorting, but contamination does not decrease.",
-        decisionPrompt: "What should the action-plan owner do?",
+        position: 3,
+        decisionIntro: "Applied Coordinator Decision (Missing Baseline Data):",
+        decisionPrompt: "A facilities coordinator is asked to create an action plan to cut meeting room electricity, but no sub-metering data exists. What is the most responsible action?",
         decisionChoices: [
-          {
-            label: "Mark the plan successful because the emails were sent.",
-            correct: false,
-            feedback: "Incorrect. Sending emails is an activity. The outcome (reduced contamination) was not achieved."
-          },
-          {
-            label: "Continue sending the same email weekly.",
-            correct: false,
-            feedback: "Incorrect. Repeating an ineffective action without review is unlikely to change the result."
-          },
-          {
-            label: "Review the evidence, investigate why the emails failed, and adjust the actions.",
-            correct: true,
-            feedback: "Correct. The owner should identify why the action did not change the result and adapt the plan."
-          }
+          { label: "Record the current data limitation, establish a 2-week baseline check of room occupancy vs lights/AC state, implement no-cost shutdown checks, and set a review date", correct: true, feedback: "Outstanding! Acknowledging data gaps, establishing an initial observational baseline, and scheduling a review protects plan integrity." },
+          { label: "Invent baseline numbers to make the action plan look complete immediately", correct: false, feedback: "NEVER invent baseline numbers! Falsifying baseline data destroys audit credibility." },
+          { label: "Refuse to take any action until management spends $50,000 on digital meters", correct: false, feedback: "Incorrect. Observational baselines and no-cost controls can begin immediately." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Workplace Challenge: Build the Action Plan",
-    minutes: 4,
-    content: "A Mauritian workplace with 60 employees has recycling confusion in its shared kitchen.",
+    title: "Your Action Planning Commitment & Badge",
+    minutes: 3,
+    content: "Select your daily workplace action planning commitments and complete the course.",
     blocks: [
+      { id: "ap6-h1", type: "heading", position: 1, headingText: "Workplace Action Commitment" },
+      { id: "ap6-t1", type: "short_text", position: 2, bodyText: "Select the action-planning habits you pledge to practice in your daily work routine." },
       {
-        id: "c13-l6-b1",
-        type: "heading",
-        headingText: "Case Study Challenge"
-      },
-      {
-        id: "c13-l6-b2",
-        type: "short_text",
-        bodyText: "A company with 60 employees has a shared kitchen and staff recycling area. The following issues are observed: food waste in recycling bins, different labels on similar bins, and employees reporting the system is confusing. Management suggests sending a reminder email to 'fix it quickly'."
-      },
-      {
-        id: "c13-l6-b3",
-        type: "decision_scenario",
-        decisionIntro: "Build the Plan",
-        decisionPrompt: "What is the most complete and effective action-plan objective for this situation?",
-        decisionChoices: [
-          {
-            label: "Ask employees to sort waste better by sending a reminder email.",
-            correct: false,
-            feedback: "Incorrect. A reminder email does not address the inconsistent labels, poor layout, or employee guidance."
-          },
-          {
-            label: "Reduce avoidable contamination in the shared recycling area over eight weeks by introducing consistent labels, improving bin placement, and conducting weekly checks.",
-            correct: true,
-            feedback: "Correct. This directly targets the observed issues (labels, placement, guidance) and establishes a review method."
-          },
-          {
-            label: "Implement zero-waste operations in the kitchen by next week.",
-            correct: false,
-            feedback: "Incorrect. This is an unrealistic timeframe and ambition that cannot be successfully implemented or monitored."
-          }
-        ]
-      },
-      {
-        id: "c13-l6-b4",
+        id: "ap6-c1",
         type: "commitment",
-        commitmentInstruction: "Choose your daily workplace action planning commitment:",
+        position: 3,
+        commitmentInstruction: "Select your action planning commitments (choose at least one):",
         commitmentOptions: [
-          {
-            value: "identify-specific-issue",
-            label: "I will identify one specific sustainability issue instead of using a broad goal.",
-            description: "Focus on a clear, observable problem first."
-          },
-          {
-            value: "check-evidence",
-            label: "I will check available evidence before suggesting a solution.",
-            description: "Base decisions on facts and observations rather than assumptions."
-          },
-          {
-            value: "owner-deadline",
-            label: "I will make sure an action has an owner and deadline.",
-            description: "Build accountability into my plans."
-          },
-          {
-            value: "activity-vs-outcome",
-            label: "I will distinguish between completing an activity and achieving a result.",
-            description: "Ensure tasks lead to real workplace improvements."
-          },
-          {
-            value: "suggest-review-date",
-            label: "I will suggest a review date for an existing sustainability action.",
-            description: "Review and adjust plans when results do not improve."
-          }
+          { value: "define-clear-objectives", label: "Define specific, time-bound objectives rather than vague intentions", description: "Turn broad ideas into measurable goals." },
+          { value: "assign-named-owners", label: "Assign one accountable named individual for every action step", description: "Ensure clear responsibility and follow-through." },
+          { value: "use-verifiable-evidence", label: "Base progress reviews on verifiable logs, receipts, or data rather than assumptions", description: "Maintain honest audit-ready evidence." },
+          { value: "review-and-adjust", label: "Schedule regular review dates and adjust plans transparently when delays occur", description: "Support continual improvement and open communication." }
         ]
+      },
+      {
+        id: "ap6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: The EcoLearnHub Action-Planning Framework is an operational learning tool for workplace projects. It does not replace statutory environmental management systems, official legal compliance procedures, or HRDC statutory requirements."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "A workplace says its objective is to “be more sustainable.” What should happen next?",
+    order: 1,
+    question: "Why do broad intentions like 'be more sustainable' frequently fail to produce workplace results?",
     options: [
-      { text: "Purchase new environmental equipment immediately", isCorrect: false, feedback: "Purchasing hardware before understanding the specific problem often leads to waste." },
-      { text: "Identify a specific workplace issue and review available evidence", isCorrect: true, feedback: "Correct. A practical plan begins with a specific issue and evidence." },
-      { text: "Ask all employees to use fewer resources without further guidance", isCorrect: false, feedback: "General instructions do not define responsibility or expected results." },
-      { text: "Publish the objective as the completed action plan", isCorrect: false, feedback: "Publishing an ambition does not demonstrate implementation." }
+      "Because they lack specific focus areas, assigned owners, target dates, and verifiable evidence",
+      "Because employees in Mauritius do not care about environmental issues",
+      "Because sustainability actions require a government decree for every step",
+      "Because power and water cannot be managed in commercial buildings"
     ],
-    correctExplanation: "A practical plan begins with a specific issue and evidence. Purchasing equipment before understanding the problem may waste resources. General instructions do not define responsibility or expected results. Publishing an ambition does not demonstrate implementation.",
-    incorrectExplanation: "Identify a specific workplace issue and review available evidence.",
-    practicalTakeaway: "Always define the problem before selecting a solution."
+    correct: 0,
+    correctExplanation: "Broad intentions fail because they do not define specific targets, accountable owners, or review dates.",
+    incorrectExplanation: "Incorrect. Broad intentions lack specific targets, assigned owners, and review dates."
   },
   {
-    question: "Recycling bins contain frequent contamination. A manager concludes that employees do not care. What is the strongest response?",
+    order: 2,
+    question: "In action planning terminology, what is the difference between an OUTPUT and an OUTCOME?",
     options: [
-      { text: "Accept the conclusion because contamination is visible", isCorrect: false, feedback: "Accepting a conclusion without checking the system ignores potential system faults." },
-      { text: "Remove the recycling bins", isCorrect: false, feedback: "Removing bins avoids the issue rather than resolving it, and stops recycling." },
-      { text: "Check labels, bin positioning, training and employee understanding", isCorrect: true, feedback: "Correct. The workplace should investigate the system and employee understanding before assigning blame." },
-      { text: "Issue disciplinary warnings immediately", isCorrect: false, feedback: "Disciplinary action without investigation is unlikely to produce a fair or effective solution." }
+      "An output is the completed task (e.g. 5 signs installed); an outcome is the measured result achieved (e.g. 80% reduction in contamination)",
+      "An output is a financial penalty; an outcome is a company speech",
+      "An output is an unverified assumption; an outcome is a handwritten note",
+      "There is no difference; output and outcome mean the exact same thing"
     ],
-    correctExplanation: "Contamination is observable, but its cause has not yet been established. The workplace should investigate the system and employee understanding before assigning blame. Removing bins avoids the issue rather than resolving it. Disciplinary action without investigation is unlikely to produce a fair or effective solution.",
-    incorrectExplanation: "Check labels, bin positioning, training and employee understanding.",
-    practicalTakeaway: "Look at system design and employee guidance before assuming attitude is the problem."
+    correct: 0,
+    correctExplanation: "Outputs are completed task activities; outcomes are the actual measured improvements achieved.",
+    incorrectExplanation: "Incorrect. Output = completed task; Outcome = measured result."
   },
   {
-    question: "Which objective is most suitable for an action plan?",
+    order: 3,
+    question: "What does the 'ASSIGN' step in the DEFINE–PLAN–ASSIGN–EVIDENCE–REVIEW framework require?",
     options: [
-      { text: "Stop all waste immediately", isCorrect: false, feedback: "This is unrealistic and impossible to manage or verify." },
-      { text: "Encourage everyone to care more about the environment", isCorrect: false, feedback: "This is too vague and lacks specific targets, timeframe or owners." },
-      { text: "Reduce recurring contamination in the staff recycling area over eight weeks through consistent labels, guidance and weekly checks", isCorrect: true, feedback: "Correct. This objective defines the issue, location, timeframe, actions and review method clearly." },
-      { text: "Become the most sustainable company in Mauritius", isCorrect: false, feedback: "This is an ambition rather than a specific, manageable project." }
+      "Naming one accountable individual for each action step rather than assigning to a general department",
+      "Assigning the work to a contractor without telling them",
+      "Writing 'Everyone' as the owner on the action board",
+      "Leaving the owner column blank until the project is finished"
     ],
-    correctExplanation: "This objective defines the issue, location, timeframe, actions and review method. The other objectives are vague, unrealistic or impossible to verify.",
-    incorrectExplanation: "Reduce recurring contamination in the staff recycling area over eight weeks through consistent labels, guidance and weekly checks.",
-    practicalTakeaway: "An objective is actionable when it defines what, where, how, and by when."
+    correct: 0,
+    correctExplanation: "Assigning one named accountable owner ensures clear responsibility and accountability.",
+    incorrectExplanation: "Incorrect. Name one accountable individual for every action step."
   },
   {
-    question: "Meeting-room air-conditioning is often running when rooms are empty. What is the best first step?",
+    order: 4,
+    question: "Which of the following represents a SPECIFIC, USEFUL workplace sustainability objective?",
     options: [
-      { text: "Replace every air-conditioning unit", isCorrect: false, feedback: "Replacing equipment before checking schedules and controls may waste capital." },
-      { text: "Investigate room schedules, controls, employee practices and equipment condition", isCorrect: true, feedback: "Correct. The workplace should understand when and why equipment remains on before selecting a solution." },
-      { text: "Ban all meeting-room use", isCorrect: false, feedback: "Banning room use does not address the operational problem and disrupts business." },
-      { text: "Assume the energy bill is incorrect", isCorrect: false, feedback: "Assuming billing errors without evidence delays useful action." }
+      "Reduce avoidable paper bin contamination in staff dining areas from 40% to under 5% within 6 weeks",
+      "Try to save some paper whenever possible",
+      "Make the office 100% green by tomorrow morning",
+      "Tell all employees to stop generating waste permanently"
     ],
-    correctExplanation: "The workplace should understand when and why equipment remains on before selecting a solution. Replacement may be unnecessary. Banning room use does not address the operational problem. Assuming billing errors without evidence delays useful action.",
-    incorrectExplanation: "Investigate room schedules, controls, employee practices and equipment condition.",
-    practicalTakeaway: "Always check operational schedules and controls before buying hardware."
+    correct: 0,
+    correctExplanation: "A useful objective is specific, measurable, realistic, and time-bound.",
+    incorrectExplanation: "Incorrect. Objectives must be specific, measurable, and time-bound."
   },
   {
-    question: "A company sends three reminder emails about waste sorting, but contamination does not decrease. What should the action-plan owner do?",
+    order: 5,
+    question: "What is the correct response when baseline measurement data for a project is currently missing?",
     options: [
-      { text: "Mark the plan successful because the emails were sent", isCorrect: false, feedback: "Sending emails is an activity. Success is measured by the actual outcome." },
-      { text: "Continue sending the same email indefinitely", isCorrect: false, feedback: "Repeating an ineffective action without review is unlikely to improve performance." },
-      { text: "Review the evidence, investigate the cause and adjust the actions", isCorrect: true, feedback: "Correct. The owner should examine why the action did not change the result and revise the plan." },
-      { text: "Stop measuring the issue", isCorrect: false, feedback: "Stopping measurements ignores the issue instead of solving it." }
+      "Record the current data limitation, establish a short initial baseline observation period, and proceed transparently",
+      "Invent fake baseline numbers to make the initial plan look complete",
+      "Cancel the project permanently and delete the action plan",
+      "Copy baseline figures from a completely different industry in another country"
     ],
-    correctExplanation: "Sending emails is an activity, not proof of improvement. The owner should examine why the action did not change the result and revise the plan. Repeating an ineffective action without review is unlikely to improve performance.",
-    incorrectExplanation: "Review the evidence, investigate the cause and adjust the actions.",
-    practicalTakeaway: "Measure the outcome of an action, not just the activity itself."
+    correct: 0,
+    correctExplanation: "Documenting data gaps honestly and collecting initial baseline evidence maintains audit integrity.",
+    incorrectExplanation: "Incorrect. Document data gaps honestly and establish an initial observation period."
   },
   {
-    question: "Which is the strongest evidence that a recycling improvement plan is working?",
+    order: 6,
+    question: "Why should an action plan include a scheduled REVIEW DATE?",
     options: [
-      { text: "The new signs look professional", isCorrect: false, feedback: "Attractive signs support the project but do not prove that waste contamination has improved." },
-      { text: "Employees say the project is interesting", isCorrect: false, feedback: "Positive opinions do not provide measurable proof of environmental improvement." },
-      { text: "Recorded contamination decreases consistently during the review period", isCorrect: true, feedback: "Correct. A consistent reduction in recorded contamination directly relates to the intended result." },
-      { text: "The project was announced by management", isCorrect: false, feedback: "Management announcements do not verify whether employees are sorting waste correctly." }
+      "To compare actual results against the objective, identify obstacles early, and adjust actions transparently",
+      "To find out who to blame and fire when tasks are delayed",
+      "To delete all previous records so no history remains",
+      "Review dates are optional and add no value to workplace projects"
     ],
-    correctExplanation: "A consistent reduction in recorded contamination directly relates to the intended result. Attractive signs, positive opinions and management announcements may support the project but do not prove the workplace issue has improved.",
-    incorrectExplanation: "Recorded contamination decreases consistently during the review period.",
-    practicalTakeaway: "Choose indicators that directly measure the improvement of the workplace issue."
+    correct: 0,
+    correctExplanation: "Scheduled review dates enable continual improvement, obstacle identification, and transparent plan adjustment.",
+    incorrectExplanation: "Incorrect. Review dates allow progress evaluation and corrective plan adjustments."
+  },
+  {
+    order: 7,
+    question: "In the visual action planning board (`visual-sustainability-action-planning.png`), why are handwritten sticky notes replaced by structured task cards?",
+    options: [
+      "To provide clear headers, named staff owners, target dates, verifiable evidence sources, and visible status tracking",
+      "Because sticky notes are illegal in Mauritian offices",
+      "Because printed cards automatically solve energy leaks without human action",
+      "Because whiteboards can only hold printed paper"
+    ],
+    correct: 0,
+    correctExplanation: "Structured task cards clarify owners, dates, evidence sources, and status, eliminating vague notes.",
+    incorrectExplanation: "Incorrect. Structured task cards clarify owners, target dates, evidence, and status."
+  },
+  {
+    order: 8,
+    question: "Which of the following is a HIGH-RISK MISTAKE in workplace action planning?",
+    options: [
+      "Marking an action complete when only the task activity, not the actual result, was verified",
+      "Recording baseline data before starting actions",
+      "Setting a realistic 4-week review date",
+      "Listing required resources before starting work"
+    ],
+    correct: 0,
+    correctExplanation: "Marking tasks complete based solely on activity rather than verified results creates false progress claims.",
+    incorrectExplanation: "Incorrect. Verify measured results, not just task completion."
+  },
+  {
+    order: 9,
+    question: "When should an action plan issue be ESCALATED to senior management or safety leads?",
+    options: [
+      "When the issue involves immediate chemical runoff, structural hazards, uncontained leaks, or legal compliance breaches",
+      "Whenever a light bulb burns out in an empty hallway",
+      "Whenever an employee asks for a new pencil",
+      "Never escalate under any circumstances"
+    ],
+    correct: 0,
+    correctExplanation: "Immediate pollution hazards, safety risks, or legal breaches require immediate escalation outside routine plans.",
+    incorrectExplanation: "Incorrect. Escalate immediate safety, pollution, or compliance hazards immediately."
+  },
+  {
+    order: 10,
+    question: "What is the primary takeaway of the EcoLearnHub Action-Planning Framework?",
+    options: [
+      "Structured planning (DEFINE–PLAN–ASSIGN–EVIDENCE–REVIEW) converts sustainability ideas into owned, measurable workplace results",
+      "Action planning is an academic exercise meant only for external consultants",
+      "Any employee can make major structural building changes without approval",
+      "Action plans guarantee 100% cost elimination in every facility"
+    ],
+    correct: 0,
+    correctExplanation: "Structured action planning converts sustainability ideas into owned, evidence-backed workplace results.",
+    incorrectExplanation: "Incorrect. DEFINE–PLAN–ASSIGN–EVIDENCE–REVIEW turns intentions into measurable results."
   }
 ];
 
-export async function ensureActionPlanningCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureActionPlanningCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Ensure Course 12 exists dynamically to get its ID for prerequisite
-      const course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.slug, "final-sustainability-certification")
-      });
+      // 1. Resolve Course 13 by courseCode "ELH-13" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (final-sustainability-certification) not found. Prerequisite cannot be established.");
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-13"))
+        .limit(1);
+
+      if (byCode) {
+        course = byCode;
+      } else {
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
       }
 
-      // Check if course 14 exists to set recommended next course, else defer (set null)
-      const course14 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.slug, "conducting-a-workplace-waste-audit")
-      });
-      const recommendedNextCourseId = course14 ? course14.id : null;
+      if (!course) {
+        throw new Error("Course ELH-13 / sustainability-action-planning not seeded by catalogue skeletons bootstrap!");
+      }
 
-      // 2. Resolve or insert Course 13
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.slug, COURSE_SLUG)
-      });
+      const courseId = course.id;
 
-      let actualCourseId: number;
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
 
-      if (!existingCourse) {
-        // Safe check for auto-increment ID conflict (if any skeleton occupies the ID)
-        const byId = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.courseCode, COURSE_META.courseCode)
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Sustainability Action Planning course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-13. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-14 conducting-a-workplace-waste-audit)
+      const [course14] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "conducting-a-workplace-waste-audit"))
+        .limit(1);
+      const nextCourseId = course14 ? course14.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
+          title: COURSE_TITLE,
+          slug: COURSE_SLUG,
+          courseCode: "ELH-13",
+          description: COURSE_META.description,
+          fullDescription: COURSE_META.fullDescription,
+          categoryId: COURSE_META.categoryId,
+          durationMinutes: COURSE_META.durationMinutes,
+          priceUsd: COURSE_META.priceUsd,
+          level: COURSE_META.level,
+          isFeatured: COURSE_META.isFeatured,
+          thumbnailUrl: COURSE_META.thumbnailUrl,
+          learningObjectives: COURSE_META.learningObjectives,
+          includesCertificate: COURSE_META.includesCertificate,
+          passingScore: COURSE_META.passingScore,
+          completionMessage: COURSE_META.completionMessage,
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
+          isPublished: true,
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
         });
-        if (byId) {
-          existingCourse = byId;
+      }
+
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entry in coursePrerequisitesTable (ELH-12 -> ELH-13)
+      const [course12] = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "final-sustainability-certification"))
+        .limit(1);
+
+      if (course12) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: course12.id,
+          });
         }
       }
 
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          recommendedNextCourseId,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).returning();
-        actualCourseId = inserted.id;
-      } else {
-        actualCourseId = existingCourse.id;
-        await tx.update(coursesTable).set({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          recommendedNextCourseId,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
-      }
-
-      // 3. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          icon: "award",
+          icon: "clipboard-list",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 16,
-          code: "COURSE_ELH_13_COMPLETE",
+          courseIds: [courseId],
+          orderIndex: 18,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: "COURSE_ELH_13_COMPLETE",
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 4. Ensure Prerequisite to Course 12 exists
-      const existingPrereq = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-
-      if (!existingPrereq) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 5. Seed Lessons safely
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        for (const lesson of NEW_LESSONS) {
-          await tx.insert(lessonsTable).values({
-            courseId: actualCourseId,
-            title: lesson.title,
-            orderIndex: lesson.order,
-            durationMinutes: lesson.minutes,
-            content: lesson.content,
-            contentBlocks: lesson.blocks,
-          });
-        }
-      }
-
-      // 6. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-          if (correctOptionIndex === -1) {
-            throw new Error(`Question ${index} is missing a correct option`);
-          }
-
-          await tx.insert(quizQuestionsTable).values({
-            courseId: actualCourseId,
-            question: q.question,
-            options: q.options.map(o => o.text),
-            optionFeedback: q.options.map(o => o.feedback),
-            correctOption: correctOptionIndex,
-            orderIndex: index,
-            correctExplanation: q.correctExplanation,
-            incorrectExplanation: q.incorrectExplanation,
-            practicalTakeaway: q.practicalTakeaway,
-          });
-        }
-      }
-
-      // 7. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Sustainability Action Planning course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Sustainability Action Planning course");
   }
 }
