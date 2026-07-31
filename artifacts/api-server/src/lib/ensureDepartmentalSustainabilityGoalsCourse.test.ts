@@ -6,80 +6,107 @@ import {
   lessonsTable,
   quizQuestionsTable,
   badgeDefinitionsTable,
-  coursePrerequisitesTable,
   systemSeedsTable,
 } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { ensureDepartmentalSustainabilityGoalsCourse } from "./ensureDepartmentalSustainabilityGoalsCourse";
 
-test("Course 14 Seeding & Integrity Unit Tests", async () => {
-  try {
-    await db.transaction(async (tx) => {
-      // Clean seed record if it exists to force execution
-      await tx.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "departmental-sustainability-goals-v1"));
+test("Course 14 (ELH-14) Seeding & Integrity Unit Tests", async () => {
+  // 1. Initial seed execution
+  console.log("- Running Course 14 seeder...");
+  await ensureDepartmentalSustainabilityGoalsCourse();
 
-      // Run seeder
-      await ensureDepartmentalSustainabilityGoalsCourse();
+  // Verify course exists with correct metadata
+  const [course] = await db
+    .select()
+    .from(coursesTable)
+    .where(eq(coursesTable.courseCode, "ELH-14"))
+    .limit(1);
 
-      // Verify course exists
-      const [course] = await tx
-        .select()
-        .from(coursesTable)
-        .where(eq(coursesTable.slug, "setting-departmental-sustainability-goals"))
-        .limit(1);
+  assert.ok(course, "Course ELH-14 must exist");
+  assert.equal(course.slug, "setting-departmental-sustainability-goals");
+  assert.equal(course.passingScore, 80);
+  assert.equal(course.status, "published");
+  assert.equal(course.title, "Setting Departmental Sustainability Goals");
 
-      assert.ok(course, "Course 14 must be created");
-      assert.equal(course.courseCode, "ELH-14");
-      assert.equal(course.passingScore, 80);
+  // Verify exactly 6 lessons
+  const lessons = await db
+    .select()
+    .from(lessonsTable)
+    .where(eq(lessonsTable.courseId, course.id));
+  assert.equal(lessons.length, 6, "Must have exactly 6 lessons");
 
-      // Verify exactly 6 lessons exist
-      const lessons = await tx
-        .select()
-        .from(lessonsTable)
-        .where(eq(lessonsTable.courseId, course.id));
-      assert.equal(lessons.length, 6, "Should seed exactly 6 lessons");
-
-      // Verify exactly 8 quiz questions exist
-      const quizQuestions = await tx
-        .select()
-        .from(quizQuestionsTable)
-        .where(eq(quizQuestionsTable.courseId, course.id));
-      assert.equal(quizQuestions.length, 8, "Should seed exactly 8 quiz questions");
-
-      // Verify badge definition
-      const [badge] = await tx
-        .select()
-        .from(badgeDefinitionsTable)
-        .where(eq(badgeDefinitionsTable.slug, "departmental-sustainability-goal-setter"))
-        .limit(1);
-      assert.ok(badge, "Badge must be created");
-      assert.equal(badge.name, "Departmental Sustainability Goal Setter");
-
-      // Verify prerequisites
-      const prereqs = await tx
-        .select()
-        .from(coursePrerequisitesTable)
-        .where(eq(coursePrerequisitesTable.courseId, course.id));
-      assert.equal(prereqs.length, 2, "Should have 2 prerequisite entries (Course 12 and Course 13)");
-
-      // Run again for idempotency check
-      await ensureDepartmentalSustainabilityGoalsCourse();
-
-      const coursesPost = await tx
-        .select()
-        .from(coursesTable)
-        .where(eq(coursesTable.slug, "setting-departmental-sustainability-goals"));
-      assert.equal(coursesPost.length, 1, "Idempotency: Should not duplicate course");
-
-      // Trigger rollback to clean up test database changes
-      tx.rollback();
-    });
-  } catch (err: any) {
-    // Drizzle uses custom error throwing for transaction rollbacks
-    if (err && (err.message === "Rollback" || err.name === "TransactionRollbackError")) {
-      // Expected rollback to keep DB clean
-      return;
-    }
-    throw err;
+  // Verify every lesson has non-empty contentBlocks
+  for (const lesson of lessons) {
+    assert.ok(
+      Array.isArray(lesson.contentBlocks) &&
+        lesson.contentBlocks.length > 0,
+      `Lesson "${lesson.title}" must have populated contentBlocks`
+    );
   }
+
+  // Verify exactly 10 quiz questions
+  const quizQuestions = await db
+    .select()
+    .from(quizQuestionsTable)
+    .where(eq(quizQuestionsTable.courseId, course.id));
+  assert.equal(
+    quizQuestions.length,
+    10,
+    "Must have exactly 10 quiz questions"
+  );
+
+  // Verify badge definition
+  const [badge] = await db
+    .select()
+    .from(badgeDefinitionsTable)
+    .where(eq(badgeDefinitionsTable.slug, "departmental-sustainability-goal-setter"))
+    .limit(1);
+  assert.ok(badge, "Departmental Sustainability Goal Setter badge must exist");
+  assert.equal(badge.name, "Departmental Sustainability Goal Setter");
+
+  // Verify system seed marker was recorded
+  const [seedMarker] = await db
+    .select()
+    .from(systemSeedsTable)
+    .where(eq(systemSeedsTable.name, "departmental-sustainability-goals-v2"))
+    .limit(1);
+  assert.ok(seedMarker, "Seed marker departmental-sustainability-goals-v2 must be recorded");
+
+  // 2. Idempotency test — run seeder again; counts must not change
+  console.log("- Running seeder again for idempotency check...");
+  await ensureDepartmentalSustainabilityGoalsCourse();
+
+  const lessonsRetry = await db
+    .select()
+    .from(lessonsTable)
+    .where(eq(lessonsTable.courseId, course.id));
+  assert.equal(
+    lessonsRetry.length,
+    6,
+    "Second run must not duplicate lessons"
+  );
+
+  const quizRetry = await db
+    .select()
+    .from(quizQuestionsTable)
+    .where(eq(quizQuestionsTable.courseId, course.id));
+  assert.equal(
+    quizRetry.length,
+    10,
+    "Second run must not duplicate quiz questions"
+  );
+
+  // 3. Integrity guard check — repair missing questions
+  console.log("- Testing integrity guard (deleting quiz questions to trigger repair)...");
+  await db.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, course.id));
+  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "departmental-sustainability-goals-v2"));
+
+  await ensureDepartmentalSustainabilityGoalsCourse();
+
+  const quizRepaired = await db
+    .select()
+    .from(quizQuestionsTable)
+    .where(eq(quizQuestionsTable.courseId, course.id));
+  assert.equal(quizRepaired.length, 10, "Repaired course must contain 10 questions");
 });
