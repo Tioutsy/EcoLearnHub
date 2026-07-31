@@ -8,7 +8,7 @@ import {
   certificatesTable,
   badgeDefinitionsTable,
 } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 
 const router = Router();
 
@@ -109,18 +109,39 @@ router.get("/courses/:courseId/summary", async (req, res): Promise<void> => {
     let modulesCompleted = 0;
     let completionPct = 0;
     if (enrollment) {
+      const userEnrollments = await db
+        .select({ id: enrollmentsTable.id })
+        .from(enrollmentsTable)
+        .where(
+          and(
+            eq(enrollmentsTable.userId, userId),
+            eq(enrollmentsTable.courseId, courseId),
+          ),
+        );
+      const enrollmentIds = userEnrollments.map((e) => e.id);
+
       const completedRows = await db
         .select({ lessonId: lessonProgressTable.lessonId })
         .from(lessonProgressTable)
         .where(
           and(
-            eq(lessonProgressTable.enrollmentId, enrollment.id),
+            inArray(lessonProgressTable.enrollmentId, enrollmentIds),
             eq(lessonProgressTable.completed, 1),
           ),
         );
-      // Distinct + clamped so duplicate/stray progress rows cannot exceed the module total.
-      modulesCompleted = Math.min(new Set(completedRows.map((r) => r.lessonId)).size, totalModules);
-      completionPct = enrollment.progressPct ?? 0;
+
+      const distinctCount = new Set(completedRows.map((r) => r.lessonId)).size;
+      const rawPct = enrollment.progressPct ?? 0;
+      const isCompleted = enrollment.status === "completed" || rawPct >= 100;
+
+      const pctBasedModules = totalModules > 0 ? Math.round((rawPct / 100) * totalModules) : 0;
+      modulesCompleted = isCompleted
+        ? totalModules
+        : Math.min(totalModules, Math.max(distinctCount, pctBasedModules));
+
+      completionPct = isCompleted
+        ? 100
+        : Math.max(rawPct, totalModules > 0 ? Math.round((modulesCompleted / totalModules) * 100) : 0);
     }
 
     const attempts = await db

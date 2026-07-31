@@ -209,9 +209,14 @@ export default function DatabaseCoursePlayer({
   }
 
   function invalidateProgress() {
-    if (!isPreview && enrollmentId) {
-      queryClient.invalidateQueries({ queryKey: ["progress", enrollmentId] });
-      queryClient.invalidateQueries({ queryKey: ["enrollment", enrollmentId] });
+    if (!isPreview) {
+      if (enrollmentId) {
+        queryClient.invalidateQueries({ queryKey: ["progress", enrollmentId] });
+        queryClient.invalidateQueries({ queryKey: ["enrollment", enrollmentId] });
+      }
+      if (courseId) {
+        queryClient.invalidateQueries({ queryKey: ["courseSummary", courseId] });
+      }
     }
   }
 
@@ -865,6 +870,23 @@ function CompletionScreen({
         badgeEarned: true,
         badgeName: enrollment?.course?.badgeName || "Badge",
         certificateId: null,
+      };
+    }
+    if (rawSummary) {
+      const isCompletedOr100 = (enrollment?.progressPct ?? 0) >= 100 || enrollment?.status === "completed";
+      const totalCount = rawSummary.totalModules || lessons.length || 1;
+      const actualCompletedCount = isCompletedOr100
+        ? totalCount
+        : Math.max(
+            rawSummary.modulesCompleted || 0,
+            (enrollment?.progressPct ?? 0) > 0 ? Math.round(((enrollment?.progressPct ?? 0) / 100) * totalCount) : 0
+          );
+      const points = actualCompletedCount * 50 + (rawSummary.quizPassed ? 100 : 0);
+      return {
+        ...rawSummary,
+        modulesCompleted: actualCompletedCount,
+        totalModules: totalCount,
+        points: { totalPoints: rawSummary.points?.totalPoints ? Math.max(rawSummary.points.totalPoints, points) : points },
       };
     }
     return rawSummary;
