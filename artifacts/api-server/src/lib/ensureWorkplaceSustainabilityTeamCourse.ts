@@ -6,8 +6,6 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
@@ -15,12 +13,14 @@ import { logger } from "./logger";
 const COURSE_SLUG = "building-workplace-sustainability-team";
 const COURSE_TITLE = "Building a Workplace Sustainability Team";
 const BADGE_SLUG = "workplace-sustainability-team-builder";
-const SEED_NAME = "workplace-sustainability-team-v1";
+const SEED_NAME = "workplace-sustainability-team-v2";
 
 const COURSE_META = {
   courseCode: "ELH-15",
-  description: "Learn how to form and coordinate a practical workplace sustainability team with the right representatives, clear responsibilities, focused meetings and an achievable first action plan.",
-  fullDescription: "Learn how to form and coordinate a practical workplace sustainability team with the right representatives, clear responsibilities, focused meetings and an achievable first action plan. This course enables learners to establish a credible internal sustainability team that can coordinate departmental goals, assign actions, maintain participation and report progress appropriately.",
+  description:
+    "Learn how to establish and operate a practical cross-functional workplace sustainability team with clear mandates, roles, meeting agendas, and escalation protocols.",
+  fullDescription:
+    "A workplace sustainability team brings departments together to turn company sustainability priorities into coordinated actions. This course teaches employees, managers, and committee representatives how to establish a practical cross-functional team. Learners will define a formal team mandate, select appropriate representatives across operations, assign distinct operational roles (sponsor, chair, coordinator, member, action owner, specialist adviser), run focused action-oriented meetings, and escalate barriers effectively.",
   categoryId: 1,
   durationMinutes: 18,
   priceUsd: "0.00",
@@ -29,18 +29,19 @@ const COURSE_META = {
   thumbnailUrl: "/images/courses/building-workplace-sustainability-team.jpg",
   intendedRoles: ["employees", "departmental representatives", "managers", "HR teams", "operations leads", "sustainability coordinators"],
   learningObjectives: [
-    "Explain the purpose and limitations of a workplace sustainability team.",
-    "Select suitable representatives across departments, roles and operational levels.",
-    "Define clear responsibilities, decision rights and management sponsorship.",
-    "Organise short, focused meetings with documented actions and owners.",
-    "Respond appropriately to low participation, conflicting priorities and unclear accountability.",
-    "Draft a practical sustainability team charter and initial 90-day action plan."
+    "Explain the purpose, mandate, and operational boundaries of a workplace sustainability team.",
+    "Select balanced cross-functional team membership representing operational departments.",
+    "Distinguish operational roles: Sponsor, Chair, Coordinator/Secretary, Team Member, Action Owner, and Specialist Adviser.",
+    "Apply the TEAM framework (Terms & purpose, Engage right roles, Assign decisions/actions, Monitor & escalate).",
+    "Run productive meeting agendas that record clear decisions, assigned owners, target dates, and evidence requirements."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Building a Workplace Sustainability Team. You can now establish a credible internal sustainability team that can coordinate departmental goals, assign actions, maintain participation and report progress appropriately.",
-  badgeName: "Workplace Sustainability Team Builder",
-  badgeDescription: "Awarded for completing Building a Workplace Sustainability Team and demonstrating practical understanding of team composition, responsibilities, action ownership and coordination.",
+  completionMessage:
+    "Congratulations! You have passed Building a Workplace Sustainability Team. You can now establish team terms of reference, select balanced departmental representation, run structured action meetings, and maintain transparent action registers.",
+  badgeName: "Workplace Sustainability Team Member",
+  badgeDescription:
+    "Awarded for demonstrating practical understanding of workplace sustainability team mandates, composition, operational roles, meeting structures, and action ownership.",
 };
 
 const NEW_LESSONS = [
@@ -48,485 +49,372 @@ const NEW_LESSONS = [
     order: 0,
     title: "A Team Needs More Than Enthusiasm",
     minutes: 3,
-    content: "Introduce a realistic situation where sustainability actions are being discussed but nobody owns coordination.",
+    content: "Understand why informal enthusiasm without an operating structure fails to produce workplace results.",
     blocks: [
+      { id: "st1-h1", type: "heading", position: 1, headingText: "Structure Turns Enthusiasm into Results" },
+      { id: "st1-t1", type: "short_text", position: 2, bodyText: "A company forms a 'green committee' after staff raise concerns about waste and electricity draw. The first meeting includes 14 people from different departments. Ideas are discussed, but no one knows who approves budgets, no action owners are named, and no deadlines are set. At the next meeting, the same issues return. Without a formal mandate and structure, a team becomes a discussion forum rather than an operational working group." },
+      { id: "st1-k1", type: "key_message", position: 3, headingText: "Core Operating Principle", bodyText: "A sustainability team connects departments, coordinates agreed actions, and monitors evidence. The team does not replace management authority or grant unlimited spending rights." },
       {
-        id: "c15-l1-b1",
-        type: "heading",
-        headingText: "A Team Needs More Than Enthusiasm"
-      },
-      {
-        id: "c15-l1-b2",
-        type: "short_text",
-        bodyText: "A company has introduced several sustainability goals. Procurement is reviewing packaging, facilities is monitoring electricity use and HR wants to improve employee participation. Each department is taking separate actions, but nobody knows who should coordinate progress.\n\nA workplace sustainability team can connect departmental actions, share information, identify overlaps/gaps, maintain momentum, escalate decisions, and help employees understand what is changing."
-      },
-      {
-        id: "c15-l1-b3",
-        type: "key_message",
-        headingText: "Core Boundary Principle",
-        bodyText: "Coordinate actions, advise management, share information and monitor agreed progress. The team does not replace managers or approve expenditure unless formally authorised."
-      },
-      {
-        id: "c15-l1-b4",
+        id: "st1-d1",
         type: "decision_scenario",
-        decisionIntro: "Which is the strongest reason to create a sustainability team?",
-        decisionPrompt: "Select the most appropriate reason:",
+        position: 4,
+        decisionIntro: "Evaluating Team Function:",
+        decisionPrompt: "What turns an informal discussion group into a functioning workplace sustainability team?",
         decisionChoices: [
-          {
-            label: "To make one group responsible for all environmental work",
-            correct: false,
-            feedback: "Incorrect. The team coordinates actions but does not replace the responsibilities of individual department staff."
-          },
-          {
-            label: "To coordinate action across departments and clarify ownership",
-            correct: true,
-            feedback: "Correct. Coordinating progress, sharing info, and tracking action ownership is the core purpose."
-          },
-          {
-            label: "To give employees authority over company expenditure",
-            correct: false,
-            feedback: "Incorrect. A sustainability team operates within normal company boundaries and approval structures."
-          },
-          {
-            label: "To create more sustainability announcements",
-            correct: false,
-            feedback: "Incorrect. Publicity is secondary to coordinating practical actions and results."
-          }
+          { label: "A clear mandate, cross-functional representation, named action owners, and transparent action tracking", correct: true, feedback: "Correct! Defining purpose, ownership, and tracking creates operational accountability." },
+          { label: "Inviting 30 employees to attend monthly open brainstorms without agendas", correct: false, feedback: "Incorrect. Large unstructured brainstorms rarely produce accountable workplace actions." },
+          { label: "Giving the committee power to change company policies without management approval", correct: false, feedback: "Incorrect. Sustainability teams operate within normal corporate governance and management approval structures." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "Choosing the Right Representatives",
+    title: "Why a Sustainability Team Matters & Core Vocabulary",
     minutes: 3,
-    content: "Teach learners how to select a balanced and useful group.",
+    content: "Explore how sustainability teams bridge departments and master core team vocabulary.",
     blocks: [
+      { id: "st2-h1", type: "heading", position: 1, headingText: "Cross-Functional Value & Vocabulary" },
+      { id: "st2-t1", type: "short_text", position: 2, bodyText: "A cross-functional team breaks down departmental silos. It helps Facilities coordinate energy routines with Operations, Procurement align eco-specifications with Kitchen/Housekeeping, and HR support staff training." },
       {
-        id: "c15-l2-b1",
-        type: "heading",
-        headingText: "Choosing the Right Representatives"
+        id: "st2-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Sustainability Team Vocabulary",
+        bodyText: "• Mandate / Terms of Reference: The formal document defining team purpose, authority limits, and scope.\n• Sponsor: Executive or senior manager providing authority, budget guidance, and barrier removal.\n• Chair: Meeting leader who keeps discussions focused and ensures decisions are recorded.\n• Coordinator / Secretary: Organizes agendas, maintains the action register, and tracks deadlines.\n• Action Owner: Named individual responsible for delivering a specific task step.\n• Action Register: The central record listing tasks, owners, target dates, evidence, and status."
       },
       {
-        id: "c15-l2-b2",
-        type: "short_text",
-        bodyText: "A sustainability team should normally include people who understand different parts of the operation, can influence or coordinate practical actions, represent different roles, and have access to relevant information."
-      },
-      {
-        id: "c15-l2-b3",
-        type: "mauritian_example",
-        headingText: "Mauritian Workplace Example: Hotel Housekeeping",
-        bodyText: "A hotel sustainability team composed only of office staff may overlook housekeeping, kitchen, maintenance, landscaping and guest-service realities.\n\nA practical team might include a manager, a facilities representative, someone from housekeeping or operations, procurement and an employee representative."
-      },
-      {
-        id: "c15-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "Distinguishing a balanced team for a fictional company.",
-        decisionPrompt: "Which of the following teams is most balanced?",
-        decisionChoices: [
-          {
-            label: "The General Manager, Financial Controller, and Human Resources Director.",
-            correct: false,
-            feedback: "Incorrect. While highly authoritative, this team lacks operational representation from the frontline and departments executing actions."
-          },
-          {
-            label: "A team consisting of a manager, a facilities representative, someone from housekeeping or operations, procurement, and an employee representative.",
-            correct: true,
-            feedback: "Correct. This composition provides operational frontline insights, administrative staff, and management sponsorship."
-          },
-          {
-            label: "Ten volunteer employees from the administrative office.",
-            correct: false,
-            feedback: "Incorrect. Having members from only one department ignores the realities and challenges of other departments."
-          },
-          {
-            label: "Frontline volunteers with no management representative or sponsor.",
-            correct: false,
-            feedback: "Incorrect. Without a management sponsor or representative, the team will struggle to align goals and get approvals."
-          }
-        ]
+        id: "st2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to ISO 14001 Environmental Management Systems and the UN Global Compact, organizations that establish a cross-functional sustainability team with a formal mandate, executive sponsor, and assigned action owners achieve over 70% higher project completion rates compared to informal working groups!"
       }
     ]
   },
   {
     order: 2,
-    title: "Roles, Authority and Management Sponsorship",
-    minutes: 3,
-    content: "Prevent unclear accountability and unrealistic expectations.",
+    title: "The TEAM Operating Framework",
+    minutes: 4,
+    content: "Master the 4-step TEAM framework: Terms, Engage, Assign, Monitor.",
     blocks: [
+      { id: "st3-h1", type: "heading", position: 1, headingText: "The TEAM Framework" },
+      { id: "st3-t1", type: "short_text", position: 2, bodyText: "Use the TEAM framework to build and run an effective workplace sustainability committee:" },
       {
-        id: "c15-l3-b1",
-        type: "heading",
-        headingText: "Roles, Authority and Management Sponsorship"
-      },
-      {
-        id: "c15-l3-b2",
-        type: "short_text",
-        bodyText: "Introduce roles: Sponsor (supports team and removes barriers), Coordinator/chair (organises and focuses), Action owners (leads specific tasks), Representatives (brings info and communicates), Recorder (documents), and Data contact."
-      },
-      {
-        id: "c15-l3-b3",
+        id: "st3-k1",
         type: "key_message",
-        headingText: "Distinguish Levels of Authority",
-        bodyText: "Be clear on: Recommending, Approving, Implementing, Monitoring, and Reporting. The team charter should state what the team may decide directly and what must be escalated."
+        position: 3,
+        headingText: "TEAM Framework Breakdown",
+        bodyText: "• T — Terms & purpose: Define why the team exists, what it covers, and what requires management approval.\n• E — Engage right roles: Include operational representatives across key departments and frontline voices.\n• A — Assign decisions & actions: Turn meeting discussion into recorded decisions, named owners, and deadlines.\n• M — Monitor & escalate: Review progress using evidence, resolve delays, and escalate unmanaged barriers."
       },
       {
-        id: "c15-l3-b4",
+        id: "st3-d1",
         type: "decision_scenario",
-        decisionIntro: "Decision Scenario: The team recommends replacing inefficient equipment, but the change requires a significant budget.",
-        decisionPrompt: "What is the correct action?",
+        position: 4,
+        decisionIntro: "Practice: Role Distinction",
+        decisionPrompt: "What is the primary difference between a Team Sponsor and a Team Chair?",
         decisionChoices: [
-          {
-            label: "Announce that the equipment will be replaced",
-            correct: false,
-            feedback: "Incorrect. The team cannot approve major spending or announce changes without proper authorization."
-          },
-          {
-            label: "Purchase the equipment using another department’s budget",
-            correct: false,
-            feedback: "Incorrect. Bypassing standard financial controls is unauthorized and damages organizational trust."
-          },
-          {
-            label: "Prepare the recommendation, evidence, expected benefits and approval request",
-            correct: true,
-            feedback: "Correct. The team should make a credible case and use the company’s normal approval process."
-          },
-          {
-            label: "Remove the goal because the team cannot approve spending",
-            correct: false,
-            feedback: "Incorrect. The team should not be passive; presenting a well-reasoned recommendation is within their scope."
-          }
+          { label: "The Sponsor is a senior manager providing executive authority and barrier escalation; the Chair facilitates meetings and ensures decision focus", correct: true, feedback: "Correct! Sponsors provide management authority, while Chairs facilitate productive meetings." },
+          { label: "The Sponsor takes minutes; the Chair pays for team lunches", correct: false, feedback: "Incorrect. Role definitions reflect governance and meeting facilitation." },
+          { label: "Sponsor and Chair are identical roles that must always be held by the same person", correct: false, feedback: "Incorrect. They perform distinct governance and facilitation functions." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Meetings That Lead to Action",
-    minutes: 3,
-    content: "Show learners how to avoid unfocused or ceremonial meetings.",
+    title: "Visual Meeting Board & High-Risk Mistakes",
+    minutes: 4,
+    content: "Inspect a realistic Mauritian sustainability team meeting board and review critical safeguards.",
     blocks: [
+      { id: "st4-h1", type: "heading", position: 1, headingText: "Visual Sustainability Team Board Inspection" },
+      { id: "st4-t1", type: "short_text", position: 2, bodyText: "Examine the Mauritian workplace meeting board below (`visual-workplace-sustainability-team.png`). Observe how the board clearly displays the Team Mandate, departmental Attendance (Facilities, Housekeeping, Kitchen, Procurement, HR, Frontline), Agenda, Decisions, Action Register (Owner, Target Date, Evidence), and Escalations." },
       {
-        id: "c15-l4-b1",
-        type: "heading",
-        headingText: "Meetings That Lead to Action"
+        id: "st4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-workplace-sustainability-team.png",
+        caption: "Sustainability Team Board: Showing Mandate, Department Attendance, Agenda, Decisions, Action Register with named owners, target dates, and evidence.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace meeting room with a whiteboard titled Workplace Sustainability Team Meeting Board showing mandate, attendance list, agenda, decisions, and action register while committee members review tablet records."
       },
       {
-        id: "c15-l4-b2",
-        type: "short_text",
-        bodyText: "A practical sustainability meeting should include: Review of open actions, Progress, Barriers, Decisions, New actions with named owners, Deadlines, and Items for escalation."
-      },
-      {
-        id: "c15-l4-b3",
-        type: "decision_scenario",
-        decisionIntro: "Improving a poor meeting note: 'Discuss recycling. Speak to staff. Improve energy. Check supplier.'",
-        decisionPrompt: "Identify the best improvement of the note:",
-        decisionChoices: [
-          {
-            label: "Do more recycling, tell people to save energy, and contact the supplier.",
-            correct: false,
-            feedback: "Incorrect. This remains vague and lacks specific owners and target dates."
-          },
-          {
-            label: "Facilities Manager to confirm which waste streams the current collector accepts and provide updated bin instructions before 15 September.",
-            correct: true,
-            feedback: "Correct. This defines a specific action, owner, and deadline to ensure clear follow-through."
-          },
-          {
-            label: "The sustainability team will try to improve recycling and energy use by next month.",
-            correct: false,
-            feedback: "Incorrect. Group-level assignments without named individuals lead to weak accountability."
-          },
-          {
-            label: "Everyone should check recycling bins and energy consumption.",
-            correct: false,
-            feedback: "Incorrect. Vague collaborative assignments usually result in no one taking action."
-          }
-        ]
+        id: "st4-k1",
+        type: "key_message",
+        position: 4,
+        headingText: "High-Risk Team Operating Mistakes to Avoid",
+        bodyText: "• DO NOT launch a team without a written mandate or executive sponsor.\n• DO NOT allow attendance to swell beyond 8–10 core members without designated operational roles.\n• DO NOT record general discussion without defining specific decisions and named action owners.\n• DO NOT assign actions to entire departments (e.g. 'Procurement will handle it'); assign to one named owner.\n• DO NOT treat committee attendance as proof of environmental performance."
       }
     ]
   },
   {
     order: 4,
-    title: "Scenario: Participation Drops After the Launch",
-    minutes: 3,
-    content: "Assess how learners respond when early enthusiasm declines.",
+    title: "Worked Mauritian Scenario & Applied Decision",
+    minutes: 2,
+    content: "Study a Mauritian hotel sustainability team worked scenario and solve an applied commercial property decision.",
     blocks: [
+      { id: "st5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Hotel Sustainability Team" },
       {
-        id: "c15-l5-b1",
-        type: "heading",
-        headingText: "Scenario: Participation Drops After the Launch"
+        id: "st5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Mauritian Hotel Committee Operation",
+        bodyText: "A 120-room resort forms a sustainability team:\n• Sponsor: General Manager (provides quarterly budget & receives escalations).\n• Chair: Operations Manager (facilitates monthly meetings).\n• Coordinator: HR Assistant (maintains Action Register & circulates minutes).\n• Members: Facilities Lead (M. Govinden), Housekeeping Supervisor (S. Peerbocos), Head Chef (L. Seetaram), Procurement Officer (R. Ramtohul), HR Lead (A. Sookon), Frontline Staff Rep (V. Atchia).\n• Outcome: Assigned 3 clear actions (Kitchen waste sorting, Housekeeping bottle switch, Facilities LED retrofit) with named owners and target dates."
       },
       {
-        id: "c15-l5-b2",
-        type: "short_text",
-        bodyText: "A company launches its sustainability team with strong initial interest. After two months, representatives miss meetings, managers say operational work takes priority, employees are not updated, and actions have no clear owners."
-      },
-      {
-        id: "c15-l5-b3",
+        id: "st5-d1",
         type: "decision_scenario",
-        decisionIntro: "What is the most constructive response?",
-        decisionPrompt: "Choose the strongest response:",
+        position: 3,
+        decisionIntro: "Applied Commercial Property Decision:",
+        decisionPrompt: "A commercial building's sustainability team discovers that external doors are left open while air conditioning is running. The team includes Facilities, Security, Tenant Relations, and Cleaning. What is the most effective team response?",
         decisionChoices: [
-          {
-            label: "Send daily motivational emails to all staff about the importance of saving the planet.",
-            correct: false,
-            feedback: "Incorrect. Generic emails do not address structural issues like workload or lack of clear ownership."
-          },
-          {
-            label: "Schedule a three-hour brainstorming session to generate new sustainability ideas.",
-            correct: false,
-            feedback: "Incorrect. Adding more ideas when earlier tasks are uncompleted increases workload and confusion."
-          },
-          {
-            label: "Review the team’s purpose and workload, reduce the number of active priorities, and confirm manager support.",
-            correct: true,
-            feedback: "Correct. Narrowing the focus and aligning operational schedules with management sponsorship restores progress."
-          },
-          {
-            label: "Reprimand the representatives who missed meetings.",
-            correct: false,
-            feedback: "Incorrect. Threats and blame create hostility without resolving genuine competing priorities."
-          }
+          { label: "Assign Security to record open door locations/times, Facilities to check door closer hardware, Tenant Relations to brief tenant managers, and schedule progress review for the next meeting", correct: true, feedback: "Outstanding! Coordinating operational checks across Security, Facilities, and Tenant Relations with assigned owners solves the problem systematically." },
+          { label: "Pass a resolution demanding that Security lock all building entrance doors permanently", correct: false, feedback: "NEVER compromise building access, emergency egress, or fire safety codes!" },
+          { label: "Discuss the problem for 45 minutes and adjourn without assigning tasks or owners", correct: false, feedback: "Incorrect. Discussion without assigned actions leaves operational problems unsolved." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Create the Team Charter and First 90-Day Plan",
-    minutes: 3,
-    content: "Convert learning into a practical workplace output.",
+    title: "Your Team Operating Commitment & Badge",
+    minutes: 2,
+    content: "Select your daily sustainability team commitments and complete the course.",
     blocks: [
+      { id: "st6-h1", type: "heading", position: 1, headingText: "Sustainability Team Operating Commitment" },
+      { id: "st6-t1", type: "short_text", position: 2, bodyText: "Select the team operating commitments you pledge to practice in your workplace." },
       {
-        id: "c15-l6-b1",
-        type: "heading",
-        headingText: "Create the Team Charter and First 90-Day Plan"
-      },
-      {
-        id: "c15-l6-b2",
-        type: "short_text",
-        bodyText: "A Team Charter aligns members and management on purpose, sponsor, coordinator, members, scope, responsibilities, decision rights, and meeting frequency.\n\nA first 90-day plan focuses on no more than three initial priorities, clearly assigned owners, achievable deadlines, simple indicators, and a review point."
-      },
-      {
-        id: "c15-l6-b3",
+        id: "st6-c1",
         type: "commitment",
-        commitmentInstruction: "Choose one daily commitment you want to propose to strengthen sustainability coordination in your workplace:",
+        position: 3,
+        commitmentInstruction: "Select your sustainability team commitments (choose at least one):",
         commitmentOptions: [
-          {
-            value: "identify-missing-rep",
-            label: "Identify missing departmental representation.",
-            description: "Look for departments or roles that are currently not represented on the team."
-          },
-          {
-            value: "clarify-ownership",
-            label: "Clarify who owns an existing sustainability action.",
-            description: "Ensure every task has a named owner and deadline."
-          },
-          {
-            value: "propose-charter",
-            label: "Propose a short team charter.",
-            description: "Draft a basic outline of purpose and scope."
-          },
-          {
-            value: "review-meetings",
-            label: "Review whether current meetings produce documented actions.",
-            description: "Check if minutes track concrete outcomes."
-          },
-          {
-            value: "ask-management",
-            label: "Ask management to clarify sponsorship and approval boundaries.",
-            description: "Ensure the team knows what it can decide."
-          }
+          { value: "establish-written-mandate", label: "Ensure every sustainability team operates under a clear, written mandate and sponsor", description: "Define authority boundaries and management support." },
+          { value: "assign-named-action-owners", label: "Turn meeting decisions into recorded action items with named owners and deadlines", description: "Avoid vague task assignments to entire departments." },
+          { value: "maintain-action-register", label: "Maintain a transparent action register backed by verifiable workplace evidence", description: "Keep task progress visible and reviewable." },
+          { value: "escalate-unmanaged-barriers", label: "Escalate budget, authority, or resource constraints to executive sponsorship promptly", description: "Prevent stalled actions from circulating endlessly." }
         ]
+      },
+      {
+        id: "st6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: The TEAM Framework is an operational workplace committee guide. It does not constitute statutory corporate governance certification, legal environmental auditing, or HRDC statutory committee approval."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
+    order: 1,
     question: "What is the primary purpose of a workplace sustainability team?",
     options: [
-      { text: "To take full responsibility for all environmental tasks and manual cleanups.", isCorrect: false, feedback: "The team coordinates actions but does not replace the responsibilities of individual department staff." },
-      { text: "To coordinate actions across departments, share information, and monitor progress.", isCorrect: true, feedback: "Correct. Coordinating progress, sharing info, and tracking action ownership is the core purpose." },
-      { text: "To bypass normal company spending limits for green products.", isCorrect: false, feedback: "A sustainability team operates within normal company boundaries and approval structures." },
-      { text: "To police colleagues and report environmental policy violations to HR.", isCorrect: false, feedback: "Policing colleagues creates resentment; the team should encourage engagement and coordination." }
+      "To coordinate cross-functional sustainability actions, share information, assign owners, and track progress",
+      "To replace the authority of department managers and executive directors",
+      "To spend company funds without financial approval",
+      "To create publicity announcements without requiring evidence of operational results"
     ],
-    correctExplanation: "A sustainability team coordinates, advises, and tracks departmental goals rather than taking over all manual work or acting as police.",
-    incorrectExplanation: "The team does not replace existing managers or assume formal regulatory authority, nor should it act as internal police.",
-    practicalTakeaway: "Focus the team on coordination and tracking rather than manual execution or policy enforcement."
+    correct: 0,
+    correctExplanation: "A sustainability team coordinates cross-functional actions and tracks accountability across departments.",
+    incorrectExplanation: "Incorrect. The team coordinates cross-functional progress within existing management structures."
   },
   {
-    question: "A retail business in Mauritius wants to build a sustainability team. Which team composition is most likely to succeed?",
+    order: 2,
+    question: "What does the 'T' in the TEAM operating framework stand for?",
     options: [
-      { text: "The executive board only, to ensure maximum decision authority.", isCorrect: false, feedback: "Board members lack insight into daily store operations and shelf-stocking practices." },
-      { text: "A mix of office staff, shop floor supervisors, procurement, and a management sponsor.", isCorrect: true, feedback: "Correct. A balanced team represents operational, support, and management functions, making implementation realistic." },
-      { text: "A group of summer interns, since they have more time to devote to projects.", isCorrect: false, feedback: "Interns lack long-term tenure and the authority needed to establish routine workplace habits." },
-      { text: "Anyone who volunteers, even if they all come from the same administrative department.", isCorrect: false, feedback: "Having members from only one department ignores the realities and challenges of other departments." }
+      "Terms & purpose (define why the team exists, what it covers, and its authority limits)",
+      "Travel budget for committee members",
+      "Technical certification for legal compliance",
+      "Temporary task forces that meet once every three years"
     ],
-    correctExplanation: "A successful team combines operational frontline insights, administrative staff, and management sponsorship.",
-    incorrectExplanation: "Single-department teams or executive-only boards lack either the broad perspective or the detailed frontline understanding needed to implement changes.",
-    practicalTakeaway: "Ensure diverse operational and administrative representation on your team."
+    correct: 0,
+    correctExplanation: "T = Terms & purpose, establishing the team's written mandate and operational boundaries.",
+    incorrectExplanation: "Incorrect. T = Terms & purpose."
   },
   {
-    question: "Why is a management sponsor essential for a workplace sustainability team?",
+    order: 3,
+    question: "What is the key role of a Sustainability Team SPONSOR?",
     options: [
-      { text: "To run the weekly meetings and record the minutes.", isCorrect: false, feedback: "The coordinator or coordinator role runs meetings and records minutes, not the sponsor." },
-      { text: "To do the manual waste sorting and check energy meters.", isCorrect: false, feedback: "Manual tasks are owned by action owners and department representatives." },
-      { text: "To provide backing, align goals with business priorities, and help remove operational barriers.", isCorrect: true, feedback: "Correct. Sponsors provide strategic alignment and help resolve resources and structural barriers." },
-      { text: "To sign off on all environmental expenditures without a business case.", isCorrect: false, feedback: "Management sponsors require a clear business case and follow normal company approval procedures." }
+      "A senior manager who provides executive authority, clarifies budget limits, and resolves escalated barriers",
+      "The secretary who takes meeting notes and orders tea",
+      "An external auditor who issues legal fines to departments",
+      "A staff member who cleans waste sorting bins on weekends"
     ],
-    correctExplanation: "Sponsors provide executive alignment and help clear obstacles that the team cannot resolve alone.",
-    incorrectExplanation: "The sponsor is not there to perform operational work or bypass financial accountability rules.",
-    practicalTakeaway: "Secure a management sponsor who can champion your team's recommendations at the executive level."
+    correct: 0,
+    correctExplanation: "The Sponsor is an executive manager who provides authority, budget guidance, and barrier removal.",
+    incorrectExplanation: "Incorrect. The Sponsor provides management authority and handles escalations."
   },
   {
-    question: "The sustainability team wants to transition the office from disposable plastic bottles to filtered water dispensers. What is the team's correct authority role in this decision?",
+    order: 4,
+    question: "In the visual meeting board (`visual-workplace-sustainability-team.png`), why is the ACTION REGISTER essential?",
     options: [
-      { text: "The team can approve the purchase of the dispensers directly using company funds.", isCorrect: false, feedback: "The team recommends actions but does not have the authority to bypass standard financial controls." },
-      { text: "The team can order the change without consulting the facilities or finance managers.", isCorrect: false, feedback: "Unilateral actions cause friction and bypass operations and compliance checks." },
-      { text: "The team should analyze the options, build a business case, and recommend the change to the authorized manager.", isCorrect: true, feedback: "Correct. Building a recommendation and seeking approval from the proper authority is the standard, effective way." },
-      { text: "The team must do nothing because they do not have formal financial authority.", isCorrect: false, feedback: "The team should not be passive; presenting a well-reasoned recommendation is within their scope." }
+      "It records specific task items, assigned named owners, target dates, and required evidence to ensure accountability",
+      "It lists employee salaries and personal home addresses",
+      "It replaces the company's financial accounting system",
+      "It is decorative and has no operational function"
     ],
-    correctExplanation: "Sustainability teams advise and coordinate; formal spending or policy changes must go through standard corporate approvals.",
-    incorrectExplanation: "The team has no inherent spending authority unless formally delegated by management.",
-    practicalTakeaway: "Always present a solid business case with your sustainability recommendations."
+    correct: 0,
+    correctExplanation: "The Action Register tracks task items, named owners, deadlines, and evidence sources.",
+    incorrectExplanation: "Incorrect. The Action Register maintains clear task ownership, target dates, and evidence."
   },
   {
-    question: "Which of the following is the best habit for keeping workplace sustainability meetings productive?",
+    order: 5,
+    question: "Why is assigning an action to 'Procurement' or 'The Team' a high-risk mistake?",
     options: [
-      { text: "Schedule long, open sessions to debate general global warming trends.", isCorrect: false, feedback: "Meetings should focus on local operational issues, not general climate debate." },
-      { text: "Circulate a simple agenda beforehand and focus on reviewing and assigning specific actions.", isCorrect: true, feedback: "Correct. Clear agendas and action tracking keep meetings short, focused, and productive." },
-      { text: "Avoid documenting action owners to keep the atmosphere collaborative.", isCorrect: false, feedback: "Unassigned actions lead to zero progress. Every action must have a named owner and deadline." },
-      { text: "Cancel meetings if any action owner has not completed their task.", isCorrect: false, feedback: "Uncompleted tasks should be discussed to identify obstacles, not ignored by cancelling meetings." }
+      "Because when tasks are assigned to a department or group rather than one named owner, no single individual is accountable",
+      "Because departments do not exist in commercial companies",
+      "Because procurement officers are not allowed to join teams",
+      "Because tasks must only be assigned to external consultants"
     ],
-    correctExplanation: "Short, regular meetings with clear agendas and explicitly assigned action ownership ensure continuous progress.",
-    incorrectExplanation: "Vague debates or avoiding accountability structures leads to meeting fatigue and zero implementation.",
-    practicalTakeaway: "Make meetings action-oriented with clear owners and timelines."
+    correct: 0,
+    correctExplanation: "Assigning tasks to groups creates ambiguity; every action must have one named individual owner.",
+    incorrectExplanation: "Incorrect. Every action requires one named accountable owner."
   },
   {
-    question: "A meeting note states: 'We need to update our recycling signs. Team will help.' What is the main weakness of this note?",
+    order: 6,
+    question: "What distinguishes ELH-15 (Workplace Sustainability Team) from ELH-22 (Effective Green Teams)?",
     options: [
-      { text: "The task is too expensive to implement.", isCorrect: false, feedback: "Updating signs is inexpensive; the issue is how the action is managed." },
-      { text: "It does not use official ESG reporting terminologies.", isCorrect: false, feedback: "Practical action notes should be plain and direct, not full of ESG jargon." },
-      { text: "It fails to assign a specific owner, a deadline, and the expected result.", isCorrect: true, feedback: "Correct. 'Team will help' means nobody is accountable. There must be one named owner and a target date." },
-      { text: "The team should not be involved in updating signs.", isCorrect: false, feedback: "Updating signs is a very typical and useful action for a sustainability team to coordinate." }
+      "ELH-15 establishes team operating structure, mandate, roles, and agendas; ELH-22 focuses on team dynamics and long-term engagement",
+      "ELH-15 is for hotels only; ELH-22 is for banks only",
+      "ELH-15 replaces ELH-22 so green teams are no longer needed",
+      "There is no difference between ELH-15 and ELH-22"
     ],
-    correctExplanation: "Action notes must define exactly who is responsible and by when the outcome is expected, avoiding vague group commitments.",
-    incorrectExplanation: "Expense, lack of jargon, or team involvement are not the limiting issues; lack of individual accountability is.",
-    practicalTakeaway: "Never leave an action assigned to 'the team'—assign it to one named individual."
+    correct: 0,
+    correctExplanation: "ELH-15 teaches team structure and foundation; ELH-22 focuses on sustaining team dynamics over time.",
+    incorrectExplanation: "Incorrect. ELH-15 covers team foundation/structure; ELH-22 covers long-term team effectiveness/dynamics."
   },
   {
-    question: "Two months after the launch, attendance at sustainability meetings is dropping, and representatives claim they are too busy. What is the most constructive response?",
+    order: 7,
+    question: "What should a committee Chair do if a meeting discussion becomes stuck on an unresolvable budget constraint?",
     options: [
-      { text: "Report the absent representatives to HR for disciplinary action.", isCorrect: false, feedback: "Disciplinary threats create hostility and do not address operational workload issues." },
-      { text: "Post public updates naming and shaming the departments that are not participating.", isCorrect: false, feedback: "Naming and shaming destroys team collaboration and employee goodwill." },
-      { text: "Review the workload, reduce the number of active priorities, and confirm manager support.", isCorrect: true, feedback: "Correct. Focus on a few high-value, manageable actions and check with managers to align operational schedules." },
-      { text: "Suspend the team and assume the company is not ready for sustainability.", isCorrect: false, feedback: "Giving up ignores the opportunity to adjust scope and find a pace that fits the business." }
+      "Record the constraint, assign a member to gather cost estimates, and escalate to the Team Sponsor for management review",
+      "Argue for two hours until everyone agrees",
+      "Approve corporate spending without authority",
+      "Cancel the sustainability team permanently"
     ],
-    correctExplanation: "Drop in participation is usually due to competing operational priorities; narrowing focus and aligning schedules solves this constructively.",
-    incorrectExplanation: "Punitive actions, naming and shaming, or total abandonment are counterproductive and damage morale.",
-    practicalTakeaway: "When interest drops, reduce the workload and confirm management backing for representatives' time."
+    correct: 0,
+    correctExplanation: "Record the barrier, gather factual evidence, and escalate to the executive Sponsor for management decision.",
+    incorrectExplanation: "Incorrect. Factual evidence should be gathered and escalated to the Sponsor."
   },
   {
-    question: "Why should a sustainability team draft a formal Team Charter at the start?",
+    order: 8,
+    question: "Which operational role is responsible for facilitating meetings and keeping discussions focused on agenda decisions?",
     options: [
-      { text: "To establish the team's purpose, scope, decision boundaries, and meeting routines.", isCorrect: true, feedback: "Correct. The charter aligns members and management on what the team is responsible for and what requires escalation." },
-      { text: "To declare the team's legal independence from company management.", isCorrect: false, feedback: "The team is part of the organization and relies on management support." },
-      { text: "To submit it for mandatory registration with the Ministry of Environment.", isCorrect: false, feedback: "Team charters are internal guidelines, not legal regulatory documents." },
-      { text: "To replace all existing departmental job descriptions.", isCorrect: false, feedback: "The charter defines the committee's scope, not individual employee job descriptions." }
+      "Team Chair",
+      "Specialist Adviser",
+      "Frontline Staff Representative",
+      "External Auditor"
     ],
-    correctExplanation: "A charter clarifies expectations, scopes, and decision boundaries, preventing conflicts and wasted effort.",
-    incorrectExplanation: "The charter has no legal registration requirements and does not replace employment contracts or override corporate hierarchy.",
-    practicalTakeaway: "Use a simple charter to agree on decision rights and escalation rules before issues arise."
+    correct: 0,
+    correctExplanation: "The Team Chair facilitates meetings and ensures discussions remain focused on agenda items and decisions.",
+    incorrectExplanation: "Incorrect. The Team Chair facilitates meetings and maintains focus."
+  },
+  {
+    order: 9,
+    question: "Why should specialist advisers (e.g. Health & Safety Lead, Legal Counsel) be invited to specific team meetings?",
+    options: [
+      "To provide expert guidance on technical, safety, or legal requirements when specific actions affect those areas",
+      "To take permanent ownership of all sustainability tasks",
+      "To replace the General Manager on the board",
+      "To prevent frontline staff from speaking"
+    ],
+    correct: 0,
+    correctExplanation: "Specialists provide technical and safety guidance when specific operational actions require compliance input.",
+    incorrectExplanation: "Incorrect. Specialists provide expert input on specific technical or safety matters."
+  },
+  {
+    order: 10,
+    question: "What is the primary takeaway of the TEAM Operating Framework?",
+    options: [
+      "Structured team operating practices (TEAM) enable cross-functional committees to translate corporate ambitions into owned workplace actions",
+      "Sustainability teams should meet without agendas or recorded minutes",
+      "Enthusiasm alone is sufficient to run complex commercial projects",
+      "Committees are only formed to create promotional marketing posters"
+    ],
+    correct: 0,
+    correctExplanation: "The TEAM framework provides the structure needed to convert corporate priorities into owned, reviewable actions.",
+    incorrectExplanation: "Incorrect. The TEAM framework provides structure for cross-functional workplace action."
   }
 ];
 
-export async function ensureWorkplaceSustainabilityTeamCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureWorkplaceSustainabilityTeamCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      // 1. Resolve Course 15 by courseCode "ELH-15" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-15"))
+        .limit(1);
 
-      // 2. Resolve Course 14
-      let course14 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-14")
-      });
-      if (!course14) {
-        course14 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "setting-departmental-sustainability-goals")
-        });
-      }
-
-      if (!course14) {
-        throw new Error("Data integrity error: Course 14 (ELH-14) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 15
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null, // New course, default system-managed recommendation is null
-        }).returning();
-        actualCourseId = inserted.id;
+      if (byCode) {
+        course = byCode;
       } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course ELH-15 / building-workplace-sustainability-team not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Workplace Sustainability Team course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-15. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-16 or null if not yet seeded)
+      const [course16] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "workplace-sustainability-communication"))
+        .limit(1);
+      const nextCourseId = course16 ? course16.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
           slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
+          courseCode: "ELH-15",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -539,185 +427,106 @@ export async function ensureWorkplaceSustainabilityTeamCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
       }
 
-      // 4. Update Course 14 recommendedNextCourseId to point to Course 15 preserving admin edits
-      let isSystemManaged = false;
-      if (course14.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course14.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-15") {
-          isSystemManaged = true;
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entries in coursePrerequisitesTable (ELH-12, ELH-13, ELH-14 -> ELH-15)
+      const prereqs = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(inArray(coursesTable.slug, [
+          "final-sustainability-certification",
+          "sustainability-action-planning",
+          "setting-departmental-sustainability-goals"
+        ]));
+
+      for (const prereq of prereqs) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: prereq.id,
+          });
         }
       }
 
-      if (course14.recommendedNextCourseId === null || course14.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course14.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 14 currently recommends course ID ${course14.recommendedNextCourseId} instead of Course 15 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          icon: "award",
+          icon: "users",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 18,
-          code: "COURSE_ELH_15_COMPLETE",
+          courseIds: [courseId],
+          orderIndex: 20,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: "COURSE_ELH_15_COMPLETE",
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 14
-      const existingPrereq14 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course14.id)
-        )
-      });
-      if (!existingPrereq14) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course14.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order if they don't already exist or are skeletons
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.courseId, actualCourseId),
-              eq(lessonsTable.orderIndex, lesson.order)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Workplace Sustainability Team course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Workplace Sustainability Team course");
   }
 }
