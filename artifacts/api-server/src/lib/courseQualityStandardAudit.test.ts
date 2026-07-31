@@ -3,14 +3,16 @@ import assert from "node:assert/strict";
 import { ensureSchemaModifications } from "./ensureSchemaModifications";
 import { ensureFoundationsCourse } from "./ensureFoundationsCourse";
 import { ensureWasteSortingCourse } from "./ensureWasteSortingCourse";
+import { ensureEnergyEfficiencyCourse } from "./ensureEnergyEfficiencyCourse";
 import { evaluateCourseQuality } from "./courseQualityDiagnostics";
 import { db, coursesTable } from "@workspace/db";
 
-describe("Course Quality Standard Audit (ELH-01 & ELH-02)", () => {
+describe("Course Quality Standard Audit (ELH-01, ELH-02 & ELH-03)", () => {
   before(async () => {
     await ensureSchemaModifications();
     await ensureFoundationsCourse();
     await ensureWasteSortingCourse();
+    await ensureEnergyEfficiencyCourse();
   });
 
   test("1. Active catalogue contains all 29 courses (ELH-01 through ELH-29)", async () => {
@@ -42,5 +44,19 @@ describe("Course Quality Standard Audit (ELH-01 & ELH-02)", () => {
     assert.ok(scorecard.breakdown.memorableFactScore > 0, "ELH-02 must score points for memorable fact");
     assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-02 must score points for visual question");
     assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-02 must score points for applied scenario");
+  });
+
+  test("5. ELH-03 energy efficiency course reaches release quality score threshold (>= 85)", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-03");
+    assert.ok(scorecard.totalScore >= 85, `ELH-03 score must be >= 85, got ${scorecard.totalScore}`);
+    assert.equal(scorecard.releaseBlockers.length, 0, `ELH-03 must have 0 release blockers, got ${scorecard.releaseBlockers.join("; ")}`);
+    assert.equal(scorecard.isReleaseReady, true, "ELH-03 must be flagged as release ready");
+  });
+
+  test("6. ELH-03 diagnostic breakdown includes memorable fact, visual question, and scenario scores", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-03");
+    assert.ok(scorecard.breakdown.memorableFactScore > 0, "ELH-03 must score points for memorable fact");
+    assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-03 must score points for visual question");
+    assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-03 must score points for applied scenario");
   });
 });

@@ -6,20 +6,20 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
 } from "@workspace/db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_ID = 3;
 const COURSE_SLUG = "energy-efficiency-at-work";
 const COURSE_TITLE = "Energy Efficiency at Work";
 const BADGE_SLUG = "energy-saver";
-const SEED_NAME = "energy-efficiency-at-work-v1";
+const SEED_NAME = "energy-efficiency-at-work-v2";
 
 const COURSE_META = {
   description:
-    "A practical guide to reducing electricity consumption, improving climate control and lighting practices, and eliminating unnecessary standby energy use in Mauritian workplaces.",
+    "Help employees identify avoidable workplace energy waste, optimize air-conditioning and lighting habits, follow end-of-day shutdown procedures, and escalate technical issues safely.",
   fullDescription:
-    "This course covers simple daily habits and optimized workplace settings that can reduce electricity consumption and lower carbon emissions. Tailored specifically for Mauritian workspaces, it teaches employees how to optimize air conditioning and lighting, switch off standby power safely, and follow shutdown checklists.",
+    "This course covers simple daily habits and safe workplace practices that reduce electricity consumption and lower operating costs in Mauritian facilities. Tailored for office, retail, hospitality, and warehouse staff, it teaches learners how to optimize cooling, eliminate unnecessary standby power, and distinguish direct employee actions from technical issues requiring facilities escalation.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "1400.00",
@@ -27,10 +27,11 @@ const COURSE_META = {
   isFeatured: false,
   thumbnailUrl: "/images/courses/energy-efficiency.png",
   learningObjectives: [
-    "Identify the primary sources of electricity consumption in a typical Mauritian office.",
-    "Implement optimized lighting and air conditioning settings to reduce load without affecting comfort.",
-    "Recognize and eliminate standby energy waste on office appliances.",
-    "Establish energy-saving habits during end-of-day shut-down routines."
+    "Recognise common sources of avoidable workplace energy waste in Mauritian facilities.",
+    "Distinguish between direct employee actions, site-procedure checks, and technical escalation.",
+    "Apply appropriate energy-saving practices without affecting safety, comfort, or critical operations.",
+    "Respond safely and effectively to realistic workplace energy-waste situations.",
+    "Choose one practical energy-efficiency commitment relevant to your daily role."
   ],
   includesCertificate: true,
   passingScore: 80,
@@ -41,204 +42,185 @@ const COURSE_META = {
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Office Energy: Where Does It All Go?",
+    title: "Workplace Energy: Where Does It Go?",
     minutes: 3,
-    content: "Understand primary electricity consumers in typical office environments.",
+    content: "Understand primary energy users and your role in safe energy efficiency.",
     blocks: [
-      { id: "ee1-h1", type: "heading", position: 1, headingText: "Office Energy: Where Does It All Go?" },
-      { id: "ee1-t1", type: "short_text", position: 2, bodyText: "Electricity in commercial buildings is consumed by many systems. Knowing which systems use the most power helps us focus our efforts on the most impactful habits." },
-      { id: "ee1-k1", type: "key_message", position: 3, headingText: "The Big Consumers", bodyText: "Air conditioning and lighting are often among the most significant sources of workplace electricity consumption." },
-      { id: "ee1-w1", type: "workplace_example", position: 4, headingText: "Office Cooling in Mauritius", bodyText: "In tropical climates, ventilation and cooling systems run continuously, making them the primary contributors to commercial grid load." },
+      { id: "ee1-h1", type: "heading", position: 1, headingText: "Arriving at an Empty Office" },
+      { id: "ee1-t1", type: "short_text", position: 2, bodyText: "Imagine arriving at work at 7:45 AM. The main office floor is still empty, yet overhead lights are fully lit, air-conditioning louvers are blasting cold air beside an open balcony window, and several computer displays are glowing. What should you touch, what requires checking, and what should be left alone?" },
+      { id: "ee1-k1", type: "key_message", position: 3, headingText: "Safety and Operations Take Priority", bodyText: "Energy efficiency means achieving required workplace results without wasting power. However, operational safety, food safety, data integrity, and employee comfort ALWAYS take priority over switching off equipment indiscriminately." },
+      {
+        id: "ee1-d1",
+        type: "decision_scenario",
+        position: 4,
+        decisionIntro: "Morning arrival decision scenario:",
+        decisionPrompt: "You walk into an empty glass boardroom at 8:00 AM. Overhead panel lights are fully turned on, but no meetings are scheduled until 10:30 AM. What should you do?",
+        decisionChoices: [
+          { label: "Switch off the boardroom lights until the scheduled meeting time", correct: true, feedback: "Perfect! Switching off lighting in empty, unused meeting rooms is a safe, direct employee action." },
+          { label: "Leave the lights on because someone might enter eventually", correct: false, feedback: "Incorrect. Lighting empty rooms for hours causes avoidable energy waste." },
+          { label: "Locate the main electrical circuit breaker panel and flip the breaker", correct: false, feedback: "Never open or tamper with electrical panels! General employees must use normal wall switches only." }
+        ]
+      },
       {
         id: "ee1-m1",
         type: "multiple_choice",
         position: 5,
-        mcqQuestion: "Which of the following is typically a major consumer of electricity in an air-conditioned office building?",
+        mcqQuestion: "What is the core definition of workplace energy efficiency?",
         mcqOptions: [
-          "Air conditioning and ventilation systems",
-          "Small desktop phone chargers",
-          "Wired computer mice",
-          "LED status indicators on keyboards"
+          "Achieving required business results while eliminating unnecessary energy waste",
+          "Switching off all electrical equipment indiscriminately regardless of safety",
+          "Setting air conditioning to the coldest possible temperature",
+          "Disconnecting server racks and food storage refrigerators overnight"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Yes! Cooling and ventilation systems require large amounts of power to maintain comfortable indoor temperatures in tropical environments.",
-        mcqIncorrectExplanation: "Incorrect. Air conditioning and ventilation are typically among the most significant energy users, whereas chargers and mice consume minimal energy."
+        mcqCorrectExplanation: "Energy efficiency focuses on avoiding waste while preserving safety, comfort, and operational needs.",
+        mcqIncorrectExplanation: "Incorrect. Indiscriminate shut-downs compromise safety and business operations."
       }
     ]
   },
   {
     order: 1,
-    title: "Smarter Air Conditioning",
+    title: "Smarter Air Conditioning & Humidity Control",
     minutes: 3,
-    content: "Learn how to optimize temperature settings and contain cooling.",
+    content: "Optimize cooling settings and contain conditioned air in tropical environments.",
     blocks: [
-      { id: "ee2-h1", type: "heading", position: 1, headingText: "Smarter Air Conditioning" },
-      { id: "ee2-t1", type: "short_text", position: 2, bodyText: "Air conditioning is essential for a comfortable work environment, but small inefficiencies or poor practices can lead to significant waste of electricity." },
-      { id: "ee2-k1", type: "key_message", position: 3, headingText: "AC Guidelines", bodyText: "Avoid unnecessarily low air-conditioning settings. A setting around 24°C can provide a practical balance between comfort and energy efficiency in many workplaces." },
-      { id: "ee2-w1", type: "workplace_example", position: 4, headingText: "Every Degree Counts", bodyText: "Energy performance varies according to the building, equipment, insulation, occupancy, and operating conditions. Small adjustments can add up to noticeable energy savings over time." },
+      { id: "ee2-h1", type: "heading", position: 1, headingText: "Cooling in the Mauritian Climate" },
+      { id: "ee2-t1", type: "short_text", position: 2, bodyText: "In tropical Mauritian weather, air-conditioning and ventilation systems are the largest single consumer of commercial electricity. Small habits have a significant cumulative impact on building load." },
+      { id: "ee2-k1", type: "key_message", position: 3, headingText: "The 24°C Comfort Benchmark", bodyText: "Setting thermostats around 24°C provides a comfortable indoor working environment while preventing compressor overwork. Setting an AC unit to 16°C does NOT cool a warm room any faster—it only forces the compressor to run continuously." },
       {
         id: "ee2-d1",
         type: "decision_scenario",
-        position: 5,
-        decisionIntro: "A common office scenario:",
-        decisionPrompt: "You arrive in a meeting room where the AC was left at a very low setting, and it feels uncomfortably cold. What should you do?",
+        position: 4,
+        decisionIntro: "AC and window scenario:",
+        decisionPrompt: "You enter a shared office where the wall-mounted AC unit is running on high cooling, but a large balcony window right beside it is open to the warm tropical garden outside. What is the correct response?",
         decisionChoices: [
-          { label: "Adjust the AC setting to a comfortable 24°C", correct: true, feedback: "Perfect! Adjusting the thermostat directly solves the discomfort and saves energy." },
-          { label: "Open the window to let warm air in while keeping the AC running", correct: false, feedback: "Incorrect. Opening a window while AC runs forces the system to work harder, wasting energy." },
-          { label: "Leave the room and find another place to work", correct: false, feedback: "This leaves the AC wasting electricity in an empty room." }
+          { label: "Close the open window immediately to contain the conditioned air", correct: true, feedback: "Excellent! Keeping windows and doors closed prevents heavy cooling leakage and compressor strain." },
+          { label: "Lower the AC thermostat temperature to 16°C to fight the outside heat", correct: false, feedback: "Incorrect! Lowering the temperature while windows are open wastes massive amounts of electricity." },
+          { label: "Unplug the AC unit's main wiring from the wall", correct: false, feedback: "Never tamper with hardwired electrical connections. Use remote/wall controls or close the window." }
         ]
-      },
-      {
-        id: "ee2-m1",
-        type: "multiple_choice",
-        position: 6,
-        mcqQuestion: "Why is it important to keep windows and doors closed when the air conditioning is on?",
-        mcqOptions: [
-          "To prevent cooled air from escaping and warm, humid air from entering",
-          "To keep the room completely soundproof",
-          "Because it is required by local safety laws",
-          "To stop the office lights from flickering"
-        ],
-        mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Exactly. Keeping the space sealed keeps the cooled air inside and prevents the AC system from working harder than necessary.",
-        mcqIncorrectExplanation: "Incorrect. Open windows allow warm outside air in, which causes the AC to draw more power."
       }
     ]
   },
   {
     order: 2,
-    title: "Smarter Workplace Lighting",
-    minutes: 3,
-    content: "Optimize overhead lights and make appropriate use of daylight.",
+    title: "Standby Power & Sourced Energy Facts",
+    minutes: 4,
+    content: "Discover standby energy waste and learn sourced efficiency principles.",
     blocks: [
-      { id: "ee3-h1", type: "heading", position: 1, headingText: "Smarter Workplace Lighting" },
-      { id: "ee3-t1", type: "short_text", position: 2, bodyText: "Lighting is another area where simple habits can make a big difference. We want to maximize the use of natural light while maintaining high safety and visibility standards." },
-      { id: "ee3-w1", type: "workplace_example", position: 3, headingText: "Efficiency Gains", bodyText: "Replacing older fluorescent tubes with modern LED tubes is a highly effective hardware upgrade, but occupant habits are just as important." },
+      { id: "ee3-h1", type: "heading", position: 1, headingText: "Vampire Power & Standby Waste" },
+      { id: "ee3-t1", type: "short_text", position: 2, bodyText: "Many workplace devices—monitors, desktop printers, coffee machines, chargers, and AV systems—continue drawing power even when sitting idle in standby mode." },
       {
-        id: "ee3-d1",
-        type: "decision_scenario",
-        position: 4,
-        decisionIntro: "Try this scenario:",
-        decisionPrompt: "You notice that the lights in a small conference room are still on, even though the meeting ended an hour ago and the room is empty. What do you do?",
-        decisionChoices: [
-          { label: "Switch the lights off before leaving the area", correct: true, feedback: "Excellent! Switching off lights in empty spaces is a simple and immediate energy saver." },
-          { label: "Leave them on because someone might use the room later today", correct: false, feedback: "This wastes electricity. If someone uses the room later, they can easily turn the lights back on." },
-          { label: "Report it to the facility manager to log an incident", correct: false, feedback: "No need to log an incident; simply flipping the switch off is faster and more practical." }
-        ]
+        id: "ee3-f1",
+        type: "memorable_fact",
+        position: 3,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to the International Energy Agency (IEA), standby power consumption in commercial electronics accounts for up to 10% to 15% of total office appliance electricity use! Enabling automatic sleep modes and switching off non-essential displays at night eliminates this vampire load without affecting productivity."
       },
-      { id: "ee3-p1", type: "practical_action", position: 5, headingText: "Turn Off Lights in Empty Spaces", bodyText: "Get into the habit of turning off lights in empty meeting rooms, kitchens, corridors, and work areas when it is safe to do so." },
+      {
+        id: "ee3-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Misconception: Lowest AC Setting Cools Faster",
+        bodyText: "Myth: 'Setting the AC to 16°C cools down a hot office faster than setting it to 24°C.' Fact: AC units supply air at a constant output temperature. Setting a lower target temperature only delays when the compressor cycles off, wasting energy without speeding up cooling."
+      },
       {
         id: "ee3-m1",
         type: "multiple_choice",
-        position: 6,
-        mcqQuestion: "How can employees best balance lighting comfort and energy efficiency during the day?",
+        position: 5,
+        mcqQuestion: "What is standby or 'vampire' power waste in a commercial workplace?",
         mcqOptions: [
-          "Use natural daylight where practical, and turn off unnecessary overhead lights",
-          "Keep all office lights turned off at all times",
-          "Keep all lights on high brightness regardless of outside conditions",
-          "Cover the windows to block natural light entirely"
+          "Electricity drawn by electronic devices while sitting idle or turned off in standby mode",
+          "Power consumed by solar panels during high daylight hours",
+          "Electricity used exclusively by heavy industrial motors",
+          "Power generated by backup diesel generators"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Correct! Leveraging natural daylight and turning off lights in unoccupied rooms is a practical and safe balance.",
-        mcqIncorrectExplanation: "Incorrect. Safety and comfortable visibility must always be maintained; do not keep office lights off if it compromises safety."
+        mcqCorrectExplanation: "Standby power refers to idle energy drawn by displays, chargers, and appliances when not actively in use.",
+        mcqIncorrectExplanation: "Incorrect. Standby power is the continuous background draw of idle electronics."
       }
     ]
   },
   {
     order: 3,
-    title: "Standby Energy and Hidden Waste",
-    minutes: 3,
-    content: "Identify phantom loads and understand when not to unplug.",
+    title: "Inspecting Your Workplace Energy Boundaries",
+    minutes: 4,
+    content: "Identify energy waste and distinguish safe actions from critical equipment.",
     blocks: [
-      { id: "ee4-h1", type: "heading", position: 1, headingText: "Standby Energy and Hidden Waste" },
-      { id: "ee4-t1", type: "short_text", position: 2, bodyText: "Many electronic devices continue to draw power even when turned off or in standby mode. This is often referred to as 'vampire power' or standby waste." },
-      { id: "ee4-k1", type: "key_message", position: 3, headingText: "Identify Critical Equipment First", bodyText: "Always follow workplace procedures and obtain approval before unplugging shared equipment. Never switch off servers, network infrastructure, refrigeration, security systems, or essential safety systems." },
-      { id: "ee4-w1", type: "workplace_example", position: 4, headingText: "Common Standby Consumers", bodyText: "Equipment such as monitors, printer displays, active phone chargers, and televisions left on standby overnight can continuously draw electricity." },
+      { id: "ee4-h1", type: "heading", position: 1, headingText: "Workplace Energy Inspection" },
+      { id: "ee4-t1", type: "short_text", position: 2, bodyText: "Examine a real Mauritian workplace interior. Observe the wall AC unit running beside an open window, the lit empty boardroom, an active workstation monitor, and a breakroom refrigerator." },
       {
-        id: "ee4-d1",
-        type: "decision_scenario",
-        position: 5,
-        decisionIntro: "A workplace standby scenario:",
-        decisionPrompt: "At the end of your shift, you see a desk printer with a glowing standby light and a phone charger left plugged into the wall without a phone. What is the appropriate action?",
-        decisionChoices: [
-          { label: "Unplug the phone charger, and turn off the printer using its power button if authorized", correct: true, feedback: "Perfect. Chargers draw power when plugged in, and printers should be shut down appropriately." },
-          { label: "Unplug the main office network router to stop standby power", correct: false, feedback: "Warning! Never unplug network routers or servers as they perform critical office functions." },
-          { label: "Leave everything plugged in and turned on to avoid touching cords", correct: false, feedback: "This ignores standby waste; simple approved actions can safely reduce it." }
-        ]
+        id: "ee4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-workplace-energy-waste.png",
+        caption: "Workplace Energy Inspection: Wall AC running near an open window, lit empty boardroom, active monitor, and a breakroom fridge labelled 'DO NOT UNPLUG'.",
+        imageAlt: "Realistic photograph of a modern Mauritian workplace showing an active AC unit beside an open window, an unoccupied lit glass boardroom, an active computer monitor, and a breakroom mini-fridge with a prominent red 'DO NOT UNPLUG' safety label."
       },
       {
         id: "ee4-m1",
         type: "multiple_choice",
-        position: 6,
-        mcqQuestion: "Which of the following devices is generally safe and recommended for employees to switch off or unplug at the end of the day?",
+        position: 4,
+        mcqQuestion: "In the workplace inspection scene above, which action represents an UNSAFE or PROHIBITED action for general employees?",
         mcqOptions: [
-          "Individual computer monitors and non-essential desk accessories",
-          "The main office server rack and security cameras",
-          "The kitchen refrigerator storing employee lunches",
-          "Emergency exit sign lighting systems"
+          "Unplugging or turning off the breakroom refrigerator labelled 'DO NOT UNPLUG'",
+          "Closing the open window beside the active air conditioning unit",
+          "Switching off lights in the unoccupied glass boardroom",
+          "Setting your own workstation computer display to automatic sleep mode"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Yes! Turning off your own monitor and desk accessories is completely safe and saves energy without disrupting critical business operations.",
-        mcqIncorrectExplanation: "Incorrect. Servers, security systems, fridges, and emergency lighting must remain running continuously for safety and operations."
+        mcqCorrectExplanation: "Never disconnect critical appliances (like refrigerators, server equipment, or medical storage) marked 'DO NOT UNPLUG'. Disconnecting them ruins stored goods and violates operational safety rules.",
+        mcqIncorrectExplanation: "Incorrect. Closing windows and switching off unneeded lights are safe direct actions. Disconnecting critical refrigerators is prohibited."
       }
     ]
   },
   {
     order: 4,
-    title: "The Five-Minute End-of-Day Shutdown",
-    minutes: 4,
-    content: "Establish a shutdown routine checklist before leaving.",
+    title: "Action Boundaries: Act, Check & Escalate",
+    minutes: 3,
+    content: "Categorize energy actions into direct habits, site checks, and technical escalation.",
     blocks: [
-      { id: "ee5-h1", type: "heading", position: 1, headingText: "The Five-Minute End-of-Day Shutdown" },
-      { id: "ee5-t1", type: "short_text", position: 2, bodyText: "Establishing a simple end-of-day shutdown routine is one of the most effective habits you can build to reduce workplace energy waste." },
-      { id: "ee5-p1", type: "practical_action", position: 3, headingText: "Your Daily Checklist", bodyText: "Before leaving: 1. Save work and shut down your PC. 2. Turn off monitors. 3. Switch off desk task lights. 4. Check shared rooms for empty lights/ACs. 5. Disconnect unused chargers. 6. Keep servers, security, and refrigeration running." },
+      { id: "ee5-h1", type: "heading", position: 1, headingText: "Three Categories of Action" },
+      { id: "ee5-t1", type: "short_text", position: 2, bodyText: "To maintain workplace safety while saving power, group your daily actions into three distinct categories:" },
+      {
+        id: "ee5-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Act, Check & Escalate",
+        bodyText: "1. ACT DIRECTLY: Switch off lights in empty rooms, turn off personal monitors, close windows near AC.\n2. CHECK SITE PROCEDURE: Shared printers, central AV equipment, or multi-user workstation hubs.\n3. ESCALATE TO FACILITIES: Faulty door seals, leaking AC units, broken thermostats, or electrical panel issues."
+      },
       {
         id: "ee5-d1",
         type: "decision_scenario",
         position: 4,
-        decisionIntro: "Last employee departure scenario:",
-        decisionPrompt: "You are the last person leaving your department's shared office space for the weekend. What is your shutdown routine?",
+        decisionIntro: "End-of-day shared workspace scenario:",
+        decisionPrompt: "You are leaving the office at 6:00 PM. A central desktop printer is connected to a shared network server, and a thermostat is showing an error code. What is the correct combination of actions?",
         decisionChoices: [
-          { label: "Perform your checklist, ensuring non-essential lights and ACs are off, but leaving servers and fridges running", correct: true, feedback: "Excellent! You successfully eliminate non-essential waste while keeping critical equipment safe." },
-          { label: "Turn off the main electrical breaker for the entire floor", correct: false, feedback: "Caution! Cutting all power can damage servers, shut off security, and spoil food in refrigerators." },
-          { label: "Just walk out and lock the door, leaving all desk setups and ACs active", correct: false, feedback: "This leaves office cooling and lights running unnecessarily all weekend." }
+          { label: "Follow the site procedure for the shared printer, switch off your personal screen, and report the thermostat error code to facilities", correct: true, feedback: "Outstanding! This perfectly balances direct action, procedural compliance, and technical escalation." },
+          { label: "Unplug every wire on the floor including network routers and server cords", correct: false, feedback: "Incorrect! Disconnecting shared network infrastructure disrupts overnight IT processes." },
+          { label: "Do nothing and leave everything running all weekend", correct: false, feedback: "Incorrect. Personal equipment and unneeded lighting should be addressed." }
         ]
-      },
-      {
-        id: "ee5-m1",
-        type: "multiple_choice",
-        position: 5,
-        mcqQuestion: "Why should servers and network equipment be excluded from standard employee shutdown checklists?",
-        mcqOptions: [
-          "Because they perform critical business and communication tasks that must run continuously",
-          "Because they do not consume any electricity",
-          "Because they do not have power buttons",
-          "Because they automatically shut down when employees leave"
-        ],
-        mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "Exactly. Server and network infrastructure must remain active to support remote access, backups, and communications.",
-        mcqIncorrectExplanation: "Incorrect. Network systems are essential infrastructure and must not be turned off by regular employees."
       }
     ]
   },
   {
     order: 5,
-    title: "My Workplace Energy Commitments",
+    title: "Your Energy Efficiency Commitment",
     minutes: 3,
-    content: "Pledge your support for energy savings.",
+    content: "Select practical daily energy habits for your work routine.",
     blocks: [
       { id: "ee6-h1", type: "heading", position: 1, headingText: "Pledge to Act" },
-      { id: "ee6-t1", type: "short_text", position: 2, bodyText: "Great work! You have finished the lessons. Now choose the habits you will carry forward in your workplace." },
+      { id: "ee6-t1", type: "short_text", position: 2, bodyText: "Congratulations on completing the lessons! Choose the energy-saving commitments you will practice in your daily work routine." },
       {
         id: "ee6-c1",
         type: "commitment",
         position: 3,
-        commitmentInstruction: "Select the commitments you will practice at work. Choose at least two:",
+        commitmentInstruction: "Select your daily workplace energy commitments (choose at least one):",
         commitmentOptions: [
-          { value: "ac-24", label: "Use practical air-conditioning settings and avoid unnecessarily cold rooms.", description: "Keep office cooling balanced to avoid power waste." },
-          { value: "unplug-vampires", label: "Turn off approved power strips and disconnect unused chargers before leaving.", description: "Stop vampire power consumption when off-duty." },
-          { value: "switch-lights-off", label: "Turn off lights in empty meeting rooms, kitchens, corridors, and work areas when safe to do so.", description: "Avoid illuminating unoccupied rooms." },
-          { value: "shutdown-equipment", label: "Shut down my computer, monitor, and non-essential desk equipment at the end of the day.", description: "Completely power off your workstation daily." }
+          { value: "switch-empty-lights", label: "Switch off lights in empty rooms and shared spaces", description: "Turn off lighting when leaving meeting rooms or break areas." },
+          { value: "keep-windows-closed", label: "Keep windows and doors closed while air conditioning is running", description: "Contain conditioned air and prevent compressor overload." },
+          { value: "ac-24-degrees", label: "Maintain AC thermostat settings around 24°C", description: "Avoid excessively low temperature settings." },
+          { value: "shutdown-pc", label: "Shut down personal workstation displays at the end of the day", description: "Eliminate overnight standby power draw on personal devices." },
+          { value: "report-faulty-controls", label: "Report leaking AC units, broken seals, or faulty controls to facilities", description: "Escalate technical maintenance issues promptly." }
         ]
       }
     ]
@@ -248,113 +230,75 @@ const NEW_LESSONS = [
 const NEW_QUIZ = [
   {
     order: 1,
-    question: "Which of the following temperature practices is generally recommended for office air conditioning in tropical environments to balance comfort and energy savings?",
+    question: "What is the primary goal of workplace energy efficiency?",
     options: [
-      "Keep the thermostat set around 16°C at all times",
-      "Keep the thermostat set around 24°C to provide a practical balance",
-      "Turn the AC off and on every 10 minutes",
-      "Keep the thermostat at 20°C and keep windows open"
+      "Achieving required business results while eliminating unnecessary energy waste",
+      "Switching off all building power indiscriminately every evening",
+      "Setting thermostats to 16°C to cool spaces faster",
+      "Disconnecting critical IT servers and refrigeration equipment"
     ],
-    correct: 1,
-    correctExplanation: "Correct. A setting around 24°C provides comfortable indoor cooling while preventing unnecessary grid load.",
-    incorrectExplanation: "Incorrect. Settings that are too low (like 16°C or 20°C) draw excessive energy in tropical regions."
+    correct: 0,
+    correctExplanation: "Energy efficiency focuses on eliminating waste while maintaining operational safety, comfort, and business continuity.",
+    incorrectExplanation: "Incorrect. Energy efficiency prioritizes operational needs and safety over indiscriminate shut-downs."
   },
   {
     order: 2,
-    question: "An office door leading to a non-air-conditioned hallway is left wide open while the AC is running. What is the best action?",
+    question: "Why is keeping windows and doors closed essential when air conditioning is active in Mauritian offices?",
     options: [
-      "Close the door to keep the cooled air inside and prevent the AC from overloading",
-      "Open all windows in the room to balance the air pressure",
-      "Turn off the air conditioning entirely for the day",
-      "Ignore it, as modern AC units are unaffected by open doors"
+      "It prevents conditioned cold air from escaping and warm humid air from overloading the compressor",
+      "It makes the building completely soundproof",
+      "It is required by traffic management authorities",
+      "It increases the speed of internet connections"
     ],
     correct: 0,
-    correctExplanation: "Correct. Closing the door isolates the cooled space and reduces the energy required by the system.",
-    incorrectExplanation: "Incorrect. Open doors or windows allow warm air to enter, forcing the system to work harder."
+    correctExplanation: "Open windows allow warm humid air into conditioned spaces, forcing AC compressors to work continuously.",
+    incorrectExplanation: "Incorrect. Open windows cause severe cooling leakage and compressor strain."
   },
   {
     order: 3,
-    question: "What should be done with a shared office printer or photocopier over the weekend, according to general energy guidelines?",
+    question: "What is 'vampire' or standby power draw?",
     options: [
-      "It should be unplugged from the wall outlet completely, along with the office servers",
-      "It should be left fully active with the screen turned on so it is ready for Monday",
-      "It should be switched to standby or turned off using its power button if authorized by workplace procedures",
-      "It should be kept printing blank pages to prevent ink drying"
+      "Continuous background electricity drawn by electronic appliances while sitting idle in standby mode",
+      "Power drawn exclusively by heavy industrial solar farms",
+      "Backup power supplied by emergency batteries during outages",
+      "Electricity used by lighting fixtures during daylight hours"
     ],
-    correct: 2,
-    correctExplanation: "Correct. Switching to standby or shutting down using the power button (if authorized) prevents standby power waste without affecting operations.",
-    incorrectExplanation: "Incorrect. Unplugging critical infrastructure or leaving screens fully active is not recommended. Standby or power button shut-down is preferred."
+    correct: 0,
+    correctExplanation: "Standby power refers to the continuous idle energy draw of connected electronics and displays when not in active use.",
+    incorrectExplanation: "Incorrect. Standby power is the continuous background draw of idle electronics."
   },
   {
     order: 4,
-    question: "Your desk area is well-lit by natural daylight, but the overhead artificial lights are turned on. How can you optimize lighting?",
+    question: "Which of the following equipment must NEVER be switched off or unplugged by general employees during end-of-day shut-downs?",
     options: [
-      "Keep the artificial lights on anyway to ensure absolute brightness",
-      "Turn off unnecessary overhead lights near the windows where natural light is sufficient",
-      "Close all blinds and turn on additional task lamps",
-      "Unscrew the overhead lightbulbs manually"
+      "Critical food refrigerators, server racks, or appliances marked 'DO NOT UNPLUG'",
+      "Individual desktop display monitors at your personal workstation",
+      "Overhead lights in an empty meeting room",
+      "Desk lamps in unoccupied offices"
     ],
-    correct: 1,
-    correctExplanation: "Correct. Utilizing natural daylight and reducing artificial lighting in well-lit zones is a safe and efficient practice.",
-    incorrectExplanation: "Incorrect. Blocking natural light or leaving unnecessary lights on is wasteful."
+    correct: 0,
+    correctExplanation: "Refrigerators, server infrastructure, and critical safety appliances must remain powered continuously to prevent spoilage and data loss.",
+    incorrectExplanation: "Incorrect. Critical refrigeration and server equipment must never be disconnected by general staff."
   },
   {
     order: 5,
-    question: "When using the office kitchen kettle, how can you practice energy efficiency while keeping safety in mind?",
+    question: "What is the correct action when you notice a thermostat displaying a technical error code or an AC unit leaking water?",
     options: [
-      "Boil only the amount of water you need rather than filling the kettle to the top",
-      "Keep the kettle plugged in and boiling continuously throughout the day",
-      "Fill the kettle to the maximum line every time, even for one cup of tea",
-      "Boil water on a microwave plate instead of using the kettle"
+      "Escalate the technical fault to facilities or maintenance staff immediately",
+      "Open the internal electrical panel and attempt to re-wire the unit yourself",
+      "Ignore it and leave it leaking on the floor",
+      "Unplug the entire building's main power switch"
     ],
     correct: 0,
-    correctExplanation: "Correct. Boiling only the required volume of water saves both electricity and time.",
-    incorrectExplanation: "Incorrect. Boiling extra water consumes unnecessary energy."
-  },
-  {
-    order: 6,
-    question: "You are leaving a shared meeting room after a workshop, and no one else is scheduled to use it for the rest of the day. What should you do?",
-    options: [
-      "Leave the lights on because the cleaning crew will turn them off tonight",
-      "Leave the AC at 18°C so the room stays cool for tomorrow",
-      "Ensure the lights and AC are switched off before you close the door",
-      "Leave the door wide open with lights on to show the room is empty"
-    ],
-    correct: 2,
-    correctExplanation: "Correct. Making sure lights and cooling are off in unoccupied rooms is a primary habit for reducing energy waste.",
-    incorrectExplanation: "Incorrect. Leaving systems running in empty rooms waste energy unnecessarily."
-  },
-  {
-    order: 7,
-    question: "Which of the following actions is recommended for your computer monitor at the end of the day?",
-    options: [
-      "Leave it on with a screen saver running all night",
-      "Turn off the monitor screen completely using its power button",
-      "Keep it in active mode so it receives background updates",
-      "Unplug the computer's CPU while leaving the monitor turned on"
-    ],
-    correct: 1,
-    correctExplanation: "Correct! Screen savers do not save energy; turning off the monitor screen prevents standby power draw.",
-    incorrectExplanation: "Incorrect. Screen savers still draw power. The screen should be shut down."
-  },
-  {
-    order: 8,
-    question: "Who is responsible for turning off communal systems like central AC or shared lobby monitors at the end of the day?",
-    options: [
-      "Any regular employee can shut down central server systems without asking",
-      "It should follow designated workplace procedures and authorized employee responsibilities",
-      "They should never be turned off, even during office holidays",
-      "The last person to leave must unplug all wall sockets, including the security system"
-    ],
-    correct: 1,
-    correctExplanation: "Correct. Managing communal and shared systems must follow workplace procedures to prevent turning off critical business operations.",
-    incorrectExplanation: "Incorrect. Unplugging critical security systems or randomly shutting down servers is dangerous. Follow authorized procedures."
+    correctExplanation: "Technical maintenance, thermostat errors, and leaks require trained facilities escalation—never DIY electrical repairs.",
+    incorrectExplanation: "Incorrect. Technical faults must be reported to facilities staff for safe professional repair."
   }
 ];
 
-export async function ensureEnergyEfficiencyCourse(externalTx?: any): Promise<void> {
-  const runSeeder = async (tx: any) => {
-    // 1. Resolve Course 3 by ID 3 or slug
+export async function ensureEnergyEfficiencyCourse(): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      // 1. Resolve Course 3 by ID 3 or slug
       let course = null;
       
       const [byId] = await tx
@@ -397,40 +341,32 @@ export async function ensureEnergyEfficiencyCourse(externalTx?: any): Promise<vo
         .from(quizQuestionsTable)
         .where(eq(quizQuestionsTable.courseId, courseId));
 
-      // 3. Evaluate integrity violations (incomplete or placeholder checks)
+      // 3. Evaluate integrity violations
       const hasMissingLessons = existingLessons.length !== 6;
       const hasEmptyBlocks = existingLessons.some(
-        (l: any) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
       );
-      const hasPlaceholderText = existingLessons.some(
-        (l: any) => l.title.includes("[DRAFT SKELETON]") || (l.content || "").includes("[DRAFT SKELETON]")
-      );
-      const hasMissingQuiz = existingQuizQuestions.length !== 8;
-      const hasPlaceholderQuiz = existingQuizQuestions.some(
-        (q: any) => q.question.includes("[DRAFT SKELETON]")
-      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 5;
       const hasIncorrectSlug = course.slug !== COURSE_SLUG;
 
       const needsRepair = !existingSeed ||
                           hasMissingLessons ||
                           hasEmptyBlocks ||
-                          hasPlaceholderText ||
                           hasMissingQuiz ||
-                          hasPlaceholderQuiz ||
                           hasIncorrectSlug;
 
       if (!needsRepair) {
-        logger.info({ courseId, slug: COURSE_SLUG }, "Energy Efficiency course content and integrity verified. Skipping repair to preserve administrator edits...");
+        logger.info({ courseId, slug: COURSE_SLUG }, "Energy Efficiency course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
         return;
       }
 
-      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing seed detected for Course 3. Re-seeding course content and lessons transactionally...");
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course 3. Re-seeding course content and lessons transactionally...");
 
-      // 4. Resolve next recommended course dynamically by slug (Course 4: Water Conservation)
+      // 4. Resolve next recommended course dynamically by slug
       const [nextCourse] = await tx
         .select({ id: coursesTable.id })
         .from(coursesTable)
-        .where(eq(coursesTable.slug, "water-conservation"))
+        .where(eq(coursesTable.slug, "water-conservation-workplace"))
         .limit(1);
       const nextCourseId = nextCourse?.id ?? null;
 
@@ -514,22 +450,15 @@ export async function ensureEnergyEfficiencyCourse(externalTx?: any): Promise<vo
       if (!existingSeed) {
         await tx.insert(systemSeedsTable).values({
           name: SEED_NAME,
-          version: 1,
+          version: 2,
         });
-      }
-
-      logger.info({ courseId, slug: COURSE_SLUG }, "Energy Efficiency course seed / repair transaction completed successfully.");
-    };
-
-    try {
-      if (externalTx) {
-        await runSeeder(externalTx);
       } else {
-        await db.transaction(async (tx) => {
-          await runSeeder(tx);
-        });
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
-    } catch (err) {
-      logger.error({ err }, "Failed to execute idempotent seeding/repair of Energy Efficiency course");
-    }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Energy Efficiency at Work course v2 seed / repair transaction completed successfully.");
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Energy Efficiency course");
+  }
 }
