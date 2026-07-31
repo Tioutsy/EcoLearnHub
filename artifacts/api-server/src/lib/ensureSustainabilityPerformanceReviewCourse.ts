@@ -6,8 +6,6 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
@@ -15,13 +13,14 @@ import { logger } from "./logger";
 const COURSE_SLUG = "reviewing-sustainability-performance-and-corrective-action";
 const COURSE_TITLE = "Reviewing Sustainability Performance and Taking Corrective Action";
 const BADGE_SLUG = "sustainability-performance-reviewer";
-const BADGE_CODE = "COURSE_ELH_19_COMPLETE";
-const SEED_NAME = "sustainability-performance-review-v1";
+const SEED_NAME = "sustainability-performance-review-v2";
 
 const COURSE_META = {
   courseCode: "ELH-19",
-  description: "Learn how to review sustainability results, identify performance gaps and agree corrective actions that address the real cause of a problem. This course helps workplace teams turn tracking information into practical follow-up and measurable improvement.",
-  fullDescription: "Learn how to review sustainability results, identify performance gaps and agree corrective actions that address the real cause of a problem. This course helps workplace teams turn tracking information into practical follow-up and measurable improvement.",
+  description:
+    "Learn how to evaluate sustainability results against baselines and targets, distinguish absolute from intensity metrics, identify root causes, and decide evidence-backed corrective actions.",
+  fullDescription:
+    "A positive-looking dashboard does not automatically prove environmental improvement. This course enables managers, sustainability leads, and department representatives to conduct rigorous performance reviews. Learners master comparing actual results against like-for-like baselines, normalizing for occupancy or production changes, investigating root causes without jumping to conclusions, and establishing owned corrective actions.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "0.00",
@@ -30,504 +29,392 @@ const COURSE_META = {
   thumbnailUrl: "/images/courses/reviewing-sustainability-performance-and-corrective-action.jpg",
   intendedRoles: ["employees", "green team members", "department coordinators", "supervisors", "managers", "facilities and operations staff", "HR, procurement and administration teams", "ESG or compliance support staff"],
   learningObjectives: [
-    "Compare actual performance with an agreed target or expected result.",
-    "Identify when performance requires investigation.",
-    "Distinguish evidence from assumptions during a review.",
-    "Separate immediate symptoms from possible root causes.",
-    "Select practical and proportionate corrective actions.",
-    "Assign ownership, deadlines and follow-up checks.",
-    "Document review decisions clearly.",
-    "Escalate significant, repeated or uncertain issues appropriately."
+    "Verify data suitability and like-for-like comparison boundaries before evaluating results.",
+    "Compare actual performance against baselines, targets, and historical trends.",
+    "Distinguish absolute consumption (total kWh) from intensity metrics (kWh per guest-night or unit).",
+    "Apply the REVIEW operational framework (Review data, Examine comparisons, Verify variances, Investigate causes, Establish decisions, Write record).",
+    "Investigate root causes without confusing correlation with causation or declaring victory prematurely."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Reviewing Sustainability Performance and Taking Corrective Action. You can now identify performance gaps, investigate likely causes and document practical follow-up actions more clearly.",
+  completionMessage:
+    "Congratulations! You have completed Reviewing Sustainability Performance and Taking Corrective Action. You can now evaluate results against like-for-like baselines, distinguish intensity metrics from absolute totals, investigate root causes, and document evidence-backed corrective decisions.",
   badgeName: "Sustainability Performance Reviewer",
-  badgeDescription: "Awarded for completing Reviewing Sustainability Performance and Taking Corrective Action and demonstrating the ability to identify performance gaps, investigate likely causes and document practical follow-up actions.",
+  badgeDescription:
+    "Awarded for demonstrating operational mastery of sustainability performance reviews, like-for-like comparisons, root-cause analysis, and evidence-backed decision making.",
 };
 
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Compare the Result with the Expectation",
+    title: "A Positive Dashboard Is Not Automatically Proven Success",
     minutes: 3,
-    content: "Learn how to compare actual performance with targets and baseline data. Understand how context factors like occupancy, staffing levels, or seasonal variations impact results.",
+    content: "Understand why green dashboard indicators require contextual analysis, like-for-like comparisons, and data checks before declaring success.",
     blocks: [
+      { id: "pr1-h1", type: "heading", position: 1, headingText: "Look Beyond the Surface Dashboard" },
+      { id: "pr1-t1", type: "short_text", position: 2, bodyText: "A hotel committee reviews its monthly dashboard: Electricity consumption fell 8%, Water increased 11%, Recycling reached 72%, and 3 energy actions are marked completed. The manager declares: 'Overall environmental performance improved significantly.' However, guest occupancy fell 24% during the month, one main water meter was replaced during week two, and the recycling percentage excludes mixed waste collected from the main restaurant. Without adjusting for lower occupancy and checking boundary exclusions, declaring success is premature and misleading." },
+      { id: "pr1-k1", type: "key_message", position: 3, headingText: "Performance Review Rule", bodyText: "Evaluating performance requires comparing actual results against a valid like-for-like baseline, normalizing for operational volume (occupancy, production), and accounting for data limitations." },
       {
-        id: "c19-l1-b1",
-        type: "heading",
-        headingText: "Compare the Result with the Expectation"
-      },
-      {
-        id: "c19-l1-b2",
-        type: "short_text",
-        bodyText: "A performance review begins by comparing actual results with agreed expectations or baselines. If paper purchases have not decreased after introducing digital approvals, does this automatically mean the action failed?\n\nTo conduct a fair review, check: the original action, intended result, indicator, comparison period, and evidence source. Always review context—such as changes in staffing, customer occupancy, equipment failure, supplier delays, or seasonal business activity—before judging success."
-      },
-      {
-        id: "c19-l1-b3",
-        type: "key_message",
-        headingText: "Fair Comparisons",
-        bodyText: "Always compare actual performance with a clearly defined expectation and relevant context before deciding what the result means."
-      },
-      {
-        id: "c19-l1-b4",
+        id: "pr1-d1",
         type: "decision_scenario",
-        decisionIntro: "An office's electricity use remained flat despite installing LED lights, but occupancy doubled during the same period. What should the team check first?",
-        decisionPrompt: "Select the most appropriate review step:",
+        position: 4,
+        decisionIntro: "Evaluating Dashboard Claims:",
+        decisionPrompt: "An office electricity bill dropped by 10% in July, but the office was closed for 7 days due to public holidays and renovation. How should the sustainability lead interpret this result?",
         decisionChoices: [
-          {
-            label: "Declare the LED installation unsuccessful",
-            correct: false,
-            feedback: "Incorrect. This ignores the significant context change (doubled occupancy)."
-          },
-          {
-            label: "Verify whether the LEDs are functional, and calculate energy consumption per office occupant to adjust for the doubled occupancy context",
-            correct: true,
-            feedback: "Correct. Comparing consumption per occupant adjusts for the occupancy change, providing a fair basis for comparison."
-          },
-          {
-            label: "Remove the occupancy figures from the data to keep the chart simple",
-            correct: false,
-            feedback: "Incorrect. Ignoring critical workplace context changes distorts the review's accuracy."
-          },
-          {
-            label: "Change the targets so the LED project appears successful",
-            correct: false,
-            feedback: "Incorrect. Arbitrarily changing baseline targets without analysis is poor data practice."
-          }
+          { label: "Record the result as provisional, note the 7-day closure context, and compare daily operating consumption against prior open months to evaluate true efficiency", correct: true, feedback: "Correct! Accounting for operational closures prevents false claims of efficiency improvements caused simply by reduced operating days." },
+          { label: "Declare the energy efficiency project an unqualified success", correct: false, feedback: "Incorrect. Lower consumption due to office closure is a volume drop, not an efficiency achievement." },
+          { label: "Delete the July electricity data from the annual record", correct: false, feedback: "Incorrect. Data history must be preserved; context notes explain the variation." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "Identify the Performance Gap",
+    title: "Why Performance Reviews Matter & Essential Vocabulary",
     minutes: 3,
-    content: "Describe performance gaps precisely using numbers, locations, and timeframes. Avoid subjective labels like 'waste sorting is bad' in favor of objective, audit-ready statements.",
+    content: "Explore the operational value of evidence-based reviews and master 50+ performance review terms.",
     blocks: [
+      { id: "pr2-h1", type: "heading", position: 1, headingText: "Operational Decision-Making & Vocabulary" },
+      { id: "pr2-t1", type: "short_text", position: 2, bodyText: "Rigorous performance reviews catch operational flaws early, prevent wasted capital on ineffective actions, and ensure management decisions are grounded in verified data." },
       {
-        id: "c19-l2-b1",
-        type: "heading",
-        headingText: "Identify the Performance Gap"
-      },
-      {
-        id: "c19-l2-b2",
-        type: "short_text",
-        bodyText: "A performance gap is the difference between what was expected and what actually happened. A clear gap statement should list: the indicator, expected result, actual result, review period, location, and supporting evidence.\n\nAvoid vague statements like 'waste sorting is not working.' Instead, use precise details: 'During the four-week review period, contamination was recorded in five of eight checks at the staff canteen recycling point.'"
-      },
-      {
-        id: "c19-l2-b3",
+        id: "pr2-k1",
         type: "key_message",
-        headingText: "Precise Gap Wording",
-        bodyText: "Wording gaps precisely makes it easier to target the cause and select the correct corrective action."
+        position: 3,
+        headingText: "Core Performance Review Vocabulary",
+        bodyText: "• Absolute Result: Total resource consumed (e.g. Total 45,000 kWh).\n• Intensity Result: Resource consumed normalized per unit of activity (e.g. 14.2 kWh per occupied guest-night).\n• Favourable/Unfavourable Variance: Difference between planned target and actual measured result.\n• Like-for-Like Comparison: Comparing data across identical reporting durations, site boundaries, and operational contexts.\n• Root Cause vs Symptom: The underlying operational failure vs the visible surface anomaly.\n• Correlation vs Causation: Coincidental alignment of two numbers vs proven cause-and-effect relationship.\n• Activity vs Outcome: Performing a task (e.g. Briefed staff) vs measured environmental result (e.g. Reduced waste contamination)."
       },
       {
-        id: "c19-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A Mauritian hotel team notices back-of-house waste stations are failing separation targets. Which is the clearest performance gap statement?",
-        decisionPrompt: "Select the clearest statement:",
-        decisionChoices: [
-          {
-            label: "Staff are mixing waste again because they are in a rush.",
-            correct: false,
-            feedback: "Incorrect. This is an assumption about motivation, not a factual statement of the gap."
-          },
-          {
-            label: "Back-of-house recycling bins are contaminated.",
-            correct: false,
-            feedback: "Incorrect. This lacks timeframes, locations, specific indicators, or evidence statistics."
-          },
-          {
-            label: "Weekly waste review logs show that plastic packaging was mixed with food waste in 6 out of 10 checks during the evening shifts in July.",
-            correct: true,
-            feedback: "Correct. This statement specifies the source (weekly review logs), what was mixed (plastic and food), the rate (6 out of 10), the timeframe (evening shifts in July), and the location (back-of-house)."
-          },
-          {
-            label: "We need better waste containers in the hotel.",
-            correct: false,
-            feedback: "Incorrect. This is a proposed solution, not a description of the performance gap."
-          }
-        ]
+        id: "pr2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Evaluation Criteria & Timing)",
+        bodyText: "Performance evaluation should explicitly establish what will be monitored and measured, the methods used, the criteria against which results are evaluated, and when results will be analyzed and reviewed.\n\nManagement-system standards (ISO 14001 Clause 9.1 & ISO 9001 Clause 9.1) mandate that organizations evaluate environmental performance against established baselines and retain documented review records as evidence of decision making."
       }
     ]
   },
   {
     order: 2,
-    title: "Investigate Causes, Not Just Symptoms",
-    minutes: 3,
-    content: "Differentiate immediate symptoms from root causes. Learn how to ask simple investigative questions about unclear instructions, equipment, placement, or training.",
+    title: "The REVIEW Operational Framework",
+    minutes: 4,
+    content: "Master the 6-step REVIEW framework for evidence-backed performance evaluation.",
     blocks: [
+      { id: "pr3-h1", type: "heading", position: 1, headingText: "The REVIEW Operational Framework" },
+      { id: "pr3-t1", type: "short_text", position: 2, bodyText: "Use the REVIEW framework to evaluate sustainability progress and agree corrective actions:" },
       {
-        id: "c19-l3-b1",
-        type: "heading",
-        headingText: "Investigate Causes, Not Just Symptoms"
-      },
-      {
-        id: "c19-l3-b2",
-        type: "short_text",
-        bodyText: "A symptom is the visible issue. A cause explains why it happened. A root cause is the underlying process issue that, if fixed, prevents the problem from returning.\n\nInvestigate by asking: What happened? Where and when? Is it repeated or isolated? What changed? Who knows the process? Common cause categories include: unclear instructions, lack of ownership, missing equipment/tools, poor placement, process conflicts, or inadequate training."
-      },
-      {
-        id: "c19-l3-b3",
+        id: "pr3-k1",
         type: "key_message",
-        headingText: "Root Cause Focus",
-        bodyText: "Address the cause, not just the symptom. Moving the trash bin closer (addressing placement cause) is more effective than repeatedly telling people to use it (treating symptom)."
+        position: 3,
+        headingText: "REVIEW Framework Breakdown",
+        bodyText: "• R — Review data quality & boundaries: Verify physical units, billing periods, and site scope.\n• E — Examine actual results against right comparison: Compare vs like-for-like baselines and intensity metrics.\n• V — Verify variances, trends & limitations: Distinguish one-off anomalies from persistent operational trends.\n• I — Investigate causes without jumping to conclusions: Test hypotheses before assigning blame.\n• E — Establish decisions, owners & follow-up actions: Agree specific corrective actions with deadlines.\n• W — Write review record & communicate honestly: Document limitations and report findings without exaggeration."
       },
       {
-        id: "c19-l3-b4",
+        id: "pr3-d1",
         type: "decision_scenario",
-        decisionIntro: "A warehouse repeatedly leaves heating and lighting systems running after closing hours. Which response investigates the cause rather than repeating the symptom?",
-        decisionPrompt: "Select the investigative response:",
+        position: 4,
+        decisionIntro: "Practice: Absolute vs Intensity Metrics",
+        decisionPrompt: "A hotel's total water consumption rose by 5% in December, but guest nights increased by 25% during the peak holiday season. How should the sustainability manager report performance?",
         decisionChoices: [
-          {
-            label: "Write down that the heating and lighting were left on again on Monday.",
-            correct: false,
-            feedback: "Incorrect. This merely re-records the visible symptom."
-          },
-          {
-            label: "Ask the warehouse supervisor who is responsible for the closing routine, check if a closing checklist exists, and verify if the shutdown switches are clearly marked.",
-            correct: true,
-            feedback: "Correct. This investigates ownership, process, and tools to identify why the shutdown did not happen."
-          },
-          {
-            label: "Remind staff to turn off lights when leaving.",
-            correct: false,
-            feedback: "Incorrect. This treats the symptom with advice, without checking why it failed (e.g. lack of closing checklist or assigned owner)."
-          },
-          {
-            label: "Install automated sensors immediately without asking questions.",
-            correct: false,
-            feedback: "Incorrect. This jumps to a costly solution before understanding the underlying operational cause."
-          }
+          { label: "Report that absolute water rose 5% due to peak occupancy, but water intensity improved from 0.48 m³ to 0.40 m³ per guest-night (a 16.6% intensity improvement)", correct: true, feedback: "Correct! Presenting both absolute totals and normalized intensity metrics provides a complete, honest performance evaluation." },
+          { label: "Report only that water consumption improved, omitting the 5% total increase", correct: false, feedback: "Incorrect. Suppressing absolute consumption figures hides environmental impact." },
+          { label: "Declare the water conservation campaign a failure because total water increased", correct: false, feedback: "Incorrect. Ignoring the 25% occupancy increase fails to recognize operational efficiency gains." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Select a Proportionate Corrective Action",
-    minutes: 3,
-    content: "Distinguish immediate corrections from long-term corrective actions. Select actions that are relevant, achievable, specific, and assigned.",
+    title: "Visual Dashboard Inspection & High-Risk Mistakes",
+    minutes: 4,
+    content: "Inspect a projected performance review dashboard and review critical safeguards.",
     blocks: [
+      { id: "pr4-h1", type: "heading", position: 1, headingText: "Visual Performance Review Dashboard Inspection" },
+      { id: "pr4-t1", type: "short_text", position: 2, bodyText: "Examine the projected meeting dashboard (`visual-sustainability-performance-review.png`). Observe how red sticky notes highlight data review defects: electricity shown in MUR cost instead of kWh, water compared across unequal billing periods (50 days vs 42 days), recycling percentage missing a denominator, a green 'Target Achieved' badge despite missing fuel data, and an unsupported conclusion banner stating 'Overall Performance Improved' despite a 24% drop in occupancy." },
       {
-        id: "c19-l4-b1",
-        type: "heading",
-        headingText: "Select a Proportionate Corrective Action"
+        id: "pr4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-sustainability-performance-review.png",
+        caption: "Quarterly Sustainability Performance Review Dashboard: Displaying financial cost errors, unequal comparison periods, missing denominators, and premature conclusion claims.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace meeting room with a projected screen titled Quarterly Sustainability Performance Review Dashboard showing highlighted review defects like electricity in MUR cost, unequal billing periods, missing denominators, and premature conclusions."
       },
       {
-        id: "c19-l4-b2",
-        type: "short_text",
-        bodyText: "Immediate Correction fixes the current issue (e.g. removing plastic from a paper recycling bin). Corrective Action prevents the issue from recurring (e.g. updating signage and briefing shifts).\n\nA corrective action must be specific, achievable, assigned to one owner, time-bound, and proportionate to the impact of the problem. Simply repeating general awareness messages is rarely effective."
-      },
-      {
-        id: "c19-l4-b3",
+        id: "pr4-k1",
         type: "key_message",
-        headingText: "Action Range",
-        bodyText: "Possible actions include: clarifying instructions, updating checklists, reassigning ownership, repairing tools, or adjusting target timelines."
-      },
-      {
-        id: "c19-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "Waste contamination occurs because recycling labels are positioned behind the bins where staff cannot see them when approaching. What is the most appropriate corrective action?",
-        decisionPrompt: "Select the most appropriate action:",
-        decisionChoices: [
-          {
-            label: "Publish a story in the annual newsletter about how recycling works.",
-            correct: false,
-            feedback: "Incorrect. This does not address the physical cause (labels hidden behind the bins)."
-          },
-          {
-            label: "Reposition the labels to eye-level on the wall above the bins by Friday, and inspect the bins for contamination weekly for three weeks to verify success.",
-            correct: true,
-            feedback: "Correct. This physically addresses the cause, sets a clear deadline, and includes a verification plan."
-          },
-          {
-            label: "Remove the recycling bins to prevent staff from making mistakes.",
-            correct: false,
-            feedback: "Incorrect. This is an extreme response that cancels the recycling goal entirely."
-          },
-          {
-            label: "Tell staff to look harder for the labels when throwing trash away.",
-            correct: false,
-            feedback: "Incorrect. This blames the user rather than fixing the poor placement cause."
-          }
-        ]
+        position: 4,
+        headingText: "High-Risk Review Mistakes to Avoid",
+        bodyText: "• DO NOT cherry-pick favourable metrics while suppressing negative results.\n• DO NOT silently rewrite missed targets after the review period has ended.\n• DO NOT treat reduced financial expenditure (MUR) as proof of reduced physical consumption (kWh).\n• DO NOT claim a completed activity (e.g. Staff trained) is proof of an environmental outcome.\n• DO NOT present internal informal reviews as independent third-party audit assurance."
       }
     ]
   },
   {
     order: 4,
-    title: "Assign Ownership and Follow-Up",
-    minutes: 3,
-    content: "Assign actions to a single accountable role with a realistic deadline and a follow-up date. Avoid collective ownership terms like 'everyone' or 'the team'.",
+    title: "Worked Mauritian Scenario & Applied Decision",
+    minutes: 2,
+    content: "Study a resort quarterly review scenario and solve an applied facilities decision.",
     blocks: [
+      { id: "pr5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Grand Baie Resort Quarterly Review" },
       {
-        id: "c19-l5-b1",
-        type: "heading",
-        headingText: "Assign Ownership and Follow-Up"
+        id: "pr5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Balanced Performance Review Log",
+        bodyText: "A Grand Baie resort reviews Q2 performance across 4 streams:\n1. Electricity: Absolute down 4%, Intensity down 8% (kWh/guest-night) | Status: On Track | Decision: Continue HVAC setback schedules.\n2. Water: Absolute up 12%, Intensity up 7% | Status: Off Track | Investigation: Main pool balance-tank leak identified | Action: Maintenance Lead to repair valve by 15 July.\n3. Kitchen Food Waste: Down 15% | Status: Target Achieved | Action: Chef team briefing recorded as best practice.\n4. Generator Diesel: Uncollected data gap | Status: At Risk | Escalation: Logistics Lead assigned to retrieve supplier receipts."
       },
       {
-        id: "c19-l5-b2",
-        type: "short_text",
-        bodyText: "Corrective actions must be logged with one clear owner (using a named role rather than collective terms like 'everyone' or 'the team'), start date, due date, resources, completion evidence, and follow-up check date.\n\nWater leak example: A leak remains unrepaired for weeks because Maintenance believed Procurement was ordering the part, while Procurement believed Maintenance had already ordered it. Clear ownership entries solve this confusion."
-      },
-      {
-        id: "c19-l5-b3",
-        type: "key_message",
-        headingText: "Tracking Entry",
-        bodyText: "Record ownership clearly. Use a specific role (e.g. 'Facilities Supervisor') so accountability is maintained even if staff shifts occur."
-      },
-      {
-        id: "c19-l5-b4",
+        id: "pr5-d1",
         type: "decision_scenario",
-        decisionIntro: "Which tracker entry provides the clearest accountability for repairing a leaking valve?",
-        decisionPrompt: "Select the entry with clear accountability:",
+        position: 3,
+        decisionIntro: "Applied Facilities Decision:",
+        decisionPrompt: "A commercial office building reports a 9% reduction in monthly electricity consumption. However, office occupancy fell 18% during the month, and the reporting period was two days shorter due to public holidays. What is the correct performance review decision?",
         decisionChoices: [
-          {
-            label: "Action: Fix leak. Owner: Maintenance. Due date: ASAP.",
-            correct: false,
-            feedback: "Incorrect. 'Maintenance' is a group, and 'ASAP' is not a defined deadline."
-          },
-          {
-            label: "Action: Facilities Lead to order replacement valve and verify installation; Due: 10-Aug; Follow-up check: 15-Aug; Evidence: repair work order.",
-            correct: true,
-            feedback: "Correct. This defines a specific owner role (Facilities Lead), exact deadline and follow-up dates, and clear evidence requirements."
-          },
-          {
-            label: "Action: Get the plumber in. Owner: Anyone on shift. Due date: Next month.",
-            correct: false,
-            feedback: "Incorrect. 'Anyone' means no one is accountable, and 'next month' lacks a specific completion date."
-          },
-          {
-            label: "Action: Discuss valve replacement at the next green team meeting.",
-            correct: false,
-            feedback: "Incorrect. This is a task to talk about the leak, not an action to repair it."
-          }
+          { label: "Record the 9% drop as provisional, calculate daily electricity intensity per occupant, and note that energy efficiency per person actually decreased slightly due to fixed baseline loads", correct: true, feedback: "Outstanding! Normalizing for occupancy and operating days reveals that per-person energy intensity rose, preventing an false claim of efficiency gains." },
+          { label: "Publish a news release claiming the energy reduction target was exceeded", correct: false, feedback: "NEVER publish unadjusted volume drops as sustainability efficiency triumphs." },
+          { label: "Change the baseline target to match the 9% drop so the chart looks green", correct: false, feedback: "Incorrect. Silently altering baselines to force green indicators violates review integrity." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Check Effectiveness and Record the Decision",
-    minutes: 3,
-    content: "Distinguish 'action completed' from 'action effective'. Learn how to review outcomes, update trackers, and establish simple progress commitments.",
+    title: "Your Review Commitment & Badge",
+    minutes: 2,
+    content: "Select your daily performance review commitments and complete the course.",
     blocks: [
+      { id: "pr6-h1", type: "heading", position: 1, headingText: "Performance Review Commitment" },
+      { id: "pr6-t1", type: "short_text", position: 2, bodyText: "Select the performance review practices you pledge to apply in your workplace." },
       {
-        id: "c19-l6-b1",
-        type: "heading",
-        headingText: "Check Effectiveness and Record the Decision"
-      },
-      {
-        id: "c19-l6-b2",
-        type: "short_text",
-        bodyText: "Completing a task does not automatically mean the problem is solved. Distinguish: Action Completed (new recycling signs installed) from Action Effective (contamination dropped to expected level).\n\nReview outcomes: close the action (if effective), extend the timeline, revise the action (if complete but ineffective), or escalate to management for repeated failures."
-      },
-      {
-        id: "c19-l6-b3",
-        type: "key_message",
-        headingText: "Effectiveness Rule",
-        bodyText: "Only close an action on the tracker after verifying that the performance gap has actually improved based on evidence."
-      },
-      {
-        id: "c19-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Which performance review improvement would be most useful in your workplace?",
-        commitmentChoices: [
-          "Review one overdue sustainability action",
-          "Rewrite one vague performance-gap statement",
-          "Assign a clear owner to one corrective action",
-          "Add a follow-up date to an existing tracker",
-          "Check whether one completed action was actually effective"
+        id: "pr6-c1",
+        type: "commitment",
+        position: 3,
+        commitmentInstruction: "Select your review commitments (choose at least one):",
+        commitmentOptions: [
+          { value: "like-for-like-comparisons", label: "Always verify like-for-like comparison boundaries, units, and operating durations before evaluating results", description: "Ensure fair and mathematical comparison." },
+          { value: "report-intensity-and-absolute", label: "Report both absolute totals and normalized intensity metrics alongside operational context", description: "Provide complete, balanced performance pictures." },
+          { value: "investigate-root-causes", label: "Investigate root causes for unfavourable variances rather than blaming individuals or ignoring gaps", description: "Focus on operational problem solving." },
+          { value: "assign-owned-corrective-actions", label: "Assign a single owner, target date, and required evidence to every review decision", description: "Turn review findings into accountable actions." }
         ]
+      },
+      {
+        id: "pr6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: This course provides practical workplace guidance on reviewing sustainability performance. It does not provide independent assurance, environmental accreditation, statutory reporting certification, legal advice, or verification of an organization's environmental claims."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "A company introduced digital approvals to reduce paper use. Paper purchases remained unchanged, but employee numbers increased by 25%. What is the best review response?",
+    order: 1,
+    question: "Why is declaring 'environmental performance improved' based solely on a lower electricity bill a high-risk review mistake?",
     options: [
-      { text: "Declare the digital approvals initiative unsuccessful immediately.", isCorrect: false, feedback: "Incorrect. This ignores the 25% staff increase context." },
-      { text: "Compare paper use using a relative measure (like sheets per employee) and consider the increase in staff.", isCorrect: true, feedback: "Correct. Adjusting for the employee count changes provides a fair basis for performance analysis." },
-      { text: "Remove the new employee figures from the review data to keep the report simple.", isCorrect: false, feedback: "Incorrect. Hiding context changes distorts the performance review." },
-      { text: "Report that paper use decreased because the digital process was successfully implemented.", isCorrect: false, feedback: "Incorrect. Reporting success despite unchanged purchases is misleading." }
+      "Because lower electricity bills may simply reflect reduced business occupancy, office closures, or shorter billing cycles rather than improved energy efficiency",
+      "Because electricity data is not relevant to sustainability",
+      "Because performance reviews are only allowed to inspect water usage",
+      "Because lower bills always indicate financial fraud"
     ],
-    correctExplanation: "Performance reviews must compare results using a fair comparison and relevant context, such as staff growth.",
-    incorrectExplanation: "Declaring failure, hiding data, or reporting false success ignores baseline context principles.",
-    practicalTakeaway: "Review performance using a fair comparison and relevant workplace context."
+    correct: 0,
+    correctExplanation: "Lower consumption can result from reduced business activity or closures; like-for-like intensity analysis is required.",
+    incorrectExplanation: "Incorrect. Reduced bills may stem from volume drops or shorter billing periods rather than genuine efficiency."
   },
   {
-    question: "Which represents the clearest performance-gap statement for a tracker update?",
+    order: 2,
+    question: "What does the 'E' in the REVIEW operational framework stand for in the second step?",
     options: [
-      { text: "Recycling is bad.", isCorrect: false, feedback: "Incorrect. This is a vague opinion, not a performance gap." },
-      { text: "Staff do not care about waste sorting.", isCorrect: false, feedback: "Incorrect. This is a subjective assumption about motivation." },
-      { text: "During six weekly checks, mixed food packaging was found four times in the canteen paper-recycling container.", isCorrect: true, feedback: "Correct. This states the location (canteen), what was mixed, the rate (4 of 6 checks), and the specific container." },
-      { text: "The waste bins are probably confusing.", isCorrect: false, feedback: "Incorrect. This is a guess about a cause, not a description of the gap." }
+      "Examine actual results against the right comparison (compare vs like-for-like baselines and intensity metrics)",
+      "Erase all negative data points from the quarterly slides",
+      "Email the raw spreadsheet to external journalists immediately",
+      "Expend remaining departmental budget before month-end"
     ],
-    correctExplanation: "A clear gap statement describes what happened, where, when, and how often based on objective evidence.",
-    incorrectExplanation: "Vague opinions, guesses about motivation, or suggestions about causes are not gap statements.",
-    practicalTakeaway: "A useful gap statement describes what happened, where, when, and how often."
+    correct: 0,
+    correctExplanation: "E = Examine actual results against the right comparison, using valid baselines and intensity metrics.",
+    incorrectExplanation: "Incorrect. E = Examine actual results against the right comparison."
   },
   {
-    question: "The lights remain on after warehouse closing hours. Which statement describes a possible cause rather than only the symptom?",
+    order: 3,
+    question: "What is the key difference between ABSOLUTE RESULT and INTENSITY RESULT?",
     options: [
-      { text: "The warehouse lights are currently on.", isCorrect: false, feedback: "Incorrect. This merely restates the visible symptom." },
-      { text: "Electricity is being consumed after hours.", isCorrect: false, feedback: "Incorrect. This is a description of the symptom's effect, not its cause." },
-      { text: "No role is assigned to complete the final shutdown check.", isCorrect: true, feedback: "Correct. This describes a process gap (unassigned ownership) that explains why the lights were left on." },
-      { text: "The warehouse should save more energy.", isCorrect: false, feedback: "Incorrect. This is a general advice plea, not a cause." }
+      "Absolute result measures total resource consumed (e.g. Total kWh); Intensity result normalizes consumption per activity unit (e.g. kWh per guest-night)",
+      "Absolute result measures money spent; Intensity result measures employee happiness",
+      "Absolute result is used in summer; Intensity result is used in winter",
+      "Absolute result and Intensity result mean the exact same thing"
     ],
-    correctExplanation: "A cause explains why an issue occurs, whereas a symptom is simply the visible result of the problem.",
-    incorrectExplanation: "Restating the problem, describing its effects, or pleading for general behavior change does not identify the cause.",
-    practicalTakeaway: "Investigate why the issue happens before selecting a corrective action."
+    correct: 0,
+    correctExplanation: "Absolute metrics track total environmental load; Intensity metrics track operational efficiency per unit.",
+    incorrectExplanation: "Incorrect. Absolute = total consumption; Intensity = consumption normalized per unit of activity."
   },
   {
-    question: "Waste contamination occurs because labels are positioned behind the bins and cannot be seen by staff. What is the most appropriate corrective action?",
+    order: 4,
+    question: "In the visual performance review slide (`visual-sustainability-performance-review.png`), why is the conclusion banner 'Overall Performance Improved' invalid?",
     options: [
-      { text: "Send a general annual sustainability newsletter to all staff.", isCorrect: false, feedback: "Incorrect. A newsletter does not address the physical placement issue." },
-      { text: "Move the labels to visible positions above the bins and verify contamination rates during the next review period.", isCorrect: true, feedback: "Correct. This addresses the specific cause (label placement) and schedules follow-up checks." },
-      { text: "Remove all recycling stations to prevent mistakes.", isCorrect: false, feedback: "Incorrect. Cancelling the project is an extreme reaction that avoids solving the problem." },
-      { text: "Mark the issue as completed because the labels already exist.", isCorrect: false, feedback: "Incorrect. Marking the issue complete when contamination persists ignores effectiveness." }
+      "Because it claims overall success despite a 24% drop in hotel occupancy, unequal water comparison periods, and missing fuel data",
+      "Because the presentation uses a projector screen instead of paper handouts",
+      "Because there are too many people in the meeting room",
+      "Because the slide header font is too small"
     ],
-    correctExplanation: "Corrective actions must target the identified cause of the gap and verify whether the change resolved it.",
-    incorrectExplanation: "Newsletters, project cancellations, or premature completions do not address the placement cause.",
-    practicalTakeaway: "The corrective action should address the identified cause and include follow-up."
+    correct: 0,
+    correctExplanation: "The banner ignores a 24% occupancy drop, unequal water billing periods, and missing fuel data.",
+    incorrectExplanation: "Incorrect. The conclusion ignores major operational context drops, unequal periods, and data gaps."
   },
   {
-    question: "Which corrective-action entry provides the clearest accountability in a progress log?",
+    order: 5,
+    question: "Why must financial currency costs (e.g. MUR spent on energy) NEVER be used as the primary metric for environmental performance?",
     options: [
-      { text: "Owner: Everyone. Due date: Soon.", isCorrect: false, feedback: "Incorrect. Group ownership and vague due dates lead to zero action." },
-      { text: "Owner: Green Team. Due date: When possible.", isCorrect: false, feedback: "Incorrect. This lacks a specific responsible role or a clear deadline." },
-      { text: "Owner: Facilities Supervisor. Due date: 14 August. Follow-up check: 21 August.", isCorrect: true, feedback: "Correct. This specifies a single role, a clear due date, and a specific check date." },
-      { text: "Owner: Management. Due date: To be discussed.", isCorrect: false, feedback: "Incorrect. This is too vague and lacks commitment details." }
+      "Because utility price tariffs change over time, so money spent does not reflect physical kWh or m³ consumed",
+      "Because currency amounts are not understood by facilities staff",
+      "Because financial costs are regulated by international court orders",
+      "Because money spent is always lower than energy consumed"
     ],
-    correctExplanation: "Accountability requires a single owner role, a specific due date, and a scheduled follow-up check date.",
-    incorrectExplanation: "Group owners, vague timelines, or delaying discussion does not provide clear accountability.",
-    practicalTakeaway: "Assign a clear owner, deadline, and follow-up point."
+    correct: 0,
+    correctExplanation: "Tariff adjustments distort financial trends; physical consumption units (kWh, m³) are required for environmental evaluation.",
+    incorrectExplanation: "Incorrect. Tariff changes distort cost trends; physical units must be evaluated."
   },
   {
-    question: "New recycling signs were installed as planned, but contamination remained unchanged after four weeks. What should the team conclude?",
+    order: 6,
+    question: "What is the difference between an ACTIVITY (e.g. Training completed) and an OUTCOME (e.g. Reduced waste stream)?",
     options: [
-      { text: "The action is complete and therefore successful.", isCorrect: false, feedback: "Incorrect. The signs are up, but the action was not effective in reducing contamination." },
-      { text: "The contamination issue must be caused by lazy employees.", isCorrect: false, feedback: "Incorrect. Blaming employees does not solve the process issue." },
-      { text: "The action was completed, but its effectiveness needs further review and possibly a revised response.", isCorrect: true, feedback: "Correct. If an action is complete but ineffective, the team must review and adjust the corrective action." },
-      { text: "The contamination results should be removed from the tracker log.", isCorrect: false, feedback: "Incorrect. Deleting negative data violates reporting integrity." }
+      "An activity is a task executed; an outcome is the measured environmental change resulting from that action",
+      "An activity is performed by managers; an outcome is performed by external auditors",
+      "Activity and outcome mean the exact same thing in ISO standards",
+      "An activity takes 5 minutes; an outcome takes 5 years"
     ],
-    correctExplanation: "Completion of an action (signs installed) does not prove that it was effective in resolving the gap (contamination).",
-    incorrectExplanation: "Claiming success, blaming staff, or deleting logs ignores the fact that the gap remains unresolved.",
-    practicalTakeaway: "Completion of an action does not prove that it was effective."
+    correct: 0,
+    correctExplanation: "Completing a task is an activity; an outcome requires measured evidence of environmental improvement.",
+    incorrectExplanation: "Incorrect. Activity = task executed; Outcome = measured environmental result achieved."
   },
   {
-    question: "A department claims that a corrective action solved a recurring water leak, but no repair record or follow-up inspection log is available. What is the best response?",
+    order: 7,
+    question: "Why is silently changing a missed target after a review period ends a high-risk review violation?",
     options: [
-      { text: "Close the action because the department manager verbally confirmed it.", isCorrect: false, feedback: "Incorrect. Verbal confirmations without proof do not meet audit-ready evidence standards." },
-      { text: "Record the action as effective and update the tracker to complete.", isCorrect: false, feedback: "Incorrect. Closing trackers without verifying evidence undermines data integrity." },
-      { text: "Request the repair work order or a follow-up inspection record before closing the action.", isCorrect: true, feedback: "Correct. Verifiable evidence of repair and follow-up checks is required before closing an action." },
-      { text: "Delete the original leak record to keep the system clean.", isCorrect: false, feedback: "Incorrect. Deleting records of historical leaks is bad data practice." }
+      "Because it conceals operational underperformance, destroys target baselines, and prevents genuine root-cause investigation",
+      "Because targets can never be adjusted under any circumstances",
+      "Because computers automatically lock spreadsheet files after 30 days",
+      "Because targets are legally binding corporate contracts"
     ],
-    correctExplanation: "Before closing any corrective action, you must verify documented proof of repair and follow-up checks.",
-    incorrectExplanation: "Accepting verbal claims, updating trackers without proof, or deleting records violates data integrity.",
-    practicalTakeaway: "Confirm completion and effectiveness before closing an action."
+    correct: 0,
+    correctExplanation: "Revising missed targets silently hides failures; target changes must be formally approved and recorded in change logs.",
+    incorrectExplanation: "Incorrect. Silently modifying targets hides underperformance and destroys baseline integrity."
   },
   {
-    question: "A corrective action has been attempted twice, but the same problem continues and the cause remains uncertain. What is the best next step?",
+    order: 8,
+    question: "How should a sustainability review committee handle an unfavourable variance where water consumption spiked by 30%?",
     options: [
-      { text: "Repeat the same action again and wait for better results.", isCorrect: false, feedback: "Incorrect. Repeating failed actions without changes is ineffective." },
-      { text: "Mark the action completed on the tracker to keep metrics high.", isCorrect: false, feedback: "Incorrect. Fabricating completion metrics hides unresolved issues." },
-      { text: "Escalate the issue to management and investigate the cause further before selecting a new action.", isCorrect: true, feedback: "Correct. Deeper investigation and escalation are needed when repeated attempts fail and causes are uncertain." },
-      { text: "Stop recording the issue in the tracker logs.", isCorrect: false, feedback: "Incorrect. Hiding repeated issues violates professional tracking standards." }
+      "Investigate root causes (check sub-meters for pipe leaks, valve faults, or kitchen equipment issues) and assign an owned corrective action",
+      "Ignore the spike and hope it decreases next month",
+      "Blame the housekeeping department without checking sub-meter data",
+      "Delete the water column from the quarterly report"
     ],
-    correctExplanation: "When repeated actions fail and causes are unclear, the issue must be escalated to management for investigation.",
-    incorrectExplanation: "Repeating failures, falsifying tracking statistics, or ignoring the issue does not resolve the gap.",
-    practicalTakeaway: "Repeated or uncertain problems may require escalation and deeper investigation."
+    correct: 0,
+    correctExplanation: "Unfavourable variances require root-cause evidence investigation and an owned corrective action plan.",
+    incorrectExplanation: "Incorrect. Investigate root causes using sub-meters and assign an owned corrective action."
+  },
+  {
+    order: 9,
+    question: "How does ELH-19 (Performance Review) connect to ELH-20 (Roles and Accountability)?",
+    options: [
+      "ELH-19 identifies performance gaps and corrective decisions; ELH-20 defines organizational governance, approval authorities, and escalation paths",
+      "ELH-19 replaces governance so organizational roles are no longer needed",
+      "ELH-19 is for receptionists; ELH-20 is for external journalists",
+      "There is no connection between performance review and accountability"
+    ],
+    correct: 0,
+    correctExplanation: "ELH-19 evaluates results and defines corrective needs; ELH-20 enforces governance and decision approvals.",
+    incorrectExplanation: "Incorrect. ELH-19 identifies corrective needs; ELH-20 establishes governance and decision authority."
+  },
+  {
+    order: 10,
+    question: "What is the primary takeaway of the REVIEW Operational Framework?",
+    options: [
+      "Applying REVIEW (Review data, Examine comparisons, Verify variances, Investigate causes, Establish decisions, Write record) ensures evidence-backed decisions",
+      "Performance reviews are optional and have no impact on workplace sustainability",
+      "Reviews should only celebrate positive results while ignoring gaps",
+      "Baselines should be changed whenever actual results miss targets"
+    ],
+    correct: 0,
+    correctExplanation: "The REVIEW framework provides disciplined, evidence-based performance evaluation and accountable follow-through.",
+    incorrectExplanation: "Incorrect. REVIEW provides structured discipline for evidence-backed performance evaluation."
   }
 ];
 
-export async function ensureSustainabilityPerformanceReviewCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureSustainabilityPerformanceReviewCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      // 1. Resolve Course 19 by courseCode "ELH-19" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-19"))
+        .limit(1);
 
-      // 2. Resolve Course 18
-      let course18 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-18")
-      });
-      if (!course18) {
-        course18 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-data-collection-and-evidence")
-        });
-      }
-
-      if (!course18) {
-        throw new Error("Data integrity error: Course 18 (ELH-18) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 19
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
-        actualCourseId = inserted.id;
+      if (byCode) {
+        course = byCode;
       } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course ELH-19 / reviewing-sustainability-performance-and-corrective-action not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Sustainability Performance Review course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-19. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-20 or null if not yet seeded)
+      const [course20] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "roles-and-accountability"))
+        .limit(1);
+      const nextCourseId = course20 ? course20.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
           slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
+          courseCode: "ELH-19",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -540,185 +427,110 @@ export async function ensureSustainabilityPerformanceReviewCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
       }
 
-      // 4. Update Course 18 recommendedNextCourseId to point to Course 19 preserving admin edits
-      let isSystemManaged = false;
-      if (course18.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course18.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-19") {
-          isSystemManaged = true;
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entries in coursePrerequisitesTable (ELH-12 through ELH-18 -> ELH-19)
+      const prereqs = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(inArray(coursesTable.slug, [
+          "final-sustainability-certification",
+          "sustainability-action-planning",
+          "setting-departmental-sustainability-goals",
+          "building-workplace-sustainability-team",
+          "communicating-sustainability-at-work",
+          "tracking-sustainability-actions-and-progress",
+          "sustainability-data-collection-and-evidence"
+        ]));
+
+      for (const prereq of prereqs) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: prereq.id,
+          });
         }
       }
 
-      if (course18.recommendedNextCourseId === null || course18.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course18.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 18 currently recommends course ID ${course18.recommendedNextCourseId} instead of Course 19 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          icon: "check-circle",
+          icon: "bar-chart-2",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 22,
-          code: BADGE_CODE,
+          courseIds: [courseId],
+          orderIndex: 24,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 18
-      const existingPrereq18 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course18.id)
-        )
-      });
-      if (!existingPrereq18) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course18.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order if they don't already exist or are skeletons
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Sustainability Performance Review course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Sustainability Performance Review course");
   }
 }
