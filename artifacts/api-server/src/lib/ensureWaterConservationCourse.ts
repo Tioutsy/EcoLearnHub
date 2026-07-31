@@ -6,20 +6,20 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
 } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_ID = 4;
 const COURSE_SLUG = "water-conservation";
 const COURSE_TITLE = "Water Conservation";
 const BADGE_SLUG = "water-wise-at-work";
-const SEED_NAME = "water-conservation-v1";
+const SEED_NAME = "water-conservation-v2";
 
 const COURSE_META = {
   description:
-    "Learn how daily habits, early leak reporting and sensible workplace practices can reduce unnecessary water use without compromising hygiene, safety, service quality or operational needs.",
+    "Learn how daily workplace habits, early leak reporting, and sensible conservation boundaries eliminate water waste without compromising hygiene, safety, or operational standards.",
   fullDescription:
-    "This course helps employees recognise water waste, use water more carefully during routine work, report leaks or faults promptly, and balance conservation with hygiene, safety, service quality and operational requirements. It is practical, mobile-friendly, and relevant to employees across all sectors in Mauritius.",
+    "This course covers practical water efficiency routines across Mauritian commercial facilities. It teaches employees how to identify hidden leaks, eliminate unnecessary running water, distinguish direct employee actions from technical escalation, and ensure that water conservation never compromises essential handwashing, sanitation, food safety, or operational safety.",
   categoryId: 1,
   durationMinutes: 18,
   priceUsd: "1400.00",
@@ -27,963 +27,444 @@ const COURSE_META = {
   isFeatured: false,
   thumbnailUrl: "/images/courses/water-conservation.png",
   learningObjectives: [
-    "Identify visible and less-obvious signs of water waste.",
-    "Use water more efficiently during routine workplace activities.",
-    "Report leaks and faulty equipment promptly through the correct workplace channel.",
-    "Distinguish between actions employees may take themselves and issues requiring authorised maintenance.",
-    "Balance water conservation with hygiene, safety, customer service and operational standards.",
+    "Explain why responsible water use matters to employees, businesses, and the Mauritian environment.",
+    "Identify common forms of avoidable water waste in commercial and service workplaces.",
+    "Take safe, practical actions to reduce water waste within employee authority.",
+    "Distinguish between direct actions, site-procedure checks, and issues requiring technical escalation.",
+    "Respond appropriately to realistic workplace water-use and leak scenarios.",
+    "Select one practical workplace commitment to support responsible water stewardship."
   ],
   includesCertificate: true,
   passingScore: 80,
   completionMessage:
-    "You have completed Water Conservation. You can now recognise common signs of water waste, make more careful decisions during routine work and report leaks or faults before they become larger problems.",
-  badgeName: "Water Wise at Work",
+    "You have completed Water Conservation. You can now recognise common water waste, practice sensible water stewardship during daily work, and escalate plumbing faults safely.",
+  badgeName: "Workplace Water Steward",
   badgeDescription:
-    "Awarded for demonstrating practical workplace water-conservation awareness and responsible leak-reporting decisions.",
+    "Awarded for demonstrating practical workplace water-conservation awareness, safe escalation, and responsible water stewardship.",
 };
 
 const NEW_LESSONS = [
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lesson 1 — The Leak Everyone Walks Past
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     order: 0,
     title: "The Leak Everyone Walks Past",
     minutes: 3,
-    content:
-      "A relatable situation where a small dripping tap is noticed repeatedly but never reported — and why that matters.",
+    content: "Understand why reporting minor leaks and water waste matters in Mauritian workplaces.",
     blocks: [
-      {
-        id: "wc1-h1",
-        type: "heading",
-        position: 1,
-        headingText: "The Leak Everyone Walks Past",
-      },
-      {
-        id: "wc1-t1",
-        type: "short_text",
-        position: 2,
-        bodyText:
-          "In an office kitchen, a tap has been dripping for three days. Several people have noticed it. Each person assumed someone else already reported it. Nobody did. The dripping continued.",
-      },
-      {
-        id: "wc1-k1",
-        type: "key_message",
-        position: 3,
-        headingText: "Do Not Assume Someone Else Has Reported It",
-        bodyText:
-          "A small recurring problem is worth reporting. You do not need to diagnose or repair the fault — just pass the information to the right person. Include the location, what you observed, and when.",
-      },
-      {
-        id: "wc1-w1",
-        type: "workplace_example",
-        position: 4,
-        headingText: "How a Small Drip Adds Up",
-        bodyText:
-          "A slow drip from a tap or fitting may seem negligible. But over days and weeks, a persistent small leak can waste a significant volume of water and may indicate a fault that will worsen without attention. The solution is simple: report it promptly through the correct workplace channel.",
-      },
+      { id: "wc1-h1", type: "heading", position: 1, headingText: "Arriving at a Service Area" },
+      { id: "wc1-t1", type: "short_text", position: 2, bodyText: "Imagine walking into a workplace service area. A washroom tap is dripping continuously into a filled sink, an outdoor hose is running water onto hard pavement, and a toilet cistern keeps refilling in the background. Several staff members have walked past, assuming someone else reported it. Nobody did." },
+      { id: "wc1-k1", type: "key_message", position: 3, headingText: "Do Not Assume Someone Else Has Reported It", bodyText: "Never assume another colleague or cleaner has reported a leak. Reporting a small dripping tap or running cistern takes less than a minute, preventing thousands of litres of wasted treated water and avoiding major pipe bursts." },
       {
         id: "wc1-d1",
         type: "decision_scenario",
-        position: 5,
-        decisionIntro: "You notice a tap in the staff kitchen that continues dripping after use. It has been like this for two days. What do you do?",
-        decisionPrompt: "Choose the most appropriate action:",
+        position: 4,
+        decisionIntro: "Morning arrival decision scenario:",
+        decisionPrompt: "You notice a washroom tap dripping continuously after use. It has been like this for two days. What should you do?",
         decisionChoices: [
-          {
-            label: "Ignore it — the leak appears small and someone will notice eventually.",
-            correct: false,
-            feedback:
-              "This is the same assumption everyone else is making. Nobody reports it, and the leak continues. Small problems are worth reporting promptly — do not wait for a more serious fault to develop.",
-          },
-          {
-            label: "Try to dismantle the tap yourself to find the cause.",
-            correct: false,
-            feedback:
-              "Unless you are an authorised and competent maintenance person, do not attempt to dismantle plumbing fittings. You could make the fault worse or create a safety risk. Report it to the right person instead.",
-          },
-          {
-            label: "Report the location and the problem through the correct workplace channel.",
-            correct: true,
-            feedback:
-              "This is the right action. You do not need to diagnose or fix the fault. Reporting the location, what you observed, and when it started gives the maintenance team the information they need to act.",
-          },
-          {
-            label: "Wait until the leak becomes more serious before reporting it.",
-            correct: false,
-            feedback:
-              "Waiting makes the problem worse. An early report often results in a quicker and less disruptive repair. Report it as soon as you notice it.",
-          },
-        ],
+          { label: "Report the exact location and dripping issue to facilities or management promptly", correct: true, feedback: "Perfect! Prompt reporting through approved channels prevents cumulative water waste and larger plumbing damage." },
+          { label: "Ignore it, assuming maintenance will notice it during regular checks", correct: false, feedback: "Incorrect. Assuming others will report it allows minor leaks to waste thousands of litres over time." },
+          { label: "Attempt to dismantle the tap fixture with personal tools to fix it yourself", correct: false, feedback: "Never attempt unauthorized plumbing repairs! General employees should report faults to qualified facilities staff." }
+        ]
       },
       {
         id: "wc1-m1",
         type: "multiple_choice",
-        position: 6,
-        mcqQuestion:
-          "What information is most useful to include when reporting a dripping tap or minor leak at work?",
+        position: 5,
+        mcqQuestion: "Why should employees report minor dripping taps or refilling cisterns immediately?",
         mcqOptions: [
-          "The exact location, what you observed, and when you noticed it",
-          "Your personal opinion on the likely cause of the fault",
-          "A list of all the taps in the building that might have the same problem",
-          "The contact details of the person who should pay for the repair",
+          "Small persistent leaks add up to thousands of litres of wasted water over time and may indicate worsening pipe faults",
+          "Dripping taps are required by building regulations to remain unreported",
+          "Building management pays employees a cash bonus for every leak reported",
+          "Water meters stop running when leaks are small"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation:
-          "Exactly right. Providing the location, a clear description of what you observed, and when you noticed it gives the maintenance team everything they need to investigate and act quickly.",
-        mcqIncorrectExplanation:
-          "The most useful report is factual and specific: where is it, what did you observe, and when did you notice it? Speculation about causes or who pays is not required from the reporter.",
-      },
-    ],
+        mcqCorrectExplanation: "Persistent drips waste massive volumes of treated water and signal underlying valve or pipe wear.",
+        mcqIncorrectExplanation: "Incorrect. Minor leaks cause significant cumulative loss and require early reporting."
+      }
+    ]
   },
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lesson 2 — Where Water Is Used at Work
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     order: 1,
-    title: "Where Water Is Used at Work",
+    title: "Why Water Conservation Matters in Mauritius",
     minutes: 3,
-    content:
-      "Recognise the many places and activities where water is used in different types of workplace.",
+    content: "Connect responsible water use to community, business continuity, and island ecosystems.",
     blocks: [
-      {
-        id: "wc2-h1",
-        type: "heading",
-        position: 1,
-        headingText: "Where Water Is Used at Work",
-      },
-      {
-        id: "wc2-t1",
-        type: "short_text",
-        position: 2,
-        bodyText:
-          "Water is used across many parts of a workplace. Recognising where it is used helps you notice when something is wrong, make better decisions, and know which situations to report.",
-      },
+      { id: "wc2-h1", type: "heading", position: 1, headingText: "Three Water Conservation Perspectives" },
+      { id: "wc2-t1", type: "short_text", position: 2, bodyText: "In Mauritius, treated fresh water is a vital shared resource. Efficient water management in commercial premises supports island resilience across three key areas:" },
       {
         id: "wc2-k1",
         type: "key_message",
         position: 3,
-        headingText: "Focus on What You Can Observe, Influence or Report",
-        bodyText:
-          "Employees should focus on water use they can see, affect during routine tasks, or report to the right person. Do not interfere with technical systems, controlled processes or equipment you are not authorised to operate.",
+        headingText: "Community, Business & Environment",
+        bodyText: "• Community Impact: Responsible commercial water use ensures steady supply for local healthcare, domestic, and municipal needs.\n• Business Continuity: Eliminating leaks prevents structural water damage, avoids high utility surcharges, and ensures uninterrupted operational service.\n• Environmental Protection: Reducing unnecessary pumping and treatment lowers grid electricity load and protects coastal ecosystems."
       },
       {
         id: "wc2-w1",
         type: "workplace_example",
         position: 4,
-        headingText: "Common Workplace Water Uses",
-        bodyText:
-          "Water is used in washrooms and handwashing, staff kitchens, cleaning routines, landscaping and outdoor areas, guest rooms and bathrooms, laundry, food preparation, construction activities, manufacturing or process operations, vehicle or equipment washing, and cooling or building services. Not all of these are within an individual employee's control — but most can be observed and reported.",
-      },
-      {
-        id: "wc2-m1",
-        type: "multiple_choice",
-        position: 5,
-        mcqQuestion:
-          "A maintenance colleague tells you that a building cooling system appears to be leaking water. What is the most appropriate action for a regular employee in this situation?",
-        mcqOptions: [
-          "Attempt to fix the cooling system yourself using available tools.",
-          "Ignore it — cooling systems are technical and outside your responsibilities.",
-          "Report what you observed to the correct person and let authorised staff investigate.",
-          "Switch off the cooling system immediately to stop any further water loss.",
-        ],
-        mcqCorrectIndex: 2,
-        mcqCorrectExplanation:
-          "Reporting what you observed is the right action. Technical systems like building cooling should be investigated by authorised staff. Your role is to notice and report, not to repair or shut down equipment you are not authorised to operate.",
-        mcqIncorrectExplanation:
-          "Attempting to repair, ignoring, or switching off a technical system you are not trained or authorised to work on could cause further damage or a safety risk. The right action is to report it to the correct person.",
-      },
-    ],
+        headingText: "Hygiene & Safety Protection Rule",
+        bodyText: "CRITICAL PRINCIPLE: Water conservation must NEVER compromise handwashing, surface sanitization, food safety, or medical infection control. Always use necessary water for thorough hygiene—conservation targets avoidable waste, not essential sanitation."
+      }
+    ]
   },
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lesson 3 — Use Less Without Lowering Standards
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     order: 2,
-    title: "Use Less Without Lowering Standards",
-    minutes: 3,
-    content:
-      "Practical ways to use water more carefully during routine work while maintaining hygiene, safety and service standards.",
+    title: "Common Sources of Waste & Sourced Facts",
+    minutes: 4,
+    content: "Identify frequent sources of workplace water loss and learn sourced conservation facts.",
     blocks: [
+      { id: "wc3-h1", type: "heading", position: 1, headingText: "Recognising Avoidable Water Waste" },
+      { id: "wc3-t1", type: "short_text", position: 2, bodyText: "Avoidable water waste frequently occurs during routine cleaning, washroom use, landscaping, and kitchen operations." },
       {
-        id: "wc3-h1",
-        type: "heading",
-        position: 1,
-        headingText: "Use Less Without Lowering Standards",
-      },
-      {
-        id: "wc3-t1",
-        type: "short_text",
-        position: 2,
-        bodyText:
-          "Using water more carefully does not mean cutting corners. There are practical habits that help you work efficiently without compromising hygiene, food safety, service quality or operational requirements.",
-      },
-      {
-        id: "wc3-k1",
-        type: "key_message",
+        id: "wc3-f1",
+        type: "memorable_fact",
         position: 3,
-        headingText: "Hygiene and Safety Always Come First",
-        bodyText:
-          "Never reduce the quality of handwashing, food preparation, sanitation or cleaning in order to save water. Conservation means avoiding unnecessary waste — not compromising standards.",
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to United Nations Environment Programme (UNEP) and WHO technical guidelines, a single commercial tap dripping at just 1 drip per second wastes over 11,000 litres of clean treated water per year! Promptly closing taps fully and reporting worn washers eliminates this massive hidden loss."
       },
       {
         id: "wc3-w1",
         type: "workplace_example",
         position: 4,
-        headingText: "Practical Habits That Make a Difference",
-        bodyText:
-          "Turn taps off fully after use. Avoid running water while performing a separate task when continuous flow is not needed. Use the correct amount of water for the task at hand. Follow approved cleaning procedures. Use appropriate cleaning equipment — a damp cloth or mop can be more effective than a continuous hose in many indoor situations. Load dishwashers and washing machines according to workplace procedures before running a cycle. Plan cleaning tasks to avoid unnecessary repeat washing.",
-      },
-      {
-        id: "wc3-p1",
-        type: "practical_action",
-        position: 5,
-        headingText: "Simple Habits to Carry Into Every Shift",
-        bodyText:
-          "1. Turn taps off fully — do not leave them running while doing something else. 2. Use the right amount of water for each task. 3. Follow your workplace's approved cleaning and operating procedures. 4. If you are unsure whether a method is correct, ask a supervisor rather than guessing.",
-      },
-      {
-        id: "wc3-d1",
-        type: "decision_scenario",
-        position: 6,
-        decisionIntro:
-          "A staff member is cleaning a work area. They are considering using a continuously running hose because it seems faster than filling a bucket.",
-        decisionPrompt:
-          "What factors should they consider before deciding?",
-        decisionChoices: [
-          {
-            label:
-              "Use the running hose without checking — speed is the priority.",
-            correct: false,
-            feedback:
-              "Speed alone is not a sufficient reason to use a continuously running hose. Consider whether continuous flow is actually needed for this task, what the approved cleaning method is, and whether the area, materials or hygiene requirements call for a specific approach.",
-          },
-          {
-            label:
-              "Consider the approved procedure, hygiene requirements, the available equipment, and whether continuous flow is actually necessary for this task.",
-            correct: true,
-            feedback:
-              "The right approach is to consider the context. In some situations a running hose is appropriate; in others a bucket, mop or spray is more effective and uses less water. Always follow approved procedures and hygiene requirements. If uncertain, ask a supervisor.",
-          },
-          {
-            label:
-              "Never use a hose — buckets are always more water-efficient.",
-            correct: false,
-            feedback:
-              "This is not a universal rule. Some cleaning tasks require hose flow. The correct decision depends on the approved procedure, hygiene requirements, the surface being cleaned, and the equipment available. Do not substitute one blanket rule for another.",
-          },
-          {
-            label:
-              "Use whichever method uses the least water regardless of hygiene.",
-            correct: false,
-            feedback:
-              "Hygiene requirements must not be compromised in order to save water. Conservation means avoiding unnecessary waste, not reducing cleanliness standards. Always follow approved procedures.",
-          },
-        ],
+        headingText: "Misconception: Hose Down vs Broom Cleaning",
+        bodyText: "Myth: 'Hosing down outdoor hardstanding and walkways is the fastest way to clean.' Fact: Sweeping hard surfaces with a broom before spot-cleaning uses up to 90% less water and prevents silt runoff into storm drains."
       },
       {
         id: "wc3-m1",
         type: "multiple_choice",
-        position: 7,
-        mcqQuestion:
-          "Which of the following best describes how to balance water conservation with hygiene and food safety at work?",
+        position: 5,
+        mcqQuestion: "Which practice represents avoidable workplace water waste?",
         mcqOptions: [
-          "Reduce handwashing duration to one rinse to save water.",
-          "Skip dishwasher cycles if they are not completely full to avoid waste.",
-          "Avoid unnecessary water use while always following hygiene and food-safety procedures in full.",
-          "Use as little water as possible in food preparation areas, even if it affects safety.",
+          "Leaving a garden hose running continuously on hard pavement while taking a break",
+          "Washing hands thoroughly with soap for 20 seconds as required by hygiene guidelines",
+          "Sanitizing food-prep surfaces using required water concentrations",
+          "Operating a commercial dishwasher only when fully loaded"
         ],
-        mcqCorrectIndex: 2,
-        mcqCorrectExplanation:
-          "This is the correct balance. Conservation means avoiding unnecessary water use, not compromising hygiene or safety. Handwashing, food preparation, and sanitation procedures must always be followed in full.",
-        mcqIncorrectExplanation:
-          "Hygiene, handwashing, and food-safety procedures must never be reduced to save water. Conservation applies to genuinely unnecessary water use — not to required safety practices.",
-      },
-    ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Leaving hoses running on hard pavement is pure waste. Handwashing and food safety sanitation are essential needs.",
+        mcqIncorrectExplanation: "Incorrect. Running hoses unattended on pavement wastes water; handwashing and food sanitation are non-negotiable."
+      }
+    ]
   },
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lesson 4 — Spot, Report and Follow Up
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     order: 3,
-    title: "Spot, Report and Follow Up",
-    minutes: 3,
-    content:
-      "Recognise warning signs of leaks or faulty equipment and know how to report them clearly and safely.",
+    title: "Inspecting Workplace Water Boundaries",
+    minutes: 4,
+    content: "Practice identifying water waste, safety hazards near electricity, and escalation rules.",
     blocks: [
+      { id: "wc4-h1", type: "heading", position: 1, headingText: "Workplace Service Area Inspection" },
+      { id: "wc4-t1", type: "short_text", position: 2, bodyText: "Examine a real Mauritian workplace service area. Observe the dripping sink tap, the outdoor hose running on pavement, and the electrical safety warning sign." },
       {
-        id: "wc4-h1",
-        type: "heading",
-        position: 1,
-        headingText: "Spot, Report and Follow Up",
-      },
-      {
-        id: "wc4-t1",
-        type: "short_text",
-        position: 2,
-        bodyText:
-          "You do not need to be a plumber to notice that something is wrong. Recognising common warning signs and reporting them promptly is a practical and important contribution.",
-      },
-      {
-        id: "wc4-k1",
-        type: "key_message",
+        id: "wc4-img1",
+        type: "visual_question",
         position: 3,
-        headingText: "These Are Warning Signs — Not Diagnoses",
-        bodyText:
-          "You are not expected to identify the technical cause of a fault. You are expected to notice something unusual, report it clearly, and leave the investigation to authorised staff.",
-      },
-      {
-        id: "wc4-w1",
-        type: "workplace_example",
-        position: 4,
-        headingText: "Possible Signs of a Leak or Fault",
-        bodyText:
-          "A tap that does not close properly. A toilet that continues running after flushing. Water appearing where the area should normally be dry. Dampness, staining or discolouration on walls, ceilings or floors. A hose connection or fitting that drips during use. Repeatedly wet ground when there has been no obvious water use. Equipment using water in a way that seems different from its normal operation. A tank or container that needs refilling more frequently than usual.",
-      },
-      {
-        id: "wc4-d1",
-        type: "decision_scenario",
-        position: 5,
-        decisionIntro:
-          "You notice a damp patch forming on the ceiling of a storeroom. There is no obvious explanation — it was dry yesterday.",
-        decisionPrompt:
-          "What is the most appropriate immediate response?",
-        decisionChoices: [
-          {
-            label:
-              "Place a container underneath and carry on — it is probably not serious.",
-            correct: false,
-            feedback:
-              "A container is a temporary measure at best. A new, unexplained damp patch on a ceiling may indicate a leak above. Report it promptly. If there is any sign of structural risk or electrical equipment nearby, escalate immediately.",
-          },
-          {
-            label:
-              "Report the location and what you observed to the facilities team, noting the date and any safety concerns.",
-            correct: true,
-            feedback:
-              "Correct. A clear, factual report — including the location, what you saw, when it appeared, and whether there are any safety concerns — gives the maintenance team what they need to investigate. If there are electrical fixtures near the damp area, flag that as a priority.",
-          },
-          {
-            label:
-              "Open the ceiling panels yourself to check what is above the storeroom.",
-            correct: false,
-            feedback:
-              "Do not enter ceiling spaces or remove panels unless you are authorised and competent to do so. Report the observation and let trained maintenance staff carry out the investigation.",
-          },
-          {
-            label:
-              "Wait for the patch to dry and see whether it returns before reporting anything.",
-            correct: false,
-            feedback:
-              "Waiting can allow a leak to worsen, cause additional damage, or create a safety hazard — particularly if the water is near electrical fittings. Report it now.",
-          },
-        ],
-      },
-      {
-        id: "wc4-p1",
-        type: "practical_action",
-        position: 6,
-        headingText: "What to Include in a Useful Fault Report",
-        bodyText:
-          "1. Exact location (room, floor, area, equipment). 2. What you observed (describe it clearly, without guessing the cause). 3. When you first noticed it. 4. Whether it is continuous or comes and goes. 5. Any immediate safety risk (electrical fittings nearby, slip hazard, structural concern). 6. A photograph, if your company policy allows it. Do not interfere with electrical, pressurised, contaminated or technical systems. Report and step back.",
+        imageUrl: "/images/courses/visual-workplace-water-waste.png",
+        caption: "Workplace Service Area Inspection: Stainless steel sink with dripping tap, outdoor running hose, and safety sign: 'CAUTION: KEEP ELECTRICAL EQUIPMENT DRY - REPORT LEAKS IMMEDIATELY'.",
+        imageAlt: "Realistic photograph of a modern Mauritian workplace service area featuring a stainless steel sink with a dripping commercial tap, an open doorway showing a hose running on hard pavement, and a prominent warning sign: CAUTION: KEEP ELECTRICAL EQUIPMENT DRY - REPORT LEAKS IMMEDIATELY."
       },
       {
         id: "wc4-m1",
         type: "multiple_choice",
-        position: 7,
-        mcqQuestion:
-          "Which of the following is a useful warning sign that a toilet may have a fault worth reporting?",
+        position: 4,
+        mcqQuestion: "In the workplace inspection scene above, what must you do if you observe water pooling near an electrical appliance or wall outlet?",
         mcqOptions: [
-          "The toilet makes a quiet noise only when first flushed.",
-          "The toilet continues running for several minutes or indefinitely after flushing.",
-          "The toilet handle requires a firm push to operate.",
-          "The toilet cistern occasionally refills during the night.",
+          "Escalate the hazard immediately to facilities/safety officers without touching electrical equipment or stepping into pooled water",
+          "Mop up the water while holding active power cords with bare hands",
+          "Ignore the water because electricity and water naturally mix",
+          "Attempt to repair the electrical outlet using a metal screwdriver"
         ],
-        mcqCorrectIndex: 1,
-        mcqCorrectExplanation:
-          "A toilet that continues running long after flushing is a clear sign of a fault — a valve or seal is likely not closing correctly. This should be reported so the fault can be investigated and repaired by authorised maintenance staff.",
-        mcqIncorrectExplanation:
-          "A toilet that runs continuously after flushing is the clearest indicator of a fault worth reporting. A normal flush may briefly fill the cistern, but continuous running indicates something is not closing properly.",
-      },
-    ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Water near electrical equipment presents severe electrocution hazards. Never touch electrical gear in wet conditions—escalate to safety staff immediately.",
+        mcqIncorrectExplanation: "Incorrect. Water near electrical equipment is a life-safety hazard requiring immediate professional escalation."
+      }
+    ]
   },
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lesson 5 — Water Decisions in Real Workplaces
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     order: 4,
-    title: "Water Decisions in Real Workplaces",
-    minutes: 4,
-    content:
-      "Apply the learning through realistic situations drawn from hospitality, office, and facilities or construction settings.",
+    title: "Action Boundaries: Act, Check & Escalate",
+    minutes: 3,
+    content: "Categorize water actions into direct employee habits, site checks, and technical escalation.",
     blocks: [
+      { id: "wc5-h1", type: "heading", position: 1, headingText: "Three Levels of Action" },
+      { id: "wc5-t1", type: "short_text", position: 2, bodyText: "Group your daily workplace water actions into three distinct safety levels:" },
       {
-        id: "wc5-h1",
-        type: "heading",
-        position: 1,
-        headingText: "Water Decisions in Real Workplaces",
-      },
-      {
-        id: "wc5-t1",
-        type: "short_text",
-        position: 2,
-        bodyText:
-          "The right response to a water issue depends on the context — the sector, the setting, the people involved, and the operational requirements. Work through three realistic situations.",
+        id: "wc5-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Act, Check & Escalate Framework",
+        bodyText: "1. ACT DIRECTLY: Turn off running taps fully, sweep hard surfaces before washing, report visible drips.\n2. CHECK SITE PROCEDURE: Scheduled landscape watering, commercial dishwashing load rules, authorized water reuse.\n3. ESCALATE TO FACILITIES: Persistent leaks, running toilet cisterns, burst pipes, water near electrical gear, or concealed wall dampness."
       },
       {
         id: "wc5-d1",
         type: "decision_scenario",
-        position: 3,
-        decisionIntro:
-          "Scenario A — Hotel or Hospitality: A hotel guest contacts reception to say that the toilet in their room continues running after flushing. It has been happening since they checked in.",
-        decisionPrompt:
-          "What is the most appropriate response from the reception or guest-services team?",
-        decisionChoices: [
-          {
-            label:
-              "Inform the guest that maintenance has been notified and arrange a room change or timely repair, logging the room number and the reported fault.",
-            correct: true,
-            feedback:
-              "Correct. The guest receives a prompt service response, the fault is logged with the correct location and description, and maintenance can investigate. This balances guest service, prompt reporting, and correct escalation.",
-          },
-          {
-            label:
-              "Tell the guest it is probably normal and suggest they flush again.",
-            correct: false,
-            feedback:
-              "A toilet that runs continuously is not normal. Dismissing a guest's concern is poor service and allows a real fault to continue unreported.",
-          },
-          {
-            label:
-              "Visit the room and attempt to repair the cistern mechanism yourself.",
-            correct: false,
-            feedback:
-              "Unless you are an authorised and competent maintenance person, do not attempt to repair plumbing equipment. Your role is to log the fault and escalate it to the right person promptly.",
-          },
-          {
-            label:
-              "Wait until check-out to log the fault so the guest is not disturbed.",
-            correct: false,
-            feedback:
-              "Delaying the report prolongs the water waste and leaves a fault unattended that could worsen. Report promptly even if a room change or repair needs to be arranged sensitively.",
-          },
-        ],
-      },
-      {
-        id: "wc5-d2",
-        type: "decision_scenario",
         position: 4,
-        decisionIntro:
-          "Scenario B — Office or Retail: Water is found pooling under the staff-kitchen sink on a Monday morning. A colleague says they also noticed it on Friday but did not report it.",
-        decisionPrompt:
-          "What should you do?",
+        decisionIntro: "End-of-shift persistent leak scenario:",
+        decisionPrompt: "At 5:30 PM on a Friday, you discover a slow leak under a kitchen sink. Water is dripping into a bucket, but the bucket will overflow by morning. The main maintenance technician has left. What should you do?",
         decisionChoices: [
-          {
-            label:
-              "Place a container under the sink and leave it there indefinitely without reporting it.",
-            correct: false,
-            feedback:
-              "A container buys time but does not fix the problem. Water under a sink may indicate a slow leak that will worsen. The fault must be reported to the correct person so it can be investigated and repaired.",
-          },
-          {
-            label:
-              "Report the recurring problem, place a temporary container if it is safe to do so, keep the area clean and dry to prevent slips, and follow up to confirm the report was received.",
-            correct: true,
-            feedback:
-              "This is the correct response. You report the fault, take a simple practical step to manage the immediate situation safely, and follow up to make sure the report was acted on.",
-          },
-          {
-            label:
-              "Try to tighten the pipe connections yourself to stop the leak.",
-            correct: false,
-            feedback:
-              "Do not attempt to repair plumbing unless you are authorised and competent. Even tightening a connection incorrectly can damage fittings or make the fault worse. Report it and let maintenance handle it.",
-          },
-          {
-            label:
-              "Ignore it — it was probably there all weekend without causing damage.",
-            correct: false,
-            feedback:
-              "Time without visible damage does not mean the problem is safe to leave. The leak will continue and could worsen. Report it now.",
-          },
-        ],
-      },
-      {
-        id: "wc5-d3",
-        type: "decision_scenario",
-        position: 5,
-        decisionIntro:
-          "Scenario C — Construction, Maintenance or Manufacturing: You notice that a hose used in a routine process appears to be running for longer than usual, and there is water pooling nearby that is not normally present.",
-        decisionPrompt:
-          "What should you consider before taking any action?",
-        decisionChoices: [
-          {
-            label:
-              "Switch off the hose immediately and report the observation.",
-            correct: false,
-            feedback:
-              "Before switching off any water supply on a controlled process, consider whether the process is safety-critical, temperature-controlled, or managed by an authorised operator. Stopping it without authorisation could cause a hazard or damage to the process. Assess first, then act or report.",
-          },
-          {
-            label:
-              "Assess whether the process is controlled by an authorised operator, consider any safety or quality requirements, then report the observation to the right person or escalate if there is an immediate safety risk.",
-            correct: true,
-            feedback:
-              "Correct. In technical or industrial settings, controlled water processes may have safety, quality or regulatory requirements. Your role is to observe and report — and to escalate urgently if there is an immediate safety risk — not to interfere with a process you may not fully understand.",
-          },
-          {
-            label:
-              "Assume the operator knows about it and carry on with your work.",
-            correct: false,
-            feedback:
-              "Do not assume. If something appears unusual and there is water pooling unexpectedly, it is worth raising with the relevant person. You do not need to be certain — reporting an observation is always appropriate.",
-          },
-          {
-            label:
-              "Ignore it — technical processes are not your responsibility.",
-            correct: false,
-            feedback:
-              "Safety and environmental awareness are everyone's responsibility. Reporting an unusual observation to the right person is always appropriate, even if the technical operation is managed by someone else.",
-          },
-        ],
-      },
-      {
-        id: "wc5-p1",
-        type: "practical_action",
-        position: 6,
-        headingText: "Across Every Sector: The Same Principles Apply",
-        bodyText:
-          "Notice what is unusual. Report it clearly to the right person. Do not attempt repairs you are not authorised to carry out. Keep the area safe while waiting for maintenance. Follow up to confirm the report was received and acted on.",
-      },
-    ],
+          { label: "Place a larger temporary basin and notify the emergency facilities/after-hours contact with the exact location", correct: true, feedback: "Outstanding! Combining temporary containment with official after-hours escalation prevents weekend flooding." },
+          { label: "Leave the small bucket as is and go home without telling anyone", correct: false, feedback: "Incorrect! The bucket will overflow overnight, causing floor damage." },
+          { label: "Turn off random main water valves in the building basement without authorization", correct: false, feedback: "Never turn main building valves without training! Doing so may cut off fire suppression or essential hygiene lines." }
+        ]
+      }
+    ]
   },
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Lesson 6 — My Water-Wise Commitment
-  // ─────────────────────────────────────────────────────────────────────────────
   {
     order: 5,
-    title: "My Water-Wise Commitment",
-    minutes: 2,
-    content:
-      "Summarise the course learning and allow the learner to select practical commitments they will carry forward.",
+    title: "Your Water Stewardship Commitment",
+    minutes: 3,
+    content: "Select practical daily water-saving commitments for your work routine.",
     blocks: [
-      {
-        id: "wc6-h1",
-        type: "heading",
-        position: 1,
-        headingText: "My Water-Wise Commitment",
-      },
-      {
-        id: "wc6-t1",
-        type: "short_text",
-        position: 2,
-        bodyText:
-          "You have worked through six lessons covering the most common water-related situations employees encounter at work. Before completing the course, choose the commitments you will carry into your daily work.",
-      },
-      {
-        id: "wc6-k1",
-        type: "key_message",
-        position: 3,
-        headingText: "Small, Consistent Actions Make a Difference",
-        bodyText:
-          "Water conservation at work does not require special skills or authority. Noticing problems, reporting them promptly, following approved procedures and making careful everyday decisions are actions every employee can take.",
-      },
+      { id: "wc6-h1", type: "heading", position: 1, headingText: "Pledge to Act" },
+      { id: "wc6-t1", type: "short_text", position: 2, bodyText: "Congratulations on completing the lessons! Select the water stewardship habits you commit to practice in your daily work routine." },
       {
         id: "wc6-c1",
         type: "commitment",
-        position: 4,
-        commitmentInstruction:
-          "Select the commitments you will practise at work. Choose at least one:",
+        position: 3,
+        commitmentInstruction: "Select your daily workplace water commitments (choose at least one):",
         commitmentOptions: [
-          {
-            value: "report-leaks",
-            label: "I will report leaks or recurring water problems promptly.",
-            description:
-              "Reporting early prevents small faults from becoming larger ones.",
-          },
-          {
-            value: "close-taps",
-            label: "I will check that taps are fully closed after use.",
-            description:
-              "A tap that is not fully closed may drip continuously.",
-          },
-          {
-            value: "follow-procedures",
-            label: "I will follow approved cleaning and operating procedures.",
-            description:
-              "Approved procedures balance effectiveness, hygiene and resource use.",
-          },
-          {
-            value: "avoid-running-water",
-            label:
-              "I will avoid leaving water running when it is not required.",
-            description:
-              "Running water unnecessarily is one of the most common and avoidable forms of waste.",
-          },
-          {
-            value: "notice-warning-signs",
-            label:
-              "I will pay attention to damp areas, running toilets and other warning signs.",
-            description:
-              "Early observation leads to earlier reporting and earlier repair.",
-          },
-          {
-            value: "ask-when-unsure",
-            label:
-              "I will ask the appropriate person when I am unsure about a water-use practice.",
-            description:
-              "Asking is always better than guessing, especially where hygiene or safety is involved.",
-          },
-        ],
-      },
-    ],
-  },
+          { value: "report-drips", label: "Report dripping taps or running toilet cisterns promptly", description: "Prevent hidden water loss by notifying facilities immediately." },
+          { value: "close-taps-fully", label: "Ensure washroom and kitchen taps are fully closed after use", description: "Eliminate avoidable drip waste during routine work." },
+          { value: "sweep-before-wash", label: "Sweep walkways and hardstanding before spot-cleaning", description: "Replace excessive hose washing with efficient broom sweeping." },
+          { value: "protect-hygiene", label: "Maintain essential handwashing and hygiene standards", description: "Ensure water conservation never compromises health or sanitation." },
+          { value: "escalate-electrical-hazards", label: "Escalate leaks near electrical gear or concealed pipes", description: "Prioritize workplace safety by reporting complex leaks safely." }
+        ]
+      }
+    ]
+  }
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FINAL QUIZ — 8 questions, correct answers distributed across positions 0–3
-// ─────────────────────────────────────────────────────────────────────────────
 const NEW_QUIZ = [
   {
     order: 1,
-    question:
-      "A tap in the staff kitchen has been dripping for two days. Several colleagues have noticed it. What is the correct response?",
+    question: "Why should employees report minor dripping taps or refilling cisterns promptly?",
     options: [
-      "Leave it — someone else will report it eventually.",
-      "Report the location and the fault through the correct workplace channel.",
-      "Attempt to tighten the tap fitting yourself.",
-      "Wait until the fault becomes more serious before raising it.",
+      "Persistent minor drips waste thousands of litres of clean water annually and signal potential pipe failure",
+      "Dripping taps improve building air humidity and should not be reported",
+      "Water meters do not register small dripping leaks",
+      "Building management pays cash rewards for every reported drip"
     ],
-    correct: 1,
-    correctExplanation:
-      "Reporting the location, what you observed, and when is the correct action. You do not need to diagnose or repair the fault — providing clear information to the right person allows it to be fixed promptly.",
-    incorrectExplanation:
-      "Small recurring faults are worth reporting immediately. Assuming someone else will act, waiting for a more serious problem, or attempting an unauthorised repair are all less appropriate responses.",
+    correct: 0,
+    correctExplanation: "Minor drips add up to thousands of litres of cumulative waste and can lead to severe pipe bursts if neglected.",
+    incorrectExplanation: "Incorrect. Minor leaks waste large volumes of treated water and require early reporting."
   },
   {
     order: 2,
-    question:
-      "A ceiling has a new damp patch this morning that was not there yesterday. There are electrical light fittings nearby. What should you do?",
+    question: "What is the relationship between water conservation and workplace hygiene guidelines?",
     options: [
-      "Remove the ceiling panel to check for a pipe above.",
-      "Place a container below the damp patch and ignore it until it worsens.",
-      "Report the observation clearly, note the location, and flag the nearby electrical fittings as a priority safety concern.",
-      "Switch off the lighting circuit to protect the fittings yourself.",
+      "Water conservation targets avoidable waste, but essential handwashing, sanitation, and food safety must NEVER be reduced",
+      "Employees should stop washing hands to save water",
+      "Hygiene procedures should only be followed during rainy seasons",
+      "Food preparation surfaces should never be washed with clean water"
     ],
-    correct: 2,
-    correctExplanation:
-      "Report the observation clearly and flag the electrical risk. Unexplained dampness near electrical fittings is a safety concern. Let authorised maintenance staff investigate — do not enter ceiling spaces, remove panels, or tamper with electrical circuits yourself.",
-    incorrectExplanation:
-      "The priority is to report the observation clearly, including the nearby electrical fittings, so that authorised staff can investigate safely. Do not attempt repairs, enter ceiling spaces, or interfere with electrical circuits.",
+    correct: 0,
+    correctExplanation: "Hygiene, handwashing, and food safety are mandatory standards that must never be compromised for water saving.",
+    incorrectExplanation: "Incorrect. Essential health, hygiene, and food safety standards take strict priority over water savings."
   },
   {
     order: 3,
-    question:
-      "Which of the following best describes how to conserve water without reducing hygiene standards?",
+    question: "Which action should be classified under 'TECHNICAL ESCALATION' rather than direct employee action?",
     options: [
-      "Skip routine handwashing if your hands appear clean.",
-      "Reduce dishwasher cycle temperature to save water.",
-      "Avoid unnecessary water use while following hygiene and food-safety procedures in full.",
-      "Use less water during food preparation to improve kitchen efficiency.",
+      "Repairing a concealed wall pipe leak or water near an electrical panel",
+      "Closing a tap fully after washing hands",
+      "Sweeping hardstanding before washing with a bucket",
+      "Reporting an unclosed outdoor garden hose"
     ],
-    correct: 2,
-    correctExplanation:
-      "Conservation means avoiding genuinely unnecessary water use — it never means reducing handwashing, hygiene or food-safety standards. Required procedures must always be followed in full.",
-    incorrectExplanation:
-      "Water conservation applies to genuinely unnecessary use. Handwashing, hygiene procedures and food-safety requirements must never be reduced or skipped to save water.",
+    correct: 0,
+    correctExplanation: "Concealed plumbing repairs and leaks near electrical equipment pose extreme safety risks and require technical facilities escalation.",
+    incorrectExplanation: "Incorrect. Concealed leaks and electrical water hazards require professional technical maintenance."
   },
   {
     order: 4,
-    question:
-      "Which of the following is the clearest sign that a toilet should be reported for a possible fault?",
+    question: "What is a water-efficient alternative to hosing down outdoor hardstanding and walkways?",
     options: [
-      "The toilet makes a brief sound when the cistern refills after flushing.",
-      "The toilet handle requires a firm push to operate.",
-      "The toilet continues running for several minutes or indefinitely after flushing.",
-      "The toilet cistern takes slightly longer to refill than other toilets in the building.",
+      "Sweeping surfaces thoroughly with a broom before spot-cleaning with a bucket",
+      "Leaving water running continuously for two hours",
+      "Using high-pressure hot water on clean concrete",
+      "Flooding walkways with drinking water"
     ],
-    correct: 2,
-    correctExplanation:
-      "A toilet that runs continuously after flushing is a clear sign of a fault — a valve or seal is not closing correctly. Report it to maintenance so it can be investigated and repaired.",
-    incorrectExplanation:
-      "A toilet that continues running long after flushing is the clearest indicator of a fault requiring maintenance. Normal refilling after a flush is expected; continuous running is not.",
+    correct: 0,
+    correctExplanation: "Broom sweeping removes debris dry, using up to 90% less water than continuous hose washing.",
+    incorrectExplanation: "Incorrect. Sweeping prior to spot cleaning dramatically cuts water consumption."
   },
   {
     order: 5,
-    question:
-      "A hotel guest reports that the toilet in their room has been running continuously since they checked in. What is the most appropriate response?",
+    question: "At the end of your shift, you notice water pooling under a staff sink near an electrical socket. What is the safest response?",
     options: [
-      "Visit the room and attempt to adjust the cistern mechanism yourself.",
-      "Inform the guest that maintenance has been notified, arrange a resolution, and log the room number and fault clearly.",
-      "Tell the guest it is probably a temporary sound and will stop shortly.",
-      "Wait until the guest checks out to report the fault so the room is not disturbed.",
-    ],
-    correct: 1,
-    correctExplanation:
-      "The correct response prioritises guest service, prompt reporting, correct fault logging, and escalation to authorised maintenance. Do not attempt repairs yourself or dismiss the guest's concern.",
-    incorrectExplanation:
-      "The fault must be logged and reported promptly. Dismissing the guest's concern, delaying the report, or attempting an unauthorised repair are all incorrect responses.",
-  },
-  {
-    order: 6,
-    question:
-      "Water is found pooling under a staff-kitchen sink on Monday morning. A colleague says they noticed it on Friday but did not report it. What should you do now?",
-    options: [
-      "Report the fault, place a temporary container if safe to do so, keep the area dry to prevent slips, and follow up to confirm the report was received.",
-      "Tighten the pipe connections beneath the sink to stop the leak yourself.",
-      "Leave a note for the next shift to deal with it.",
-      "Accept that it has been there all weekend without causing harm and monitor it for another week.",
+      "Report the hazard immediately to after-hours facilities/safety contact without touching electrical equipment",
+      "Attempt to rewire the electrical socket yourself using wet towels",
+      "Ignore it and leave the building without telling anyone",
+      "Step into the water pool to inspect the socket closely"
     ],
     correct: 0,
-    correctExplanation:
-      "Report the fault, take a simple safe step to manage the immediate hazard, and follow up to ensure the report was received. Do not attempt plumbing repairs yourself or delay reporting a known fault.",
-    incorrectExplanation:
-      "The fault must be reported now. Time without visible damage does not mean the problem is safe to leave. Avoid attempting repairs you are not authorised to carry out.",
-  },
-  {
-    order: 7,
-    question:
-      "A hose on a manufacturing or construction site appears to be running for longer than usual and there is unexplained pooling of water nearby. The process is operated by a colleague on a different team. What is the appropriate approach?",
-    options: [
-      "Switch off the hose immediately without consulting anyone.",
-      "Ignore it — controlled processes are not your responsibility.",
-      "Assume the operator has already identified the issue and carry on.",
-      "Assess whether the process is safety-critical, then report your observation to the operator or the relevant supervisor, escalating urgently if there is an immediate safety risk.",
-    ],
-    correct: 3,
-    correctExplanation:
-      "In technical settings, controlled processes may have safety, quality or regulatory requirements. Report your observation to the right person and escalate if there is an immediate risk — do not interfere with a process you are not authorised to manage.",
-    incorrectExplanation:
-      "Reporting an unusual observation is always appropriate. Do not switch off controlled equipment without authorisation, and do not ignore an unexplained change. Assess the situation and report it to the right person.",
-  },
-  {
-    order: 8,
-    question:
-      "Which of the following pieces of information is most useful to include in a fault report about a possible water leak?",
-    options: [
-      "Your professional opinion on the technical cause of the fault.",
-      "The names of colleagues who also noticed the problem but did not report it.",
-      "The exact location, a clear description of what you observed, when you first noticed it, and any immediate safety risk.",
-      "A list of all the plumbing fittings in the affected area.",
-    ],
-    correct: 2,
-    correctExplanation:
-      "A useful fault report includes the exact location, a factual description of what you observed, when you noticed it, and any safety concerns. You are not expected to diagnose the technical cause or list all fittings in the area.",
-    incorrectExplanation:
-      "The most useful report is factual and specific: where, what, when, and any safety risk. Leave the technical investigation to authorised maintenance staff.",
-  },
+    correctExplanation: "Water near electrical sockets presents fatal shock risks. Escalate to safety/facilities personnel immediately.",
+    incorrectExplanation: "Incorrect. Water near electrical equipment requires immediate professional safety escalation."
+  }
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main seeder function — idempotent, admin-edit-preserving
-// ─────────────────────────────────────────────────────────────────────────────
-export async function ensureWaterConservationCourse(
-  externalTx?: any
-): Promise<void> {
-  const runSeeder = async (tx: any) => {
-    // 1. Resolve Course 4 by ID 4 first, then by slug
-    let course = null;
-
-    const [byId] = await tx
-      .select()
-      .from(coursesTable)
-      .where(eq(coursesTable.id, COURSE_ID))
-      .limit(1);
-
-    if (byId) {
-      course = byId;
-    } else {
-      const [bySlug] = await tx
+export async function ensureWaterConservationCourse(): Promise<void> {
+  try {
+    await db.transaction(async (tx) => {
+      // 1. Resolve Course 4 by ID 4 or slug
+      let course = null;
+      
+      const [byId] = await tx
         .select()
         .from(coursesTable)
-        .where(eq(coursesTable.slug, COURSE_SLUG))
+        .where(eq(coursesTable.id, COURSE_ID))
         .limit(1);
-      course = bySlug ?? null;
-    }
 
-    if (!course) {
-      throw new Error(
-        "Course 4 not seeded by catalogue skeletons bootstrap. Ensure ensureCatalogueSkeletons() runs first."
+      if (byId) {
+        course = byId;
+      } else {
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course 4 not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
       );
-    }
+      const hasMissingQuiz = existingQuizQuestions.length !== 5;
+      const hasIncorrectSlug = course.slug !== COURSE_SLUG;
 
-    const courseId = course.id;
+      const needsRepair = !existingSeed ||
+                          hasMissingLessons ||
+                          hasEmptyBlocks ||
+                          hasMissingQuiz ||
+                          hasIncorrectSlug;
 
-    // 2. Fetch seed marker and existing database content
-    const [existingSeed] = await tx
-      .select()
-      .from(systemSeedsTable)
-      .where(eq(systemSeedsTable.name, SEED_NAME))
-      .limit(1);
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Water Conservation course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
 
-    const existingLessons = await tx
-      .select()
-      .from(lessonsTable)
-      .where(eq(lessonsTable.courseId, courseId));
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course 4. Re-seeding course content and lessons transactionally...");
 
-    const existingQuizQuestions = await tx
-      .select()
-      .from(quizQuestionsTable)
-      .where(eq(quizQuestionsTable.courseId, courseId));
+      // 4. Resolve next recommended course dynamically by slug
+      const [nextCourse] = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "carbon-footprint-awareness"))
+        .limit(1);
+      const nextCourseId = nextCourse?.id ?? null;
 
-    // 3. Evaluate integrity violations (determines whether repair is needed)
-    const hasMissingLessons = existingLessons.length !== 6;
-    const hasEmptyBlocks = existingLessons.some(
-      (l: any) =>
-        !l.contentBlocks ||
-        !Array.isArray(l.contentBlocks) ||
-        l.contentBlocks.length === 0
-    );
-    const hasPlaceholderText = existingLessons.some(
-      (l: any) =>
-        l.title.includes("[DRAFT SKELETON]") ||
-        (l.content || "").includes("[DRAFT SKELETON]")
-    );
-    const hasMissingQuiz = existingQuizQuestions.length !== 8;
-    const hasPlaceholderQuiz = existingQuizQuestions.some((q: any) =>
-      q.question.includes("[DRAFT SKELETON]")
-    );
-    const hasIncorrectSlug = course.slug !== COURSE_SLUG;
+      // 5. Update course record slug, title, and metadata
+      await tx
+        .update(coursesTable)
+        .set({
+          title: COURSE_TITLE,
+          slug: COURSE_SLUG,
+          description: COURSE_META.description,
+          fullDescription: COURSE_META.fullDescription,
+          categoryId: COURSE_META.categoryId,
+          durationMinutes: COURSE_META.durationMinutes,
+          priceUsd: COURSE_META.priceUsd,
+          level: COURSE_META.level,
+          isFeatured: COURSE_META.isFeatured,
+          thumbnailUrl: COURSE_META.thumbnailUrl,
+          learningObjectives: COURSE_META.learningObjectives,
+          includesCertificate: COURSE_META.includesCertificate,
+          passingScore: COURSE_META.passingScore,
+          completionMessage: COURSE_META.completionMessage,
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
+          isPublished: true,
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
 
-    const needsRepair =
-      !existingSeed ||
-      hasMissingLessons ||
-      hasEmptyBlocks ||
-      hasPlaceholderText ||
-      hasMissingQuiz ||
-      hasPlaceholderQuiz ||
-      hasIncorrectSlug;
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
+      }
 
-    if (!needsRepair) {
-      logger.info(
-        { courseId, slug: COURSE_SLUG },
-        "Water Conservation course content and integrity verified. Skipping repair to preserve administrator edits..."
+      // 7. Seed/re-seed quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
       );
-      return;
-    }
 
-    logger.info(
-      { courseId, slug: COURSE_SLUG },
-      "Integrity mismatch or missing seed detected for Course 4. Re-seeding course content and lessons transactionally..."
-    );
-
-    // 4. Resolve next recommended course dynamically by slug (Course 5: Sustainable Procurement)
-    const [nextCourse] = await tx
-      .select({ id: coursesTable.id })
-      .from(coursesTable)
-      .where(eq(coursesTable.slug, "sustainable-procurement"))
-      .limit(1);
-    const nextCourseId = nextCourse?.id ?? null;
-
-    // 5. Update course record metadata
-    await tx
-      .update(coursesTable)
-      .set({
-        title: COURSE_TITLE,
-        slug: COURSE_SLUG,
-        description: COURSE_META.description,
-        fullDescription: COURSE_META.fullDescription,
-        categoryId: COURSE_META.categoryId,
-        durationMinutes: COURSE_META.durationMinutes,
-        priceUsd: COURSE_META.priceUsd,
-        level: COURSE_META.level,
-        isFeatured: COURSE_META.isFeatured,
-        thumbnailUrl: COURSE_META.thumbnailUrl,
-        learningObjectives: COURSE_META.learningObjectives,
-        includesCertificate: COURSE_META.includesCertificate,
-        passingScore: COURSE_META.passingScore,
-        completionMessage: COURSE_META.completionMessage,
-        badgeName: COURSE_META.badgeName,
-        badgeDescription: COURSE_META.badgeDescription,
-        recommendedNextCourseId: nextCourseId,
-        isPublished: true,
-        status: "published",
-      })
-      .where(eq(coursesTable.id, courseId));
-
-    // 6. Re-seed lessons
-    await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
-    for (const newLesson of NEW_LESSONS) {
-      await tx.insert(lessonsTable).values({
-        courseId,
-        title: newLesson.title,
-        orderIndex: newLesson.order,
-        durationMinutes: newLesson.minutes,
-        content: newLesson.content,
-        contentBlocks: newLesson.blocks,
-        isArchived: false,
-      });
-    }
-
-    // 7. Re-seed quiz questions
-    await tx
-      .delete(quizQuestionsTable)
-      .where(eq(quizQuestionsTable.courseId, courseId));
-    await tx.insert(quizQuestionsTable).values(
-      NEW_QUIZ.map((q) => ({
-        courseId,
-        question: q.question,
-        options: q.options,
-        correctOption: q.correct,
-        orderIndex: q.order,
-        correctExplanation: q.correctExplanation,
-        incorrectExplanation: q.incorrectExplanation,
-        isArchived: false,
-      }))
-    );
-
-    // 8. Idempotently seed badge definition
-    await tx
-      .insert(badgeDefinitionsTable)
-      .values({
-        slug: BADGE_SLUG,
-        name: COURSE_META.badgeName,
-        description: COURSE_META.badgeDescription,
-        icon: "droplets",
-        criteriaType: "all_courses",
-        threshold: 0,
-        courseIds: [courseId],
-        orderIndex: 9,
-      })
-      .onConflictDoUpdate({
-        target: badgeDefinitionsTable.slug,
-        set: {
+      // 8. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
+          slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
+          icon: "droplet",
+          criteriaType: "all_courses",
+          threshold: 0,
           courseIds: [courseId],
-        },
-      });
+          orderIndex: 9,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
 
-    // 9. Record seed marker
-    if (!existingSeed) {
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        version: 1,
-      });
-    }
+      // 9. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
+        });
+      } else {
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
+      }
 
-    logger.info(
-      { courseId, slug: COURSE_SLUG },
-      "Water Conservation course seed / repair transaction completed successfully."
-    );
-  };
-
-  try {
-    if (externalTx) {
-      await runSeeder(externalTx);
-    } else {
-      await db.transaction(async (tx) => {
-        await runSeeder(tx);
-      });
-    }
+      logger.info({ courseId, slug: COURSE_SLUG }, "Water Conservation course v2 seed / repair transaction completed successfully.");
+    });
   } catch (err) {
-    logger.error(
-      { err },
-      "Failed to execute idempotent seeding/repair of Water Conservation course"
-    );
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Water Conservation course");
   }
 }
