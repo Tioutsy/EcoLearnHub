@@ -6,8 +6,6 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
@@ -15,518 +13,408 @@ import { logger } from "./logger";
 const COURSE_SLUG = "sustainability-data-collection-and-evidence";
 const COURSE_TITLE = "Sustainability Data Collection and Evidence";
 const BADGE_SLUG = "sustainability-evidence-contributor";
-const BADGE_CODE = "COURSE_ELH_18_COMPLETE";
-const SEED_NAME = "sustainability-data-collection-and-evidence-v1";
+const SEED_NAME = "sustainability-data-collection-and-evidence-v2";
 
 const COURSE_META = {
   courseCode: "ELH-18",
-  description: "Learn how to collect reliable workplace sustainability information, maintain clear supporting evidence and recognise common data-quality problems. This course helps employees and managers create records that are practical, understandable and suitable for progress reviews.",
-  fullDescription: "Learn how to collect reliable workplace sustainability information, maintain clear supporting evidence and recognise common data-quality problems. This course helps employees and managers create records that are practical, understandable and suitable for progress reviews.",
+  description:
+    "Learn how to collect, record, validate, and preserve reliable workplace sustainability data with correct units, reporting periods, boundaries, and supporting evidence files.",
+  fullDescription:
+    "Reliable sustainability tracking depends on ground-level data quality. This course enables employees, data collectors, and managers to select authentic data sources (utility invoices, meter logs, weigh-slips), apply explicit units and reporting periods, distinguish measured values from estimates and calculations, avoid using zero for missing data, and maintain audit-ready traceability without risking data gaps.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
   thumbnailUrl: "/images/courses/sustainability-data-collection-and-evidence.jpg",
-  intendedRoles: ["employees", "managers", "supervisors", "green teams", "facilities and operations", "esg and compliance support"],
+  intendedRoles: ["employees", "managers", "supervisors", "green teams", "facilities and operations", "esg and compliance support", "data collectors"],
   learningObjectives: [
-    "Distinguish useful sustainability evidence from vague claims or assumptions.",
-    "Identify the information required before beginning data collection.",
-    "Record figures, observations and documents consistently.",
-    "Select evidence that is proportionate to the action being tracked.",
-    "Recognise common data-quality problems.",
-    "Escalate gaps or uncertainty rather than inventing or estimating unsupported information.",
-    "Maintain records that another authorised person can understand and verify."
+    "Identify appropriate workplace sustainability data sources (utility bills, sub-meters, weigh-slips, procurement records).",
+    "Record data entries with complete metadata (value, physical unit, site boundary, reporting period, source link).",
+    "Apply the SOURCE data-quality framework (Select source, Observe period/unit, Upload record, Record estimates, Check gaps/duplicates, Escalate).",
+    "Distinguish between primary measured values, estimates, assumptions, and calculated indicators.",
+    "Recognize missing data, outliers, and duplicate entries, ensuring zero is never entered for unavailable data."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Sustainability Data Collection and Evidence. You can now contribute clearer, more consistent sustainability records and recognise when information needs clarification before it is used.",
-  badgeName: "Sustainability Evidence Contributor",
-  badgeDescription: "Awarded for completing Sustainability Data Collection and Evidence and demonstrating the ability to collect reliable workplace sustainability information, maintain clear supporting evidence and recognise common data-quality problems.",
+  completionMessage:
+    "Congratulations! You have completed Sustainability Data Collection and Evidence. You can now collect accurate workplace data, maintain complete units and reporting boundaries, preserve source evidence, and escalate data-quality gaps.",
+  badgeName: "Sustainability Data Collector",
+  badgeDescription:
+    "Awarded for demonstrating operational mastery of workplace data collection, unit precision, source evidence preservation, and data-gap escalation.",
 };
 
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Evidence, Not Assumptions",
+    title: "A Neat Spreadsheet Is Not Automatically Reliable Data",
     minutes: 3,
-    content: "Differentiate a claim from an observation or measured figure. Understand how to collect proportionate evidence (such as meter readings, invoices, and checklists) that another person can easily verify.",
+    content: "Understand why formatting data in a spreadsheet does not guarantee accuracy without units, boundaries, and source proof.",
     blocks: [
+      { id: "dc1-h1", type: "heading", position: 1, headingText: "Data Reliability Starts at the Source" },
+      { id: "dc1-t1", type: "short_text", position: 2, bodyText: "A hotel's monthly sustainability log reports: Electricity: 42, Water: 1,850, Waste Recycled: 65%, Generator Diesel: blank, Food Waste: 0. No physical units are shown. The electricity number came from a financial invoice total (MUR 42,000) rather than kilowatt-hours. The water figure covers six weeks instead of one calendar month. The recycling percentage lacks numerator/denominator records. Diesel data was uncollected, and food waste was entered as zero because no weigh-slip was submitted." },
+      { id: "dc1-k1", type: "key_message", position: 3, headingText: "Data Reliability Rule", bodyText: "A neat spreadsheet row is meaningless without physical units, explicit reporting boundaries, a defined collection period, and a verifiable source document." },
       {
-        id: "c18-l1-b1",
-        type: "heading",
-        headingText: "Evidence, Not Assumptions"
-      },
-      {
-        id: "c18-l1-b2",
-        type: "short_text",
-        bodyText: "A department reports that it has 'significantly reduced paper use,' but the action tracker contains no figures, dates, or supporting records. Vague claims cannot be reviewed or verified.\n\nUseful sustainability evidence shows what happened, what was measured or observed, when it happened, where the information came from, who recorded it, and what supporting proof is available. Evidence does not need to be complex to be useful: dated meter readings, invoices, checklists, photographs, and logs are all excellent, proportionate forms of evidence."
-      },
-      {
-        id: "c18-l1-b3",
-        type: "key_message",
-        headingText: "Workplace Example",
-        bodyText: "An office in Mauritius claiming reduced electricity consumption should compare electricity utility data or meter logs for consistent periods, while noting occupancy levels or closures, rather than simply stating 'energy use is lower.'"
-      },
-      {
-        id: "c18-l1-b4",
+        id: "dc1-d1",
         type: "decision_scenario",
-        decisionIntro: "Which statement is best supported and most useful for a progress review?",
-        decisionPrompt: "Select the best-supported statement:",
+        position: 4,
+        decisionIntro: "Evaluating Spreadsheet Data Quality:",
+        decisionPrompt: "A department spreadsheet lists Water: 1,850 without units or dates. How should a data collector respond?",
         decisionChoices: [
-          {
-            label: "The office is using less electricity",
-            correct: false,
-            feedback: "Incorrect. This is a claim with no data, time period, or evidence source."
-          },
-          {
-            label: "Electricity use appears lower this month",
-            correct: false,
-            feedback: "Incorrect. This is an assumption based on appearance, not a measured figure."
-          },
-          {
-            label: "Electricity consumption fell by 12% in August compared to July, based on utility invoice data attached to the tracker",
-            correct: true,
-            feedback: "Correct. This statement specifies the amount (12%), period (August vs July), source (utility invoice), and provides the source document."
-          },
-          {
-            label: "We are the greenest office in the region",
-            correct: false,
-            feedback: "Incorrect. This is unsupportable marketing puffery that does not relate to specific measurements."
-          }
+          { label: "Reject the entry until the value is specified with units (e.g. 1,850 m³), site scope (Building B), reporting period (1–30 June 2026), and source link (CWA bill / meter log)", correct: true, feedback: "Correct! Every data point requires a value, physical unit, site boundary, exact reporting period, and traceable source." },
+          { label: "Assume the number means 1,850 litres and approve the spreadsheet", correct: false, feedback: "Incorrect. Never assume physical units; guessing leads to massive calculation errors." },
+          { label: "Change the number to zero because no unit was provided", correct: false, feedback: "Incorrect. Never enter zero for missing metadata or uncollected records." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "Decide What to Collect First",
+    title: "Why Data Quality Matters & Essential Vocabulary",
     minutes: 3,
-    content: "Learn how to define data requirements before starting collection. Understand how clear instructions on scope, units, timing, and sources prevent inconsistencies.",
+    content: "Understand operational benefits of reliable data and master 50+ core data-collection terms.",
     blocks: [
+      { id: "dc2-h1", type: "heading", position: 1, headingText: "Operational Value & Plain-Language Vocabulary" },
+      { id: "dc2-t1", type: "short_text", position: 2, bodyText: "Accurate data enables facilities leads to pinpoint equipment leaks, procurement officers to evaluate supplier efficiency, and management to track performance targets honestly." },
       {
-        id: "c18-l2-b1",
-        type: "heading",
-        headingText: "Decide What to Collect First"
-      },
-      {
-        id: "c18-l2-b2",
-        type: "short_text",
-        bodyText: "Before collecting evidence, you must clarify: the goal being tracked, the indicator, the measurement unit or format, the reporting period, the responsible person, the source, and review frequency. Collecting massive amounts of unguided data does not improve quality; it increases confusion."
-      },
-      {
-        id: "c18-l2-b3",
+        id: "dc2-k1",
         type: "key_message",
-        headingText: "Instruction Comparison",
-        bodyText: "Vague instruction: 'Collect food waste data.' Clear instruction: 'Record the weight of avoidable canteen food waste in kilograms after lunch service every Friday for four weeks, using the canteen scale.'"
+        position: 3,
+        headingText: "Core Data-Collection Vocabulary",
+        bodyText: "• Primary Data: Direct physical measurements (e.g. meter readings, weigh-scale slips).\n• Secondary Data: Derived or third-party estimates (e.g. average fuel factors).\n• Source Record: Original evidence file (e.g. CEB invoice PDF, signed delivery note).\n• Unit of Measure: Physical dimension (kWh, m³, kg, L, tonnes) — NEVER currency amount.\n• Reporting Period: Exact calendar date span of resource usage (e.g. 1–30 June 2026).\n• Missing Data vs Zero: Missing data means uncollected information (blank/escalated); zero means verified zero resource use.\n• Outlier: An implausibly high or low value requiring verification before submission.\n• Traceability: The ability to trace a final reported statistic back to its original source record."
       },
       {
-        id: "c18-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A coordinator is asked to 'track electricity reduction' from the facilities team. Which detail must be clarified first to ensure consistent data?",
-        decisionPrompt: "Select the most critical detail to clarify:",
-        decisionChoices: [
-          {
-            label: "The national energy tariff rates for the next five years",
-            correct: false,
-            feedback: "Incorrect. Tariff rates are external pricing details; they do not define how or when electricity consumption is measured."
-          },
-          {
-            label: "The specific meters to be read, the reading day of the month, the unit (kWh), and who will record the figures",
-            correct: true,
-            feedback: "Correct. Defining meters, frequency, units, and ownership ensures data remains consistent and comparable over time."
-          },
-          {
-            label: "The marketing slogans for the energy saving campaign",
-            correct: false,
-            feedback: "Incorrect. Marketing slogans do not establish data parameters or measurement consistency."
-          },
-          {
-            label: "The global carbon emission factors for grid electricity",
-            correct: false,
-            feedback: "Incorrect. Carbon accounting factors are applied later; you first need clear parameters for the raw electricity data collection."
-          }
-        ]
+        id: "dc2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Completion vs Verification)",
+        bodyText: "An action or report marked 'completed' is not automatically verified.\n\nReliable monitoring records show what deliverable was measured, who was accountable, when it was recorded, and what documented information supports the value.\n\nManagement-system standards (ISO 14001 Clause 9.1 & ISO 9001 Clause 9.1) emphasize monitoring, evaluation, and retaining appropriate documented information. A clear data register preserves evidence and prevents relying on memory or unverified estimates."
       }
     ]
   },
   {
     order: 2,
-    title: "Record Information Consistently",
-    minutes: 3,
-    content: "Understand why consistency in units, sources, and formatting is critical. Follow basic data protection guidelines, avoiding unnecessary personal or confidential information.",
+    title: "The SOURCE Data-Quality Framework",
+    minutes: 4,
+    content: "Apply the 6-step SOURCE framework for disciplined data collection.",
     blocks: [
+      { id: "dc3-h1", type: "heading", position: 1, headingText: "The SOURCE Data-Quality Framework" },
+      { id: "dc3-t1", type: "short_text", position: 2, bodyText: "Follow the SOURCE protocol for every workplace data entry:" },
       {
-        id: "c18-l3-b1",
-        type: "heading",
-        headingText: "Record Information Consistently"
-      },
-      {
-        id: "c18-l3-b2",
-        type: "short_text",
-        bodyText: "Consistent records are easy to compare and verify. Use the same units, same sources, format dates identically, avoid leaving unexplained blanks, name files clearly, and record corrections transparently. Separate actual figures from estimates, and never modify historical values without an audit trail.\n\nData Protection Rule: Collect only the information required for the tracker, and follow your organization's privacy and document-retention guidelines. Avoid recording unnecessary personal details."
-      },
-      {
-        id: "c18-l3-b3",
+        id: "dc3-k1",
         type: "key_message",
-        headingText: "Consistent Log Entry",
-        bodyText: "Weak entries: 'Pipe leaking', 'Fixed', 'Small leak'. Better entries: Date reported, Location, Leak type, Person notified, Date repaired, Verification status, and work order link."
+        position: 3,
+        headingText: "SOURCE Framework Breakdown",
+        bodyText: "• S — Select the correct source: Use primary meter logs, utility invoices, or weigh-slips.\n• O — Observe period, boundary & unit: Record physical unit (kWh, m³), exact dates, and site location.\n• U — Upload or preserve supporting record: Attach or link original digital PDFs or photo logs.\n• R — Record estimates & assumptions honestly: Label non-metered estimates clearly with formulas.\n• C — Check for gaps, duplicates & unusual values: Audit for double invoices, missing months, and spikes.\n• E — Escalate unresolved issues & preserve corrections: Surface uncollected data gaps and log change reasons."
       },
       {
-        id: "c18-l3-b4",
+        id: "dc3-d1",
         type: "decision_scenario",
-        decisionIntro: "Which leak log entry is easiest for a manager to verify and review three months later?",
-        decisionPrompt: "Select the most consistent log entry:",
+        position: 4,
+        decisionIntro: "Practice: Handling Unavailable Data",
+        decisionPrompt: "A generator diesel delivery took place on 28 June, but the delivery receipt was misplaced. How should the logistics clerk record the June generator fuel data?",
         decisionChoices: [
-          {
-            label: "Leak fixed last week by facilities crew.",
-            correct: false,
-            feedback: "Incorrect. This lacks the exact date, location, repair details, or verification link."
-          },
-          {
-            label: "12-Sep-2026: Bathroom 2B hot water pipe leak repaired by plumber; verified dry on 13-Sep-2026; repair invoice #8874 attached.",
-            correct: true,
-            feedback: "Correct. This logs the date, location, repair details, verification date, and attaches verifiable source proof (invoice #8874)."
-          },
-          {
-            label: "Leak under control.",
-            correct: false,
-            feedback: "Incorrect. This contains no dates, location, or verifiable details."
-          },
-          {
-            label: "Plumber repaired a faucet and noted a leak somewhere in the office block.",
-            correct: false,
-            feedback: "Incorrect. This is too vague and lacks dates, exact location, or supporting records."
-          }
+          { label: "Flag the entry as 'Data Pending / Misplaced Receipt', record a provisional estimate based on tank dipstick reading with a note, and request a duplicate receipt from the fuel supplier", correct: true, feedback: "Correct! Labeling provisional estimates transparently and requesting supplier duplicates preserves data integrity." },
+          { label: "Enter '0' in the diesel column so the monthly summary formula works without errors", correct: false, feedback: "NEVER enter zero for uncollected or missing data; zero distorts totals and falsely implies zero fuel usage." },
+          { label: "Copy the diesel consumption figure from May without writing any note", correct: false, feedback: "Incorrect. Silently carrying forward old figures creates false historical records." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Use Proportionate Supporting Evidence",
-    minutes: 3,
-    content: "Select evidence that is proportionate to the action being tracked. Understand how simple actions (checklists), ongoing tasks (logs), and purchasing actions (receipts) require different types of proof.",
+    title: "Visual Inspection & Data-Quality Safeguards",
+    minutes: 4,
+    content: "Inspect a realistic Mauritian data collection log sheet and master critical safeguards.",
     blocks: [
+      { id: "dc4-h1", type: "heading", position: 1, headingText: "Visual Data Quality Inspection" },
+      { id: "dc4-t1", type: "short_text", position: 2, bodyText: "Examine the printed monthly data log sheet (`visual-sustainability-data-quality-check.png`). Observe how red sticky notes mark data quality defects: missing units on water ('1850'), zero entered for missing diesel fuel data ('0'), duplicate invoice references, and unverified percentages." },
       {
-        id: "c18-l4-b1",
-        type: "heading",
-        headingText: "Use Proportionate Supporting Evidence"
+        id: "dc4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-sustainability-data-quality-check.png",
+        caption: "Monthly Sustainability Data Log Sheet: Highlighting missing units, zero for missing data, duplicate invoice numbers, and unverified percentages.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace desk with a printed Monthly Sustainability Data Log Sheet showing highlighted data quality defects like missing units, zero for missing data, duplicate invoice references, and unverified percentages while coordinators review."
       },
       {
-        id: "c18-l4-b2",
-        type: "short_text",
-        bodyText: "Evidence should be relevant, dated, and stored in an authorized location. It should also be proportionate to the action's significance. A simple task (installing recycling bins) needs simple evidence like a dated photo or location checklist. An ongoing task (weekly equipment shutdown) needs a signed weekly log. A purchasing action (buying reusable mugs) needs invoice receipts."
-      },
-      {
-        id: "c18-l4-b3",
+        id: "dc4-k1",
         type: "key_message",
-        headingText: "Photo Limitations",
-        bodyText: "A photograph shows that an item existed at one moment, but it does not prove ongoing use, correct operation, or long-term results."
-      },
-      {
-        id: "c18-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A department replaces single-use cups with ceramic mugs. Which evidence represents the most proportionate combination for the tracker?",
-        decisionPrompt: "Select the most proportionate evidence:",
-        decisionChoices: [
-          {
-            label: "A photograph of one mug on a desk and a verbal promise that everyone is using them",
-            correct: false,
-            feedback: "Incorrect. One desk photo and a verbal claim do not verify that the purchasing change was fully implemented."
-          },
-          {
-            label: "The approved mug purchase order, delivery note, and the updated facilities supply checklist",
-            correct: true,
-            feedback: "Correct. The purchase order and delivery note prove the procurement change occurred, and the supply checklist verifies distribution."
-          },
-          {
-            label: "A 50-page corporate sustainability strategy document",
-            correct: false,
-            feedback: "Incorrect. Strategy documents define intentions, they do not prove that this specific cup replacement action took place."
-          },
-          {
-            label: "Daily video logs of employees drinking beverages for two weeks",
-            correct: false,
-            feedback: "Incorrect. This is excessive, violates privacy guidelines, and creates unnecessary administrative burden."
-          }
-        ]
+        position: 4,
+        headingText: "High-Risk Data Mistakes to Avoid",
+        bodyText: "• DO NOT record financial cost (MUR) in place of physical consumption units (kWh, m³).\n• DO NOT mix calendar month boundaries (1–30 June) with billing cycle dates (12 May–11 June) without noting overlap.\n• DO NOT enter '0' for missing data; leave blank or tag as 'Data Gap / Escalated'.\n• DO NOT overwrite primary source data with calculated formulas or secondary indicators.\n• DO NOT save evidence files in private personal folders or personal messaging chats."
       }
     ]
   },
   {
     order: 4,
-    title: "Recognise Data-Quality Problems",
-    minutes: 3,
-    content: "Identify common data-quality errors: missing dates, inconsistent periods, selective reporting, and unsupported estimates. Learn how to escalate gaps honestly.",
+    title: "Worked Mauritian Scenario & Applied Decision",
+    minutes: 2,
+    content: "Study a hotel multi-resource data collection log and solve a real-world facilities decision.",
     blocks: [
+      { id: "dc5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Hotel Monthly Data Collection Log" },
       {
-        id: "c18-l5-b1",
-        type: "heading",
-        headingText: "Recognise Data-Quality Problems"
+        id: "dc5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Coordinated Hotel Resource Data Log",
+        bodyText: "A Grand Baie hotel collects 4 monthly streams:\n1. Electricity: 48,200 kWh | Period: 1–30 June | Source: CEB Smart Meter Log | Validation: Checked vs sub-meters.\n2. Water: 2,150 m³ | Period: 1–30 June | Source: CWA Bill & Daily Sub-Meter Register | Validation: Leak test confirmed.\n3. General Waste: 4.2 tonnes | Period: 1–30 June | Source: Contractor Weigh-Slips (8 receipts attached) | Unit: Tonnes.\n4. Recyclable Plastic: 680 kg | Period: 1–30 June | Source: Recycler Receipt #1042 | Validation: Weigh-scale verified."
       },
       {
-        id: "c18-l5-b2",
-        type: "short_text",
-        bodyText: "Common errors include missing units, selective reporting, or treating 'Zero', 'Not measured', and 'Not available' as interchangeable. An honest gap is always more useful than a value that is estimated or invented without support.\n\nEscalation rule: when data is missing, mark it as 'unavailable', note the reason, notify the responsible owner, and adjust the collection process for next time."
-      },
-      {
-        id: "c18-l5-b3",
-        type: "key_message",
-        headingText: "Blank Cell Scenario",
-        bodyText: "A waste log contains a blank cell for week 3. The manager should not assume waste was zero; a blank cell simply means data is incomplete until explained."
-      },
-      {
-        id: "c18-l5-b4",
+        id: "dc5-d1",
         type: "decision_scenario",
-        decisionIntro: "You find that the fuel record for one company vehicle is missing for the month. What is the correct way to record this in the tracker?",
-        decisionPrompt: "Select the best data entry action:",
+        position: 3,
+        decisionIntro: "Applied Facilities Decision:",
+        decisionPrompt: "A facilities manager needs monthly electricity data by noon for a quarterly review. The CEB utility bill has not arrived yet, but the maintenance technician has recorded physical sub-meter readings for 30 June. What is the most reliable action?",
         decisionChoices: [
-          {
-            label: "Copy the fuel consumption from the previous month so the reports look consistent",
-            correct: false,
-            feedback: "Incorrect. Copying values creates a false estimate and hides the data gap."
-          },
-          {
-            label: "Mark the fuel data as 'Unavailable', record that the log sheet was lost, and report the gap to the fleet manager",
-            correct: true,
-            feedback: "Correct. This maintains integrity by declaring the gap honestly and prompting corrective action to retrieve or prevent lost logs."
-          },
-          {
-            label: "Enter zero, assuming the vehicle was not used much",
-            correct: false,
-            feedback: "Incorrect. Recording zero when fuel was consumed is false data and distorts the total utility metrics."
-          },
-          {
-            label: "Estimate the figure based on memory without adding any notes",
-            correct: false,
-            feedback: "Incorrect. Memory-based estimates without notes degrade data quality and make auditing impossible."
-          }
+          { label: "Calculate electricity usage using the 30 June sub-meter photo logs, enter the value with unit 'kWh (Provisional Meter Log)', attach the sub-meter photo, and note that utility invoice verification will occur upon bill arrival", correct: true, feedback: "Outstanding! Using primary sub-meter logs labelled as provisional meter readings maintains transparency, physical units, and immediate traceability." },
+          { label: "Copy the previous month's CEB invoice consumption figure so the table is filled", correct: false, feedback: "NEVER copy previous months' figures without labeling them as estimates; doing so creates false historical records." },
+          { label: "Multiply last month's bill cost by 1.1 to guess current usage", correct: false, feedback: "Incorrect. Guessing based on financial cost is unreliable and introduces severe calculation errors." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Prepare Evidence for Review",
-    minutes: 3,
-    content: "Learn how to organize records so another person can verify them. Conduct reviews following a structured routine, and make a personal collection commitment.",
+    title: "Your Data Collection Commitment & Badge",
+    minutes: 2,
+    content: "Select your daily data collection commitments and complete the course.",
     blocks: [
+      { id: "dc6-h1", type: "heading", position: 1, headingText: "Data Collection Commitment" },
+      { id: "dc6-t1", type: "short_text", position: 2, bodyText: "Select the data collection practices you pledge to apply in your workplace." },
       {
-        id: "c18-l6-b1",
-        type: "heading",
-        headingText: "Prepare Evidence for Review"
-      },
-      {
-        id: "c18-l6-b2",
-        type: "short_text",
-        bodyText: "Evidence is review-ready when someone else can understand the action, its source, its limitations, and verify the result without relying on your memory. Before reviews, verify: actions are named, periods are clear, units are marked, sources are identified, and links are active."
-      },
-      {
-        id: "c18-l6-b3",
-        type: "key_message",
-        headingText: "Review Routine",
-        bodyText: "1. Confirm the action. 2. Check the indicator. 3. Check the period. 4. Verify the source data. 5. Note gaps or anomalies. 6. Record the review outcome."
-      },
-      {
-        id: "c18-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Which data collection improvement would be most useful in your workplace?",
-        commitmentChoices: [
-          "Clarify one indicator before collecting new information",
-          "Add dates and sources to an existing tracker",
-          "Review one blank or unexplained value",
-          "Organise one set of supporting evidence",
-          "Confirm who is responsible for one data source"
+        id: "dc6-c1",
+        type: "commitment",
+        position: 3,
+        commitmentInstruction: "Select your data collection commitments (choose at least one):",
+        commitmentOptions: [
+          { value: "include-physical-units", label: "Include explicit physical units (kWh, m³, kg, L) on every data point recorded", description: "Prevent financial currency or unit confusion." },
+          { value: "never-zero-for-missing", label: "Never enter zero for uncollected or missing data; tag gaps and escalate transparently", description: "Protect mathematical formula totals." },
+          { value: "preserve-source-evidence", label: "Attach or link original source records (invoices, meter photos, weigh-slips) in shared drives", description: "Maintain full audit traceability." },
+          { value: "distinguish-estimates", label: "Clearly label estimates and assumptions with their calculation methods", description: "Ensure full operational transparency." }
         ]
+      },
+      {
+        id: "dc6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: This course provides practical workplace guidance on sustainability data collection. It does not provide independent assurance, environmental accreditation, statutory reporting certification, legal advice, or verification of an organization's environmental performance."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "A department claims: 'We have dramatically reduced paper use.' The action tracker has no figures, dates, or source files. What is the best response?",
+    order: 1,
+    question: "Why is entering '1,850' in a water tracking spreadsheet without units or dates a data-quality failure?",
     options: [
-      { text: "Approve the update as completed because the department team verbally confirmed it.", isCorrect: false, feedback: "Incorrect. Verbal confirmations without data do not provide reliable or verifiable evidence." },
-      { text: "Ask the department for a defined comparison period and the supporting printer logs or purchasing invoices.", isCorrect: true, feedback: "Correct. A credible claim requires a specified timeframe and reliable source documents to back it up." },
-      { text: "Replace the word 'dramatically' with 'slightly' and mark the action as completed in the tracker.", isCorrect: false, feedback: "Incorrect. Softening the adjectives does not fix the absolute lack of data or evidence." },
-      { text: "Add an estimated percentage (like 10%) so the tracker fields appear complete.", isCorrect: false, feedback: "Incorrect. Inventing numbers undermines the integrity of the tracking system." }
+      "Because without physical units (e.g. m³, L) and an exact reporting period, the number cannot be verified, calculated, or compared",
+      "Because spreadsheets cannot store numbers greater than 1,000",
+      "Because water tracking is legally restricted to government officers",
+      "Because all water numbers must be written in roman numerals"
     ],
-    correctExplanation: "Sustainability claims must be backed by a defined comparison period and reliable source data to be credible.",
-    incorrectExplanation: "Verbal assurances, modifying adjectives, or fabricating estimates do not resolve data gaps.",
-    practicalTakeaway: "Always ask for comparison periods and source records before entering a claim into the tracker."
+    correct: 0,
+    correctExplanation: "Every data point requires a value, physical unit, site boundary, exact reporting period, and traceable source.",
+    incorrectExplanation: "Incorrect. Numbers without physical units and reporting periods cannot be verified or compared."
   },
   {
-    question: "A hotel team wants to track canteen food waste. Which instruction is most useful to ensure consistent data collection?",
+    order: 2,
+    question: "What does the 'O' in the SOURCE data-quality framework stand for?",
     options: [
-      { text: "Monitor canteen food waste regularly.", isCorrect: false, feedback: "Incorrect. 'Regularly' is vague and doesn't specify when, what, or how to measure." },
-      { text: "Ask canteen staff whether food waste has improved at the end of each week.", isCorrect: false, feedback: "Incorrect. Staff opinions are subjective and do not provide consistent, measurable data." },
-      { text: "Record the weight of avoidable food waste from the staff canteen in kilograms after Friday lunch service for four weeks, using the canteen scale.", isCorrect: true, feedback: "Correct. This specifies what to measure, the unit (kg), when (after Friday lunch), duration (four weeks), and the exact tool (canteen scale)." },
-      { text: "Take a photograph of the kitchen area at the end of the month.", isCorrect: false, feedback: "Incorrect. Photographs do not measure food waste weight or provide operational consistency." }
+      "Observe period, boundary & unit (record physical units, exact calendar dates, and site location)",
+      "Overwrite old spreadsheet files to save storage space",
+      "Omit fuel data if the invoice is too complicated",
+      "Order new smart meters without management approval"
     ],
-    correctExplanation: "Clear collection instructions define the exact task, the unit of measurement, the timing, the duration, and the tools to be used.",
-    incorrectExplanation: "Vague terms, staff opinions, or random photographs fail to establish consistent or comparable data points.",
-    practicalTakeaway: "Specify the unit, timing, tool, and coordinator when requesting sustainability data."
+    correct: 0,
+    correctExplanation: "O = Observe period, boundary & unit, ensuring explicit physical and temporal boundaries.",
+    incorrectExplanation: "Incorrect. O = Observe period, boundary & unit."
   },
   {
-    question: "A weekly leak tracker contains a blank cell for one week. What should the reviewer conclude?",
+    order: 3,
+    question: "What is the critical difference between MISSING DATA and ZERO?",
     options: [
-      { text: "No leaks occurred during that week.", isCorrect: false, feedback: "Incorrect. A blank cell does not prove zero leaks; it is ambiguous." },
-      { text: "The value should be recorded as zero to keep the charts aligned.", isCorrect: false, feedback: "Incorrect. Entering zero for missing data is inaccurate and distorts reporting integrity." },
-      { text: "The information is incomplete until the blank is explained and verified by the inspection owner.", isCorrect: true, feedback: "Correct. A blank cell represents missing data and must be treated as incomplete until clarified." },
-      { text: "The previous week's leak count should be copied into the blank cell.", isCorrect: false, feedback: "Incorrect. Duplicating historical records without verification creates false metrics." }
+      "Missing data means information was uncollected (must remain blank/tagged gap); zero means verified proof that zero resource was consumed",
+      "Missing data means zero cost; zero means negative cost",
+      "Missing data and zero mean the exact same thing in accounting",
+      "Missing data is used for electricity; zero is used for water"
     ],
-    correctExplanation: "Blanks represent incomplete data. A reviewer cannot assume a blank equals zero or no activity; it must be investigated.",
-    incorrectExplanation: "Assuming zero, copying old values, or ignoring the cell ignores the data gap and distorts the tracker.",
-    practicalTakeaway: "Never assume a blank cell means zero leaks or zero waste. Treat it as incomplete."
+    correct: 0,
+    correctExplanation: "Entering zero for missing data distorts totals and falsely implies zero resource consumption.",
+    incorrectExplanation: "Incorrect. Missing data = uncollected info; Zero = verified zero consumption."
   },
   {
-    question: "One department records plastic waste in kilograms. Another department records it as 'number of bags.' What is the main issue with this tracking data?",
+    order: 4,
+    question: "In the visual data log sheet photo (`visual-sustainability-data-quality-check.png`), what data defect is highlighted on the water row?",
     options: [
-      { text: "Both datasets are automatically incorrect and must be deleted.", isCorrect: false, feedback: "Incorrect. The data is not necessarily incorrect, but it is inconsistent." },
-      { text: "The results cannot be easily compared or combined without a defined conversion rate or a uniform recording method.", isCorrect: true, feedback: "Correct. Using different units makes it impossible to aggregate the total plastic waste accurately." },
-      { text: "Bags are always a more accurate unit of measurement than kilograms.", isCorrect: false, feedback: "Incorrect. Kilograms (weight) is a standardized unit, whereas bags vary in volume and fullness." },
-      { text: "The numbers should be added together directly in the main report.", isCorrect: false, feedback: "Incorrect. You cannot add weight (kg) directly to counts (bags) without a conversion." }
+      "The value '1850' is recorded without any physical unit of measure (e.g. m³ or litres)",
+      "The document is printed on recycled paper",
+      "The table contains too many rows",
+      "The font color is dark blue"
     ],
-    correctExplanation: "Tracking metrics must use standardized units (or have documented conversion rules) to allow aggregation and comparison.",
-    incorrectExplanation: "Inconsistent units do not mean the data is corrupt, but they prevent direct comparison and reporting.",
-    practicalTakeaway: "Agree on standard units (like kilograms or liters) before starting data collection across departments."
+    correct: 0,
+    correctExplanation: "The water row shows '1850' without specifying m³ or litres, creating severe ambiguity.",
+    incorrectExplanation: "Incorrect. The highlighted defect is a missing unit of measure."
   },
   {
-    question: "A company installs new recycling points in three office areas. Which evidence is most proportionate to verify this action?",
+    order: 5,
+    question: "Why should financial invoice costs (e.g. MUR 45,000) NEVER be entered into consumption fields meant for physical units (e.g. kWh)?",
     options: [
-      { text: "A general email bulletin to employees saying recycling is important.", isCorrect: false, feedback: "Incorrect. Emails state intent or awareness; they do not prove bins were actually installed." },
-      { text: "A dated installation checklist signed by the facilities coordinator, supported by photographs of the three bins.", isCorrect: true, feedback: "Correct. This provides direct, proportionate proof of installation (checklist and photos) for a simple physical action." },
-      { text: "The company's five-year waste management strategy document.", isCorrect: false, feedback: "Incorrect. Strategy documents show plans, not proof of installation for this specific action." },
-      { text: "An employee survey asking if the new bins look nice.", isCorrect: false, feedback: "Incorrect. Employee opinions do not provide concrete proof of physical installation." }
+      "Because utility tariffs change over time, so money spent does not equal physical energy or water consumed",
+      "Because currency amounts are secret and confidential",
+      "Because utility bills are always inaccurate",
+      "Because physical units can only be measured in winter"
     ],
-    correctExplanation: "Evidence should be proportionate to the action. For a simple physical installation, a checklist and photos are perfect.",
-    incorrectExplanation: "Corporate strategy PDFs, general emails, or opinions are not direct, proportionate proof of physical actions.",
-    practicalTakeaway: "Match the evidence to the action: a signed checklist and photos are perfect for physical installations."
+    correct: 0,
+    correctExplanation: "Tariffs and taxes fluctuate; tracking costs instead of physical units distorts environmental footprint calculations.",
+    incorrectExplanation: "Incorrect. Financial costs fluctuate with tariffs and do not represent physical resource consumption."
   },
   {
-    question: "A facilities team changes its weekly electricity meter-reading day from Monday morning to Friday afternoon. What should they do?",
+    order: 6,
+    question: "How should a data collector handle an ESTIMATED value when a meter reading is temporarily unavailable?",
     options: [
-      { text: "Continue reading without noting the change in the tracker logs.", isCorrect: false, feedback: "Incorrect. Failing to note the change obscures why weekly consumption figures may appear different." },
-      { text: "Delete the previous Monday readings to keep the database consistent.", isCorrect: false, feedback: "Incorrect. Deleting historical data destroys valuable baseline tracking records." },
-      { text: "Document the change in the tracker notes because changing the reading interval will affect weekly comparisons.", isCorrect: true, feedback: "Correct. Changing intervals shifts the duration of the reading period, which must be noted to explain anomalies." },
-      { text: "Adjust the historical Monday data to match the new Friday timeline.", isCorrect: false, feedback: "Incorrect. Fabricating historical entries violates data integrity and auditing rules." }
+      "Label the entry clearly as 'Estimate', record the estimation formula/source, and schedule verification when actual data arrives",
+      "Enter the estimate as a verified meter reading without telling anyone",
+      "Leave the spreadsheet permanently locked",
+      "Multiply last year's number by 2 and submit it"
     ],
-    correctExplanation: "Changes in data collection intervals or methods must be documented to explain variances and preserve comparison validity.",
-    incorrectExplanation: "Failing to document, deleting baseline records, or fabricating history undermines tracking credibility.",
-    practicalTakeaway: "Always document changes in data collection timing or tools to explain future variances."
+    correct: 0,
+    correctExplanation: "Estimates must be explicitly labeled with calculation methods and updated when measured data arrives.",
+    incorrectExplanation: "Incorrect. Estimates must be clearly labeled with methods and updated upon verification."
   },
   {
-    question: "An employee cannot find the fuel invoice for a company delivery vehicle, but wants to complete the monthly tracking report. What is the best action?",
+    order: 7,
+    question: "What is an OUTLIER in workplace sustainability data collection?",
     options: [
-      { text: "Enter an estimate based on memory and mark the task as complete.", isCorrect: false, feedback: "Incorrect. Memory-based estimates without notes degrade data quality." },
-      { text: "Copy the previous month's fuel invoice amount.", isCorrect: false, feedback: "Incorrect. Duplicating values creates false reports and hides the gap." },
-      { text: "Record the fuel data as 'Unavailable', document the missing invoice note, and notify the fleet supervisor.", isCorrect: true, feedback: "Correct. Flagging the gap honestly is critical, allowing follow-up to retrieve the invoice or fix logs." },
-      { text: "Leave the cell blank without adding any notes or telling anyone.", isCorrect: false, feedback: "Incorrect. Unexplained blanks leave the report ambiguous and delay resolution." }
+      "An implausibly high or low data value compared to historical baselines that requires verification before submission",
+      "An employee who works outside the main office building",
+      "A document that was deleted from the computer recycle bin",
+      "A supplier who provides raw materials"
     ],
-    correctExplanation: "Data integrity requires declaring gaps honestly, logging the reasons, and notifying supervisors to address the missing source records.",
-    incorrectExplanation: "Fabricating estimates, duplicating historical values, or ignoring gaps violates professional data standards.",
-    practicalTakeaway: "Be honest about missing data: mark it 'Unavailable', explain the gap, and notify the owner."
+    correct: 0,
+    correctExplanation: "Outliers are unusual spikes or drops requiring verification for potential leaks or data entry errors.",
+    incorrectExplanation: "Incorrect. Outliers are unusual values requiring verification before submission."
   },
   {
-    question: "Which tracker entry represents the most review-ready progress update?",
+    order: 8,
+    question: "Why is saving evidence files in shared company locations better than storing them in personal folders?",
     options: [
-      { text: "Lights improved. Completed.", isCorrect: false, feedback: "Incorrect. This has no date, details, or link to supporting records." },
-      { text: "Energy project successful.", isCorrect: false, feedback: "Incorrect. This is a vague claim that provides no data or verification proof." },
-      { text: "LED replacements completed in reception and meeting rooms on 14 July; contractor sign-off sheet #401 attached; post-install electricity review scheduled for October.", isCorrect: true, feedback: "Correct. This logs the action, date (14 July), location (reception/meeting rooms), attaches proof (sheet #401), and schedules the next review step." },
-      { text: "Everyone agrees the new office lights are much better.", isCorrect: false, feedback: "Incorrect. Staff consensus is nice, but it is not verifiable evidence of project completion." }
+      "Because shared storage ensures audit traceability, team access, and operational continuity when staff change roles",
+      "Because personal folders use more internet bandwidth",
+      "Because shared files cannot be edited by managers",
+      "Because personal files automatically expire after 24 hours"
     ],
-    correctExplanation: "A review-ready entry clearly details the action, location, date, links to supporting proof, and maps out the next review step.",
-    incorrectExplanation: "Vague claims, opinion metrics, or single-word updates lack the details needed for audit and verification.",
-    practicalTakeaway: "Write tracker entries so someone else can understand the action, date, location, and proof without asking you."
+    correct: 0,
+    correctExplanation: "Shared evidence locations ensure team access, audit traceability, and continuity.",
+    incorrectExplanation: "Incorrect. Shared locations preserve traceability and operational continuity."
+  },
+  {
+    order: 9,
+    question: "How does ELH-18 (Data Collection) connect to ELH-19 (Performance Review)?",
+    options: [
+      "ELH-18 ensures raw data is complete, validated, and traceable; ELH-19 evaluates those validated data streams to review overall progress",
+      "ELH-18 replaces performance reviews entirely",
+      "ELH-18 is for receptionists; ELH-19 is for external lawyers",
+      "ELH-18 handles financial payroll while ELH-19 handles marketing"
+    ],
+    correct: 0,
+    correctExplanation: "ELH-18 collects and validates raw data; ELH-19 interprets the validated data during performance reviews.",
+    incorrectExplanation: "Incorrect. ELH-18 provides validated data; ELH-19 evaluates performance trends."
+  },
+  {
+    order: 10,
+    question: "What is the primary takeaway of the SOURCE Data-Quality Framework?",
+    options: [
+      "Applying SOURCE (Select source, Observe period/unit, Upload record, Record estimates, Check gaps, Escalate) ensures workplace data is reliable and traceable",
+      "Data collection is only necessary during external audits",
+      "Spreadsheets should be submitted without checking for missing units",
+      "Estimates should always replace physical meter readings"
+    ],
+    correct: 0,
+    correctExplanation: "The SOURCE framework provides structured discipline for accurate, evidence-backed data collection.",
+    incorrectExplanation: "Incorrect. SOURCE provides the discipline needed for reliable workplace data."
   }
 ];
 
-export async function ensureSustainabilityDataCollectionCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureSustainabilityDataCollectionCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      // 1. Resolve Course 18 by courseCode "ELH-18" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-18"))
+        .limit(1);
 
-      // 2. Resolve Course 17
-      let course17 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-17")
-      });
-      if (!course17) {
-        course17 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "tracking-sustainability-actions-and-progress")
-        });
-      }
-
-      if (!course17) {
-        throw new Error("Data integrity error: Course 17 (ELH-17) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 18
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
-        actualCourseId = inserted.id;
+      if (byCode) {
+        course = byCode;
       } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course ELH-18 / sustainability-data-collection-and-evidence not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Sustainability Data Collection course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-18. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-19 or null if not yet seeded)
+      const [course19] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "sustainability-performance-review"))
+        .limit(1);
+      const nextCourseId = course19 ? course19.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
           slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
+          courseCode: "ELH-18",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -539,185 +427,109 @@ export async function ensureSustainabilityDataCollectionCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
       }
 
-      // 4. Update Course 17 recommendedNextCourseId to point to Course 18 preserving admin edits
-      let isSystemManaged = false;
-      if (course17.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course17.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-18") {
-          isSystemManaged = true;
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entries in coursePrerequisitesTable (ELH-12 through ELH-17 -> ELH-18)
+      const prereqs = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(inArray(coursesTable.slug, [
+          "final-sustainability-certification",
+          "sustainability-action-planning",
+          "setting-departmental-sustainability-goals",
+          "building-workplace-sustainability-team",
+          "communicating-sustainability-at-work",
+          "tracking-sustainability-actions-and-progress"
+        ]));
+
+      for (const prereq of prereqs) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: prereq.id,
+          });
         }
       }
 
-      if (course17.recommendedNextCourseId === null || course17.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course17.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 17 currently recommends course ID ${course17.recommendedNextCourseId} instead of Course 18 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          icon: "file-text",
+          icon: "database",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 21,
-          code: BADGE_CODE,
+          courseIds: [courseId],
+          orderIndex: 23,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 17
-      const existingPrereq17 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course17.id)
-        )
-      });
-      if (!existingPrereq17) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course17.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order if they don't already exist or are skeletons
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Sustainability Data Collection course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Sustainability Data Collection course");
   }
 }
