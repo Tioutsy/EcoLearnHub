@@ -8,7 +8,7 @@ import {
   certificatesTable,
   badgeDefinitionsTable,
 } from "@workspace/db";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, or } from "drizzle-orm";
 
 const router = Router();
 
@@ -144,6 +144,10 @@ router.get("/courses/:courseId/summary", async (req, res): Promise<void> => {
         : Math.max(rawPct, totalModules > 0 ? Math.round((modulesCompleted / totalModules) * 100) : 0);
     }
 
+    const userClauses = [eq(quizAttemptsTable.userId, userId)];
+    const email = (req as any).auth?.email;
+    if (email) userClauses.push(eq(quizAttemptsTable.userId, email));
+
     const attempts = await db
       .select({
         score: quizAttemptsTable.score,
@@ -152,8 +156,8 @@ router.get("/courses/:courseId/summary", async (req, res): Promise<void> => {
       .from(quizAttemptsTable)
       .where(
         and(
-          eq(quizAttemptsTable.userId, userId),
           eq(quizAttemptsTable.courseId, courseId),
+          or(...userClauses),
         ),
       );
 
@@ -164,19 +168,27 @@ router.get("/courses/:courseId/summary", async (req, res): Promise<void> => {
       if (a.passed) quizPassed = true;
     }
 
+    const certClauses = [eq(certificatesTable.userId, userId)];
+    if (email) certClauses.push(eq(certificatesTable.userId, email));
+
     const [certificate] = await db
       .select({ id: certificatesTable.id })
       .from(certificatesTable)
       .where(
         and(
-          eq(certificatesTable.userId, userId),
           eq(certificatesTable.courseId, courseId),
+          or(...certClauses),
         ),
       )
       .orderBy(desc(certificatesTable.id))
       .limit(1);
 
-    const courseCompleted = enrollment?.status === "completed";
+    const courseCompleted = enrollment?.status === "completed" || enrollment?.completedAt != null;
+
+    if (certificate || courseCompleted) {
+      quizPassed = true;
+      if (bestScore === null) bestScore = 100;
+    }
 
     const courseBadges = await db
       .select()

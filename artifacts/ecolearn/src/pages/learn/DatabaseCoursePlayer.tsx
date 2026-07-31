@@ -873,7 +873,7 @@ function CompletionScreen({
       };
     }
     if (rawSummary) {
-      const isCompletedOr100 = (enrollment?.progressPct ?? 0) >= 100 || enrollment?.status === "completed";
+      const isCompletedOr100 = (enrollment?.progressPct ?? 0) >= 100 || enrollment?.status === "completed" || enrollment?.completedAt != null;
       const totalCount = rawSummary.totalModules || lessons.length || 1;
       const actualCompletedCount = isCompletedOr100
         ? totalCount
@@ -881,11 +881,15 @@ function CompletionScreen({
             rawSummary.modulesCompleted || 0,
             (enrollment?.progressPct ?? 0) > 0 ? Math.round(((enrollment?.progressPct ?? 0) / 100) * totalCount) : 0
           );
-      const points = actualCompletedCount * 50 + (rawSummary.quizPassed ? 100 : 0);
+      const isQuizPassed = rawSummary.quizPassed || isCompletedOr100;
+      const bestScore = rawSummary.bestScore ?? (isCompletedOr100 ? 100 : null);
+      const points = actualCompletedCount * 50 + (isQuizPassed ? 100 : 0);
       return {
         ...rawSummary,
         modulesCompleted: actualCompletedCount,
         totalModules: totalCount,
+        quizPassed: isQuizPassed,
+        bestScore,
         points: { totalPoints: rawSummary.points?.totalPoints ? Math.max(rawSummary.points.totalPoints, points) : points },
       };
     }
