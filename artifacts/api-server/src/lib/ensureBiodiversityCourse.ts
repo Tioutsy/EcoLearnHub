@@ -6,655 +6,469 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
 } from "@workspace/db";
-import { eq, or } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_ID = 8;
 const COURSE_SLUG = "biodiversity-in-mauritius";
 const COURSE_TITLE = "Biodiversity in Mauritius";
 const BADGE_SLUG = "biodiversity-aware";
-const SEED_NAME = "biodiversity-in-mauritius-v1";
-const SKELETON_BADGE_SLUG = "biodiversity-aware";
+const SEED_NAME = "biodiversity-in-mauritius-v2";
+const SKELETON_BADGE_SLUG = "biodiversity-aware"; // catalogue skeleton slug — do not delete
 
 const COURSE_META = {
-  description: "Discover why Mauritius has distinctive biodiversity, how workplaces can affect local ecosystems and what employees can do to reduce harm.",
+  description:
+    "Learn how routine workplace activities affect Mauritian ecosystems, distinguish native vs. invasive species, and apply the Pause–Protect–Report–Record framework to prevent environmental harm.",
   fullDescription:
-    "Understand why Mauritius has distinctive biodiversity, why biodiversity matters to people and businesses, how ordinary workplace activities can affect ecosystems, and how employees can make practical, responsible decisions. The focus is on practical awareness rather than formal scientific classification.",
+    "This course provides employees across all operational roles with a practical, workplace-focused introduction to Mauritian biodiversity. Learn why local ecosystems matter to business resilience, distinguish native, endemic, introduced, and invasive alien species, map workplace impacts across site disturbance, water, waste, lighting, and procurement, and master the Pause–Protect–Report–Record protocol.",
   categoryId: 1,
-  durationMinutes: 20,
-  priceUsd: "0.00",
+  durationMinutes: 18,
+  priceUsd: "1400.00",
   level: "Foundation",
   isFeatured: false,
   thumbnailUrl: "/images/courses/biodiversity-in-mauritius.jpg",
   learningObjectives: [
-    "Explain biodiversity in plain language.",
-    "Distinguish between native, endemic, introduced and invasive species.",
-    "Identify important terrestrial, freshwater, wetland, coastal and marine ecosystems in Mauritius.",
-    "Explain how biodiversity supports people and businesses.",
-    "Recognise workplace activities that can damage habitats or wildlife.",
-    "Select practical actions that reduce biodiversity-related harm.",
-    "Commit to one realistic biodiversity-supporting action at work.",
+    "Explain biodiversity and ecosystem services in plain workplace language.",
+    "Distinguish native, endemic, introduced, and invasive alien species with Mauritian examples.",
+    "Identify workplace activities that cause habitat disturbance, runoff pollution, or species disruption.",
+    "Apply the 4-step Pause–Protect–Report–Record protocol when encountering environmental risks.",
+    "Avoid high-risk actions such as wildlife handling, unauthorized vegetation clearing, or herbicide spraying.",
+    "Evaluate role-based micro-decisions across facilities, hospitality, procurement, office, and landscaping.",
+    "Select one practical workplace biodiversity commitment to support ecosystem protection."
   ],
   includesCertificate: true,
   passingScore: 80,
   completionMessage:
-    "You have completed Biodiversity in Mauritius. You can now recognise common workplace impacts on local ecosystems and make more biodiversity-aware decisions.",
-  badgeName: "Biodiversity Aware",
+    "You have completed Biodiversity in Mauritius. You can now recognise workplace impacts on local ecosystems, distinguish species concepts, and apply Pause–Protect–Report–Record safely.",
+  badgeName: "Mauritius Biodiversity Aware",
   badgeDescription:
-    "Awarded for completing the Biodiversity in Mauritius course.",
-  recommendedNextCourseId: 9, // ESG Basics
+    "Awarded for demonstrating practical workplace biodiversity awareness, understanding Mauritian ecosystems, and applying Pause–Protect–Report–Record protocols.",
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Lesson content
-// ─────────────────────────────────────────────────────────────────────────────
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "A Harmless Workplace Decision?",
+    title: "Workplace Decisions & Ecosystem Impact",
     minutes: 3,
-    content: "Create a relatable workplace hook regarding landscaping and property changes.",
+    content: "Learn how routine site operations connect directly to local Mauritian biodiversity.",
     blocks: [
+      { id: "bio1-h1", type: "heading", position: 1, headingText: "Ecological Risks Beyond Site Boundaries" },
+      { id: "bio1-t1", type: "short_text", position: 2, bodyText: "On a Monday morning at a Mauritian commercial facility near a coastal drainage channel, a site supervisor notices exterior lights left on in daylight, loose plastic litter clogging a storm drain cover, chemical drums stored beside the drain, and contractors preparing to clear shrubland near a marked native plant restoration zone." },
+      { id: "bio1-k1", type: "key_message", position: 3, headingText: "Routine Decisions Have Direct Ecological Consequences", bodyText: "Biodiversity protection is not limited to national parks. Routine site activities—such as lighting draw, waste management, landscaping, and contractor oversight—directly influence surrounding terrestrial, wetland, and lagoon ecosystems." },
       {
-        id: "hook-1",
-        type: "text",
-        content:
-          "A company is improving the grounds around an office, hotel, retail site or residential property. The proposed work includes removing existing vegetation, planting fast-growing decorative species, installing stronger outdoor lighting, increasing chemical pest control, and extending paving close to a drainage or wet area.",
+        id: "bio1-d1",
+        type: "decision_scenario",
+        position: 4,
+        decisionIntro: "Evaluating site disturbance scenario:",
+        decisionPrompt: "A contractor suggests clearing shrubland near a coastal drainage boundary to store extra equipment, claiming 'it is just wild weeds.' What is the correct initial action?",
+        decisionChoices: [
+          { label: "Pause work in that area, protect the site boundary, and report to the facility environmental lead to verify habitat status", correct: true, feedback: "Excellent! Pausing and verifying protects sensitive native species and prevents illegal or damaging site clearing." },
+          { label: "Allow the clearing to proceed immediately to avoid contractor schedule delays", correct: false, feedback: "Incorrect! Clearing unverified vegetation can destroy native habitats and violate environmental regulations." },
+          { label: "Spray chemical herbicides over the shrubland to clear it faster", correct: false, feedback: "NEVER apply unapproved herbicides! Chemical runoff damages drainage soils and nearby aquatic ecosystems." }
+        ]
       },
       {
-        id: "hook-2",
-        type: "text",
-        content: "The manager describes the project as harmless because the property is privately owned.",
-      },
-      {
-        id: "hook-scenario",
-        type: "scenario",
-        scenarioText: "What should the team do first?",
-        options: [
-          {
-            id: "opt-1",
-            text: "Approve the work because biodiversity only matters inside protected parks.",
-            isCorrect: false,
-            feedback: "Incorrect. Habitats and species do not observe property boundaries, and actions outside parks can still cause significant harm.",
-          },
-          {
-            id: "opt-2",
-            text: "Check whether the work could affect habitats, drainage, wildlife or introduce invasive species.",
-            isCorrect: true,
-            feedback: "Correct. Assessing the site first is the most responsible step to avoid irreversible harm.",
-          },
-          {
-            id: "opt-3",
-            text: "Remove all vegetation so that wildlife cannot enter the property.",
-            isCorrect: false,
-            feedback: "Incorrect. Removing all vegetation destroys habitats and degrades local ecosystems entirely.",
-          },
-          {
-            id: "opt-4",
-            text: "Continue immediately and review the effects after completion.",
-            isCorrect: false,
-            feedback: "Incorrect. Reviewing after completion may be too late to reverse damage to wildlife or drainage.",
-          },
+        id: "bio1-m1",
+        type: "multiple_choice",
+        position: 5,
+        mcqQuestion: "What is biodiversity in simple workplace terms?",
+        mcqOptions: [
+          "The variety of living organisms, habitats, and ecological relationships that support ecosystem services",
+          "The total number of potted indoor ornamental plants in an office building",
+          "A tax paid exclusively by agricultural fruit exporters",
+          "A guarantee that a property is free of wild animals and insects"
         ],
-      },
-      {
-        id: "hook-3",
-        type: "key_message",
-        content:
-          "Biodiversity can be affected by ordinary decisions about land, lighting, chemicals, drainage, purchasing and waste. A workplace does not need to be inside a national park to have an impact.",
-      },
-    ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Biodiversity encompasses all living organisms, habitats, and ecological relationships that sustain essential ecosystem services.",
+        mcqIncorrectExplanation: "Incorrect. Biodiversity represents the full variety of life, habitats, and natural systems."
+      }
+    ]
   },
   {
     order: 1,
-    title: "What Biodiversity Means",
+    title: "Mauritian Ecosystems & Species Concepts",
     minutes: 4,
-    content: "Explain biodiversity in plain international English.",
+    content: "Master native, endemic, introduced, and invasive alien species concepts with local examples.",
     blocks: [
+      { id: "bio2-h1", type: "heading", position: 1, headingText: "Four Key Species Classifications" },
+      { id: "bio2-t1", type: "short_text", position: 2, bodyText: "Mauritius is an isolated oceanic island with high ecological sensitivity. Understand these four distinct species categories:" },
       {
-        id: "def-1",
-        type: "text",
-        content:
-          "Biodiversity is the variety of living things. It includes differences between species, differences within species, the ecosystems where living things interact, and the connection between plants, animals, microorganisms, soil, water and climate.",
-      },
-      {
-        id: "def-2",
-        type: "heading",
-        content: "Understanding Species Terminology",
-      },
-      {
-        id: "def-native",
-        type: "text",
-        content:
-          "**Native species**: A species that occurs naturally in a particular place.",
-      },
-      {
-        id: "def-endemic",
-        type: "text",
-        content:
-          "**Endemic species**: A species naturally found in one defined location and nowhere else in the wild.",
-      },
-      {
-        id: "def-intro",
-        type: "text",
-        content:
-          "**Introduced species**: A species brought to a place through human activity, intentionally or accidentally.",
-      },
-      {
-        id: "def-invasive",
-        type: "text",
-        content:
-          "**Invasive alien species**: An introduced species that spreads and causes environmental, economic or other harm.",
-      },
-      {
-        id: "def-3",
+        id: "bio2-k1",
         type: "key_message",
-        content:
-          "Introduced does not automatically mean invasive. The risk depends on whether the species spreads and causes harm.",
+        position: 3,
+        headingText: "Species Categories & Examples",
+        bodyText: "• Native Species: Arrived naturally in Mauritius without human aid (e.g. coastal mangroves, seabirds).\n• Endemic Species: Native species found ONLY in Mauritius and nowhere else on Earth (e.g. Mauritius Kestrel, Pink Pigeon, Ebony tree).\n• Introduced Species: Brought to Mauritius by human activity, living in managed environments (e.g. agricultural crops, decorative garden flowers).\n• Invasive Alien Species: Introduced species that spread aggressively and damage native ecosystems (e.g. Strawberry Guava / Goyave de Chine, Privet, Rats, Mongoose)."
       },
-    ],
+      {
+        id: "bio2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Worth Knowing)",
+        bodyText: "According to the National Parks and Conservation Service (NPCS), Mauritius has over 670 native flowering plant species, of which approximately 45% are endemic! Because native forest remnants now cover less than 5% of the island, protecting remaining native habitats from invasive weeds and workplace disturbance is vital for island survival."
+      }
+    ]
   },
   {
     order: 2,
-    title: "Mauritius and Its Living Heritage",
-    minutes: 3,
-    content: "Explain how island isolation contributed to distinctive species and ecosystems.",
+    title: "The Workplace Biodiversity Impact Map",
+    minutes: 4,
+    content: "Map operational activity risks across site disturbance, water, waste, lighting, and procurement.",
     blocks: [
+      { id: "bio3-h1", type: "heading", position: 1, headingText: "Five Workplace Impact Categories" },
+      { id: "bio3-t1", type: "short_text", position: 2, bodyText: "Examine how five core workplace activities connect directly to local ecological risks:" },
       {
-        id: "heritage-1",
-        type: "text",
-        content:
-          "Because Mauritius is an isolated island, it developed unique species and ecosystems. Many of these are endemic, meaning they are found naturally nowhere else in the wild.",
+        id: "bio3-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Impact Categories & Mitigations",
+        bodyText: "1. Site & Habitat Disturbance: Land clearing, unapproved storage, heavy equipment movement near vegetation.\n2. Water & Drainage Runoff: Chemical spills, oil leaks, or sediment washing into storm drains and lagoons.\n3. Waste & Plastics: Loose packaging or food waste attracting pests or entering marine environments.\n4. Lighting & Noise Disturbance: Unnecessary exterior night lighting disturbing nocturnal fauna and nesting birds.\n5. Landscaping & Procurement: Purchasing unverified timber/plants or introducing invasive ornamental species."
       },
       {
-        id: "heritage-2",
-        type: "text",
-        content:
-          "Mauritius features diverse environments, including terrestrial forests (such as Black River Gorges and Bras d’Eau National Park), rivers and freshwater streams, wetlands, mangroves, lagoons, coral reefs (like Blue Bay Marine Park), and offshore islets.",
-      },
-      {
-        id: "heritage-3",
-        type: "text",
-        content:
-          "Conservation efforts have helped protect endemic species like the Mauritius kestrel, pink pigeon and echo parakeet. However, biodiversity also includes less visible organisms such as insects, fungi, and microorganisms that are vital to these ecosystems.",
-      },
-      {
-        id: "heritage-match",
-        type: "scenario",
-        scenarioText: "Match the ecosystem with one of its critical functions:",
-        options: [
-          {
-            id: "opt-1",
-            text: "Forest: supports soil and water conservation.",
-            isCorrect: true,
-            feedback: "Correct. Forests play a major role in holding soil in place and managing water cycles.",
-          },
-          {
-            id: "opt-2",
-            text: "Wetland: only provides drinking water.",
-            isCorrect: false,
-            feedback: "Incorrect. Wetlands also store water, filter pollutants, and help reduce flooding.",
-          },
-          {
-            id: "opt-3",
-            text: "Coral reef: has no impact on coastal protection.",
-            isCorrect: false,
-            feedback: "Incorrect. Coral reefs break waves and protect shorelines from erosion.",
-          },
-          {
-            id: "opt-4",
-            text: "Mangrove: only produces wood for construction.",
-            isCorrect: false,
-            feedback: "Incorrect. Mangroves provide vital nursery habitats for marine life and contribute to shoreline stability.",
-          },
-        ],
-      },
-    ],
+        id: "bio3-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Lighting Rule: Switch Off Daylight Floodlights",
+        bodyText: "CRITICAL OPERATIONAL PRINCIPLE: Ensure exterior security floodlights are switched off during daylight hours. Excessive night lighting near coastal or forest boundaries disrupts nocturnal pollinators and nesting wildlife."
+      }
+    ]
   },
   {
     order: 3,
-    title: "Why Biodiversity Matters to Business",
+    title: "Pause–Protect–Report–Record & Visual Inspection",
     minutes: 4,
-    content: "Explain ecosystem services and why businesses rely on them.",
+    content: "Apply the 4-step protocol and inspect a real Mauritian commercial facility site.",
     blocks: [
+      { id: "bio4-h1", type: "heading", position: 1, headingText: "The 4-Step Action Protocol" },
+      { id: "bio4-t1", type: "short_text", position: 2, bodyText: "When encountering an environmental hazard or unexpected wildlife on site, follow the Pause–Protect–Report–Record protocol:" },
       {
-        id: "matter-1",
-        type: "text",
-        content:
-          "**Ecosystem services** are benefits that people and organisations receive from functioning natural systems. These include water availability and quality, flood and drainage management, soil protection, coastal protection, fisheries, agriculture, tourism, and employee wellbeing.",
-      },
-      {
-        id: "matter-2",
-        type: "workplace_example",
-        title: "Hospitality",
-        content:
-          "Coastal pollution, landscaping, guest activities, exterior lighting and supplier choices can affect lagoons, beaches and wildlife.",
-      },
-      {
-        id: "matter-3",
-        type: "workplace_example",
-        title: "Construction and property management",
-        content:
-          "Vegetation removal, drainage changes, dust, noise, waste and chemical use can disturb habitats.",
-      },
-      {
-        id: "matter-4",
-        type: "workplace_example",
-        title: "Retail and offices",
-        content:
-          "Procurement, waste, lighting, cleaning chemicals and employee behaviour can create indirect impacts.",
-      },
-      {
-        id: "matter-5",
-        type: "workplace_example",
-        title: "Manufacturing and Agriculture",
-        content:
-          "Water discharge, chemical storage, raw-material sourcing, crop choices, soil management, and pest control can affect surrounding ecosystems.",
-      },
-      {
-        id: "matter-6",
+        id: "bio4-k1",
         type: "key_message",
-        content:
-          "Biodiversity is not separate from business. Businesses depend on natural systems and can also place pressure on them.",
+        position: 3,
+        headingText: "Pause–Protect–Report–Record",
+        bodyText: "1. PAUSE: Stop or halt disturbance in the immediate area safely.\n2. PROTECT: Keep vehicles, waste, chemicals, and unauthorized staff away from the affected zone.\n3. REPORT: Inform the facility lead, environmental coordinator, or site manager immediately.\n4. RECORD: Log exact facts, time, location, and photos without disturbing wildlife or hazardous spills."
       },
-    ],
+      {
+        id: "bio4-img1",
+        type: "visual_question",
+        position: 4,
+        imageUrl: "/images/courses/visual-workplace-biodiversity-risk.png",
+        caption: "Facility Site Inspection: Daylight floodlight active, chemical drums near drain, loose litter, marked native restoration zone, and worker photographing site hazards.",
+        imageAlt: "Realistic photograph of a Mauritian commercial property compound showing an active daytime floodlight, chemical drums beside an open storm drain, loose plastic litter, a wooden sign reading 'NATIVE SPECIES RESTORATION ZONE - DO NOT DISTURB', and a facility staff member taking a photo to report site risks."
+      },
+      {
+        id: "bio4-m1",
+        type: "multiple_choice",
+        position: 5,
+        mcqQuestion: "In the facility site inspection above, what is the best immediate response to the chemical drums stored beside the storm drain?",
+        mcqOptions: [
+          "Report the improper storage immediately and arrange for chemical drums to be moved to an approved bunded containment area away from drains",
+          "Kick the chemical drums into the storm drain cover to clear the yard space",
+          "Wash the drums with water so chemical residues flow into the coastal channel",
+          "Ignore the drums because they belong to a third-party logistics supplier"
+        ],
+        mcqCorrectIndex: 0,
+        mcqCorrectExplanation: "Chemicals stored near open drains present severe runoff risks to coastal ecosystems and must be relocated to secondary containment.",
+        mcqIncorrectExplanation: "Incorrect. Storing chemicals near storm drains risks chemical runoff into aquatic environments; proper containment is required."
+      }
+    ]
   },
   {
     order: 4,
-    title: "Recognising Workplace Pressures",
-    minutes: 4,
-    content: "Cover common pressures employees may encounter.",
+    title: "High-Risk Mistakes & Micro-Decisions",
+    minutes: 3,
+    content: "Avoid prohibited actions and practice role-based decisions across operational departments.",
     blocks: [
+      { id: "bio5-h1", type: "heading", position: 1, headingText: "High-Risk Mistakes to Avoid" },
+      { id: "bio5-t1", type: "short_text", position: 2, bodyText: "NEVER engage in these four high-risk operational behaviors:" },
       {
-        id: "pressures-1",
-        type: "bulleted-list",
-        items: [
-          "Clearing vegetation without assessing impacts",
-          "Disturbing nesting or feeding areas",
-          "Excessive external lighting",
-          "Litter and unmanaged waste or chemical spills",
-          "Inappropriate pesticide or herbicide use",
-          "Polluted runoff or blocking drainage and wet areas",
-          "Introducing potentially invasive plants or animals",
-          "Feeding wildlife or removing plants, shells, corals or animals",
-          "Purchasing products connected to habitat damage",
-          "Allowing contractors to work without environmental instructions"
-        ],
+        id: "bio5-k1",
+        type: "key_message",
+        position: 3,
+        headingText: "Prohibited Actions",
+        bodyText: "• DO NOT capture, relocate, or handle wild animals, reptiles, or fruit bats yourself.\n• DO NOT feed wild birds or stray animals near food-service or staff eating areas.\n• DO NOT apply unapproved herbicides or pesticides without authorized procedures.\n• DO NOT clear trees, shrubs, or wetlands without written environmental clearance."
       },
       {
-        id: "pressures-scenario",
-        type: "scenario",
-        scenarioText:
-          "A contractor is preparing to clear vegetation beside a company site. Employees notice birds using the area and water collecting nearby after rain. The contractor says the work is already approved and must be finished today. What is the most responsible response?",
-        options: [
-          {
-            id: "opt-1",
-            text: "Allow the work because environmental responsibility belongs only to the contractor.",
-            isCorrect: false,
-            feedback: "Contractor responsibility does not remove the company’s responsibility to prevent environmental harm.",
-          },
-          {
-            id: "opt-2",
-            text: "Physically block the machinery without informing anyone.",
-            isCorrect: false,
-            feedback: "Employees should never create an unsafe confrontation or put themselves in physical danger.",
-          },
-          {
-            id: "opt-3",
-            text: "Pause and report the concern through the appropriate manager or site procedure before irreversible work continues.",
-            isCorrect: true,
-            feedback: "Correct. Early internal escalation allows the concern to be assessed safely before irreversible damage is done.",
-          },
-          {
-            id: "opt-4",
-            text: "Photograph the work for social media but take no workplace action.",
-            isCorrect: false,
-            feedback: "Posting online is not a substitute for following workplace procedures and does not solve the immediate operational risk.",
-          },
-        ],
-      },
-      {
-        id: "pressures-takeaway",
-        type: "practical_action",
-        content:
-          "When an activity may cause irreversible harm, raise the concern before the work is completed. Use the company’s reporting and escalation procedure rather than ignoring the issue or intervening unsafely.",
-      },
-    ],
+        id: "bio5-d1",
+        type: "decision_scenario",
+        position: 4,
+        decisionIntro: "Hospitality & Food Service Scenario:",
+        decisionPrompt: "Hotel guests and staff frequently leave accessible food waste near a coastal service terrace, attracting crows and rodents. What should the service team do?",
+        decisionChoices: [
+          { label: "Secure all waste containers with tight-fitting lids, clear tables promptly, and educate staff not to feed animals", correct: true, feedback: "Correct! Securing food waste removes artificial attractants and protects coastal ecological balance." },
+          { label: "Leave extra food scraps outside so animals do not disturb guests indoors", correct: false, feedback: "Incorrect! Feeding animals creates pest dependency and damages ecosystem balance." },
+          { label: "Spray chemical poison around outdoor dining tables without authorization", correct: false, feedback: "NEVER spray unapproved poisons near dining areas or coastal habitats!" }
+        ]
+      }
+    ]
   },
   {
     order: 5,
-    title: "Practical Action and Commitment",
-    minutes: 2,
-    content: "Provide achievable employee actions.",
+    title: "Your Biodiversity Awareness Commitment",
+    minutes: 3,
+    content: "Select practical daily workplace commitments to protect Mauritian ecosystems.",
     blocks: [
+      { id: "bio6-h1", type: "heading", position: 1, headingText: "Pledge to Act" },
+      { id: "bio6-t1", type: "short_text", position: 2, bodyText: "Congratulations on completing the lessons! Select the biodiversity protection habits you commit to practice in your daily work routine." },
       {
-        id: "action-1",
-        type: "bulleted-list",
-        items: [
-          "Keep waste and chemicals away from drains, soil and waterways.",
-          "Report leaks, spills, illegal dumping or wildlife disturbance.",
-          "Follow site procedures before clearing vegetation or changing drainage.",
-          "Avoid feeding or handling wild animals, and do not remove plants, shells or corals.",
-          "Reduce unnecessary exterior lighting where operationally appropriate.",
-          "Ask suppliers and contractors how they manage environmental impacts.",
-          "Respect protected and sensitive areas during company activities.",
-          "Record and escalate environmental observations through the correct workplace channel."
-        ],
-      },
-      {
-        id: "action-2",
-        type: "text",
-        content:
-          "Note: Do not attempt to identify or remove invasive species yourself unless you are trained and authorised.",
-      },
-      {
-        id: "commit-block",
+        id: "bio6-c1",
         type: "commitment",
-        options: [
-          "I will report environmental risks before they become larger problems.",
-          "I will keep waste and chemicals away from drains and natural areas.",
-          "I will consider biodiversity when choosing products, contractors or landscaping.",
-          "I will avoid disturbing or feeding wildlife at work.",
-          "I will raise one biodiversity improvement with my manager or team."
-        ],
-      },
-      {
-        id: "action-key",
-        type: "key_message",
-        content:
-          "Protecting biodiversity often begins with noticing how an ordinary workplace decision could affect a living system.",
-      },
-    ],
-  },
+        position: 3,
+        commitmentInstruction: "Select your daily workplace biodiversity commitments (choose at least one):",
+        commitmentOptions: [
+          { value: "apply-pause-protect-report", label: "Apply the Pause–Protect–Report–Record protocol when encountering habitat risks", description: "Halt disturbance and report environmental concerns promptly." },
+          { value: "keep-drains-clean", label: "Keep chemicals, oil, and loose litter away from storm drains and waterways", description: "Prevent harmful runoff from entering rivers and coastal lagoons." },
+          { value: "avoid-wildlife-handling", label: "Never capture, relocate, or feed wild animals without specialist authorization", description: "Respect wildlife boundaries and report species sightings safely." },
+          { value: "turn-off-daytime-lights", label: "Ensure exterior floodlights are turned off during daylight hours", description: "Reduce unnecessary energy draw and nocturnal wildlife disturbance." },
+          { value: "verify-plant-sourcing", label: "Support native plant landscaping and avoid buying invasive alien species", description: "Protect local flora and prevent invasive plant spread." }
+        ]
+      }
+    ]
+  }
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Quiz content
-// ─────────────────────────────────────────────────────────────────────────────
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    questionText: "What does biodiversity include?",
-    practicalTakeaway: "When assessing biodiversity, consider the whole living system rather than only visible or rare animals.",
+    order: 1,
+    question: "What is the difference between a native species and an endemic species in Mauritius?",
     options: [
-      {
-        text: "Only rare animals living in protected parks",
-        isCorrect: false,
-        feedback: "Biodiversity includes common and rare organisms in many environments, not only animals in protected parks.",
-      },
-      {
-        text: "Plants, animals, microorganisms, genetic variety and the ecosystems connecting them",
-        isCorrect: true,
-        feedback: "Correct. Biodiversity includes living organisms, variation within life and the ecosystems where organisms interact.",
-      },
-      {
-        text: "Only species that are useful to businesses",
-        isCorrect: false,
-        feedback: "A species does not need to provide an obvious commercial benefit to be part of biodiversity.",
-      },
-      {
-        text: "Any green space created by people",
-        isCorrect: false,
-        feedback: "A managed green area may support biodiversity, but greenery alone does not define biodiversity.",
-      },
+      "Native species arrived in Mauritius naturally without human aid; endemic species are native species found ONLY in Mauritius and nowhere else on Earth",
+      "Native species are imported garden plants; endemic species are wild farm animals",
+      "Native species only live in lagoons; endemic species only live in urban offices",
+      "There is no difference; both terms mean plastic decorative plants"
     ],
+    correct: 0,
+    correctExplanation: "Native species arrived naturally; endemic species are unique native species found exclusively in Mauritius.",
+    incorrectExplanation: "Incorrect. Endemic species are native species found exclusively in Mauritius."
   },
   {
-    questionText: "What does it mean when a species is endemic to Mauritius?",
-    practicalTakeaway: "Damage to the habitat of an endemic species can have global consequences because the species may exist nowhere else.",
+    order: 2,
+    question: "Why is Strawberry Guava (Goyave de Chine) classified as an Invasive Alien Species in Mauritian forests?",
     options: [
-      {
-        text: "It is found naturally only in Mauritius.",
-        isCorrect: true,
-        feedback: "Correct. An endemic species naturally occurs in a defined location and nowhere else in the wild.",
-      },
-      {
-        text: "It was imported into Mauritius for agriculture.",
-        isCorrect: false,
-        feedback: "A species brought through human activity is introduced, not endemic.",
-      },
-      {
-        text: "It is found in every tropical country.",
-        isCorrect: false,
-        feedback: "A species found across many countries is not endemic only to Mauritius.",
-      },
-      {
-        text: "It is automatically invasive.",
-        isCorrect: false,
-        feedback: "Endemic and invasive describe different concepts. An endemic species is native to a limited place.",
-      },
+      "It spreads aggressively, crowding out native endemic trees and reducing natural forest water catchment capacity",
+      "It produces excessive oxygen that harms soil bacteria",
+      "It is a protected endemic tree planted by national parks",
+      "It requires artificial solar lighting to survive"
     ],
+    correct: 0,
+    correctExplanation: "Strawberry Guava spreads aggressively, smothering native forests and degrading ecosystem services.",
+    incorrectExplanation: "Incorrect. Invasive alien species like Strawberry Guava crowd out native fauna and flora."
   },
   {
-    questionText: "A company plans new landscaping beside a natural area. What is the best first step?",
-    practicalTakeaway: "Biodiversity risks are easier and less costly to prevent before landscaping or construction begins.",
+    order: 3,
+    question: "What should a maintenance employee do if an unfamiliar nest or wild animal is found in a work zone?",
     options: [
-      {
-        text: "Select the fastest-growing imported plants available.",
-        isCorrect: false,
-        feedback: "Fast growth is not the only consideration. Some introduced plants can spread or require unsuitable management.",
-      },
-      {
-        text: "Clear the site completely before checking what is present.",
-        isCorrect: false,
-        feedback: "Clearing first may destroy habitat before the risks are understood.",
-      },
-      {
-        text: "Assess the site and obtain appropriate advice about habitats and suitable plant choices.",
-        isCorrect: true,
-        feedback: "Correct. Early assessment helps the company avoid damage and make informed landscaping choices.",
-      },
-      {
-        text: "Use more pesticide so that insects cannot damage the landscaping.",
-        isCorrect: false,
-        feedback: "Broad pesticide use can affect non-target organisms and does not replace proper site assessment.",
-      },
+      "Follow Pause–Protect–Report–Record: pause work in that area, protect the site, report to the environmental lead, and record facts",
+      "Capture the animal in a box and release it in another town",
+      "Spray chemical pesticide over the nest immediately",
+      "Destroy the nest quickly before anyone notices"
     ],
+    correct: 0,
+    correctExplanation: "Always apply Pause–Protect–Report–Record to ensure safety and prevent unauthorized species harm.",
+    incorrectExplanation: "Incorrect. Apply Pause–Protect–Report–Record instead of capturing or destroying wildlife."
   },
   {
-    questionText: "Why can wetlands, mangroves and coral ecosystems matter to businesses and communities?",
-    practicalTakeaway: "Protecting ecosystems can also support business resilience and community wellbeing.",
+    order: 4,
+    question: "Why should chemical drums and loose plastic litter never be stored near open storm drains on commercial property?",
     options: [
-      {
-        text: "They only provide attractive places for photographs.",
-        isCorrect: false,
-        feedback: "Their value goes far beyond appearance.",
-      },
-      {
-        text: "They can support wildlife and contribute to functions such as water management, shoreline protection, fisheries and tourism.",
-        isCorrect: true,
-        feedback: "Correct. Healthy ecosystems provide several environmental, social and economic benefits.",
-      },
-      {
-        text: "They prevent every flood and storm from causing damage.",
-        isCorrect: false,
-        feedback: "Natural ecosystems can reduce risks but cannot prevent every damaging event.",
-      },
-      {
-        text: "They have no relevance unless the business operates directly inside them.",
-        isCorrect: false,
-        feedback: "Businesses can depend on or affect ecosystems indirectly through supply chains, drainage, pollution, tourism and development.",
-      },
+      "Rainwater washes chemicals and plastics directly into rivers, wetlands, and coastal lagoons, causing aquatic habitat destruction",
+      "Storing items near drains makes the storm water evaporate faster",
+      "Plastic litter in drains automatically turns into native fish food",
+      "Chemicals in drains increase solar panel power generation"
     ],
+    correct: 0,
+    correctExplanation: "Storm drains discharge directly into waterways; chemical runoff and plastics degrade aquatic and coastal ecosystems.",
+    incorrectExplanation: "Incorrect. Chemical spills and plastic litter entering storm drains destroy aquatic and lagoon habitats."
   },
   {
-    questionText: "An employee notices a contractor preparing work that may disturb wildlife and alter drainage. What is the most responsible response?",
-    practicalTakeaway: "Raise potential environmental harm early, safely and through the appropriate workplace channel.",
+    order: 5,
+    question: "A landscaping contractor offers to sell 'fast-growing exotic groundcover' for an office garden. What should the buyer do before approving?",
     options: [
-      {
-        text: "Ignore it because the contractor is responsible.",
-        isCorrect: false,
-        feedback: "Companies should not ignore possible impacts simply because work is outsourced.",
-      },
-      {
-        text: "Raise the concern immediately through the company’s manager or environmental reporting procedure.",
-        isCorrect: true,
-        feedback: "Correct. Early reporting allows the concern to be assessed before irreversible work occurs.",
-      },
-      {
-        text: "Confront the contractor physically.",
-        isCorrect: false,
-        feedback: "Employees should not place themselves or others in danger.",
-      },
-      {
-        text: "Wait until the work is complete and then mention it casually.",
-        isCorrect: false,
-        feedback: "Reporting after completion may be too late to prevent harm.",
-      },
+      "Verify that the plant is non-invasive and preferably native, avoiding species known to spread aggressively into local ecosystems",
+      "Approve the purchase immediately without checking plant species lists",
+      "Order double the quantity if the plants are bright red",
+      "Replace all surrounding trees with concrete to match the groundcover"
     ],
-  },
+    correct: 0,
+    correctExplanation: "Always check plant species to prevent introducing aggressive invasive alien plants into local ecosystems.",
+    incorrectExplanation: "Incorrect. Verify plant species to ensure they are non-invasive and eco-friendly."
+  }
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Seeder Function
-// ─────────────────────────────────────────────────────────────────────────────
-export async function ensureBiodiversityCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureBiodiversityCourse(): Promise<void> {
   try {
-    const [seedRecord] = await db
-      .select({ id: systemSeedsTable.id })
-      .from(systemSeedsTable)
-      .where(eq(systemSeedsTable.name, SEED_NAME))
-      .limit(1);
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping.`);
-      return;
-    }
-
-    let txHasFinished = false;
-
     await db.transaction(async (tx) => {
-      // 1. Course Record
-      let courseRecord;
-      const [existingCourse] = await tx
-        .select({ id: coursesTable.id })
+      // 1. Resolve Course 8 by courseCode "ELH-08", slug, or ID
+      let course = null;
+      
+      const [byCode] = await tx
+        .select()
         .from(coursesTable)
-        .where(
-          or(
-            eq(coursesTable.slug, COURSE_SLUG),
-            eq(coursesTable.id, COURSE_ID)
-          )
-        )
+        .where(eq(coursesTable.courseCode, "ELH-08"))
         .limit(1);
 
-      if (existingCourse) {
-        [courseRecord] = await tx
-          .update(coursesTable)
-          .set({
-            title: COURSE_TITLE,
-            slug: COURSE_SLUG,
-            ...COURSE_META,
-            isPublished: true,
-            status: "published",
-            updatedAt: new Date(),
-          })
-          .where(eq(coursesTable.id, existingCourse.id))
-          .returning();
+      if (byCode) {
+        course = byCode;
       } else {
-        [courseRecord] = await tx
-          .insert(coursesTable)
-          .values({
-            id: COURSE_ID,
-            title: COURSE_TITLE,
-            slug: COURSE_SLUG,
-            ...COURSE_META,
-            isPublished: true,
-            status: "published",
-          })
-          .returning();
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        if (bySlug) {
+          course = bySlug;
+        } else {
+          const [byId] = await tx
+            .select()
+            .from(coursesTable)
+            .where(eq(coursesTable.id, COURSE_ID))
+            .limit(1);
+          course = byId ?? null;
+        }
       }
 
-      const actualCourseId = courseRecord.id;
+      if (!course) {
+        throw new Error("Course ELH-08 / biodiversity-in-mauritius not seeded by catalogue skeletons bootstrap!");
+      }
 
-      // 2. Badge Definition
-      const [existingBadge] = await tx
-        .select({ id: badgeDefinitionsTable.id })
-        .from(badgeDefinitionsTable)
-        .where(
-          or(
-            eq(badgeDefinitionsTable.slug, BADGE_SLUG),
-            eq(badgeDefinitionsTable.slug, SKELETON_BADGE_SLUG)
-          )
-        )
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
         .limit(1);
 
-      if (existingBadge) {
-        await tx
-          .update(badgeDefinitionsTable)
-          .set({
-            name: COURSE_META.badgeName,
-            slug: BADGE_SLUG,
-            description: COURSE_META.badgeDescription,
-            courseIds: [actualCourseId],
-          })
-          .where(eq(badgeDefinitionsTable.id, existingBadge.id));
-      } else {
-        await tx.insert(badgeDefinitionsTable).values({
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 5;
+      const hasIncorrectSlug = course.slug !== COURSE_SLUG;
+
+      const needsRepair = !existingSeed ||
+                          hasMissingLessons ||
+                          hasEmptyBlocks ||
+                          hasMissingQuiz ||
+                          hasIncorrectSlug;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Biodiversity in Mauritius course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-08. Re-seeding course content and lessons transactionally...");
+
+      // 4. Resolve next recommended course dynamically by slug
+      const [nextCourse] = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "esg-basics-for-mauritian-business"))
+        .limit(1);
+      const nextCourseId = nextCourse?.id ?? null;
+
+      // 5. Update course record slug, title, and metadata
+      await tx
+        .update(coursesTable)
+        .set({
+          title: COURSE_TITLE,
+          slug: COURSE_SLUG,
+          courseCode: "ELH-08",
+          description: COURSE_META.description,
+          fullDescription: COURSE_META.fullDescription,
+          categoryId: COURSE_META.categoryId,
+          durationMinutes: COURSE_META.durationMinutes,
+          priceUsd: COURSE_META.priceUsd,
+          level: COURSE_META.level,
+          isFeatured: COURSE_META.isFeatured,
+          thumbnailUrl: COURSE_META.thumbnailUrl,
+          learningObjectives: COURSE_META.learningObjectives,
+          includesCertificate: COURSE_META.includesCertificate,
+          passingScore: COURSE_META.passingScore,
+          completionMessage: COURSE_META.completionMessage,
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
+          isPublished: true,
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
+      }
+
+      // 7. Seed/re-seed quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
           icon: "leaf",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 12,
+          courseIds: [courseId],
+          orderIndex: 13,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
         });
+
+      // 9. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
+        });
+      } else {
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 3. Lessons (Replace entirely for cleanliness)
-      await tx
-        .delete(lessonsTable)
-        .where(eq(lessonsTable.courseId, actualCourseId));
-
-      const lessonsToInsert = NEW_LESSONS.map((lesson) => ({
-        courseId: actualCourseId,
-        title: lesson.title,
-        orderIndex: lesson.order,
-        durationMinutes: lesson.minutes,
-        content: lesson.content,
-        contentBlocks: lesson.blocks,
-      }));
-      await tx.insert(lessonsTable).values(lessonsToInsert);
-
-      // 4. Quiz Questions (Replace entirely)
-      await tx
-        .delete(quizQuestionsTable)
-        .where(eq(quizQuestionsTable.courseId, actualCourseId));
-
-      const quizQuestionsToInsert = NEW_QUIZ_QUESTIONS.map((q, idx) => {
-        const correctIdx = q.options.findIndex(o => o.isCorrect);
-        return {
-          courseId: actualCourseId,
-          question: q.questionText,
-          practicalTakeaway: q.practicalTakeaway,
-          options: q.options.map(o => o.text),
-          correctOption: correctIdx !== -1 ? correctIdx : 0,
-          orderIndex: idx,
-          optionFeedback: q.options.map(o => o.feedback),
-          correctExplanation: correctIdx !== -1 ? q.options[correctIdx].feedback : "",
-          incorrectExplanation: "Please review the feedback for the correct choice.",
-        };
-      });
-      await tx.insert(quizQuestionsTable).values(quizQuestionsToInsert);
-
-      // 5. Mark successful completion
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
-
-      txHasFinished = true;
+      logger.info({ courseId, slug: COURSE_SLUG }, "Biodiversity in Mauritius course v2 seed / repair transaction completed successfully.");
     });
-
-    if (txHasFinished) {
-      logger.info(`${COURSE_TITLE} course content and quiz safely migrated and published.`);
-    }
-  } catch (error) {
-    logger.error(
-      { err: error },
-      `Failed to migrate ${COURSE_TITLE} course content`
-    );
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Biodiversity in Mauritius course");
   }
 }
