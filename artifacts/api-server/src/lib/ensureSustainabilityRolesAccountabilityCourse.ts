@@ -6,22 +6,21 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_SLUG = "sustainability-roles-responsibilities-and-accountability";
 const COURSE_TITLE = "Sustainability Roles, Responsibilities and Accountability";
-const BADGE_SLUG = "sustainability-accountability-contributor";
-const BADGE_CODE = "COURSE_ELH_20_COMPLETE";
-const SEED_NAME = "sustainability-roles-accountability-v1";
+const BADGE_SLUG = "sustainability-accountability-practitioner";
+const SEED_NAME = "sustainability-roles-accountability-v2";
 
 const COURSE_META = {
   courseCode: "ELH-20",
-  description: "Learn how sustainability responsibilities are shared across a workplace, how clear ownership prevents actions from being forgotten and when blocked or significant issues should be escalated. This course helps employees and managers understand their role in turning sustainability plans into consistent action.",
-  fullDescription: "Learn how sustainability responsibilities are shared across a workplace, how clear ownership prevents actions from being forgotten and when blocked or significant issues should be escalated. This course helps employees and managers understand their role in turning sustainability plans into consistent action.",
+  description:
+    "Learn how sustainability responsibilities are assigned, supported, approved, and escalated in a workplace, ensuring clear individual accountability and internal contractor oversight.",
+  fullDescription:
+    "Broad collective responsibility without named ownership creates accountability gaps. This course enables workplace teams to assign one clear accountable owner to every sustainability action, distinguish supporting from approving roles, manage contractor oversight internally, enforce separation of duties, and preserve written handovers during personnel changes.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "0.00",
@@ -30,504 +29,392 @@ const COURSE_META = {
   thumbnailUrl: "/images/courses/sustainability-roles-responsibilities-and-accountability.jpg",
   intendedRoles: ["employees", "supervisors", "line managers", "department heads", "green team members", "facilities and operations staff", "HR and procurement teams", "ESG or compliance support staff", "senior managers"],
   learningObjectives: [
-    "Distinguish participation, responsibility, ownership and accountability.",
-    "Identify who should own a workplace sustainability action.",
-    "Understand the supporting roles of employees, managers and leadership.",
-    "Avoid vague ownership such as “everyone” or “the green team.”",
-    "Clarify decision-making and approval responsibilities.",
-    "Escalate blocked, overdue or material issues appropriately.",
-    "Record accountability clearly in action trackers and review records.",
-    "Recognise when a sustainability process depends too heavily on one person."
+    "Distinguish responsibility (task execution) from final accountability (answerable for progress and results).",
+    "Assign one clear accountable owner to every workplace sustainability action.",
+    "Identify supporting, reviewing, and approving roles across departments.",
+    "Apply the CLEAR operational framework (Choose owner, Link authority, Explain roles, Agree evidence & escalation, Record decisions).",
+    "Maintain internal company oversight when contracting work out to third-party suppliers."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Sustainability Roles, Responsibilities and Accountability. You can now identify clearer action owners, supporting roles, approval responsibilities and escalation routes for workplace sustainability actions.",
-  badgeName: "Sustainability Accountability Contributor",
-  badgeDescription: "Awarded for completing Sustainability Roles, Responsibilities and Accountability and demonstrating the ability to distribute responsibilities, record ownership, escalate issues, and build resilient processes.",
+  completionMessage:
+    "Congratulations! You have completed Sustainability Roles, Responsibilities and Accountability. You can now establish single accountable ownership, separate supporting from approving roles, manage contractor oversight, and enforce separation of duties across workplace actions.",
+  badgeName: "Sustainability Accountability Practitioner",
+  badgeDescription:
+    "Awarded for demonstrating operational mastery of workplace sustainability governance, single accountable ownership, contractor oversight, and clear decision escalation.",
 };
 
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Participation Is Not the Same as Ownership",
+    title: "Broad Involvement Is Not Single Accountability",
     minutes: 3,
-    content: "Distinguish between contributing to a task and being responsible for its completion. Learn why vague collective assignments fail and how to assign a single clear owner.",
+    content: "Understand why assigning actions to 'everyone' creates accountability gaps and how naming a single accountable owner ensures progress.",
     blocks: [
+      { id: "ra1-h1", type: "heading", position: 1, headingText: "Avoid the Accountability Gap" },
+      { id: "ra1-t1", type: "short_text", position: 2, bodyText: "A commercial property meeting assigns responsibility for reducing after-hours electricity use. The action register states: 'Security, Facilities, Finance and all department managers to ensure electricity use is reduced.' No single owner is named. Security believes Facilities is responsible because it involves equipment. Facilities believes department managers control staff behavior. Finance thinks it only checks bills. Managers assume Security switches everything off. At the next review, consumption has not improved and no one can explain what was done." },
+      { id: "ra1-k1", type: "key_message", position: 3, headingText: "The Accountability Rule", bodyText: "When 'everyone' owns an action, no one is accountable. Many people may contribute, but one named role must remain answerable for progress, evidence, and review." },
       {
-        id: "c20-l1-b1",
-        type: "heading",
-        headingText: "Participation Is Not the Same as Ownership"
-      },
-      {
-        id: "c20-l1-b2",
-        type: "short_text",
-        bodyText: "If 'everyone' is responsible for reducing unnecessary printing, no one feels accountable. A successful action plan distinguishes between participation (contributing to a task) and ownership (ensuring the action moves forward and is reviewed).\n\nWhile multiple team members may participate, a single clear role should own the action. For default double-sided printing: IT configures printer defaults, HR communicates, employees participate by following instructions, but the Office Manager owns implementation, and the Department Manager reviews results."
-      },
-      {
-        id: "c20-l1-b3",
-        type: "key_message",
-        headingText: "The Ownership Principle",
-        bodyText: "Many people may contribute to an action, but one clear role must ensure that it is completed and reviewed."
-      },
-      {
-        id: "c20-l1-b4",
+        id: "ra1-d1",
         type: "decision_scenario",
-        decisionIntro: "A department plans to turn off computers at the end of the day. Which approach establishes the clearest accountability?",
-        decisionPrompt: "Select the most effective assignment:",
+        position: 4,
+        decisionIntro: "Fixing an Unclear Action Assignment:",
+        decisionPrompt: "An office action plan lists 'All Employees' as the owner for setting printer defaults to double-sided. How should the team fix this assignment?",
         decisionChoices: [
-          {
-            label: "Put up a poster saying: 'Everyone must turn off their screens.'",
-            correct: false,
-            feedback: "Incorrect. Collective assignments without clear role ownership lead to diffusion of responsibility."
-          },
-          {
-            label: "Assign the Office Administrator to verify screen shutdown during the final walk-through, with the IT Lead supporting by automating screen power-offs.",
-            correct: true,
-            feedback: "Correct. This designates a clear owner role (Office Administrator) to verify completion and a supporting role (IT Lead) to execute tasks."
-          },
-          {
-            label: "Leave the action unassigned because employees should know what to do.",
-            correct: false,
-            feedback: "Incorrect. Unassigned tasks rarely get completed consistently."
-          },
-          {
-            label: "Make the department's junior intern solely responsible for turning off all computers.",
-            correct: false,
-            feedback: "Incorrect. The intern may lack the access or process authority to enforce or coordinate this effectively across the department."
-          }
+          { label: "Assign the Office Administrator as the single accountable owner, with IT supporting technical deployment and department leads communicating the change", correct: true, feedback: "Correct! Naming one accountable owner with defined supporting roles establishes clear, actionable responsibility." },
+          { label: "Add the Sustainability Committee as a co-owner alongside All Employees", correct: false, feedback: "Incorrect. Adding more collective groups without a single named owner worsens accountability gaps." },
+          { label: "Remove the action from the plan so no one is bothered", correct: false, feedback: "Incorrect. Deleting necessary actions avoids responsibility rather than establishing governance." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "Match Responsibility to Authority and Capability",
+    title: "Why Clear Roles Matter & Essential Vocabulary",
     minutes: 3,
-    content: "Assign ownership to individuals who have the organizational authority and resources to influence the outcome. Avoid setting up team members for delay.",
+    content: "Explore the operational benefits of clear governance and master 50+ roles and accountability terms.",
     blocks: [
+      { id: "ra2-h1", type: "heading", position: 1, headingText: "Operational Decision Rights & Vocabulary" },
+      { id: "ra2-t1", type: "short_text", position: 2, bodyText: "Clear role definition speeds up decision making, prevents duplicated effort, ensures contractor work is checked, and provides seamless continuity when personnel change." },
       {
-        id: "c20-l2-b1",
-        type: "heading",
-        headingText: "Match Responsibility to Authority and Capability"
-      },
-      {
-        id: "c20-l2-b2",
-        type: "short_text",
-        bodyText: "An action owner must have: access to the relevant process, sufficient authority to coordinate changes, the time and resources to manage them, and a clear reporting line.\n\nAssigning responsibility without corresponding authority creates friction. For example, a junior employee should not be accountable for approving energy retrofits. A procurement assistant can collect supplier metrics but cannot authorize supplier changes."
-      },
-      {
-        id: "c20-l2-b3",
+        id: "ra2-k1",
         type: "key_message",
-        headingText: "Mauritian Workplace Context",
-        bodyText: "In a hotel, a maintenance technician can identify leaks and recommend repairs, but budget approval for replacement fixtures rests with the Operations Manager. Match task ownership to decision authority."
+        position: 3,
+        headingText: "Core Roles & Governance Vocabulary",
+        bodyText: "• Responsibility vs Accountability: Responsibility = doing the task; Accountability = final answerability for outcome and evidence.\n• Authority & Decision Rights: Power to authorize budget, approve actions, or enforce procedures.\n• Action Owner: Named role answerable for driving a specific workplace action to completion.\n• Supporting Role vs Approver: Supporting = provides labor/data; Approver = formal sign-off authority.\n• Delegation vs Abdication: Assigning a task while maintaining oversight vs walking away without tracking.\n• Internal Contractor Oversight: Retaining an internal company owner to verify external supplier work.\n• Separation of Duties: Splitting creation, verification, and approval roles to prevent errors and self-approval."
       },
       {
-        id: "c20-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A retail store needs to replace old lighting with energy-efficient alternatives. Who is the most appropriate owner for this action?",
-        decisionPrompt: "Select the most appropriate action owner:",
-        decisionChoices: [
-          {
-            label: "A sales floor assistant who is passionate about sustainability.",
-            correct: false,
-            feedback: "Incorrect. Although passionate, a sales assistant lacks the authority to modify store fixtures or manage procurement budgets."
-          },
-          {
-            label: "The Store Operations Manager, who has budget control and access to building maintenance systems.",
-            correct: true,
-            feedback: "Correct. The Store Operations Manager has both the operational authority and the access to resources required to complete this task."
-          },
-          {
-            label: "The entire sales team collectively.",
-            correct: false,
-            feedback: "Incorrect. Collective assignments lead to inaction because there is no single point of contact."
-          },
-          {
-            label: "The external landlord of the shopping complex.",
-            correct: false,
-            feedback: "Incorrect. While they may need to approve the modifications, they cannot lead the store's internal procurement actions."
-          }
-        ]
+        id: "ra2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Roles & Governance Standards)",
+        bodyText: "Top management must ensure that the responsibilities and authorities for relevant roles are assigned, communicated, and understood within the organization.\n\nManagement-system standards (ISO 14001 Clause 5.3 & ISO 9001 Clause 5.3) require clear role definitions to ensure environmental management processes deliver intended outputs without creating operational ambiguity."
       }
     ]
   },
   {
     order: 2,
-    title: "Clarify Supporting and Approval Roles",
-    minutes: 3,
-    content: "Define who performs the work, who approves budgets or changes, and who reviews completion. Unclear approval boundaries lead to stalled actions.",
+    title: "The CLEAR Operational Framework",
+    minutes: 4,
+    content: "Master the 5-step CLEAR framework for establishing workplace sustainability governance.",
     blocks: [
+      { id: "ra3-h1", type: "heading", position: 1, headingText: "The CLEAR Operational Framework" },
+      { id: "ra3-t1", type: "short_text", position: 2, bodyText: "Use the CLEAR framework to assign, communicate, and track workplace sustainability roles:" },
       {
-        id: "c20-l3-b1",
-        type: "heading",
-        headingText: "Clarify Supporting and Approval Roles"
-      },
-      {
-        id: "c20-l3-b2",
-        type: "short_text",
-        bodyText: "To keep actions moving, clarify: Who owns it? Who performs the work? Who approves expenses? Who must be informed? Who reviews completion and confirms effectiveness?\n\nFor replacing disposable cups in a staff area: Procurement searches for reusable options (support), Finance approves the purchase (approval), the Office Manager ensures delivery (owner), and the Department Manager reviews usage patterns after launch (review)."
-      },
-      {
-        id: "c20-l3-b3",
+        id: "ra3-k1",
         type: "key_message",
-        headingText: "Approval Alignment",
-        bodyText: "Clearly defining budget and process approvers prevents actions from becoming stalled between departments."
+        position: 3,
+        headingText: "CLEAR Framework Breakdown",
+        bodyText: "• C — Choose one accountable owner: Name a specific role (e.g. Facilities Lead) for every action.\n• L — Link responsibilities to authority & resources: Ensure the owner has time, access, and budget.\n• E — Explain supporting, reviewing & approving roles: Define who contributes, checks, and signs off.\n• A — Agree evidence, deadlines & escalation: Specify required proof files, target dates, and blocked routes.\n• R — Record decisions, handovers & follow-up: Document assignments in registers and update on departure."
       },
       {
-        id: "c20-l3-b4",
+        id: "ra3-d1",
         type: "decision_scenario",
-        decisionIntro: "An action to install sub-meters has stalled because the engineering team is waiting to see who will pay for the devices, while facilities believes the cost is covered by corporate green budgets.",
-        decisionPrompt: "What role should have been clarified first?",
+        position: 4,
+        decisionIntro: "Practice: Delegation & Handover",
+        decisionPrompt: "A facilities coordinator who owns the rainwater tank maintenance project goes on 4 weeks leave. What is the correct handover procedure?",
         decisionChoices: [
-          {
-            label: "The employee who records the meter readings.",
-            correct: false,
-            feedback: "Incorrect. That role occurs only after installation."
-          },
-          {
-            label: "The role authorized to approve and fund the purchase.",
-            correct: true,
-            feedback: "Correct. Clarifying who has budget approval responsibility prevents the project from getting stuck in an inter-departmental funding gap."
-          },
-          {
-            label: "The general manager of the company.",
-            correct: false,
-            feedback: "Incorrect. The general manager does not need to be the direct owner of every utility task."
-          },
-          {
-            label: "The external utility provider.",
-            correct: false,
-            feedback: "Incorrect. The provider does not manage internal corporate budget approvals."
-          }
+          { label: "Brief the temporary covering officer, update the action register with temporary contact details, and record open deadlines and evidence files", correct: true, feedback: "Correct! Formal handovers preserve action continuity and prevent open projects from stalling during leave." },
+          { label: "Leave the project unmonitored until the coordinator returns", correct: false, feedback: "Incorrect. Abandoning actions during leave causes missed deadlines and unmonitored contractor work." },
+          { label: "Transfer final legal liability for the building's water system to the temporary officer", correct: false, feedback: "Incorrect. Task coverage does not alter corporate legal liability structures." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Record Accountability Clearly",
-    minutes: 3,
-    content: "Log ownership details in trackers using role-based entries instead of personal names. Keep records clear to support continuity during handovers.",
+    title: "Visual Governance Inspection & High-Risk Mistakes",
+    minutes: 4,
+    content: "Inspect a projected roles and accountability matrix board and review critical safeguards.",
     blocks: [
+      { id: "ra4-h1", type: "heading", position: 1, headingText: "Visual Roles & Governance Matrix Inspection" },
+      { id: "ra4-t1", type: "short_text", position: 2, bodyText: "Examine the meeting room whiteboard (`visual-sustainability-roles-accountability.png`). Observe how red sticky notes highlight governance defects: 'ALL DEPARTMENTS' listed as sole owner, two equal accountable owners with split decision rights, a contractor listed as sole owner without internal company oversight, a former departed employee still assigned, a missing capital expense approver, a blank escalation route, and the same person creating, validating, and approving evidence." },
       {
-        id: "c20-l4-b1",
-        type: "heading",
-        headingText: "Record Accountability Clearly"
+        id: "ra4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-sustainability-roles-accountability.png",
+        caption: "Workplace Sustainability Governance & Roles Matrix: Displaying unclear ownership, missing approvers, contractor sole ownership, and self-approval defects.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace office room with a whiteboard titled Workplace Sustainability Governance & Roles Matrix showing highlighted defects like All Departments as owner, missing approvers, contractor sole ownership, and self-approval."
       },
       {
-        id: "c20-l4-b2",
-        type: "short_text",
-        bodyText: "A clear tracker entry should record: Action, Owner (by role, not personal name), Support roles, Approver, Start Date, Due Date, Review Date, and Escalation route.\n\nAvoid vague entries like: 'Owner: Sustainability Team; Deadline: Soon'. Instead, record: 'Owner: Facilities Manager; Support: Maintenance Supervisor; Approval: General Manager; Due: 30 September; Escalation: Operations Director'."
-      },
-      {
-        id: "c20-l4-b3",
+        id: "ra4-k1",
         type: "key_message",
-        headingText: "Role-Based Tracking",
-        bodyText: "Listing roles rather than personal names ensures that accountability remains clear even if staff shifts occur."
-      },
-      {
-        id: "c20-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "Which tracker entry provides the clearest accountability for a waste reduction project?",
-        decisionPrompt: "Select the most complete record:",
-        decisionChoices: [
-          {
-            label: "Owner: Green Team. Target: Reduce waste as soon as possible.",
-            correct: false,
-            feedback: "Incorrect. The Green Team is a collective, and the target timeframe is too vague."
-          },
-          {
-            label: "Action: Install compost bins; Owner: Operations Lead; Support: Kitchen Supervisor; Approval: GM; Due: 15-Oct; Review: 30-Oct; Escalation: Operations Director.",
-            correct: true,
-            feedback: "Correct. This identifies the owner role, support role, approver role, specific deadlines, review points, and escalation path."
-          },
-          {
-            label: "Owner: Jean. Jean will speak with management next month.",
-            correct: false,
-            feedback: "Incorrect. Jean is a personal name (which creates issues if Jean leaves) and lacks dates or escalation routes."
-          },
-          {
-            label: "Owner: Management. Status: In progress.",
-            correct: false,
-            feedback: "Incorrect. 'Management' is too broad to denote specific accountability."
-          }
-        ]
+        position: 4,
+        headingText: "High-Risk Governance Mistakes to Avoid",
+        bodyText: "• DO NOT assign actions to 'everyone' or 'all staff' without a named accountable lead.\n• DO NOT list an external contractor as the sole owner without an internal company supervisor.\n• DO NOT leave departed employees as active owners on registers.\n• DO NOT allow the same person to create data, validate accuracy, and sign off completion without checks.\n• DO NOT confuse green team advisory involvement with operational line management authority."
       }
     ]
   },
   {
     order: 4,
-    title: "Escalate Blocked or Significant Issues",
-    minutes: 3,
-    content: "Understand when to escalate issues. Structure escalation messages to focus on blockers and requested decisions rather than blaming individuals.",
+    title: "Worked Mauritian Scenario & Applied Decision",
+    minutes: 2,
+    content: "Study a Grand Baie resort governance scenario and solve an applied contractor oversight decision.",
     blocks: [
+      { id: "ra5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Grand Baie Resort Water Programme" },
       {
-        id: "c20-l5-b1",
-        type: "heading",
-        headingText: "Escalate Blocked or Significant Issues"
+        id: "ra5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Clear Governance & Role Assignment Log",
+        bodyText: "A Grand Baie resort structures its water conservation programme across 5 roles:\n1. Accountable Owner: Facilities Manager (drives project, reports monthly, manages budget).\n2. Supporting Roles: Housekeeping Supervisor (checks guest tap aerators) & Maintenance Tech (repairs leaks).\n3. Internal Data Owner: Sustainability Coordinator (logs meter readings & collects weigh-slips).\n4. Approver: General Manager (authorizes capital repairs over MUR 50,000).\n5. External Contractor Oversight: Plumbing Contractor performs pipe lining; Facilities Manager checks completion certificates before invoice approval."
       },
       {
-        id: "c20-l5-b2",
-        type: "short_text",
-        bodyText: "Escalation is not about blame—it is an operational tool to resolve blockers. Escalate when: a deadline is repeatedly missed, budget approval remains pending, a department dispute blocks progress, or the issue impacts safety or compliance.\n\nAn effective escalation message contains: what the issue is, why it matters, what has already been attempted, the specific blocker, and the required decision or support with a deadline."
-      },
-      {
-        id: "c20-l5-b3",
-        type: "key_message",
-        headingText: "Escalation Design",
-        bodyText: "Weak escalation: 'Nothing is happening.' Better escalation: 'Water valve repair is blocked by outstanding budget approval. Maintenance submitted the quote. GM approval is requested by Friday to prevent further water loss.'"
-      },
-      {
-        id: "c20-l5-b4",
+        id: "ra5-d1",
         type: "decision_scenario",
-        decisionIntro: "A department's printing reduction project is stalled because the IT team has not configured the default printer settings despite three requests.",
-        decisionPrompt: "Select the most effective escalation path:",
+        position: 3,
+        decisionIntro: "Applied Contractor Oversight Decision:",
+        decisionPrompt: "A hotel's external waste contractor repeatedly submits incomplete waste collection receipts. The sustainability coordinator asks the contractor to fix them, but no internal manager owns the vendor contract. What is the correct governance resolution?",
         decisionChoices: [
-          {
-            label: "Complain to the IT technician in the hallway.",
-            correct: false,
-            feedback: "Incorrect. Informal complaints do not create documented escalation resolution."
-          },
-          {
-            label: "Email the IT Director explaining that the printing reduction initiative is blocked, detailing the three previous requests, and requesting configuration authorization by Friday.",
-            correct: true,
-            feedback: "Correct. This email documents the blocker, the history, and requests a specific decision with a clear deadline."
-          },
-          {
-            label: "Remove the printers without IT's knowledge.",
-            correct: false,
-            feedback: "Incorrect. This bypasses IT systems and causes operational conflicts."
-          },
-          {
-            label: "Wait until the next annual review to report the issue.",
-            correct: false,
-            feedback: "Incorrect. Waiting a year to report a blocked initiative is ineffective tracking."
-          }
+          { label: "Assign the Procurement / Contract Manager as the internal accountable owner to enforce vendor compliance, while the Sustainability Coordinator verifies receipts", correct: true, feedback: "Outstanding! Naming an internal manager with contract authority ensures external supplier compliance can be enforced." },
+          { label: "Make the external waste contractor the sole accountable owner of the company's waste register", correct: false, feedback: "NEVER delegate internal company accountability to an external contractor." },
+          { label: "Mark the waste tracking action complete because the vendor was emailed", correct: false, feedback: "Incorrect. Contacting a supplier does not resolve incomplete compliance records." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Build Accountability That Survives Staff Changes",
-    minutes: 3,
-    content: "Avoid single-champion dependence by embedding tasks in standard operational roles. Establish accessible record-keeping routines.",
+    title: "Your Accountability Commitment & Badge",
+    minutes: 2,
+    content: "Select your daily governance commitments and complete the course.",
     blocks: [
+      { id: "ra6-h1", type: "heading", position: 1, headingText: "Accountability Commitment" },
+      { id: "ra6-t1", type: "short_text", position: 2, bodyText: "Select the governance practices you pledge to apply in your workplace." },
       {
-        id: "c20-l6-b1",
-        type: "heading",
-        headingText: "Build Accountability That Survives Staff Changes"
-      },
-      {
-        id: "c20-l6-b2",
-        type: "short_text",
-        bodyText: "Overdependence on a single sustainability champion is a major operational risk. If they leave or go on leave, progress halts, records may get lost, and process knowledge is lost.\n\nTo build resilient accountability: link tasks to job descriptions, store files in shared workspaces, implement standardized handovers, and ensure review routines are shared by multiple team members."
-      },
-      {
-        id: "c20-l6-b3",
-        type: "key_message",
-        headingText: "Resilient Routines",
-        bodyText: "Strong accountability is integrated into roles, records, and routines, not held only in one person’s memory."
-      },
-      {
-        id: "c20-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Which step will you take to make sustainability accountability more resilient in your workplace?",
-        commitmentChoices: [
-          "Replace 'everyone' with a clear owner in one action",
-          "Add an approver to one blocked action",
-          "Document one escalation route",
-          "Record one handover requirement",
-          "Check whether one process depends too heavily on one person"
+        id: "ra6-c1",
+        type: "commitment",
+        position: 3,
+        commitmentInstruction: "Select your governance commitments (choose at least one):",
+        commitmentOptions: [
+          { value: "single-accountable-owner", label: "Assign one named accountable owner to every workplace sustainability action", description: "Eliminate diffusion of responsibility." },
+          { value: "verify-authority-and-budget", label: "Ensure assigned action owners have sufficient authority, time, and budget resources", description: "Match responsibility with actual power." },
+          { value: "internal-contractor-oversight", label: "Maintain internal company oversight and check verification proof for contractor-delivered work", description: "Prevent unmonitored supplier reliance." },
+          { value: "formal-written-handovers", label: "Record formal written handovers when action owners change roles or go on leave", description: "Preserve project continuity." }
         ]
+      },
+      {
+        id: "ra6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: This course provides practical workplace guidance on sustainability roles and accountability. It does not provide legal advice, statutory governance certification, independent assurance, or confirmation that an organization has met all regulatory or management-system requirements."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "A sustainability action plan states: 'Everyone must reduce unnecessary printing.' No one is assigned to configure settings or review results. What is the main weakness?",
+    order: 1,
+    question: "Why is assigning a sustainability action to 'All Staff' or 'Everyone' a major governance flaw?",
     options: [
-      { text: "Employees should not participate in print reduction.", isCorrect: false, feedback: "Incorrect. Employee participation is important, but not sufficient on its own." },
-      { text: "The action has no clear owner responsible for coordination, implementation, and review.", isCorrect: true, feedback: "Correct. Assigning responsibility to 'everyone' means no single role is accountable for managing or reviewing the progress." },
-      { text: "Printing can never be reduced in a modern office environment.", isCorrect: false, feedback: "Incorrect. Printing can be reduced with proper settings and processes." },
-      { text: "The action plan requires more environmental statistics before it can be assigned.", isCorrect: false, feedback: "Incorrect. Additional statistics will not solve the lack of clear ownership." }
+      "Because broad collective assignments lead to diffusion of responsibility where no individual feels answerable for driving progress or saving records",
+      "Because employees are not allowed to participate in sustainability",
+      "Because sustainability actions must only be performed by external consultants",
+      "Because spreadsheet software cannot handle more than 5 names"
     ],
-    correctExplanation: "Shared participation is valuable, but it does not replace the need for a single, designated role responsible for coordinating the action and verifying its success.",
-    incorrectExplanation: "Banning participation, declaring print reduction impossible, or demanding more statistics does not resolve the root problem of unassigned ownership.",
-    practicalTakeaway: "Shared participation does not replace clear ownership."
+    correct: 0,
+    correctExplanation: "Collective assignments without a single named lead cause diffusion of responsibility and unmonitored actions.",
+    incorrectExplanation: "Incorrect. Broad assignments dilute accountability; a single named owner must drive progress."
   },
   {
-    question: "A junior employee is assigned responsibility for replacing inefficient cooling equipment but does not have authority to approve capital purchases. What is the best response?",
+    order: 2,
+    question: "What does the 'C' in the CLEAR operational framework stand for?",
     options: [
-      { text: "Keep the employee fully accountable for completing the equipment replacement.", isCorrect: false, feedback: "Incorrect. The employee cannot complete the task if they lack purchase authority." },
-      { text: "Cancel the equipment replacement action entirely.", isCorrect: false, feedback: "Incorrect. The energy-saving goal remains valid." },
-      { text: "Assign ownership to a role with appropriate budget authority, keeping the junior employee involved in implementation or research.", isCorrect: true, feedback: "Correct. Responsibility must align with authority. The role that controls the budget should own the project, while junior staff support it." },
-      { text: "Instruct the employee to purchase the equipment using their personal funds.", isCorrect: false, feedback: "Incorrect. Personal expenditure must not be expected for company assets." }
+      "Choose one accountable owner (name a specific role answerable for driving the action)",
+      "Cancel all departmental sustainability meetings",
+      "Copy all emails to external news outlets",
+      "Charge employees financial penalties for unread policies"
     ],
-    correctExplanation: "To avoid project delays, task ownership must be matched to a role that possesses the relevant authority and process access to execute the decisions.",
-    incorrectExplanation: "Leaving the employee blocked, cancelling the action, or expecting personal purchase ignores standard governance principles.",
-    practicalTakeaway: "Owners need enough authority and access to move an action forward."
+    correct: 0,
+    correctExplanation: "C = Choose one accountable owner for every workplace action.",
+    incorrectExplanation: "Incorrect. C = Choose one accountable owner."
   },
   {
-    question: "Procurement has identified a reusable alternative to a disposable staff cup, but the change is stuck waiting for a budget decision. Which role must be clarified?",
+    order: 3,
+    question: "What is the fundamental difference between RESPONSIBILITY and ACCOUNTABILITY?",
     options: [
-      { text: "The individual employee who will use the cups.", isCorrect: false, feedback: "Incorrect. Users cannot approve procurement budgets." },
-      { text: "The specific role authorized to approve the expenditure.", isCorrect: true, feedback: "Correct. The project is stuck because the approval boundary has not been clearly defined or assigned." },
-      { text: "The platform administrator who maintains the sustainability tracker.", isCorrect: false, feedback: "Incorrect. Administrators update records but do not make budget decisions." },
-      { text: "Every manager in the company.", isCorrect: false, feedback: "Incorrect. Having all managers approve creates confusion, not clarity." }
+      "Responsibility means performing the task execution; Accountability means final answerability for the outcome, evidence, and review",
+      "Responsibility applies to full-time staff; Accountability applies to part-time staff",
+      "Responsibility is used in corporate offices; Accountability is used in factories",
+      "Responsibility and Accountability are exact synonyms in organizational management"
     ],
-    correctExplanation: "Unclear approval boundaries are a common blocker. Identifying who has the authority to approve costs is critical for progression.",
-    incorrectExplanation: "Blaming users, tracker admins, or involving all managers does not resolve the specific approval blocker.",
-    practicalTakeaway: "Unclear approval responsibility can block an otherwise practical action."
+    correct: 0,
+    correctExplanation: "Responsibility = performing work; Accountability = final answerability for results and evidence.",
+    incorrectExplanation: "Incorrect. Responsibility is task execution; Accountability is final answerability."
   },
   {
-    question: "Which entry in a progress log provides the clearest accountability?",
+    order: 4,
+    question: "In the visual governance matrix board (`visual-sustainability-roles-accountability.png`), why is listing a contractor as sole owner of a compliance task a defect?",
     options: [
-      { text: "Owner: Everyone. Deadline: Soon.", isCorrect: false, feedback: "Incorrect. Vague owners and deadlines ensure the task is delayed." },
-      { text: "Owner: Green Team. Review: Later.", isCorrect: false, feedback: "Incorrect. Collective owners and unspecified review dates lack accountability." },
-      { text: "Owner: Facilities Manager. Support: Maintenance Supervisor. Due date: 20 September. Review date: 4 October.", isCorrect: true, feedback: "Correct. This entry logs a single owner role, a supporting role, and exact due and review dates." },
-      { text: "Owner: Management. Status: Ongoing.", isCorrect: false, feedback: "Incorrect. 'Management' is too broad, and 'ongoing' lacks a firm target milestone." }
+      "Because contracting out work does not contract out internal company oversight; a named internal owner must verify supplier delivery",
+      "Because contractors are forbidden from using whiteboards",
+      "Because contractors never complete their assigned tasks",
+      "Because waste contractors do not work in commercial buildings"
     ],
-    correctExplanation: "Clear logging requires a specific owner role, supporting roles, and exact due and review dates to prevent tasks from being forgotten.",
-    incorrectExplanation: "Group owners, vague dates, or broad labels like 'Management' do not provide individual accountability.",
-    practicalTakeaway: "Good records identify the owner, support, deadline and review point."
+    correct: 0,
+    correctExplanation: "Companies must retain internal accountable ownership to verify contractor evidence and enforce contract standards.",
+    incorrectExplanation: "Incorrect. Contracting out work does not eliminate the need for an internal company owner."
   },
   {
-    question: "A repair action has been delayed because budget approval has not been provided. What is the most appropriate escalation message?",
+    order: 5,
+    question: "What should happen when an assigned action owner transfers to a new department or leaves the company?",
     options: [
-      { text: "Management never helps with sustainability initiatives.", isCorrect: false, feedback: "Incorrect. This is an unhelpful complaint, not a structured escalation." },
-      { text: "The valve repair is still blocked. Maintenance completed the assessment and submitted the quotation. Budget approval is required by Friday to prevent further water loss.", isCorrect: true, feedback: "Correct. This describes the issue, the action taken, the blocker, the required decision, and a specific deadline." },
-      { text: "Someone should do something about the water leak.", isCorrect: false, feedback: "Incorrect. This does not specify the blocker or direct the message to a decision-maker." },
-      { text: "Mark the action completed on the tracker to keep metrics high.", isCorrect: false, feedback: "Incorrect. Falsifying metrics hides unresolved leaks." }
+      "Perform a formal written handover, update the action register with a new named owner, and transfer project files",
+      "Leave the departed employee listed as owner indefinitely",
+      "Delete the entire action history from the database",
+      "Assume the action is automatically completed"
     ],
-    correctExplanation: "Effective escalation describes the blocker, the business impact, what has been done, and requests a specific decision with a deadline.",
-    incorrectExplanation: "Broad complaints, vague statements, or falsified completions do not resolve the blocker.",
-    practicalTakeaway: "Effective escalation explains the blocker and the required decision."
+    correct: 0,
+    correctExplanation: "Personnel changes require updating ownership records and transferring files to preserve continuity.",
+    incorrectExplanation: "Incorrect. Perform a formal handover and assign a new active owner in the register."
   },
   {
-    question: "A department's sustainability coordinator goes on extended leave, and no other staff can access the progress tracker or files. What does this demonstrate?",
+    order: 6,
+    question: "Why is assigning an employee responsibility for a project without providing authority or budget resources ineffective?",
     options: [
-      { text: "The coordinator was highly efficient and could not be replaced.", isCorrect: false, feedback: "Incorrect. Keeping files locked in personal storage is an operational failure, not efficiency." },
-      { text: "The sustainability process depends too heavily on one individual.", isCorrect: true, feedback: "Correct. A resilient system stores data in shared drives and distributes access so work can continue during absences." },
-      { text: "All sustainability actions should stop during staff leave.", isCorrect: false, feedback: "Incorrect. Operations and sustainability reviews should proceed consistently." },
-      { text: "The files are no longer needed now that the coordinator is away.", isCorrect: false, feedback: "Incorrect. Historical records and active trackers are needed for reviews." }
+      "Because without authority to approve changes or access budget, the owner cannot overcome operational obstacles or enforce procedures",
+      "Because employees prefer not to have budget access",
+      "Because project targets can be met without any resources",
+      "Because authority is only required for senior directors"
     ],
-    correctExplanation: "Sustainability actions are at risk if they depend entirely on one person. Resilient processes link tasks to roles and share access to records.",
-    incorrectExplanation: "Praising poor data storage, stopping operations, or abandoning records ignores resilience principles.",
-    practicalTakeaway: "Important sustainability processes should continue during staff absence or change."
+    correct: 0,
+    correctExplanation: "Accountable owners must be equipped with sufficient decision rights, time, and budget resources to succeed.",
+    incorrectExplanation: "Incorrect. Responsibility without authority or resources leads to blocked, unexecutable actions."
   },
   {
-    question: "An employee records monthly water-meter readings, while the Facilities Manager reviews the trends and authorizes repairs. Who owns the action?",
+    order: 7,
+    question: "What is the purpose of SEPARATION OF DUTIES in sustainability data logging and approvals?",
     options: [
-      { text: "The employee recording the readings.", isCorrect: false, feedback: "Incorrect. Recording readings is a supporting task, not ownership of the outcome." },
-      { text: "The Facilities Manager who reviews the data, identifies gaps, and coordinates repairs.", isCorrect: true, feedback: "Correct. The manager ensures follow-up action occurs, which represents the owner role." },
-      { text: "Every individual person who uses water in the building.", isCorrect: false, feedback: "Incorrect. Users contribute to conservation but do not coordinate the tracking process." },
-      { text: "The municipal utility provider.", isCorrect: false, feedback: "Incorrect. The utility provider is external and does not manage internal building operations." }
+      "Ensuring the person preparing data or claims is not the sole verifier and approver, preventing self-approval and undetected errors",
+      "Keeping employees in separate office rooms during working hours",
+      "Preventing finance staff from talking to facilities staff",
+      "Doubling the length of all team meetings"
     ],
-    correctExplanation: "The owner of an action is the role responsible for ensuring that the task moves forward and is reviewed, even if others perform supporting data collection.",
-    incorrectExplanation: "Confusing supporting tasks, user participation, or external entities with ownership leads to gaps in tracking.",
-    practicalTakeaway: "The owner ensures follow-up, even when others perform supporting tasks."
+    correct: 0,
+    correctExplanation: "Separation of duties splits creation, verification, and approval roles to ensure data integrity and prevent self-approval.",
+    incorrectExplanation: "Incorrect. Separation of duties prevents self-approval and ensures independent review."
   },
   {
-    question: "A corrective action has missed three deadlines because two departments disagree about who should lead it. What is the best next step?",
+    order: 8,
+    question: "What role does a Sustainability Coordinator play compared to a Department Manager who owns an action?",
     options: [
-      { text: "Leave both departments responsible for it collectively.", isCorrect: false, feedback: "Incorrect. Dual collective responsibility has already failed three times." },
-      { text: "Remove the deadline from the tracker to avoid reporting failures.", isCorrect: false, feedback: "Incorrect. Deleting deadlines hides the delay rather than resolving it." },
-      { text: "Escalate the issue to operational management for a clear ownership decision and log the agreed owner.", isCorrect: true, feedback: "Correct. Inter-departmental disputes that stall progress must be escalated to a manager who can assign clear roles." },
-      { text: "Mark the action completed to close the issue.", isCorrect: false, feedback: "Incorrect. Closing an action before it is complete falsifies metrics." }
+      "The Coordinator facilitates, advises, and tracks overall progress; the Department Manager has line authority to direct staff and enforce procedures",
+      "The Coordinator makes all operational business decisions for every department",
+      "The Department Manager only attends social events",
+      "The Coordinator is legally liable for all company actions"
     ],
-    correctExplanation: "Repeated delays caused by unclear ownership require escalation to management to make a binding assignment.",
-    incorrectExplanation: "Continuing collective failure, removing deadlines, or falsifying completions does not resolve the conflict.",
-    practicalTakeaway: "Repeated delays caused by unclear ownership require a documented decision."
+    correct: 0,
+    correctExplanation: "Coordinators advise and track; Line Managers hold operational authority to direct staff and execute actions.",
+    incorrectExplanation: "Incorrect. Coordinators provide advisory support; Line Managers hold operational execution authority."
+  },
+  {
+    order: 9,
+    question: "How does ELH-20 (Roles and Accountability) connect to ELH-21 (Employee Sustainability Engagement)?",
+    options: [
+      "ELH-20 defines governance structures and decision ownership; ELH-21 builds widespread employee participation and engagement within those role boundaries",
+      "ELH-20 replaces employee participation completely",
+      "ELH-20 is for legal advisors; ELH-21 is for interns only",
+      "There is no relationship between roles and engagement"
+    ],
+    correct: 0,
+    correctExplanation: "ELH-20 establishes clear role boundaries; ELH-21 engages employees effectively within that clear framework.",
+    incorrectExplanation: "Incorrect. ELH-20 establishes clear governance boundaries; ELH-21 engages employees within them."
+  },
+  {
+    order: 10,
+    question: "What is the primary takeaway of the CLEAR Operational Framework?",
+    options: [
+      "Applying CLEAR (Choose owner, Link authority, Explain roles, Agree evidence & escalation, Record decisions) ensures transparent governance and follow-through",
+      "Role assignments should be kept secret from employees",
+      "Green teams should replace all department managers",
+      "External contractors should make all internal company decisions"
+    ],
+    correct: 0,
+    correctExplanation: "CLEAR provides structured discipline for workplace governance, role clarity, and accountable decision-making.",
+    incorrectExplanation: "Incorrect. CLEAR ensures transparent workplace governance and accountable follow-through."
   }
 ];
 
-export async function ensureSustainabilityRolesAccountabilityCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureSustainabilityRolesAccountabilityCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      // 1. Resolve Course 20 by courseCode "ELH-20" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-20"))
+        .limit(1);
 
-      // 2. Resolve Course 19
-      let course19 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-19")
-      });
-      if (!course19) {
-        course19 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "reviewing-sustainability-performance-and-corrective-action")
-        });
-      }
-
-      if (!course19) {
-        throw new Error("Data integrity error: Course 19 (ELH-19) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 20
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
-        actualCourseId = inserted.id;
+      if (byCode) {
+        course = byCode;
       } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course ELH-20 / sustainability-roles-responsibilities-and-accountability not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Workplace Sustainability Team course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-20. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-21 or null if not yet seeded)
+      const [course21] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "employee-sustainability-engagement-and-culture"))
+        .limit(1);
+      const nextCourseId = course21 ? course21.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
           slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
+          courseCode: "ELH-20",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -540,185 +427,111 @@ export async function ensureSustainabilityRolesAccountabilityCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
       }
 
-      // 4. Update Course 19 recommendedNextCourseId to point to Course 20 preserving admin edits
-      let isSystemManaged = false;
-      if (course19.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course19.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-20") {
-          isSystemManaged = true;
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entries in coursePrerequisitesTable (ELH-12 through ELH-19 -> ELH-20)
+      const prereqs = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(inArray(coursesTable.slug, [
+          "final-sustainability-certification",
+          "sustainability-action-planning",
+          "setting-departmental-sustainability-goals",
+          "building-workplace-sustainability-team",
+          "communicating-sustainability-at-work",
+          "tracking-sustainability-actions-and-progress",
+          "sustainability-data-collection-and-evidence",
+          "reviewing-sustainability-performance-and-corrective-action"
+        ]));
+
+      for (const prereq of prereqs) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: prereq.id,
+          });
         }
       }
 
-      if (course19.recommendedNextCourseId === null || course19.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course19.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 19 currently recommends course ID ${course19.recommendedNextCourseId} instead of Course 20 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
           icon: "users",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 23,
-          code: BADGE_CODE,
+          courseIds: [courseId],
+          orderIndex: 25,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 19
-      const existingPrereq19 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course19.id)
-        )
-      });
-      if (!existingPrereq19) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course19.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Workplace Sustainability Team course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Sustainability Roles and Accountability course");
   }
 }
