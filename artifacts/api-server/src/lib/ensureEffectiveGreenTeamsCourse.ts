@@ -6,528 +6,415 @@ import {
   badgeDefinitionsTable,
   systemSeedsTable,
   coursePrerequisitesTable,
-  quizAttemptsTable,
-  lessonProgressTable,
 } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
 
 const COURSE_SLUG = "creating-and-running-effective-green-teams";
 const COURSE_TITLE = "Creating and Running Effective Green Teams";
-const BADGE_SLUG = "green-team-coordinator";
-const BADGE_CODE = "COURSE_ELH_22_COMPLETE";
-const SEED_NAME = "effective-green-teams-v1";
+const BADGE_SLUG = "effective-green-team-contributor";
+const SEED_NAME = "effective-green-teams-v2";
 
 const COURSE_META = {
   courseCode: "ELH-22",
-  description: "Learn how to create and run a practical workplace green team with clear membership, responsibilities, meeting routines and action tracking. The course helps learners avoid common problems such as unclear authority, inactive meetings, duplicated responsibilities and dependence on one enthusiastic employee.",
-  fullDescription: "Learn how to create and run a practical workplace green team with clear membership, responsibilities, meeting routines and action tracking. The course helps learners avoid common problems such as unclear authority, inactive meetings, duplicated responsibilities and dependence on one enthusiastic employee.",
+  description:
+    "Learn how to operate an established workplace sustainability team effectively over time, manage decision boundaries, run productive meetings, escalate blockers, and sustain action delivery without volunteer fatigue.",
+  fullDescription:
+    "Forming a green team is only the first step. Operating a team effectively over time requires clear decision boundaries, functional representation across shifts, workable meeting routines, single action ownership, and transparent escalation routes. This course equips sustainability coordinators, committee chairs, department representatives, and managers with practical operating disciplines to convert ideas into accountable workplace delivery.",
   categoryId: 1,
   durationMinutes: 18,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
   thumbnailUrl: "/images/courses/creating-and-running-effective-green-teams.jpg",
-  intendedRoles: ["employees", "supervisors", "managers", "sustainability coordinators", "green-team members"],
+  intendedRoles: ["sustainability coordinators", "green-team members", "committee chairs", "department representatives", "supervisors", "managers", "operations leads"],
   learningObjectives: [
-    "describe what a green team should and should not do;",
-    "select members based on workplace knowledge and operational relevance;",
-    "define a workable mandate and escalation boundaries;",
-    "structure efficient green-team meetings;",
-    "record decisions, owners and due dates;",
-    "maintain participation and continuity; and",
-    "report progress without exaggerating the team’s environmental impact."
+    "Distinguish an effective, accountable operating green team from a general discussion committee or temporary campaign group.",
+    "Draft a clear team mandate, decision boundaries (direct, recommend, pilot, approve, escalate, decline), and reporting lines.",
+    "Apply the TEAMWORK operational framework (Target purpose, Ensure representation, Assign authority, Make meetings useful, Work from evidence, Organise actions, Review delivery, Keep relevant).",
+    "Structure cross-functional representation including operations, facilities, shift workers, finance, and frontline roles.",
+    "Manage meeting routines, single action ownership, blocker escalation, and handover continuity."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Creating and Running Effective Green Teams. You can now establish, organise and maintain a practical workplace green team that supports sustainability actions effectively.",
-  badgeName: "Green Team Coordinator",
-  badgeDescription: "Awarded for demonstrating practical understanding of how to establish, organise and sustain an effective workplace green team.",
+  completionMessage:
+    "Congratulations! You have completed Creating and Running Effective Green Teams. You can now operate a workplace sustainability team with clear decision boundaries, functional representation, productive meeting routines, and accountable action delivery.",
+  badgeName: "Effective Green Team Contributor",
+  badgeDescription:
+    "Awarded for demonstrating operational mastery in running an effective workplace sustainability team, managing decision boundaries, and sustaining action delivery.",
 };
 
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "What a Green Team Is For",
+    title: "Operating Discipline Beyond Initial Launch",
     minutes: 3,
-    content: "Clarify the role and scope of a green team. Differentiate advisory, coordination, and delivery tasks from management approval authority.",
+    content: "Understand why green teams stall after launch and how operating discipline converts enthusiasm into accountable delivery.",
     blocks: [
+      { id: "gt1-h1", type: "heading", position: 1, headingText: "Why Green Teams Stall After Launch" },
+      { id: "gt1-t1", type: "short_text", position: 2, bodyText: "A multi-site Mauritian enterprise launches a Green Team comprising head-office HR, marketing, and admin volunteers. After 3 months: meetings clash with operational shifts; Housekeeping, Warehouse, Maintenance, and Night-shift staff are omitted; 15 ideas are discussed but zero owners are named; budget requests sit unapproved for months; meeting frequency (12 meetings held!) is cited as proof of success; one enthusiastic employee carries all files. Members disengage. The team is active, but operationally ineffective because it lacks a clear mandate, decision boundaries, functional representation, and action ownership." },
+      { id: "gt1-k1", type: "key_message", position: 3, headingText: "Operating Principle", bodyText: "Meetings held and ideas discussed are activity indicators; completed actions, removed blockers, and verified workplace practices are effectiveness indicators. Structure your team for delivery, not just discussion." },
       {
-        id: "c22-l1-b1",
-        type: "heading",
-        headingText: "What a Green Team Is For"
-      },
-      {
-        id: "c22-l1-b2",
-        type: "short_text",
-        bodyText: "A green team is created to identify opportunities, collect employee observations, test improvements, coordinate activities, and track agreed actions. It is NOT created to replace managers, approve operational budgets, alter health/safety guidelines, or assume compliance duties.\n\nUnderstand four key roles:\n1. Advisory: Recommending or providing process input.\n2. Coordination: Helping people carry out actions.\n3. Delivery: Completing specifically assigned tasks.\n4. Approval: Authorizing budget, policy, or operational changes."
-      },
-      {
-        id: "c22-l1-b3",
-        type: "key_message",
-        headingText: "Resort Example",
-        bodyText: "A Mauritian resort green team documents water loss from guest irrigation and proposes a trial. However, the facilities manager must still approve repairs and budget expenditure."
-      },
-      {
-        id: "c22-l1-b4",
+        id: "gt1-d1",
         type: "decision_scenario",
-        decisionIntro: "Which action falls within the correct authority of a workplace green team?",
-        decisionPrompt: "Select the action within the team's authority:",
+        position: 4,
+        decisionIntro: "Diagnosing Green Team Ineffectiveness:",
+        decisionPrompt: "A company's green team meets monthly for 6 months, generating 20 ideas but completing only 1 action. What should the chair do first?",
         decisionChoices: [
-          {
-            label: "Authorizing a budget of 50,000 MUR to replace staff room light fixtures.",
-            correct: false,
-            feedback: "Incorrect. The green team does not have direct financial approval authority."
-          },
-          {
-            label: "Testing a staff room waste sorting station layout and gathering feedback from the cleaning staff.",
-            correct: true,
-            feedback: "Correct. Testing layouts and collecting feedback represent coordination and delivery tasks within the team's scope."
-          },
-          {
-            label: "Terminating the contract of a waste disposal supplier.",
-            correct: false,
-            feedback: "Incorrect. Changing supplier contracts requires formal procurement or management authority."
-          },
-          {
-            label: "Rewriting the company's health and safety policy.",
-            correct: false,
-            feedback: "Incorrect. Health and safety policies are managed by designated compliance officers."
-          }
+          { label: "Review the team mandate, representation, decision boundaries, and require every approved idea to have one named owner and target date before starting new discussions", correct: true, feedback: "Correct! Establishing clear mandates, decision flows, and single action ownership fixes root delivery failures." },
+          { label: "Increase meeting frequency from monthly to weekly to force more discussions", correct: false, feedback: "Incorrect. Holding more unorganized meetings increases meeting fatigue without resolving ownership gaps." },
+          { label: "Launch a staff competition to generate 20 more ideas", correct: false, feedback: "Incorrect. Generating more unowned ideas overburdens the team and destroys credibility." }
         ]
       }
     ]
   },
   {
     order: 1,
-    title: "Choose Members for Workplace Relevance",
+    title: "Core Purpose & Essential Vocabulary",
     minutes: 3,
-    content: "Select green team members based on operational knowledge and representative balance rather than seniority or enthusiasm alone.",
+    content: "Define the operational role of a green team and master 50+ green team governance terms.",
     blocks: [
+      { id: "gt2-h1", type: "heading", position: 1, headingText: "Team Boundaries & Governance Vocabulary" },
+      { id: "gt2-t1", type: "short_text", position: 2, bodyText: "A sustainability team provides cross-departmental coordination, evidence gathering, and recommendations. It does NOT replace line management authority, approve unbudgeted capital expenses, or assume statutory health and safety duties." },
       {
-        id: "c22-l2-b1",
-        type: "heading",
-        headingText: "Choose Members for Workplace Relevance"
-      },
-      {
-        id: "c22-l2-b2",
-        type: "short_text",
-        bodyText: "A balanced green team represents how work is actually performed. Do not select members based on job titles or appearance. Avoid committees made up only of office-based managers.\n\nUseful teams include representation from: operations, maintenance, procurement, shift staff, customer service, and finance. This ensures that when actions are planned, operational constraints (like busy checkout periods or shift changes) are understood."
-      },
-      {
-        id: "c22-l2-b3",
+        id: "gt2-k1",
         type: "key_message",
-        headingText: "Team Composition",
-        bodyText: "Select members who have direct contact with processes that generate waste, use energy, or consume water."
+        position: 3,
+        headingText: "Core Green Team Vocabulary",
+        bodyText: "• Sponsor: Senior manager who provides executive alignment, resources, and budget sign-off.\n• Chair / Coordinator: Team lead who structures agendas, facilitates meetings, and tracks action delivery.\n• Mandate & Scope: Written authorization defining what the team can decide, recommend, or pilot.\n• Decision Rights: Explicit rules on what the team can approve directly vs what requires management sign-off.\n• Functional Representation: Including key operational roles (facilities, kitchen, warehouse, shift leads) rather than head-office volunteers only.\n• Action Log: Structured record of assigned owners, target dates, and blocker escalation routes.\n• Volunteer Dependency: Vulnerability caused when team delivery relies on a single enthusiastic person without formal support."
       },
       {
-        id: "c22-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A retail company forms a green team to reduce store packaging waste. Which group represents the most effective team composition?",
-        decisionPrompt: "Select the most effective membership:",
-        decisionChoices: [
-          {
-            label: "The General Manager, the Marketing Manager, and the PR Consultant.",
-            correct: false,
-            feedback: "Incorrect. This group lacks operational knowledge of inventory, receiving, and floor routines."
-          },
-          {
-            label: "The Store Operations Lead, the Receiving Dock Supervisor, a Sales Floor Representative, and the Procurement Assistant.",
-            correct: true,
-            feedback: "Correct. This team contains the staff who handle incoming packaging, stock shelves, and make procurement requests."
-          },
-          {
-            label: "Three enthusiastic volunteers from the finance department.",
-            correct: false,
-            feedback: "Incorrect. While enthusiastic, they have no direct involvement in retail floor waste operations."
-          },
-          {
-            label: "All supervisors from every department.",
-            correct: false,
-            feedback: "Incorrect. A team containing only supervisors is often too large and misses frontline staff perspectives."
-          }
-        ]
+        id: "gt2-f1",
+        type: "memorable_fact",
+        position: 4,
+        headingText: "Did You Know? (Roles & Communication Standards)",
+        bodyText: "Management-system standards (ISO 14001 Clause 5.3 & ISO 9001 Clause 5.3) require top management to assign, communicate, and understand organizational roles and authorities to ensure environmental management processes deliver intended outputs.\n\nA green team operates effectively when its decision boundaries are formally communicated and supported by department heads."
       }
     ]
   },
   {
     order: 2,
-    title: "Establish a Clear Mandate",
-    minutes: 3,
-    content: "Define the scope, sponsor, and decision boundaries of the team. A written mandate prevents confusion about roles and authority.",
+    title: "The TEAMWORK Operational Framework",
+    minutes: 4,
+    content: "Master the 8-step TEAMWORK framework for practical green team delivery.",
     blocks: [
+      { id: "gt3-h1", type: "heading", position: 1, headingText: "The TEAMWORK Operational Framework" },
+      { id: "gt3-t1", type: "short_text", position: 2, bodyText: "Use the TEAMWORK framework to structure an accountable, high-performing green team:" },
       {
-        id: "c22-l3-b1",
-        type: "heading",
-        headingText: "Establish a Clear Mandate"
-      },
-      {
-        id: "c22-l3-b2",
-        type: "short_text",
-        bodyText: "A mandate clearly defines: purpose, scope (topics), sponsor (accountable manager), decision authority, reporting lines, meeting frequency, and review date.\n\nFor example, a retail green team's mandate might authorize it to review waste logs and recommend bin placements, but explicitly exclude authority to sign vendor contracts or modify safety policies."
-      },
-      {
-        id: "c22-l3-b3",
+        id: "gt3-k1",
         type: "key_message",
-        headingText: "Scope Boundaries",
-        bodyText: "A written mandate prevents the team from stalling due to uncertainty about what they are allowed to decide or do."
+        position: 3,
+        headingText: "TEAMWORK Framework Breakdown",
+        bodyText: "• T — Target a clear purpose: Define written mandate, scope, and decision boundaries.\n• E — Ensure relevant representation: Include operations, facilities, frontline, shift leads, and finance.\n• A — Assign authority & accountability: Name one accountable lead for every action and clarify approvers.\n• M — Make meetings useful: Run 45-min agenda-driven meetings focused on action review.\n• W — Work from evidence & reality: Use physical observations, utility records, and operational constraints.\n• O — Organise actions & resources: Secure sponsor approval, budget, and time allocations.\n• R — Review delivery & remove blockers: Escalate unresolved dependencies to executive sponsors.\n• K — Keep team relevant & sustainable: Refresh membership, manage workload, and record written handovers."
       },
       {
-        id: "c22-l3-b4",
+        id: "gt3-d1",
         type: "decision_scenario",
-        decisionIntro: "A green team is unsure whether they can spend 5,000 MUR on recycling containers. What is the most appropriate first action?",
-        decisionPrompt: "Select the best mandate step:",
+        position: 4,
+        decisionIntro: "Practice: Decision Boundary Categorization",
+        decisionPrompt: "A hotel green team wants to replace 50 showerheads with low-flow models costing 150,000 MUR. How should the team handle this decision?",
         decisionChoices: [
-          {
-            label: "Purchase the containers and ask for approval later.",
-            correct: false,
-            feedback: "Incorrect. Bypassing financial authorization limits violates company policy."
-          },
-          {
-            label: "Refer to the team's written mandate to check their approved spending limit and consult their management sponsor.",
-            correct: true,
-            feedback: "Correct. Consulting the written mandate and the sponsor clarifies authorization boundaries."
-          },
-          {
-            label: "Cancel the purchase and stop waste sorting actions.",
-            correct: false,
-            feedback: "Incorrect. This avoids resolving the boundary question."
-          },
-          {
-            label: "Ask all company employees to vote on the purchase.",
-            correct: false,
-            feedback: "Incorrect. Staff voting is not a standard corporate budget authorization method."
-          }
+          { label: "Gather water-savings evidence, obtain supplier quotes, test 2 pilot units in staff showers, and present a formal recommendation to the Facilities Manager for budget approval", correct: true, feedback: "Correct! Gathering evidence, testing pilots, and presenting costed recommendations to authorized managers respects decision boundaries." },
+          { label: "Purchase and install all 50 showerheads immediately using team volunteer funds", correct: false, feedback: "Incorrect. Green teams must not bypass procurement rules or use personal funds for capital upgrades." },
+          { label: "Reject the idea outright because green teams are forbidden from proposing plumbing improvements", correct: false, feedback: "Incorrect. Proposing costed improvements to management is a core advisory function of the team." }
         ]
       }
     ]
   },
   {
     order: 3,
-    title: "Run Short, Productive Meetings",
-    minutes: 3,
-    content: "Structure meetings around decisions, progress checks, and assignments. Focus the agenda on a few priority issues to prevent open-ended discussion.",
+    title: "Visual Meeting Inspection & High-Risk Mistakes",
+    minutes: 4,
+    content: "Inspect a green team delivery board and review critical operational safeguards.",
     blocks: [
+      { id: "gt4-h1", type: "heading", position: 1, headingText: "Visual Green Team Meeting Board Inspection" },
+      { id: "gt4-t1", type: "short_text", position: 2, bodyText: "Examine the green team meeting board (`visual-sustainability-green-team-effectiveness.png`). Observe how red sticky notes highlight operational defects: Head-office staff only (empty seat with placard reading 'Night Shift & Frontline Omitted'), long idea list with no assigned owners, budget request marked 'Awaiting Approval (3 Months)', meeting count cited as main success metric ('12 Meetings Held!'), one person holding all action folders, no written mandate, meeting time clashing with operational shift, and an overflow of unanswered suggestion slips." },
       {
-        id: "c22-l4-b1",
-        type: "heading",
-        headingText: "Run Short, Productive Meetings"
+        id: "gt4-img1",
+        type: "visual_question",
+        position: 3,
+        imageUrl: "/images/courses/visual-sustainability-green-team-effectiveness.png",
+        caption: "Green Team Quarterly Delivery & Action Board: Displaying head-office bias, unassigned actions, long pending budget approvals, and meeting count vanity metrics.",
+        imageAlt: "Realistic photograph of a Mauritian commercial workplace meeting room with a whiteboard titled Green Team Quarterly Delivery & Action Board showing highlighted defects like head office only, unassigned actions, pending approvals, and meeting count vanity metrics."
       },
       {
-        id: "c22-l4-b2",
-        type: "short_text",
-        bodyText: "Green team meetings must lead to actions. Follow a decision agenda: (1) confirm meeting objectives, (2) review open tracker actions, (3) discuss one or two priority issues, (4) assign owners/due dates, (5) list escalations, and (6) confirm post-meeting messages.\n\nAvoid open-ended discussions without decisions, trying to cover too many topics, or assigning tasks to absent staff."
-      },
-      {
-        id: "c22-l4-b3",
+        id: "gt4-k1",
         type: "key_message",
-        headingText: "Agenda Discipline",
-        bodyText: "A productive green team meeting should end with clear assignments, not vague promises."
-      },
-      {
-        id: "c22-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A green team has 12 agenda items for a 30-minute meeting. Members have spent 20 minutes discussing general environmental news.",
-        decisionPrompt: "What should the team coordinator do?",
-        decisionChoices: [
-          {
-            label: "Extend the meeting by an hour to cover all 12 items.",
-            correct: false,
-            feedback: "Incorrect. Extending meetings causes schedule conflicts and team fatigue."
-          },
-          {
-            label: "Focus the remaining 10 minutes strictly on reviewing active tracker actions and documenting owners for the top two priority issues.",
-            correct: true,
-            feedback: "Correct. Prioritizing the active tracker ensures that immediate, concrete tasks are checked and assigned."
-          },
-          {
-            label: "Cancel the meeting and reschedule for next week.",
-            correct: false,
-            feedback: "Incorrect. Rescheduling without progress does not address the lack of agenda focus."
-          },
-          {
-            label: "Assign all 12 items to the members who did not attend.",
-            correct: false,
-            feedback: "Incorrect. Assigning tasks to absent staff leads to incomplete work and frustration."
-          }
-        ]
+        position: 4,
+        headingText: "High-Risk Team Operating Mistakes to Avoid",
+        bodyText: "• DO NOT cite meeting count or attendance as evidence of environmental progress.\n• DO NOT overload one enthusiastic employee with all action items (prevent single-point failure).\n• DO NOT hold meetings during operational shift peaks that exclude frontline or shift workers.\n• DO NOT leave budget requests sitting unassigned; establish executive sponsor escalation routes.\n• DO NOT approve technical, financial, or safety changes outside the team's written mandate."
       }
     ]
   },
   {
     order: 4,
-    title: "Track Actions and Escalate Properly",
-    minutes: 3,
-    content: "Convert discussion into actions. Use tracker records to define owners and due dates, and understand what constitutes a completed task.",
+    title: "Worked Mauritian Scenario & Applied Decision",
+    minutes: 2,
+    content: "Study a Grand Baie resort green team delivery log and solve an applied manufacturing decision.",
     blocks: [
+      { id: "gt5-h1", type: "heading", position: 1, headingText: "Worked Scenario: Grand Baie Resort Green Team Delivery Log" },
       {
-        id: "c22-l5-b1",
-        type: "heading",
-        headingText: "Track Actions and Escalate Properly"
+        id: "gt5-w1",
+        type: "workplace_example",
+        position: 2,
+        headingText: "Structured Delivery & Escalation Table",
+        bodyText: "A Grand Baie resort green team tracks 4 cross-departmental items:\n1. Kitchen Food Waste: Kitchen Rep & Chef testing food trim weighing | Decision: Pilot Approved | Owner: Sous Chef | Target: 20 July | Blocker: None.\n2. Guest Villa Irrigation Leak: Maintenance Rep identified 3 broken valves | Decision: Escalated for Budget | Owner: Facilities Mgr | Approver: GM | Target: 10 July | Blocker: 25,000 MUR sign-off.\n3. Plastic Straw Replacement: Housekeeping Rep proposed paper straws | Decision: Approved Directly | Owner: Purchasing Lead | Target: Completed.\n4. Solar Panel Installation: Marketing Rep proposed rooftop solar | Decision: Outside Scope | Action: Referred to Engineering & Board."
       },
       {
-        id: "c22-l5-b2",
-        type: "short_text",
-        bodyText: "Every green team action must record: issue, action, owner role, due date, status, approval needed, verified evidence, and review date. An action is not 'completed' merely because an email was sent or a meeting occurred.\n\nFor example, if the team asks maintenance to inspect air-conditioning usage after office hours, the action remains open until maintenance completes the check and the result is logged."
-      },
-      {
-        id: "c22-l5-b3",
-        type: "key_message",
-        headingText: "Progress Tracking",
-        bodyText: "Track tasks to verified outcomes rather than administrative steps. Send emails only to start a task, not close it."
-      },
-      {
-        id: "c22-l5-b4",
+        id: "gt5-d1",
         type: "decision_scenario",
-        decisionIntro: "A green team coordinator marks the action 'Improve recycling bin signage' as 'Completed' because they emailed the graphic files to the printer.",
-        decisionPrompt: "Is this action actually complete?",
+        position: 3,
+        decisionIntro: "Applied Manufacturing Team Decision:",
+        decisionPrompt: "A textile factory green team has 8 pending actions stalled because the Operations Lead never attends monthly 2 PM meetings due to dispatch duties. What is the correct team adjustment?",
         decisionChoices: [
-          {
-            label: "Yes, because the coordinator completed their task.",
-            correct: false,
-            feedback: "Incorrect. The signs are not yet printed, delivered, or installed."
-          },
-          {
-            label: "No. The action must remain 'In Progress' or 'Waiting for Delivery' until the new signs are installed on the floor and verified.",
-            correct: true,
-            feedback: "Correct. Actions must be tracked to verified outcomes (signs installed), not administrative milestones (email sent)."
-          },
-          {
-            label: "Yes, because the printer has the files.",
-            correct: false,
-            feedback: "Incorrect. This leaves the final installation unchecked."
-          },
-          {
-            label: "No, the action should be deleted and restarted.",
-            correct: false,
-            feedback: "Incorrect. The action remains valid; it is simply not yet complete."
-          }
+          { label: "Reschedule meetings to 8:30 AM before dispatch peak, send 3-point pre-meeting briefings, or appoint an alternate shift supervisor to represent Operations", correct: true, feedback: "Outstanding! Adjusting meeting timing and appointing operational alternates removes attendance barriers." },
+          { label: "Reassign all 8 operations actions to the HR coordinator who has free time", correct: false, feedback: "Incorrect. Assigning operational actions to HR leads to failure because HR lacks shopfloor authority." },
+          { label: "Mark all 8 actions as completed to clean up the action log", correct: false, feedback: "Incorrect. Falsifying action status destroys data integrity." }
         ]
       }
     ]
   },
   {
     order: 5,
-    title: "Keep the Team Useful Over Time",
-    minutes: 3,
-    content: "Establish continuity rules. Mitigate single-champion dependencies by using rotating roles, shared folders, and documented handover procedures.",
+    title: "Your Team Operating Commitment & Badge",
+    minutes: 2,
+    content: "Select your daily team operating commitments and complete the course.",
     blocks: [
+      { id: "gt6-h1", type: "heading", position: 1, headingText: "Green Team Operating Commitment" },
+      { id: "gt6-t1", type: "short_text", position: 2, bodyText: "Select the team operating practices you pledge to apply in your workplace." },
       {
-        id: "c22-l6-b1",
-        type: "heading",
-        headingText: "Keep the Team Useful Over Time"
-      },
-      {
-        id: "c22-l6-b2",
-        type: "short_text",
-        bodyText: "To build a resilient green team: document meetings in shared files, establish rotation rules for the coordinator role, implement handover guides, and periodically review the team's usefulness. If the coordinator leaves and trackers are in their personal folders, the team collapses.\n\nWarning signs include: meetings are held but tracker items remain open for months, one volunteer does all the work, or operational representatives stop attending."
-      },
-      {
-        id: "c22-l6-b3",
-        type: "key_message",
-        headingText: "Resilient Records",
-        bodyText: "A green team is durable when its knowledge, notes, and trackers belong to the organization rather than a single individual."
-      },
-      {
-        id: "c22-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Which step will you take to improve green team durability in your workplace?",
-        commitmentChoices: [
-          "Clarify the team's mandate",
-          "Add a missing operational representative",
-          "Introduce a standard action tracker",
-          "Shorten and restructure meetings",
-          "Appoint a deputy coordinator",
-          "Review inactive or overdue actions"
+        id: "gt6-c1",
+        type: "commitment",
+        position: 3,
+        commitmentInstruction: "Select your green team commitments (choose at least one):",
+        commitmentOptions: [
+          { value: "clear-mandate-boundaries", label: "Establish a written team mandate clarifying direct decision rights, recommendations, and manager approvals", description: "Define clear authority boundaries." },
+          { value: "cross-functional-representation", label: "Ensure operations, facilities, shift leads, and frontline roles are represented in team membership", description: "Avoid head-office-only bias." },
+          { value: "single-action-ownership", label: "Assign one specific role as accountable owner for every approved green team action", description: "Eliminate unowned ideas." },
+          { value: "escalate-blockers-promptly", label: "Escalate unresolved budget requests and operational dependencies to senior executive sponsors", description: "Maintain delivery momentum." }
         ]
+      },
+      {
+        id: "gt6-w1",
+        type: "workplace_example",
+        position: 4,
+        headingText: "Practical Disclaimer",
+        bodyText: "DISCLAIMER: This course provides practical workplace guidance on operating sustainability teams. It does not provide legal advice, employee-relations certification, environmental assurance, management-system certification, or independent verification of an organization's environmental performance or workplace culture."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const NEW_QUIZ = [
   {
-    question: "A green team begins changing store operational processes and modifying utility settings without consulting the department managers. What is the main error?",
+    order: 1,
+    question: "What is the primary difference between a green team's MEETING ACTIVITY and its OPERATIONAL EFFECTIVENESS?",
     options: [
-      { text: "The green team should work faster to prevent managers from noticing.", isCorrect: false, feedback: "Incorrect. Bypassing management processes creates operational risk." },
-      { text: "The team has advisory and coordination roles but cannot approve or execute operational changes without authorized management consent.", isCorrect: true, feedback: "Correct. Green teams support and coordinate, but they do not replace the formal authority of operational department heads." },
-      { text: "Department managers should not participate in green team decisions.", isCorrect: false, feedback: "Incorrect. Managers are critical stakeholders for process feasibility." },
-      { text: "The green team should change the written company policy first.", isCorrect: false, feedback: "Incorrect. The team cannot rewrite policy without authorization." }
+      "Meeting activity measures meetings held and ideas discussed; Effectiveness measures completed actions, removed operational blockers, and verified workplace improvements",
+      "Meeting activity applies to managers; Effectiveness applies to external auditors",
+      "Meeting activity requires catering; Effectiveness requires PowerPoint slides",
+      "Meeting activity and Effectiveness are exact synonyms in corporate governance"
     ],
-    correctExplanation: "Green teams coordinate and recommend improvements but do not hold direct authority to modify operations or budgets without formal management approvals.",
-    incorrectExplanation: "Bypassing managers, excluding them, or attempting to rewrite policy without consent violates basic workplace governance.",
-    practicalTakeaway: "Green teams support implementation but do not replace management authority."
+    correct: 0,
+    correctExplanation: "Meetings held = activity; Completed actions and verified improvements = effectiveness.",
+    incorrectExplanation: "Incorrect. Activity measures meetings held; Effectiveness measures verified workplace delivery."
   },
   {
-    question: "A green team consisting only of office-based managers is trying to resolve waste sorting issues in the logistics warehouse. What is the most appropriate action?",
+    order: 2,
+    question: "What does the 'T' in the TEAMWORK operational framework stand for?",
     options: [
-      { text: "Send a reminder email to all warehouse supervisors.", isCorrect: false, feedback: "Incorrect. This does not bring warehouse operational knowledge into the team." },
-      { text: "Invite a warehouse supervisor and a receiving dock operator to join the team to represent warehouse realities.", isCorrect: true, feedback: "Correct. Representative balance requires including staff who understand the daily shift schedules and layouts." },
-      { text: "Create a warehouse sorting leaderboard.", isCorrect: false, feedback: "Incorrect. Leaderboards do not replace operational representation." },
-      { text: "Hire an external auditor to inspect the warehouse.", isCorrect: false, feedback: "Incorrect. Direct employee representation is more practical and cost-effective for local trackers." }
+      "Target a clear purpose (define written mandate, scope, and decision boundaries)",
+      "Terminate non-attending committee members immediately",
+      "Transfer all environmental budgets into personal accounts",
+      "Threaten supervisors who do not submit weekly ideas"
     ],
-    correctExplanation: "To construct realistic actions, green teams must include representative members who possess direct knowledge of the targeted department's operations.",
-    incorrectExplanation: "Email reminders, leaderboards, or external audits do not address the lack of internal operational representation.",
-    practicalTakeaway: "Choose team members for their operational relevance and process knowledge."
+    correct: 0,
+    correctExplanation: "T = Target a clear purpose with written mandate and decision boundaries.",
+    incorrectExplanation: "Incorrect. T = Target a clear purpose."
   },
   {
-    question: "Members of a green team disagree about whether they are authorized to spend 5,000 MUR on waste containers. How should this be resolved?",
+    order: 3,
+    question: "Why should a workplace green team include frontline, shift, and facilities representatives rather than head-office volunteers only?",
     options: [
-      { text: "Purchase the containers and charge it to office supplies.", isCorrect: false, feedback: "Incorrect. This violates standard financial compliance rules." },
-      { text: "Refer to the documented team mandate and check the approved spending limit authorized by their sponsor.", isCorrect: true, feedback: "Correct. The mandate defines the team's scope and spending boundaries." },
-      { text: "Cancel the waste container project.", isCorrect: false, feedback: "Incorrect. The project is valid; only the authorization needs verification." },
-      { text: "Wait until the next annual review to request authorization.", isCorrect: false, feedback: "Incorrect. Delaying a small purchase for a year is unnecessary." }
+      "Because frontline and shift staff observe daily operational waste, equipment leaks, and procedural constraints that head-office staff cannot see",
+      "Because head-office staff are legally forbidden from attending green team meetings",
+      "Because frontline staff are required to take meeting minutes",
+      "Because facilities staff own all company shares"
     ],
-    correctExplanation: "A documented mandate clarifies scope and spending limits authorized by the team's management sponsor, preventing disputes.",
-    incorrectExplanation: "Falsifying accounting, cancelling projects, or delaying for a year ignores the purpose of a written mandate.",
-    practicalTakeaway: "Refer to a written mandate to clarify spending and decision boundaries."
+    correct: 0,
+    correctExplanation: "Frontline and shift staff bring essential operational insights and spot daily waste.",
+    incorrectExplanation: "Incorrect. Cross-functional representation ensures operational reality and shift feasibility."
   },
   {
-    question: "A green team meeting covers energy, waste, procurement, biodiversity, and CSR, but ends with no actions assigned or recorded. What is the best next step?",
+    order: 4,
+    question: "In the visual green team delivery board (`visual-sustainability-green-team-effectiveness.png`), why is 'One person holding all action folders' a high-risk operating flaw?",
     options: [
-      { text: "Schedule a longer meeting next week to finish the discussions.", isCorrect: false, feedback: "Incorrect. Longer meetings without agenda discipline lead to further delays." },
-      { text: "Prioritize the agenda to focus on one or two active projects, and document a clear owner and due date for every action.", isCorrect: true, feedback: "Correct. Restructuring the meeting to focus on the tracker ensures that tasks are assigned and monitored." },
-      { text: "Assign all open issues to the coordinator to keep meetings short.", isCorrect: false, feedback: "Incorrect. Overloading the coordinator leads to burnout and project failure." },
-      { text: "Disband the green team.", isCorrect: false, feedback: "Incorrect. The team can be effective with a structured meeting format." }
+      "Because relying on a single volunteer creates a single point of failure, causes volunteer burnout, and delays all team actions if that person is absent",
+      "Because action folders must legally be stored in locked steel safes",
+      "Because paper folders increase carbon emissions by 50%",
+      "Because green team coordinators are forbidden from carrying paper"
     ],
-    correctExplanation: "Meetings are productive when they focus on a small number of tracker priorities and end with defined owners and due dates.",
-    incorrectExplanation: "Longer discussions, overloading coordinators, or disbanding teams ignores meeting management best practices.",
-    practicalTakeaway: "Focus meeting agendas on tracker priorities and record clear owners."
+    correct: 0,
+    correctExplanation: "Overloading one person creates volunteer dependency and single-point failure; actions must be distributed.",
+    incorrectExplanation: "Incorrect. Single-person overload creates volunteer dependency and delivery bottlenecks."
   },
   {
-    question: "A green team member marks the action 'Investigate night-time AC use' as 'Completed' because they sent an email to the facilities team. What is the problem with this entry?",
+    order: 5,
+    question: "How should a green team handle a proposed action that requires a 200,000 MUR capital budget approval?",
     options: [
-      { text: "Sending the email was the only required task.", isCorrect: false, feedback: "Incorrect. Sending an email does not verify the investigation occurred." },
-      { text: "The action should remain 'In Progress' until the facilities team completes the check and the result is logged.", isCorrect: true, feedback: "Correct. Action tracking requires recording the actual outcome, not just the administrative start step." },
-      { text: "The coordinator should have sent the email instead.", isCorrect: false, feedback: "Incorrect. The sender is not the issue; the premature status update is." },
-      { text: "The entry should be deleted from the tracker.", isCorrect: false, feedback: "Incorrect. The active item should be updated, not deleted." }
+      "Gather evidence, cost the proposal, test a pilot if feasible, and submit a formal recommendation to the authorized manager or executive sponsor for sign-off",
+      "Approve the expenditure directly during the green team meeting",
+      "Reallocate funds from staff salary budgets without telling finance",
+      "Cancel the meeting and abandon the initiative"
     ],
-    correctExplanation: "Track tasks to verified outcomes (e.g. check completed and results recorded) rather than initial administrative steps.",
-    incorrectExplanation: "Treating emails as completed actions, changing senders, or deleting logs hides process tracking gaps.",
-    practicalTakeaway: "Mark actions complete only after the outcome is verified."
+    correct: 0,
+    correctExplanation: "Capital expenses exceeding team authority must be costed, evidenced, and recommended to authorized managers.",
+    incorrectExplanation: "Incorrect. Green teams recommend capital expenditures to authorized line managers."
   },
   {
-    question: "An action to repair a recycling container is blocked because the team lacks budget authority. How should the team respond?",
+    order: 6,
+    question: "What is the role of an EXECUTIVE SPONSOR in a workplace green team?",
     options: [
-      { text: "Leave the action open on the tracker indefinitely.", isCorrect: false, feedback: "Incorrect. Leaving blockers unaddressed leads to tracker stagnation." },
-      { text: "Record the blocker on the tracker and escalate it to the management sponsor with a clear decision request.", isCorrect: true, feedback: "Correct. Escalation is the proper tool for resolving blocker issues that lie outside the team's authority." },
-      { text: "Move the container to a general waste pile.", isCorrect: false, feedback: "Incorrect. This damages recycling goals instead of resolving the budget." },
-      { text: "Borrow funds from another department's petty cash.", isCorrect: false, feedback: "Incorrect. This violates standard financial governance." }
+      "A senior manager who aligns team goals with company strategy, secures necessary resources, and approves or escalates budget requests",
+      "An external contractor who cleans the meeting room",
+      "A junior intern who orders coffee for meetings",
+      "A software algorithm that sends automated reminders"
     ],
-    correctExplanation: "When actions are blocked by authority limits, record the blocker on the tracker and escalate to the sponsor with a specific request.",
-    incorrectExplanation: "Indefinite delays, abandoning the asset, or unauthorized borrowing ignores operational compliance paths.",
-    practicalTakeaway: "Log blockers and escalate to the authorized sponsor."
+    correct: 0,
+    correctExplanation: "Executive sponsor = senior lead providing management alignment, resources, and budget sign-off.",
+    incorrectExplanation: "Incorrect. Sponsor = senior manager providing alignment, resources, and sign-off."
   },
   {
-    question: "A green team's coordinator resigns, and all past meeting notes and trackers are locked in their personal computer folder, forcing meetings to stop. How could this have been avoided?",
+    order: 7,
+    question: "Why should every approved green team action have ONE named role as accountable owner?",
     options: [
-      { text: "The coordinator should have remained with the company indefinitely.", isCorrect: false, feedback: "Incorrect. Staff changes are normal operational occurrences." },
-      { text: "The team should have stored all notes and trackers in a shared corporate folder and appointed a deputy coordinator.", isCorrect: true, feedback: "Correct. Storing records in shared folders and assigning a deputy coordinator ensures process continuity." },
-      { text: "The records should have been deleted upon resignation.", 'isCorrect': false, feedback: "Incorrect. Deleting records destroys operational history." },
-      { text: "The team should not have kept meeting records.", isCorrect: false, feedback: "Incorrect. Keeping records is critical for progress tracking." }
+      "Because assigning actions to 'everyone' or 'all departments' means no single person is answerable for follow-through or reporting progress",
+      "Because naming multiple owners triggers double taxation",
+      "Because database systems can only store single names",
+      "Because single ownership is required by Mauritian labor law"
     ],
-    correctExplanation: "Process continuity requires maintaining trackers in shared directories and establishing deputy roles to handle staff changes.",
-    incorrectExplanation: "Expecting permanent staff, deleting records, or avoiding records entirely fails basic business resilience checks.",
-    practicalTakeaway: "Store team records in shared folders to ensure process continuity."
+    correct: 0,
+    correctExplanation: "Naming one accountable role ensures clear answerability and prevents diffusion of responsibility.",
+    incorrectExplanation: "Incorrect. Naming one role prevents 'everyone's job becomes no one's job'."
   },
   {
-    question: "A green team has held ten meetings over five months but has completed zero actions. What is the most accurate measure of the team's usefulness?",
+    order: 8,
+    question: "What is the correct response when an employee submits a sustainability idea that the green team CANNOT implement due to technical constraints?",
     options: [
-      { text: "The team is successful because meeting attendance was high.", isCorrect: false, feedback: "Incorrect. Attendance does not measure operational impact." },
-      { text: "The team's usefulness is measured by completed actions and results, not meeting frequency alone.", isCorrect: true, feedback: "Correct. Green team success is measured by concrete results on the floor, not administrative activity." },
-      { text: "The team requires a monthly newsletter to improve outreach.", isCorrect: false, feedback: "Incorrect. Newsletters do not resolve the lack of completed actions." },
-      { text: "The team should double the number of monthly meetings.", isCorrect: false, feedback: "Incorrect. More inactive meetings will not produce outcomes." }
+      "Provide clear, respectful feedback explaining why the idea cannot currently proceed, thank the employee, and record the explanation in the decision log",
+      "Ignore the submission slip and pretend it was lost",
+      "Publicly reprimand the employee for submitting an unrealistic idea",
+      "Mark the idea as 'Completed' on the board to keep morale high"
     ],
-    correctExplanation: "A green team is evaluated by its practical output (actions completed and gaps resolved), not by meeting frequency or attendance metrics.",
-    incorrectExplanation: "Measuring success by attendance, writing newsletters, or doubling meeting frequency ignores result-oriented metrics.",
-    practicalTakeaway: "Evaluate green team effectiveness by actions completed and results achieved."
+    correct: 0,
+    correctExplanation: "Respectful, transparent explanations maintain employee trust even when ideas are declined.",
+    incorrectExplanation: "Incorrect. Transparent feedback explaining reasons maintains trust."
+  },
+  {
+    order: 9,
+    question: "How does ELH-22 (Effective Green Teams) connect to ELH-23 (Workplace Sustainability Initiatives)?",
+    options: [
+      "ELH-22 establishes the team operating discipline and decision flow; ELH-23 guides the team in selecting, planning, and executing specific high-impact initiatives",
+      "ELH-22 replaces initiatives so specific projects are no longer needed",
+      "ELH-22 is for office staff; ELH-23 is for external consultants only",
+      "There is no connection between green teams and initiatives"
+    ],
+    correct: 0,
+    correctExplanation: "ELH-22 builds team operating capability; ELH-23 guides the team in delivering specific workplace initiatives.",
+    incorrectExplanation: "Incorrect. ELH-22 provides team governance; ELH-23 provides initiative delivery mechanics."
+  },
+  {
+    order: 10,
+    question: "What is the main takeaway of the TEAMWORK Operational Framework?",
+    options: [
+      "Applying TEAMWORK (Target purpose, Ensure representation, Assign authority, Make meetings useful, Work from evidence, Organise actions, Review delivery, Keep relevant) ensures sustained team delivery",
+      "Green teams should rely on unbudgeted volunteer enthusiasm and endless meetings",
+      "Line managers should transfer all environmental responsibilities onto green teams",
+      "Meeting frequency is the single true measure of sustainability success"
+    ],
+    correct: 0,
+    correctExplanation: "TEAMWORK provides structured operating discipline for cross-functional representation and accountable action delivery.",
+    incorrectExplanation: "Incorrect. TEAMWORK provides structured operating discipline for effective green team delivery."
   }
 ];
 
-export async function ensureEffectiveGreenTeamsCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
-
+export async function ensureEffectiveGreenTeamsCourse(): Promise<void> {
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      // 1. Resolve Course 22 by courseCode "ELH-22" or slug
+      let course = null;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
+      const [byCode] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-22"))
+        .limit(1);
 
-      // 2. Resolve Course 21
-      let course21 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-21")
-      });
-      if (!course21) {
-        course21 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "building-employee-engagement-in-sustainability")
-        });
-      }
-
-      if (!course21) {
-        throw new Error("Data integrity error: Course 21 (ELH-21) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 22
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
-        actualCourseId = inserted.id;
+      if (byCode) {
+        course = byCode;
       } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
+        const [bySlug] = await tx
+          .select()
+          .from(coursesTable)
+          .where(eq(coursesTable.slug, COURSE_SLUG))
+          .limit(1);
+        course = bySlug ?? null;
+      }
+
+      if (!course) {
+        throw new Error("Course ELH-22 / creating-and-running-effective-green-teams not seeded by catalogue skeletons bootstrap!");
+      }
+
+      const courseId = course.id;
+
+      // 2. Fetch seed marker and existing database content
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
+
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, courseId));
+
+      const existingQuizQuestions = await tx
+        .select()
+        .from(quizQuestionsTable)
+        .where(eq(quizQuestionsTable.courseId, courseId));
+
+      // 3. Evaluate integrity violations
+      const hasMissingLessons = existingLessons.length !== 6;
+      const hasEmptyBlocks = existingLessons.some(
+        (l) => !l.contentBlocks || !Array.isArray(l.contentBlocks) || l.contentBlocks.length === 0
+      );
+      const hasMissingQuiz = existingQuizQuestions.length !== 10;
+
+      const needsRepair = !existingSeed || hasMissingLessons || hasEmptyBlocks || hasMissingQuiz;
+
+      if (!needsRepair) {
+        logger.info({ courseId, slug: COURSE_SLUG }, "Effective Green Teams course content and v2 integrity verified. Skipping repair to preserve administrator edits...");
+        return;
+      }
+
+      logger.info({ courseId, slug: COURSE_SLUG }, "Integrity mismatch or missing v2 seed detected for Course ELH-22. Re-seeding course content, lessons, and 10 quiz questions transactionally...");
+
+      // 4. Resolve next recommended course dynamically (ELH-23 or null if not yet seeded)
+      const [course23] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.slug, "planning-workplace-sustainability-initiatives"))
+        .limit(1);
+      const nextCourseId = course23 ? course23.id : null;
+
+      // 5. Update course record metadata
+      await tx
+        .update(coursesTable)
+        .set({
           title: COURSE_TITLE,
           slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
+          courseCode: "ELH-22",
           description: COURSE_META.description,
           fullDescription: COURSE_META.fullDescription,
           categoryId: COURSE_META.categoryId,
@@ -540,185 +427,113 @@ export async function ensureEffectiveGreenTeamsCourse() {
           includesCertificate: COURSE_META.includesCertificate,
           passingScore: COURSE_META.passingScore,
           completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          recommendedNextCourseId: nextCourseId,
           isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+          status: "published",
+        })
+        .where(eq(coursesTable.id, courseId));
+
+      // 6. Seed/re-seed lessons with exact position block arrays
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      for (const newLesson of NEW_LESSONS) {
+        await tx.insert(lessonsTable).values({
+          courseId,
+          title: newLesson.title,
+          orderIndex: newLesson.order,
+          durationMinutes: newLesson.minutes,
+          content: newLesson.content,
+          contentBlocks: newLesson.blocks,
+          isArchived: false,
+        });
       }
 
-      // 4. Update Course 21 recommendedNextCourseId to point to Course 22 preserving admin edits
-      let isSystemManaged = false;
-      if (course21.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course21.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-22") {
-          isSystemManaged = true;
+      // 7. Seed/re-seed 10 quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      await tx.insert(quizQuestionsTable).values(
+        NEW_QUIZ.map((q) => ({
+          courseId,
+          question: q.question,
+          options: q.options,
+          correctOption: q.correct,
+          orderIndex: q.order,
+          correctExplanation: q.correctExplanation,
+          incorrectExplanation: q.incorrectExplanation,
+          isArchived: false,
+        }))
+      );
+
+      // 8. Enforce prerequisite entries in coursePrerequisitesTable (ELH-12 through ELH-21 -> ELH-22)
+      const prereqs = await tx
+        .select({ id: coursesTable.id })
+        .from(coursesTable)
+        .where(inArray(coursesTable.slug, [
+          "final-sustainability-certification",
+          "sustainability-action-planning",
+          "setting-departmental-sustainability-goals",
+          "building-workplace-sustainability-team",
+          "communicating-sustainability-at-work",
+          "tracking-sustainability-actions-and-progress",
+          "sustainability-data-collection-and-evidence",
+          "reviewing-sustainability-performance-and-corrective-action",
+          "sustainability-roles-responsibilities-and-accountability",
+          "building-employee-engagement-in-sustainability"
+        ]));
+
+      for (const prereq of prereqs) {
+        const [existingPrereq] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(and(
+            eq(coursePrerequisitesTable.courseId, courseId),
+            eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+          ))
+          .limit(1);
+
+        if (!existingPrereq) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId,
+            prerequisiteCourseId: prereq.id,
+          });
         }
       }
 
-      if (course21.recommendedNextCourseId === null || course21.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course21.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 21 currently recommends course ID ${course21.recommendedNextCourseId} instead of Course 22 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
+      // 9. Idempotently seed/update badge definition
+      await tx
+        .insert(badgeDefinitionsTable)
+        .values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
           description: COURSE_META.badgeDescription,
-          icon: "star",
+          icon: "users",
           criteriaType: "all_courses",
           threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 25,
-          code: BADGE_CODE,
+          courseIds: [courseId],
+          orderIndex: 27,
+        })
+        .onConflictDoUpdate({
+          target: badgeDefinitionsTable.slug,
+          set: {
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [courseId],
+          },
+        });
+
+      // 10. Save seed marker version
+      if (!existingSeed) {
+        await tx.insert(systemSeedsTable).values({
+          name: SEED_NAME,
+          version: 2,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx.update(systemSeedsTable).set({ version: 2 }).where(eq(systemSeedsTable.name, SEED_NAME));
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 21
-      const existingPrereq21 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course21.id)
-        )
-      });
-      if (!existingPrereq21) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course21.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      logger.info({ courseId, slug: COURSE_SLUG }, "Effective Green Teams course v2 seed / repair transaction completed successfully.");
     });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  } catch (err) {
+    logger.error({ err }, "Failed to execute idempotent seeding/repair of Effective Green Teams course");
   }
 }
