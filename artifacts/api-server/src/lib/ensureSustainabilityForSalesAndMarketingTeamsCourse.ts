@@ -14,16 +14,16 @@ import { logger } from "./logger";
 
 const COURSE_SLUG = "sustainability-for-sales-and-marketing-teams";
 const COURSE_TITLE = "Sustainability for Sales and Marketing Teams";
-const BADGE_SLUG = "responsible-sustainability-communicator";
+const BADGE_SLUG = "credible-sustainability-communicator";
 const BADGE_CODE = "COURSE_ELH_28_COMPLETE";
-const SEED_NAME = "sustainability-for-sales-and-marketing-teams-v1";
+const SEED_NAME = "sustainability-for-sales-and-marketing-teams-v2";
 
 const COURSE_META = {
   courseCode: "ELH-28",
-  description: "Learn how to communicate sustainability accurately, use approved evidence and respond confidently to customer questions without exaggeration.",
-  fullDescription: "Learn how to communicate sustainability accurately, use approved evidence and respond confidently to customer questions without exaggeration.",
+  description: "Learn how to communicate sustainability accurately, use approved evidence, avoid misleading green claims, and escalate claims requiring specialist or legal review.",
+  fullDescription: "Learn how to communicate sustainability accurately, use approved evidence, avoid misleading green claims, and escalate claims requiring specialist or legal review without independently inventing, calculating, or approving technical environmental claims.",
   categoryId: 1,
-  durationMinutes: 18,
+  durationMinutes: 25,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
@@ -40,640 +40,536 @@ const COURSE_META = {
     "Managers approving customer-facing sustainability messages"
   ],
   learningObjectives: [
-    "explain why sustainability communication requires evidence and context;",
-    "distinguish a factual statement from an environmental claim;",
-    "identify vague, absolute or unsupported wording;",
-    "use approved evidence without exaggeration;",
-    "explain conditions, scope and limitations clearly;",
-    "respond appropriately to customer sustainability questions;",
-    "coordinate claim approval and updates;",
-    "correct inaccurate or outdated communications."
+    "Distinguish approved environmental facts from vague, absolute, or unverified marketing claims.",
+    "Clarify sales & marketing boundaries vs technical data owners, legal counsel, and executive approvers.",
+    "Apply the 7-stage Credible Claim Development Framework from evidence verification to publication.",
+    "Structure claims with visible qualifications, material scope limits, and appropriate evidence dates.",
+    "Respond accurately to customer sustainability questionnaires and tender inquiries using approved source registers.",
+    "Manage claim updates, version control, and rapid correction/withdrawal when operational facts change."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Sustainability for Sales and Marketing Teams. You can now communicate sustainability accurately, use approved evidence and respond confidently to customer questions without exaggeration.",
-  badgeName: "Responsible Sustainability Communicator",
-  badgeDescription: "Awarded for demonstrating practical understanding of how to communicate sustainability accurately, use approved evidence and respond confidently to customer questions without exaggeration.",
+  completionMessage: "You have completed Sustainability for Sales and Marketing Teams. You can now communicate sustainability accurately, use approved evidence, and maintain customer trust through credible claim management.",
+  badgeName: "Credible Sustainability Communicator",
+  badgeDescription: "Awarded for demonstrating practical understanding of how to communicate sustainability accurately, use approved evidence, and maintain customer trust through credible claim management.",
 };
 
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Sustainability Communication Needs Evidence",
+    title: "Opening Workplace Hook: The Flawed Proposal",
     minutes: 3,
-    content: "Explain why sustainability messages must be supported and approved. Avoid using absolute words when only limited progress exists.",
+    content: "Examine a sales tender proposal claiming '100% eco-friendly services' and 'zero-waste operations' based on incomplete evidence.",
     blocks: [
       {
         id: "c28-l1-b1",
         type: "heading",
-        headingText: "Communication Needs Evidence"
+        headingText: "Opening Workplace Hook: The Overstated Tender Claim"
       },
       {
         id: "c28-l1-b2",
         type: "short_text",
-        bodyText: "Sustainability communication influences buying decisions and trust. A message is misleading when it has no evidence, exaggerates limited improvements, hides conditions, or presents future goals as current achievements. Understand the source, approved scope, valid period, and limitations of every claim."
+        bodyText: "A sales team in Mauritius prepares a commercial proposal for a major resort client. The draft proposal headline states:\n• '100% Eco-Friendly Commercial Services'\n• 'Zero-Waste Operations'\n• 'Carbon-Neutral Delivery Fleet'\n• 'Fully Sustainable Materials'\n\nHowever, a marketing compliance review reveals:\n• Only 1 packaging box is made of recyclable material.\n• The 'carbon-neutral' claim relies on 1 month of unverified fuel logs.\n• The 'zero-waste' claim is a future 2030 target, not an achieved reality.\n• The proposal deadline is in 3 hours.\n\nThis hook demonstrates that attractive sales copy cannot replace verified evidence and formal sign-off."
       },
       {
         id: "c28-l1-b3",
         type: "key_message",
-        headingText: "Verified Facts Only",
-        bodyText: "Always match marketing words directly to verified facts. Avoid creating overly broad claims that suggest company-wide success from isolated actions."
-      },
-      {
-        id: "c28-l1-b4",
-        type: "decision_scenario",
-        decisionIntro: "A hotel replaces small single-use plastic toiletry bottles with large wall-mounted refillable dispensers in all guest rooms.",
-        decisionPrompt: "What claim can the marketing coordinator safely use on social media?",
-        decisionChoices: [
-          {
-            label: "Our hotel is now completely plastic-free.",
-            correct: false,
-            feedback: "Incorrect. The hotel still uses plastic in packaging, housekeeping, food, and maintenance."
-          },
-          {
-            label: "We have replaced single-use guest toiletry bottles with refillable dispensers, avoiding room toiletry plastic waste.",
-            correct: true,
-            feedback: "Correct. This describes the specific change that can be proven rather than making an unverified broad claim."
-          },
-          {
-            label: "Our hotel has achieved 100% environmental sustainability.",
-            correct: false,
-            feedback: "Incorrect. This is a vague, absolute claim that cannot be technically proven."
-          },
-          {
-            label: "Tell guests that the bathroom is environmentally neutral.",
-            correct: false,
-            feedback: "Incorrect. The term 'environmentally neutral' is an absolute claim without clear technical basis."
-          }
-        ]
+        headingText: "Commercial Insight",
+        bodyText: "Sales and marketing add value by translating approved technical evidence into clear messages—never by converting future targets into current guarantees."
       }
     ]
   },
   {
     order: 1,
-    title: "Replace Vague Words With Specific Information",
+    title: "Why Credible Claims Matter: Personal, Business, and Trust Value",
     minutes: 3,
-    content: "Identify vague environmental wording and replace it with clear, measurable statements. Clarify local recyclability before advertising.",
+    content: "Understand why accurate sustainability claims build customer trust, protect brand reputation, and win commercial tenders.",
     blocks: [
       {
         id: "c28-l2-b1",
         type: "heading",
-        headingText: "Replace Vague Words"
+        headingText: "Why Credible Claims Matter"
       },
       {
         id: "c28-l2-b2",
         type: "short_text",
-        bodyText: "Words like 'green,' 'eco,' and 'responsible' are positive but provide no useful details. Specific communication explains what changed, where, when, and what proof exists. Instead of 'eco-packaging,' state 'made of 80% recycled cardboard.' Ensure claims match local Mauritian recycling collection realities."
-      },
-      {
-        id: "c28-l2-b3",
-        type: "key_message",
-        headingText: "Attribute-Specific Claims",
-        bodyText: "Describe the specific material property (e.g. recycled content, compostable) rather than applying general environmental labels."
-      },
-      {
-        id: "c28-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A Mauritian retailer sells a product packaged in materials that are technically recyclable in theory, but no municipal or commercial recycling collection route currently exists for this material in Mauritius.",
-        decisionPrompt: "How should the marketing team describe the packaging?",
-        decisionChoices: [
-          {
-            label: "Advertise it as '100% recyclable' to encourage consumers.",
-            correct: false,
-            feedback: "Incorrect. Promising recyclability when no local collection route exists is misleading to Mauritian customers."
-          },
-          {
-            label: "Specify the material composition (e.g., 'made of PET plastic') and note local recycling availability should be checked.",
-            correct: true,
-            feedback: "Correct. This avoids promising local recycling processing without verified evidence."
-          },
-          {
-            label: "Mark the product as 'eco-friendly green pack.'",
-            correct: false,
-            feedback: "Incorrect. General green labels do not provide factual recyclability details."
-          },
-          {
-            label: "Claim that the package biodegrades in ordinary landfill waste.",
-            correct: false,
-            feedback: "Incorrect. Biodegradation in landfills requires specific testing; do not claim it without evidence."
-          }
-        ]
+        bodyText: "Accurate communication protects both commercial success and brand integrity:\n• Personal & Role Value: Sales staff gain confidence answering customer inquiries without guessing or risking credibility.\n• Business Value: Evidence-backed proposals win commercial tenders and protect against greenwashing lawsuits or brand damage.\n• Environmental Value: Honest communication directs customer purchasing toward genuinely superior environmental products."
       }
     ]
   },
   {
     order: 2,
-    title: "Understand Scope, Conditions and Comparisons",
+    title: "Role Boundaries: Sales/Marketing vs Technical & Legal Owners",
     minutes: 3,
-    content: "Communicate the correct scope, parameters, and time periods of claims. Limit comparative statements to verified baseline data.",
+    content: "Define functional boundaries between marketing copy drafting, technical verification, and legal sign-off.",
     blocks: [
       {
         id: "c28-l3-b1",
         type: "heading",
-        headingText: "Scope and Comparisons"
+        headingText: "Sales & Marketing Boundary Matrix"
       },
       {
         id: "c28-l3-b2",
         type: "short_text",
-        bodyText: "Claims must match the scope of evidence: specific sites, products, or periods. Avoid presenting a single property's reduction as a company-wide result. Comparative claims (e.g. 'less water,' 'lower carbon') must state the baseline compared, conditions, time period, and sources."
-      },
-      {
-        id: "c28-l3-b3",
-        type: "key_message",
-        headingText: "Control Scope creep",
-        bodyText: "Do not let claims expand as they move from technical spreadsheets to sales brochures. Disclose necessary limits."
-      },
-      {
-        id: "c28-l3-b4",
-        type: "decision_scenario",
-        decisionIntro: "A real estate company replaces lobby light fittings at one apartment residence, reducing common-area lighting consumption. Marketing wants to add 'our properties use energy-efficient lighting and consume less power' to all brochures.",
-        decisionPrompt: "What is the correct action?",
-        decisionChoices: [
-          {
-            label: "Include the company-wide statement since they plan to upgrade other properties later.",
-            correct: false,
-            feedback: "Incorrect. Promising upgrades that have not occurred converts future intentions into achieved claims."
-          },
-          {
-            label: "Restrict the claim specifically to the name of the upgraded residence, citing the measured reduction and year.",
-            correct: true,
-            feedback: "Correct. Restricting the claim to the specific site supported by data prevents misleading scope creep."
-          },
-          {
-            label: "State that all managed buildings are certified green.",
-            correct: false,
-            feedback: "Incorrect. Certifications cannot be claimed company-wide unless formally issued to all sites."
-          },
-          {
-            label: "Omit the lighting upgrade details from all brochures.",
-            correct: false,
-            feedback: "Incorrect. The upgrade is a valid achievement; communicate it with the correct, specific scope."
-          }
-        ]
+        bodyText: "Sales and marketing communicate approved facts; they do not calculate or certify technical claims.\n\nBoundary Matrix:\n• Sales/Marketing Owns: Copy drafting from approved registers, channel selection, qualifications visibility, and version control.\n• Technical/HSE Owns: Carbon calculations, energy metrics, waste data verification, and product ingredient testing.\n• Legal/Compliance Owns: Certification mark usage, regulatory risk review, and comparative advertising approvals."
       }
     ]
   },
   {
     order: 3,
-    title: "Use Approved Evidence Correctly",
+    title: "Plain-Language Green Claims Vocabulary",
     minutes: 3,
-    content: "Verify evidence currency, applicability, and validation source. Distinguish internal calculations and estimates from actual results.",
+    content: "Master essential terms for accurate environmental communication.",
     blocks: [
       {
         id: "c28-l4-b1",
         type: "heading",
-        headingText: "Use Approved Evidence"
+        headingText: "Plain-Language Green Claims Vocabulary"
       },
       {
         id: "c28-l4-b2",
         type: "short_text",
-        bodyText: "Check if evidence (procurement logs, utility readings, certificates) is current and covers the claim scope. Do not shorten statements to remove qualifications, convert estimates to achievements, or present internal calculations as independent verification."
-      },
-      {
-        id: "c28-l4-b3",
-        type: "key_message",
-        headingText: "Projections vs Achievements",
-        bodyText: "Always identify forecasted benefits as projections, and wait for performance logs before declaring achievements."
-      },
-      {
-        id: "c28-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "An internal technical proposal estimates that an upcoming shipping adjustment could reduce water usage by 20%. A salesperson wants to add 'our new process reduces water consumption by 20%' to a customer presentation.",
-        decisionPrompt: "What should the salesperson do?",
-        decisionChoices: [
-          {
-            label: "Use the statement to secure the client, since the engineering team estimated it.",
-            correct: false,
-            feedback: "Incorrect. Estimates cannot be reported as realized results before they are measured in operation."
-          },
-          {
-            label: "Describe the 20% water reduction as an expected project target, or wait until operational performance metrics verify the actual result.",
-            correct: true,
-            feedback: "Correct. Keep targets marked as projections until operational evidence proves the outcome."
-          },
-          {
-            label: "Remove the percentage and say the process is 'water neutral.'",
-            correct: false,
-            feedback: "Incorrect. 'Water neutral' is an unverified absolute claim that ignores actual calculations."
-          },
-          {
-            label: "Claim the reduction has already occurred at another site.",
-            correct: false,
-            feedback: "Incorrect. Fabricating locations violates professional codes and corporate data integrity rules."
-          }
-        ]
+        bodyText: "Key Terms Defined:\n• Verified Fact vs Target: A fact is a measured past achievement (e.g. 15% lower energy in 2025); a target is a future goal.\n• Absolute Claim: Unqualified terms like '100% green' or 'zero impact' which are almost impossible to substantiate.\n• Qualification: A visible statement explaining scope, date, baseline, or conditions (e.g., 'applies to outer packaging only').\n• Greenwashing: Exaggerating or misrepresenting environmental attributes to mislead customers."
       }
     ]
   },
   {
     order: 4,
-    title: "Respond to Customer Questions Honestly",
+    title: "Sourced Fact: ISO 14021 & Green Claims Principles",
     minutes: 3,
-    content: "Respond confidently and honestly to technical sustainability queries. Acknowledge limits and refer questions to internal owners.",
+    content: "Examine international standards governing self-declared environmental claims.",
     blocks: [
       {
         id: "c28-l5-b1",
         type: "heading",
-        headingText: "Respond Honestly"
+        headingText: "Sourced Fact: Environmental Claims Standards"
       },
       {
         id: "c28-l5-b2",
-        type: "short_text",
-        bodyText: "Customers ask about recyclability, carbon neutrality, certifications, and compliance. Provide approved facts, explain scope, acknowledge what is unconfirmed, and coordinate follow-up with internal subject owners. Never guess or fabricate answers to appear informed."
-      },
-      {
-        id: "c28-l5-b3",
-        type: "key_message",
-        headingText: "Acknowledge and Verify",
-        bodyText: "Saying what is verified and checking the rest builds more trust than making confident, unverified guesses."
-      },
-      {
-        id: "c28-l5-b4",
-        type: "decision_scenario",
-        decisionIntro: "A corporate buyer asks a sales representative if the company's recycled paper stock is processed locally in Mauritius. The representative does not have this detail.",
-        decisionPrompt: "How should the representative reply?",
-        decisionChoices: [
-          {
-            label: "Confirm it is processed locally to avoid losing sales momentum.",
-            correct: false,
-            feedback: "Incorrect. Guessing or fabricating locations creates legal risks if the supplier imports the stock."
-          },
-          {
-            label: "Provide the approved facts regarding paper specifications, explain that local processing details are being verified, and coordinate a follow-up through the procurement head.",
-            correct: true,
-            feedback: "Correct. Provide known facts, acknowledge limits, and check details with the internal owner."
-          },
-          {
-            label: "Tell the customer that processing location does not affect sustainability.",
-            correct: false,
-            feedback: "Incorrect. Dismissing buyer queries violates customer service standards and avoids transparency."
-          },
-          {
-            label: "Guarantee that the entire supply chain is carbon neutral.",
-            correct: false,
-            feedback: "Incorrect. Carbon neutrality claims require verified emissions balances; do not guess them."
-          }
-        ]
+        type: "memorable_fact",
+        factTitle: "ISO 14021:2016 & ICC Advertising Standards",
+        bodyText: "ISO 14021:2016 (Self-Declared Environmental Claims) and ICC Code guidelines state that environmental claims must be specific, substantiated, accurate, and non-deceptive.\n\nPractical Marketing Implication: A claim is misleading not only if factually false, but if it omits material qualifications or creates an overstated impression. Broad terms like 'eco-friendly' or 'chemical-free' must be replaced with specific, verifiable facts."
       }
     ]
   },
   {
     order: 5,
-    title: "Review, Approve and Correct Communications",
+    title: "7-Stage Credible Claim Development Framework",
     minutes: 3,
-    content: "Establish a controlled process for approving claims. Correct outdated or inaccurate customer-facing statements promptly.",
+    content: "Apply the 7-stage framework to take claims safely from idea to publication.",
     blocks: [
       {
         id: "c28-l6-b1",
         type: "heading",
-        headingText: "Review and Correct"
+        headingText: "The 7-Stage Credible Claim Framework"
       },
       {
         id: "c28-l6-b2",
         type: "short_text",
-        bodyText: "Claims require documentation: proposed message, evidence source, approving owner, and review date. When a statement becomes inaccurate (e.g. site changes), correct or narrow it promptly across websites, templates, and brochures. Updates protect record transparency and client trust."
+        bodyText: "1. Define Exact Claim: Specify product, service, site, or company scope.\n2. Identify Audience & Channel: Determine likely customer interpretation on web, brochure, or social media.\n3. Locate Supporting Evidence: Match claim to verified data logs or test reports.\n4. Check Scope & Date: Ensure evidence covers the exact time period and location.\n5. Draft Qualified Wording: Include visible limitations, baselines, and dates.\n6. Obtain Sign-Off: Secure technical data owner and legal/compliance approval.\n7. Publish & Review: Maintain claim register, archive outdated copy, and update as facts change."
+      }
+    ]
+  },
+  {
+    order: 6,
+    title: "Mauritius-Relevant Example: Eco-Cleaning Service Campaign",
+    minutes: 3,
+    content: "Review a commercial marketing campaign for a Mauritian facility services company.",
+    blocks: [
+      {
+        id: "c28-l7-b1",
+        type: "heading",
+        headingText: "Mauritian Commercial Example"
       },
       {
-        id: "c28-l6-b3",
-        type: "key_message",
-        headingText: "Prompt Corrections",
-        bodyText: "Updating outdated statements is part of responsible brand management. Do not wait for annual print cycles."
+        id: "c28-l7-b2",
+        type: "short_text",
+        bodyText: "A Port Louis commercial services company launches a new office cleaning line:\n• Unapproved Draft: '100% Chemical-Free, Zero-Impact Cleaning Service.'\n• Compliance Review: Product contains naturally derived cleaning agents (not chemical-free) and packaging is 80% recycled cardboard.\n\n• Approved Copy: 'Office cleaning using plant-derived active ingredients, packaged in 80% recycled cardboard delivery boxes.'"
+      }
+    ]
+  },
+  {
+    order: 7,
+    title: "Visual Element: Evidence-to-Claim Approval Flow",
+    minutes: 3,
+    content: "Interactive visual diagram mapping claim strength from unverified idea to approved copy.",
+    blocks: [
+      {
+        id: "c28-l8-b1",
+        type: "heading",
+        headingText: "Visual Interactive: Claim Strength Ladder"
       },
       {
-        id: "c28-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Select one sustainability practice you can improve in your communications:",
-        commitmentChoices: [
-          "Checking evidence before publishing",
-          "Replacing vague environmental words",
-          "Recording claim approvals",
-          "Adding clear scope to customer messages",
-          "Correcting outdated website content",
-          "Escalating customer questions instead of guessing"
-        ]
+        id: "c28-l8-b2",
+        type: "image",
+        imageUrl: "/images/courses/sustainability-for-sales-and-marketing-teams.jpg",
+        captionText: "Claim Strength Ladder: Vague Absolute Claim -> Broad Unqualified Claim -> Specific Qualified Fact."
+      },
+      {
+        id: "c28-l8-b3",
+        type: "short_text",
+        bodyText: "Approval Rule:\nNever publish a headline claim that requires hidden fine-print disclaimers to correct a misleading impression."
+      }
+    ]
+  },
+  {
+    order: 8,
+    title: "20 Practical Workplace Sales & Marketing Actions",
+    minutes: 3,
+    content: "Execute 20 concrete marketing and sales actions to ensure claim credibility.",
+    blocks: [
+      {
+        id: "c28-l9-b1",
+        type: "heading",
+        headingText: "20 Practical Sales & Marketing Actions"
+      },
+      {
+        id: "c28-l9-b2",
+        type: "short_text",
+        bodyText: "1. Make every claim specific and attribute-focused.\n2. State the exact scope (product, site, or company).\n3. Record the evidence source and date for every statement.\n4. Separate past achievements from future targets.\n5. Avoid absolute words ('100%', 'zero', 'always').\n6. Avoid vague labels ('eco', 'green', 'clean') without detail.\n7. Place material qualifications adjacent to headlines.\n8. Verify local recycling collection before claiming recyclability.\n9. Obtain written permission before using certification logos.\n10. Keep customer-facing claim wording consistent across channels.\n11. Maintain a central approved claim register.\n12. Check claim expiration dates annually.\n13. Escalate technical customer questions to data owners.\n14. Never guess answers during sales calls.\n15. Correct published errors or outdated claims immediately.\n16. Disclose baseline periods when making comparative claims.\n17. Distinguish supplier claims from company-verified evidence.\n18. Ensure imagery matches written qualifications.\n19. Archive expired marketing collateral.\n20. Verify compliance approval before press releases."
+      }
+    ]
+  },
+  {
+    order: 9,
+    title: "Applied Scenario Challenge: The Cleaning Product Launch",
+    minutes: 3,
+    content: "Solve a multi-step commercial marketing challenge involving unverified eco-labels and urgent deadlines.",
+    blocks: [
+      {
+        id: "c28-l10-b1",
+        type: "heading",
+        headingText: "Scenario Challenge: Cleaning Product Launch"
+      },
+      {
+        id: "c28-l10-b2",
+        type: "short_text",
+        bodyText: "Scenario: A distributor prepares brochure copy for a new hotel dishwashing liquid, claiming 'Certified 100% Eco-Friendly & Chemical-Free.' The product safety sheet lists active biodegradable surfactants, and a certification application is pending.\n\nCorrect Action: Revise copy to 'Formulated with biodegradable surfactants; packaging made of 50% recycled plastic.' Omit '100% chemical-free' (factually false) and 'certified' (application is pending, not awarded)."
+      }
+    ]
+  },
+  {
+    order: 10,
+    title: "Learner Commitment & Practical Actions",
+    minutes: 3,
+    content: "Select one practical workplace sales or marketing commitment to execute this week.",
+    blocks: [
+      {
+        id: "c28-l11-b1",
+        type: "heading",
+        headingText: "Select Your Practical Sales/Marketing Commitment"
+      },
+      {
+        id: "c28-l11-b2",
+        type: "short_text",
+        bodyText: "Choose one action for your team this week:\n• Review 1 active brochure or website page for vague terms like 'eco-friendly' and replace them with specific facts.\n• Verify the evidence date and source behind 1 key sales presentation slide.\n• Confirm that a future target is clearly marked as a goal rather than an achieved result.\n• Audit active marketing copy to ensure all certification logos have valid permission files."
+      }
+    ]
+  },
+  {
+    order: 11,
+    title: "Completion, Badge & Practical Disclaimer",
+    minutes: 3,
+    content: "Review completion recognition and practical disclaimer guidelines.",
+    blocks: [
+      {
+        id: "c28-l12-b1",
+        type: "heading",
+        headingText: "Completion & Recognition"
+      },
+      {
+        id: "c28-l12-b2",
+        type: "short_text",
+        bodyText: "You have completed Sustainability for Sales and Marketing Teams. You can now draft specific, qualified, and evidence-backed customer communications while protecting organizational credibility."
+      },
+      {
+        id: "c28-l12-b3",
+        type: "callout",
+        headingText: "Practical Disclaimer",
+        bodyText: "This course provides practical guidance on sales and marketing communication. It does not replace legal counsel, regulatory compliance review, or technical environmental verification."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const QUIZ_QUESTIONS = [
   {
-    question: "A hotel removes single-use plastic bottles from guest rooms. What claim can the marketing team safely place on website banners?",
+    question: "What is the primary boundary of sales and marketing teams regarding workplace sustainability claims?",
     options: [
-      { text: "Our hotel is now plastic-free.", isCorrect: false, feedback: "Incorrect. The hotel still uses plastic in other departments and packages." },
-      { text: "We have replaced room toiletry bottles with wall refillable dispensers, avoiding room plastic bottle waste.", isCorrect: true, feedback: "Correct. State the specific, verified change rather than making a company-wide absolute claim." },
-      { text: "Our bathrooms are 100% green and eco-friendly.", isCorrect: false, feedback: "Incorrect. Vague labels do not provide factual details about bathroom waste." },
-      { text: "We have eliminated environmental impacts in guest rooms.", isCorrect: false, feedback: "Incorrect. This is an absolute, unprovable claim." }
+      "Sales and marketing staff calculate technical carbon footprints and issue environmental compliance certificates.",
+      "Sales and marketing staff draft customer-facing communications using approved technical evidence, visible qualifications, and formal sign-off.",
+      "Sales and marketing staff approve absolute claims like '100% green' without consulting technical owners.",
+      "Sales and marketing staff ignore customer sustainability questions to avoid legal risks."
     ],
-    correctExplanation: "A message must describe the specific change that can be proven rather than making a company-wide absolute claim.",
-    incorrectExplanation: "Broad absolute claims like 'plastic-free' or vague green labels violate evidence-based communication rules.",
-    practicalTakeaway: "Describe the specific item removed rather than making a company-wide absolute claim."
+    correctOption: 1,
+    correctExplanation: "Correct! Sales and marketing draft communications using approved technical evidence and qualifications, leaving calculations to technical leads.",
+    incorrectExplanation: "Review role boundaries: Sales & marketing translate approved facts into copy; technical leads verify calculations.",
+    optionFeedback: [
+      "Incorrect. Carbon calculations belong to technical/ESG leads; compliance certificates require accredited bodies.",
+      "Correct! Sales and marketing staff draft customer-facing communications using approved technical evidence, visible qualifications, and formal sign-off.",
+      "Incorrect. Absolute claims without evidence violate communication controls.",
+      "Incorrect. Ignoring questions damages customer trust; refer queries to data owners instead."
+    ],
+    orderIndex: 0
   },
   {
-    question: "A marketing description for a product states that it features 'eco-friendly packaging.' How should this vague label be corrected?",
+    question: "A hotel replaces single-use plastic toiletry bottles with refillable dispensers in guest bathrooms. What claim can marketing safely use on website banners?",
     options: [
-      { text: "Leave it as is because customers understand 'eco-friendly.'", isCorrect: false, feedback: "Incorrect. Vague terms provide no factual, auditable detail." },
-      { text: "Specify the exact supported attribute (e.g., 'outer delivery box made of 80% recycled cardboard').", isCorrect: true, feedback: "Correct. Replace vague environmental words with specific, verifiable packaging attributes." },
-      { text: "Change the term to 'green packaging' instead.", isCorrect: false, feedback: "Incorrect. 'Green' is just as vague and uninformative as 'eco-friendly.'" },
-      { text: "Omit all packaging descriptions to save label space.", isCorrect: false, feedback: "Incorrect. Descriptions can remain; clarify them with facts." }
+      "Our hotel is now completely plastic-free.",
+      "Our guest room bathrooms are 100% eco-friendly and zero impact.",
+      "We have replaced single-use toiletry bottles with wall refillable dispensers in guest bathrooms.",
+      "Our hotel has eliminated all environmental footprint."
     ],
-    correctExplanation: "Replace vague environmental words with specific, verifiable packaging attributes to maintain credibility.",
-    incorrectExplanation: "Leaving vague terms, changing to other vague labels, or omitting descriptions fails to provide clear facts.",
-    practicalTakeaway: "Replace vague environmental words with specific, verifiable attributes."
+    correctOption: 2,
+    correctExplanation: "Correct! State the specific, verified physical change rather than making a broad, unverified absolute claim.",
+    incorrectExplanation: "Review specific vs absolute claims: State the exact physical change supported by evidence.",
+    optionFeedback: [
+      "Incorrect. The hotel still uses plastic in other departments.",
+      "Incorrect. '100% eco-friendly' is an unverified absolute claim.",
+      "Correct! We have replaced single-use toiletry bottles with wall refillable dispensers in guest bathrooms.",
+      "Incorrect. Eliminating all footprint is an unprovable absolute claim."
+    ],
+    orderIndex: 1
   },
   {
-    question: "A real estate developer replaces common-area lighting at one residence. The sales manager wants to add 'our properties use energy-efficient lighting' to all brochures.",
+    question: "According to ISO 14021:2016 and ICC advertising standards, why is a vague claim like 'eco-friendly product' problematic?",
     options: [
-      { text: "Use the statement since other properties will get upgrades later.", isCorrect: false, feedback: "Incorrect. Presenting future targets as current achievements is misleading." },
-      { text: "Limit the claim to the specific upgraded residence, citing the measured reduction and year.", isCorrect: true, feedback: "Correct. Keep the scope of the claim restricted to the actual properties supported by evidence." },
-      { text: "State that all buildings are certified carbon neutral.", isCorrect: false, feedback: "Incorrect. Carbon neutrality requires verified emissions records; do not guess." },
-      { text: "Remove the lighting reference entirely from all brochures.", isCorrect: false, feedback: "Incorrect. Upgrades are valid achievements; communicate them within the correct scope." }
+      "Vague claims are misleading because they provide no specific, verifiable detail and create an overstated impression.",
+      "Vague claims are prohibited because only government agencies can use the word 'eco'.",
+      "Vague claims are acceptable as long as the product price is low.",
+      "Vague claims are recommended because they require no technical data."
     ],
-    correctExplanation: "Restrict the scope of the claim to the specific property or sites supported by verified evidence.",
-    incorrectExplanation: "Expanding claims company-wide, fabricating certifications, or avoiding valid descriptions ignores scope control.",
-    practicalTakeaway: "Limit the claim to the specific property or site supported by the evidence."
+    correctOption: 0,
+    correctExplanation: "Correct! International standards require specific, substantiated facts; vague terms overstate performance and mislead consumers.",
+    incorrectExplanation: "Review claims standards: Vague terms mislead consumers by omitting specific, verifiable details.",
+    optionFeedback: [
+      "Correct! Vague claims are misleading because they provide no specific, verifiable detail and create an overstated impression.",
+      "Incorrect. 'Eco' is not restricted to government agencies, but requires factual substantiation.",
+      "Incorrect. Pricing does not excuse misleading marketing language.",
+      "Incorrect. Vague claims destroy brand credibility and violate advertising standards."
+    ],
+    orderIndex: 2
   },
   {
-    question: "An engineering proposal estimates that an upcoming delivery adjustment could reduce water usage by 20%. How should a salesperson present this?",
+    question: "A company sets a target to achieve 30% solar energy by 2030. How should this be presented in a sales presentation today?",
     options: [
-      { text: "Say 'our new process reduces water consumption by 20%' to secure the client.", isCorrect: false, feedback: "Incorrect. Reporting estimates as realized results before they are measured is misleading." },
-      { text: "Identify the 20% water reduction as an expected target, or wait until operational metrics verify the actual result.", isCorrect: true, feedback: "Correct. Keep estimated parameters marked as targets/projections until performance metrics prove the result." },
-      { text: "Describe the process as 'water neutral.'", isCorrect: false, feedback: "Incorrect. 'Water neutral' is an unverified absolute claim." },
-      { text: "State that the reduction has already occurred at another site.", isCorrect: false, feedback: "Incorrect. Fabricating locations violates corporate data integrity rules." }
+      "Present it as 'our facilities run on 30% solar power'.",
+      "Claim the company is currently carbon neutral.",
+      "Omit all energy information from customer decks.",
+      "Clearly identify it as a 2030 target goal, distinguishing it from current measured performance."
     ],
-    correctExplanation: "Identify forecasted benefits as expected targets or wait until actual performance metrics verify the results.",
-    incorrectExplanation: "Reporting projections as achieved results, using unverified terms, or fabricating sites is misleading.",
-    practicalTakeaway: "Keep statements identified as estimates or targets until verified results are measured."
+    correctOption: 3,
+    correctExplanation: "Correct! Always distinguish future targets from current measured performance to avoid converting goals into false guarantees.",
+    incorrectExplanation: "Review target vs achievement: Always identify future targets clearly as goals.",
+    optionFeedback: [
+      "Incorrect. Reporting a 2030 target as a current result is misleading.",
+      "Incorrect. Solar targets do not prove current carbon neutrality.",
+      "Incorrect. Future targets can be shared if clearly identified as goals.",
+      "Correct! Clearly identify it as a 2030 target goal, distinguishing it from current measured performance."
+    ],
+    orderIndex: 3
   },
   {
-    question: "A product uses cardboard that is technically recyclable as a material, but no collection or processing route exists in Mauritius. What should marketing state?",
+    question: "A product uses cardboard packaging that is theoretically recyclable, but no collection or recycling facility exists in Mauritius. What should marketing state?",
     options: [
-      { text: "Advertise it as '100% recyclable locally.'", isCorrect: false, feedback: "Incorrect. Promising local recyclability when no collection route exists is misleading to Mauritian customers." },
-      { text: "State the material (e.g. 'cardboard') and note that local recycling collection availability should be verified by the customer.", isCorrect: true, feedback: "Correct. Do not promise local recycling processing without verified evidence of collection channels." },
-      { text: "Label the product as 'locally recyclable green packaging.'", isCorrect: false, feedback: "Incorrect. Broad labels do not provide factual recyclability context." },
-      { text: "Claim the box biodegrades in landfill waste within a week.", isCorrect: false, feedback: "Incorrect. Do not make biodegradation rate claims without testing records." }
+      "Advertise the product as '100% locally recyclable.'",
+      "State the material (e.g. 'cardboard delivery box') and note local recycling availability should be verified by the customer.",
+      "Label it 'green eco-pack' to avoid explaining details.",
+      "Claim the box biodegrades in landfill within 2 days."
     ],
-    correctExplanation: "Do not promise local recycling processing without verified evidence of collection channels.",
-    incorrectExplanation: "Promising local recyclability, using vague green labels, or fabricating biodegradation times violates evidence rules.",
-    practicalTakeaway: "Avoid promising local recyclability unless collection and processing routes are confirmed."
+    correctOption: 1,
+    correctExplanation: "Correct! Do not claim local recyclability unless verified local collection and processing channels exist.",
+    incorrectExplanation: "Review recyclability claims: Avoid claiming local recyclability without confirmed local processing facilities.",
+    optionFeedback: [
+      "Incorrect. Promising local recyclability without local processing is misleading.",
+      "Correct! State the material (e.g. 'cardboard delivery box') and note local recycling availability should be verified by the customer.",
+      "Incorrect. Vague green labels do not provide factual recyclability context.",
+      "Incorrect. Fabricating biodegradation timelines violates claims standards."
+    ],
+    orderIndex: 4
   },
   {
-    question: "A corporate client asks a sales representative if the paper stock is processed locally in Mauritius. The representative does not have this detail. How should they respond?",
+    question: "A sales representative receives a complex technical customer inquiry about supply chain carbon emissions. The representative does not have the verified data. What should they do?",
     options: [
-      { text: "Confirm it is processed locally to keep the customer happy.", isCorrect: false, feedback: "Incorrect. Guessing creates legal and reputational risks if the paper is imported." },
-      { text: "Provide the approved paper details, explain that processing location details are being checked, and coordinate a follow-up.", isCorrect: true, feedback: "Correct. Provide known approved facts, acknowledge limitations, and check details with the procurement head." },
-      { text: "Ignore the question and discuss other specifications.", isCorrect: false, feedback: "Incorrect. Avoiding the question violates customer transparency codes." },
-      { text: "Guarantee the paper is completely carbon neutral.", isCorrect: false, feedback: "Incorrect. Carbon neutrality claims require verified emissions records; do not guess." }
+      "Estimate a low carbon figure to impress the customer.",
+      "Acknowledge the inquiry, provide approved general company facts, and escalate the technical question to the ESG data owner for a verified response.",
+      "Refuse to answer and end the sales call.",
+      "Claim the supply chain has zero emissions."
     ],
-    correctExplanation: "Provide the approved facts, acknowledge the missing information, and refer the query to the correct internal owner for follow-up.",
-    incorrectExplanation: "Guessing locations, avoiding transparency, or fabricating carbon neutrality claims is misleading.",
-    practicalTakeaway: "Provide approved facts, acknowledge missing details, and check with the appropriate owner."
+    correctOption: 1,
+    correctExplanation: "Correct! Never guess technical data during sales calls; provide approved facts and escalate missing technical queries.",
+    incorrectExplanation: "Review technical query handling: Provide known approved facts and escalate missing technical data to data owners.",
+    optionFeedback: [
+      "Incorrect. Guessing carbon figures risks major commercial and legal liability.",
+      "Correct! Acknowledge the inquiry, provide approved general company facts, and escalate the technical question to the ESG data owner for a verified response.",
+      "Incorrect. Ending calls abruptly damages customer relationships; escalate through proper channels.",
+      "Incorrect. Claiming zero emissions without evidence is false advertising."
+    ],
+    orderIndex: 5
   },
   {
-    question: "A company website claims that all offices run on renewable energy, but a new branch office opens that does not. How should the team handle this?",
+    question: "A marketing coordinator notices that an active brochure headline claims 'Zero Waste to Landfill', but a new branch office opened that still sends waste to landfill. What is the correct response?",
     options: [
-      { text: "Leave the claim on the website until the next annual printing.", isCorrect: false, feedback: "Incorrect. Leaving outdated claims active creates immediate compliance and transparency issues." },
-      { text: "Correct or narrow the website claim promptly to reflect the new branch's actual energy status.", isCorrect: true, feedback: "Correct. Inaccurate or outdated claims must be corrected or narrowed promptly." },
-      { text: "Delete the website page entirely.", isCorrect: false, feedback: "Incorrect. The page is useful; correct the statement rather than deleting the page." },
-      { text: "Claim the new branch is energy-neutral.", isCorrect: false, feedback: "Incorrect. This is an unverified claim that ignores actual energy logs." }
+      "Keep distributing the brochure until all printed copies are finished.",
+      "Update or qualify the brochure claim promptly to restrict the scope to sites that have achieved verified zero waste status.",
+      "Hide the new branch office from company listings.",
+      "Blame the printing vendor for the mistake."
     ],
-    correctExplanation: "Inaccurate or outdated claims must be corrected or narrowed promptly to protect record transparency and client trust.",
-    incorrectExplanation: "Leaving outdated claims, deleting pages, or fabricating energy neutrality violates compliance standards.",
-    practicalTakeaway: "Correct or narrow claims promptly when operational circumstances change."
+    correctOption: 1,
+    correctExplanation: "Correct! Outdated or inaccurate claims must be corrected or qualified promptly when operational facts change.",
+    incorrectExplanation: "Review claim updates: Correct or qualify claims promptly when operational facts change.",
+    optionFeedback: [
+      "Incorrect. Distributing known inaccurate claims misleads customers and breaks compliance.",
+      "Correct! Update or qualify the brochure claim promptly to restrict the scope to sites that have achieved verified zero waste status.",
+      "Incorrect. Hiding operational sites compromises corporate transparency.",
+      "Incorrect. The printing vendor prints approved copy; marketing owns claim accuracy."
+    ],
+    orderIndex: 6
   },
   {
-    question: "A manager asks a marketing coordinator to remove a critical limitation statement from a product claim because it makes the claim look less impressive.",
+    question: "A product packaging claim features a third-party eco-certification logo. What must marketing retain in the compliance file?",
     options: [
-      { text: "Remove the limitation to support the sales team.", isCorrect: false, feedback: "Incorrect. Removing material qualifications makes the claim misleading." },
-      { text: "Retain the material qualification to protect accuracy, and escalate the approval concern to the compliance manager.", isCorrect: true, feedback: "Correct. Protect record accuracy, retain the qualification, and escalate the concern." },
-      { text: "Shorten the limitation so it is hard to read.", isCorrect: false, feedback: "Incorrect. Obfuscating limitations is unethical and misleading." },
-      { text: "Move the limitation to another unrelated product page.", isCorrect: false, feedback: "Incorrect. Moving qualifications misleads audits and customers." }
+      "A downloaded Google image of the logo.",
+      "Written authorization, valid license certificate, and scope details from the certification body.",
+      "A verbal statement from the sales manager.",
+      "An internal email saying the logo looks attractive."
     ],
-    correctExplanation: "Protect record accuracy, retain the material qualification, and escalate the approval concern where necessary.",
-    incorrectExplanation: "Removing limitations, shortening qualifiers, or moving data to unrelated pages violates ethical communication codes.",
-    practicalTakeaway: "Retain material qualifications and limitations. Escalate approval concerns."
+    correctOption: 1,
+    correctExplanation: "Correct! Certification logo use requires retaining written license permission and valid scope documentation.",
+    incorrectExplanation: "Review certification marks: Retain written license permission and valid scope certificates.",
+    optionFeedback: [
+      "Incorrect. Downloading a logo image does not grant legal permission to use it.",
+      "Correct! Written authorization, valid license certificate, and scope details from the certification body.",
+      "Incorrect. Verbal statements do not satisfy legal certification licensing checks.",
+      "Incorrect. Visual appeal does not override intellectual property or accreditation rules."
+    ],
+    orderIndex: 7
   }
 ];
 
-export async function ensureSustainabilityForSalesAndMarketingTeamsCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
+export async function ensureSustainabilityForSalesAndMarketingTeamsCourse(): Promise<void> {
+  logger.info(`Checking and executing ${COURSE_TITLE} course content migration (${SEED_NAME})...`);
 
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
-
-      // 2. Resolve Course 16
-      let course16 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-16")
-      });
-      if (!course16) {
-        course16 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "communicating-sustainability-at-work")
-        });
-      }
-
-      if (!course16) {
-        throw new Error("Data integrity error: Course 16 (ELH-16) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 28
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
+      // Resolve or insert Course 28
+      const [existingCourse] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, COURSE_META.courseCode))
+        .limit(1);
 
       let actualCourseId: number;
 
       if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
+        const [inserted] = await tx
+          .insert(coursesTable)
+          .values({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            badgeName: COURSE_META.badgeName,
+            badgeDescription: COURSE_META.badgeDescription,
+            status: "published",
+            isPublished: true,
+            recommendedNextCourseId: null,
+          })
+          .returning();
         actualCourseId = inserted.id;
+        logger.info(`Inserted new ELH-28 course record (ID: ${actualCourseId}).`);
       } else {
         actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+        await tx
+          .update(coursesTable)
+          .set({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            badgeName: COURSE_META.badgeName,
+            badgeDescription: COURSE_META.badgeDescription,
+            status: "published",
+            isPublished: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(coursesTable.id, actualCourseId));
+        logger.info(`Updated existing ELH-28 course record (ID: ${actualCourseId}).`);
       }
 
-      // 4. Update Course 27 recommendedNextCourseId to point to Course 28 preserving admin edits
-      let course27Ref = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-27")
-      });
-      if (!course27Ref) {
-        course27Ref = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-facilities-and-property-teams")
-        });
-      }
+      // Ensure Badge Definition exists
+      const [existingBadge] = await tx
+        .select()
+        .from(badgeDefinitionsTable)
+        .where(eq(badgeDefinitionsTable.code, BADGE_CODE))
+        .limit(1);
 
-      if (course27Ref) {
-        let isSystemManaged = false;
-        if (course27Ref.recommendedNextCourseId) {
-          const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-            where: eq(coursesTable.id, course27Ref.recommendedNextCourseId)
-          });
-          if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-28") {
-            isSystemManaged = true;
-          }
-        }
-
-        if (course27Ref.recommendedNextCourseId === null || course27Ref.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-          await tx.update(coursesTable).set({
-            recommendedNextCourseId: actualCourseId
-          }).where(eq(coursesTable.id, course27Ref.id));
-        } else {
-          logger.warn(`Recommendation conflict: Course 27 currently recommends course ID ${course27Ref.recommendedNextCourseId} instead of Course 28 (ID: ${actualCourseId}). Preserving administrator edit.`);
-        }
+      if (existingBadge) {
+        await tx
+          .update(badgeDefinitionsTable)
+          .set({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [actualCourseId],
+          })
+          .where(eq(badgeDefinitionsTable.id, existingBadge.id));
       } else {
-        logger.warn("Data integrity note: Course 27 not found during Course 28 recommendation configuration.");
+        await tx
+          .insert(badgeDefinitionsTable)
+          .values({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            icon: "award",
+            criteriaType: "all_courses",
+            threshold: 0,
+            courseIds: [actualCourseId],
+            orderIndex: 31,
+            code: BADGE_CODE,
+          })
+          .onConflictDoNothing();
       }
 
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
+      // Update lessons and quizzes transactionally if seed is not yet present or forced
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, actualCourseId));
 
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
-          slug: BADGE_SLUG,
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          icon: "award",
-          criteriaType: "all_courses",
-          threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 31,
-          code: BADGE_CODE,
-        });
-      } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
-      }
-
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 16
-      const existingPrereq16 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course16.id)
-        )
-      });
-      if (!existingPrereq16) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course16.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.enrollmentId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
+      if (!existingSeed || existingLessons.length !== NEW_LESSONS.length) {
+        if (existingLessons.length === 0) {
+          for (const lesson of NEW_LESSONS) {
             await tx.insert(lessonsTable).values({
               courseId: actualCourseId,
               title: lesson.title,
@@ -683,66 +579,108 @@ export async function ensureSustainabilityForSalesAndMarketingTeamsCourse() {
               contentBlocks: lesson.blocks,
             });
           }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
+        } else {
+          for (const lesson of NEW_LESSONS) {
+            const lExist = existingLessons.find((l) => l.orderIndex === lesson.order);
+            if (lExist) {
+              await tx
+                .update(lessonsTable)
+                .set({
+                  title: lesson.title,
+                  durationMinutes: lesson.minutes,
+                  content: lesson.content,
+                  contentBlocks: lesson.blocks,
+                })
+                .where(eq(lessonsTable.id, lExist.id));
+            } else {
+              await tx.insert(lessonsTable).values({
+                courseId: actualCourseId,
+                title: lesson.title,
+                orderIndex: lesson.order,
+                durationMinutes: lesson.minutes,
+                content: lesson.content,
+                contentBlocks: lesson.blocks,
+              });
             }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
           }
         }
+        logger.info(`Seeded ${NEW_LESSONS.length} upgraded lessons for ELH-28.`);
+
+        await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
+        // Insert 8 scenario quiz questions with balanced option positions
+        for (const q of QUIZ_QUESTIONS) {
+          await tx.insert(quizQuestionsTable).values({
+            courseId: actualCourseId,
+            question: q.question,
+            options: q.options,
+            correctOption: q.correctOption,
+            correctExplanation: q.correctExplanation,
+            incorrectExplanation: q.incorrectExplanation,
+            optionFeedback: q.optionFeedback,
+            orderIndex: q.orderIndex,
+          });
+        }
+        logger.info(`Seeded ${QUIZ_QUESTIONS.length} upgraded quiz questions for ELH-28.`);
+
+        // Record system seed completion marker
+        if (!existingSeed) {
+          await tx.insert(systemSeedsTable).values({
+            name: SEED_NAME,
+            version: 2,
+          });
+        } else {
+          await tx
+            .update(systemSeedsTable)
+            .set({ version: 2 })
+            .where(eq(systemSeedsTable.name, SEED_NAME));
+        }
       }
 
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      // Ensure Prerequisite relationships exist: ELH-12 and ELH-16 linked to ELH-28
+      const prereqCodes = ["ELH-12", "ELH-16"];
+      const prereqCourses = await tx
+        .select()
+        .from(coursesTable)
+        .where(inArray(coursesTable.courseCode, prereqCodes));
+
+      for (const prereq of prereqCourses) {
+        const [existingLink] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(
+            and(
+              eq(coursePrerequisitesTable.courseId, actualCourseId),
+              eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+            )
+          )
+          .limit(1);
+
+        if (!existingLink) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId: actualCourseId,
+            prerequisiteCourseId: prereq.id,
+          }).onConflictDoNothing();
+        }
+      }
+
+      // Ensure ELH-27 recommends ELH-28
+      const [course27] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-27"))
+        .limit(1);
+
+      if (course27) {
+        await tx
+          .update(coursesTable)
+          .set({ recommendedNextCourseId: actualCourseId })
+          .where(eq(coursesTable.id, course27.id));
+      }
     });
 
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
+    logger.info(`Successfully seeded ${COURSE_TITLE} content.`);
   } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
+    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content.`);
     throw error;
   }
 }
