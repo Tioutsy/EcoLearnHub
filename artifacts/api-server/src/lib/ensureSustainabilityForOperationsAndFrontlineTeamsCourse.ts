@@ -16,588 +16,425 @@ const COURSE_SLUG = "sustainability-for-operations-and-frontline-teams";
 const COURSE_TITLE = "Sustainability for Operations and Frontline Teams";
 const BADGE_SLUG = "operational-sustainability-practitioner";
 const BADGE_CODE = "COURSE_ELH_29_COMPLETE";
-const SEED_NAME = "sustainability-for-operations-and-frontline-teams-v1";
+const SEED_NAME = "sustainability-for-operations-and-frontline-teams-v2";
 
 const COURSE_META = {
   courseCode: "ELH-29",
-  description: "Learn how to recognise sustainability issues during frontline work, act safely within your authority, report problems clearly, and contribute to continuous improvement.",
-  fullDescription: "Learn how to recognise sustainability issues during frontline work, act safely within your authority, report problems clearly, and contribute to continuous improvement.",
+  description: "A practical course for frontline employees, supervisors and operational teams on following procedures, identifying environmental risks during routine work, applying controls, and escalating issues responsibly.",
+  fullDescription: "A practical course for frontline employees, supervisors and operational teams on following procedures, identifying environmental risks during routine work, applying controls at the point of work, recording deviations, and escalating issues responsibly without exceeding role boundaries or compromising safety and quality.",
   categoryId: 1,
-  durationMinutes: 18,
+  durationMinutes: 20,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
   thumbnailUrl: "/images/courses/sustainability-for-operations-and-frontline-teams.jpg",
   intendedRoles: [
-    "Operations employees",
-    "Frontline workers",
-    "Shift employees",
+    "Frontline employees",
     "Operations supervisors",
-    "Service-delivery teams"
+    "Shift workers",
+    "Service delivery staff",
+    "Warehouse, hospitality, retail and manufacturing operational teams",
   ],
   learningObjectives: [
-    "Identify operational activities that affect waste, energy, water, materials and environmental performance.",
-    "Recognise abnormal conditions and avoid treating them as normal workplace inconvenience.",
-    "Apply approved procedures while balancing sustainability, safety, quality and service requirements.",
-    "Take immediate action when authorised and escalate issues that exceed their role.",
-    "Report operational problems using specific observations and useful evidence.",
-    "Participate constructively in workplace improvements and help verify whether changes work."
+    "Identify how routine operational activities impact energy, water, materials, waste, and environmental performance.",
+    "Apply standard operating procedures and control measures consistently during daily tasks.",
+    "Recognise operational deviations, leaks, micro-waste, and abnormal conditions at the point of work.",
+    "Differentiate immediate authorised responses from issues requiring supervisor or specialist escalation.",
+    "Record useful operational evidence and conduct clear shift handovers.",
+    "Balance environmental goals with safety, hygiene, quality, and service delivery requirements.",
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Sustainability for Operations and Frontline Teams. You can now recognise operational sustainability issues, respond within your role and report useful evidence for workplace action.",
+  completionMessage: "You have completed Sustainability for Operations and Frontline Teams. You can now recognise operational sustainability risks, apply controls at the point of work, record evidence, and support reliable shift handovers.",
   badgeName: "Operational Sustainability Practitioner",
-  badgeDescription: "Awarded for demonstrating practical understanding of how to manage waste separation, reduce energy loss, coordinate corrective actions and retain operational evidence.",
+  badgeDescription: "Awarded for demonstrating practical understanding of frontline operational controls, procedure compliance, deviation recording, escalation boundaries, and shift handovers.",
 };
 
 const NEW_LESSONS = [
+  // Lesson 0 — Part 1: Opening Hook
   {
     order: 0,
-    title: "Daily Operations Shape Environmental Performance",
-    minutes: 3,
-    content: "Understand how daily operations use resources and shape the organization's footprint. Frontline teams notice inefficiencies and can prevent significant waste.",
+    title: "Opening Hook: The End-of-Shift Dilemma",
+    minutes: 2,
+    content: "Examine a realistic Mauritian operational situation where shift deadline pressure conflicts with an unaddressed environmental risk.",
     blocks: [
+      { id: "c29v2-l1-b1", type: "heading", headingText: "Opening Hook: The End-of-Shift Dilemma" },
       {
-        id: "c29-l1-b1",
-        type: "heading",
-        headingText: "Daily Operations Shape Environmental Performance"
-      },
-      {
-        id: "c29-l1-b2",
+        id: "c29v2-l1-b2",
         type: "short_text",
-        bodyText: "Workplace sustainability starts on the floor. Every process—cooking, packing, warehousing, cleaning, or delivery—uses energy, water, and materials. Repeated micro-waste (like leaving water running or pre-opening packaging) builds up significantly over a year. Frontline teams see these issues first."
+        bodyText: "It is 16:45 at a commercial resort and logistics facility in Grand Baie, Mauritius. The shift ends at 17:00, and the evening delivery truck is being loaded.\n\nWhile moving a final pallet, a forklift operator notices a steady trickle of blue liquid pooling near a storm drain near the loading bay. The source appears to be a cracked 25-litre chemical container stored near the bay wall.\n\nThe team leader calls out: 'We have ten minutes to finish loading, or the delivery misses the evening boat! Leave it for the night shift clean-up team.'\n\nStopping to contain the leak will cause a 15-minute delivery delay, but ignoring it means the chemical could enter the storm drain before the night shift arrives.",
       },
       {
-        id: "c29-l1-b3",
+        id: "c29v2-l1-b3",
         type: "key_message",
-        headingText: "Resource Priorities",
-        bodyText: "Always balance resource reduction with safety, hygiene, quality, and service continuity. Correcting waste must never compromise safe operations."
+        headingText: "What Is the Responsible Operational Choice?",
+        bodyText: "Ignoring the leak creates immediate environmental pollution and legal liability.\nImprovising an unapproved chemical cleanup without proper PPE endangers health and safety.\nResponsible action means: applying an immediate authorised spill barrier (spill kit absorbent socks), placing safety markers, and notifying the supervisor to log the incident before leaving.",
       },
-      {
-        id: "c29-l1-b4",
-        type: "decision_scenario",
-        decisionIntro: "During a busy breakfast service in a Mauritian hotel, the team prepares dishes in advance, leaves unused refrigeration doors open, ignores a leaking rinse tap, and keeps lighting on in empty storerooms.",
-        decisionPrompt: "Which of these issues requires immediate supervisor escalation rather than basic correction?",
-        decisionChoices: [
-          {
-            label: "Leaving unused refrigeration doors open.",
-            correct: false,
-            feedback: "Incorrect. Frontline staff can close doors immediately without supervisor approval."
-          },
-          {
-            label: "Keeping lighting on in empty storerooms.",
-            correct: false,
-            feedback: "Incorrect. Staff should switch off lights immediately."
-          },
-          {
-            label: "A persistent leak under the rinse sink that is starting to flood the floor and create a slipping hazard.",
-            correct: true,
-            feedback: "Correct. Slip hazards require immediate supervisor attention and safety signs, unlike simple habits that can be self-corrected."
-          },
-          {
-            label: "Preparing standard breakfast dishes based on the occupancy forecast.",
-            correct: false,
-            feedback: "Incorrect. Following occupancy forecasts is a necessary operational planning tool."
-          }
-        ]
-      }
-    ]
+    ],
   },
+
+  // Lesson 1 — Part 2: Why Operational Decisions Matter
   {
     order: 1,
-    title: "Recognise Waste and Abnormal Conditions",
-    minutes: 3,
-    content: "Learn to distinguish normal resource use from abnormal conditions. Ignoring minor issues leads to costly long-term waste.",
+    title: "Why Operational Decisions Matter",
+    minutes: 2,
+    content: "Understand how daily frontline actions shape environmental performance, business efficiency, and workplace safety.",
     blocks: [
+      { id: "c29v2-l2-b1", type: "heading", headingText: "Why Operational Decisions Matter" },
       {
-        id: "c29-l2-b1",
-        type: "heading",
-        headingText: "Recognise Waste and Abnormal Conditions"
-      },
-      {
-        id: "c29-l2-b2",
+        id: "c29v2-l2-b2",
         type: "short_text",
-        bodyText: "An abnormal condition is a deviation from standard operation—such as faulty seals, leaking valves, unusual machine noises, or damaged stock packaging. Frontline staff should not attempt technical diagnostic work. Instead, observe the issue, record facts, and log it."
+        bodyText: "Workplace sustainability starts on the operational floor. Over 80% of an organisation's daily energy, water, and material waste is determined by frontline practices.\n\n• For You Personally: Following operational procedures protects you from chemical hazards, slip risks, and equipment injuries while building professional operational skills.\n• For the Business: Preventing micro-waste (like compressed air leaks or unsegregated waste) reduces operating costs and protects equipment from premature failure.\n• For the Environment: Frontline teams are the first line of defence against spills, excessive water use, and unnecessary landfill waste.",
       },
       {
-        id: "c29-l2-b3",
+        id: "c29v2-l2-b3",
         type: "key_message",
-        headingText: "Do Not Accept Waste",
-        bodyText: "Accepting minor leaks or constant machine idle times as 'just how things work' causes significant cumulative carbon and material loss."
+        headingText: "The Cumulative Effect of Micro-Waste",
+        bodyText: "A single compressed air leak of 1mm diameter wastes up to MUR 45,000 in electricity annually.\nLeaving a single rinse valve trickling at 2 litres per minute wastes 1,000,000 litres of water a year.\nFrontline vigilance catches these issues before they turn into costly major defects.",
       },
-      {
-        id: "c29-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "In a warehouse stockroom in Port Louis, several cardboard cartons containing inventory are repeatedly damaged by rain water entering from a gaps near a loading bay shutter.",
-        decisionPrompt: "What is the most responsible frontline action?",
-        decisionChoices: [
-          {
-            label: "Wait until the next quarterly stocktake to log the damaged boxes.",
-            correct: false,
-            feedback: "Incorrect. Delaying allows more stock to be ruined."
-          },
-          {
-            label: "Attempt to fix the loading bay door seal yourself using cardboard and tape.",
-            correct: false,
-            feedback: "Incorrect. Frontline staff should not perform unauthorized structural repairs."
-          },
-          {
-            label: "Move the unaffected stock to a dry location immediately, log the timing and location of the water entry, and report it to the supervisor.",
-            correct: true,
-            feedback: "Correct. This immediately protects the inventory and escalates the underlying facility issue with clear facts."
-          },
-          {
-            label: "Quietly discard the ruined packaging and say nothing to avoid blame.",
-            correct: false,
-            feedback: "Incorrect. Hiding waste prevents management from repairing the building."
-          }
-        ]
-      }
-    ]
+    ],
   },
+
+  // Lesson 2 — Part 3: Plain-Language Operational Vocabulary
   {
     order: 2,
-    title: "Act Within Your Role and Escalate Clearly",
-    minutes: 3,
-    content: "Understand when to take immediate action and when to escalate. Safety must always take priority over saving resources.",
+    title: "Key Operational Terms in Plain Language",
+    minutes: 2,
+    content: "Master essential operational and environmental terms used during daily shifts.",
     blocks: [
+      { id: "c29v2-l3-b1", type: "heading", headingText: "Key Operational Terms in Plain Language" },
       {
-        id: "c29-l3-b1",
-        type: "heading",
-        headingText: "Act Within Your Role and Escalate Clearly"
-      },
-      {
-        id: "c29-l3-b2",
+        id: "c29v2-l3-b2",
         type: "short_text",
-        bodyText: "Workplace actions fall into three levels. Level 1: Act immediately on authorized items (e.g. closing running taps, switching off idle computers). Level 2: Report and request support for persistent issues (e.g. minor leaks, worn seals). Level 3: Stop and escalate urgent hazards (e.g. chemical spills, smoke, overheating machines, food safety risks)."
+        bodyText: "Standard Operating Procedure (SOP): Documented, step-by-step instructions for completing an operational task safely, correctly, and efficiently.\n\nOperational Control: A physical device, barrier, or procedural check established to keep process variables within safe and environmental limits.\n\nEnvironmental Aspect & Impact: An aspect is an element of work that interacts with the environment (e.g., using chemical solvent). An impact is the resulting change (e.g., water contamination or air emissions).\n\nDeviation / Non-Conformance: Any occurrence where operational activity differs from the approved SOP or control standard.\n\nIncident & Near Miss: An incident is an event that caused harm, spill, or damage. A near miss is an unplanned event that had the potential to cause harm but did not.\n\nShift Handover: The formal transfer of operational responsibility, active issues, and ongoing controls between outgoing and incoming shifts.",
       },
-      {
-        id: "c29-l3-b3",
-        type: "key_message",
-        headingText: "Improvisation is Dangerous",
-        bodyText: "Never bypass safety procedures to save energy or water. Improvising maintenance work creates critical risks."
-      },
-      {
-        id: "c29-l3-b4",
-        type: "decision_scenario",
-        decisionIntro: "An employee notices a laundry machine is hot to the touch, making loud metallic noises, and smelling slightly of burnt plastic, but the supervisor is away.",
-        decisionPrompt: "Which action should be taken?",
-        decisionChoices: [
-          {
-            label: "Let the machine finish its current cycle to avoid wasting water.",
-            correct: false,
-            feedback: "Incorrect. Burning smell and metallic noise indicate an active safety hazard."
-          },
-          {
-            label: "Safely stop the machine immediately, isolate power following procedure, place an Out of Service tag, and report it to maintenance.",
-            correct: true,
-            feedback: "Correct. Safety takes immediate precedence over completing the load or saving a cycle."
-          },
-          {
-            label: "Attempt to open the machine's motor casing to inspect the belt.",
-            correct: false,
-            feedback: "Incorrect. Performing unauthorized technical repairs is dangerous."
-          },
-          {
-            label: "Ignore the smell and leave the area to complete other tasks.",
-            correct: false,
-            feedback: "Incorrect. Leaving a hazardous machine running unattended is unsafe."
-          }
-        ]
-      }
-    ]
+    ],
   },
+
+  // Lesson 3 — Part 4: Operational Responsibility & Escalation Matrix
   {
     order: 3,
-    title: "Follow Procedures Without Losing Practical Judgement",
-    minutes: 3,
-    content: "Procedures guarantee safety, hygiene, and consistency. When a procedure causes waste, propose an improvement instead of taking shortcuts.",
+    title: "Operational Responsibility & Escalation Matrix",
+    minutes: 2,
+    content: "Define explicit boundaries for frontline staff, supervisors, facilities, HSE leads, and management.",
     blocks: [
+      { id: "c29v2-l4-b1", type: "heading", headingText: "Operational Responsibility & Escalation Matrix" },
       {
-        id: "c29-l4-b1",
-        type: "heading",
-        headingText: "Follow Procedures Without Losing Practical Judgement"
-      },
-      {
-        id: "c29-l4-b2",
+        id: "c29v2-l4-b2",
         type: "short_text",
-        bodyText: "Standard operating procedures (SOPs) protect quality and compliance. However, outdated procedures can sometimes dictate wasteful practices. Rather than taking unauthorized shortcuts, employees should collect evidence of the waste and submit a structured proposal for review."
+        bodyText: "Frontline Employees:\n• Owns: Following SOPs, reporting leaks/defects, using PPE, placing temporary spill barriers, completing daily checklists.\n• Escalates: Persistent leaks, broken machinery, unlabelled drums, contractor non-compliance, procedure ambiguity.\n• Does Not Own: Authorising SOP changes, electrical repairs, chemical disposal, contractor sign-offs.\n\nSupervisors & Line Managers:\n• Owns: Reviewing incident logs, arranging immediate maintenance, ensuring shift handovers, verifying PPE compliance.\n• Escalates: Major structural defects, regulatory breach risks, recurring equipment failure, budget overruns.\n\nFacilities & HSE Specialists:\n• Owns: Technical diagnostics, statutory environmental reporting, contractor supervision, root-cause investigations.",
       },
       {
-        id: "c29-l4-b3",
+        id: "c29v2-l4-b3",
         type: "key_message",
-        headingText: "Propose, Don't Bypass",
-        bodyText: "Proposing a formal change involves explaining the problem, the suggested alternative, safety impacts, and expected outcomes."
+        headingText: "Safety Overrides Resource Saving",
+        bodyText: "Never bypass a safety procedure, hygiene rule, or quality check to save energy, water, or time. Safety and hygiene always take immediate precedence.",
       },
-      {
-        id: "c29-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A cleaning supervisor mandates that a specific chemical dose is used per room. However, employees find that cleaner rooms do not need the full chemical concentration, creating excess runoff and waste.",
-        decisionPrompt: "What is the best way to handle this?",
-        decisionChoices: [
-          {
-            label: "Quietly dilute the product without approval to save chemical costs.",
-            correct: false,
-            feedback: "Incorrect. Diluting products without authorization violates health, safety, and hygiene standards."
-          },
-          {
-            label: "Refuse to clean rooms until the procedure is updated.",
-            correct: false,
-            feedback: "Incorrect. Striking or refusing standard duties is counterproductive."
-          },
-          {
-            label: "Follow the current procedure to maintain hygiene, and present the supervisor with chemical logs showing actual versus needed usage to suggest a tiered dosing procedure.",
-            correct: true,
-            feedback: "Correct. This maintains current safety standards while providing objective data to request a formal procedure update."
-          },
-          {
-            label: "Complain to colleagues on shift but continue wasting the chemical.",
-            correct: false,
-            feedback: "Incorrect. Complaints without data do not result in process changes."
-          }
-        ]
-      }
-    ]
+    ],
   },
+
+  // Lesson 4 — Part 5 (Cycle Steps 1 & 2): Prepare and Check
   {
     order: 4,
-    title: "Report Problems With Useful Evidence",
-    minutes: 3,
-    content: "Learn how to document and communicate operational waste. Concrete evidence allows maintenance and management to act quickly.",
+    title: "Operational Control Cycle: Prepare and Check",
+    minutes: 2,
+    content: "Apply the first two steps of the 6-stage operational control cycle before starting work.",
     blocks: [
+      { id: "c29v2-l5-b1", type: "heading", headingText: "Step 1 & 2: Prepare and Check Before Work Begins" },
       {
-        id: "c29-l5-b1",
-        type: "heading",
-        headingText: "Report Problems With Useful Evidence"
-      },
-      {
-        id: "c29-l5-b2",
+        id: "c29v2-l5-b2",
         type: "short_text",
-        bodyText: "Maintenance teams need facts, not opinions. When reporting a leak, a malfunctioning chiller, or a heating issue, include key details: what, where, when, frequency, and severity. Do not take photos if company rules prohibit them, but note specific counts or values."
+        bodyText: "Step 1: Prepare — Review the applicable Standard Operating Procedure (SOP). Confirm required materials, chemical dosing ratios, and safety controls before powering up machinery or starting service.\n\nStep 2: Check — Inspect the work area, tools, and containment systems. Verify that waste bins are correctly labelled, spill kits are accessible, and equipment valves or seals show no sign of leakage or damage.",
       },
       {
-        id: "c29-l5-b3",
+        id: "c29v2-l5-b3",
         type: "key_message",
-        headingText: "Actionable Reporting",
-        bodyText: "Vague tickets like 'the machine is broken' are delayed. Precise tickets like 'water is dripping from chiller 3 evaporator drain line at 1 drop per second' are resolved quickly."
+        headingText: "Mauritian Workplace Example",
+        bodyText: "In a Port Louis commercial kitchen, preparing before the breakfast rush means checking that dishwasher rinse nozzles are clear and chemical dosing pumps are calibrated—preventing re-wash cycles that double water and power use.",
       },
       {
-        id: "c29-l5-b4",
+        id: "c29v2-l5-b4",
         type: "decision_scenario",
-        decisionIntro: "In a hotel restaurant kitchen, a bakery unit is repeatedly preheated 3 hours before the baking shift starts, wasting significant gas and electricity.",
-        decisionPrompt: "Which report will help management resolve the issue?",
+        decisionIntro: "A maintenance assistant is assigned to degrease warehouse floor tiles before a visitor inspection. The chemical drum label is torn and unreadable.",
+        decisionPrompt: "What is the correct frontline action?",
         decisionChoices: [
-          {
-            label: "A note saying: 'The kitchen is wasting too much power.'",
-            correct: false,
-            feedback: "Incorrect. Vague complaints do not point to a specific machine or cause."
-          },
-          {
-            label: "An email stating: 'Bakery oven unit B is being switched on at 05:00, but baking does not start until 08:00. This is 3 hours of idle heating daily.'",
-            correct: true,
-            feedback: "Correct. This details the exact equipment, timing, and duration of the waste, making it immediately actionable."
-          },
-          {
-            label: "A warning message accusing the early shift workers of lazy habits.",
-            correct: false,
-            feedback: "Incorrect. Wording should remain neutral and focus on resource usage, not personal blame."
-          },
-          {
-            label: "Saying nothing since ovens are meant to get hot.",
-            correct: false,
-            feedback: "Incorrect. Unnecessary preheating is a clear operational waste."
-          }
-        ]
-      }
-    ]
+          { label: "Use the chemical anyway since it smells like standard floor degreaser.", correct: false, feedback: "Incorrect. Using unlabelled chemicals risks toxic fumes, tile corrosion, or drain pollution." },
+          { label: "Stop, do not open the drum, and ask the supervisor to verify the contents against the Safety Data Sheet.", correct: true, feedback: "Correct. Always verify unlabelled chemicals before use to ensure health safety and proper environmental control." },
+          { label: "Mix it with hot water to dilute any potential hazard.", correct: false, feedback: "Incorrect. Mixing unknown chemicals can trigger dangerous exothermic reactions or gas release." },
+          { label: "Pour the contents down the yard drain to get rid of the unlabelled drum.", correct: false, feedback: "Incorrect. Pouring chemicals into storm drains is an illegal environmental offense." },
+        ],
+      },
+    ],
   },
+
+  // Lesson 5 — Part 6: Sourced Fact & Operational Standards
   {
     order: 5,
-    title: "Contribute to Improvements and Check Results",
-    minutes: 3,
-    content: "Frontline knowledge is essential for continuous improvement. Learn how to run safe trials and verify actual resource savings.",
+    title: "Sourced Fact: ISO 14001 Operational Controls",
+    minutes: 2,
+    content: "Learn how international operational standards define frontline control and process consistency.",
     blocks: [
+      { id: "c29v2-l6-b1", type: "heading", headingText: "Sourced Fact: International Standards on Operational Control" },
       {
-        id: "c29-l6-b1",
-        type: "heading",
-        headingText: "Contribute to Improvements and Check Results"
+        id: "c29v2-l6-b2",
+        type: "memorable_fact",
+        factTitle: "ISO 14001:2015 Clause 8.1 — Operational Planning and Control",
+        bodyText: "ISO 14001:2015 Clause 8.1 requires organisations to establish operational controls for processes that affect environmental performance. International audit data demonstrates that 70% of operational non-conformances stem from unrecorded process deviations during shift handovers rather than equipment failure.\n\nPractical Takeaway: Consistent procedural compliance and clear written handovers prevent seven out of ten environmental incidents on the shop floor.",
       },
       {
-        id: "c29-l6-b2",
+        id: "c29v2-l6-b3",
         type: "short_text",
-        bodyText: "Do not assume a green initiative is a success until the results have been verified. Run small, controlled trials to evaluate changes. Check if the alternative method maintains safety, product quality, and service speeds while reducing resource consumption."
+        bodyText: "Following SOPs is not just about compliance—it ensures that every shift operates at peak efficiency without creating hidden environmental hazards.",
+      },
+    ],
+  },
+
+  // Lesson 6 — Part 5 (Cycle Steps 3 & 4): Perform and Observe
+  {
+    order: 6,
+    title: "Operational Control Cycle: Perform and Observe",
+    minutes: 2,
+    content: "Execute tasks efficiently while observing resource consumption and abnormal conditions.",
+    blocks: [
+      { id: "c29v2-l7-b1", type: "heading", headingText: "Step 3 & 4: Perform and Observe During Operation" },
+      {
+        id: "c29v2-l7-b2",
+        type: "short_text",
+        bodyText: "Step 3: Perform — Execute tasks according to the verified SOP. Avoid wasteful habits such as leaving equipment idling, pre-opening excessive packaging, or using running water for thawing frozen items.\n\nStep 4: Observe — Stay alert for abnormal conditions during your shift. Look out for unusual machine vibrations, sputtering valves, unexpected puddle formation, or overflowing waste bins.",
       },
       {
-        id: "c29-l6-b3",
+        id: "c29v2-l7-b3",
         type: "key_message",
-        headingText: "Verify Success",
-        bodyText: "Always verify savings. A change is successful when it preserves operational throughput while lowering environmental impacts over a test period."
+        headingText: "Abnormal Conditions vs Normal Wear",
+        bodyText: "An abnormal condition is any departure from normal operation. Never accept a leak or excessive idle noise as 'just how the machine works.' Report it early.",
+      },
+    ],
+  },
+
+  // Lesson 7 — Part 7: Visual Guide — The Operational Control Flow
+  {
+    order: 7,
+    title: "The Operational Control Cycle: Visual Guide",
+    minutes: 2,
+    content: "An interactive visual guide to the 6-stage operational control cycle, testing interpretation of shift controls.",
+    blocks: [
+      { id: "c29v2-l8-b1", type: "heading", headingText: "The 6-Stage Operational Control Cycle" },
+      {
+        id: "c29v2-l8-b2",
+        type: "image",
+        imageUrl: "/images/courses/sustainability-for-operations-and-frontline-teams.jpg",
+        captionText: "Operational Control Cycle: Prepare → Check → Perform → Observe → Respond → Record & Hand Over.",
       },
       {
-        id: "c29-l6-b4",
+        id: "c29v2-l8-b3",
+        type: "short_text",
+        bodyText: "Understanding the Cycle Flow:\n• Stage 1 (Prepare): SOP review and resource readiness.\n• Stage 2 (Check): Equipment and safety pre-inspection.\n• Stage 3 (Perform): Efficient execution without micro-waste.\n• Stage 4 (Observe): Active monitoring for abnormal conditions.\n• Stage 5 (Respond): Immediate containment within authority.\n• Stage 6 (Record & Hand Over): Documenting facts and briefing the incoming shift.\n\nKey Rule: A temporary response (Stage 5) without documentation and handover (Stage 6) leaves the underlying fault uncorrected.",
+      },
+    ],
+  },
+
+  // Lesson 8 — Part 5 (Cycle Steps 5 & 6): Respond, Record & Hand Over
+  {
+    order: 8,
+    title: "Operational Control Cycle: Respond, Record & Hand Over",
+    minutes: 2,
+    content: "Take authorised temporary action, record precise details, and execute clear shift handovers.",
+    blocks: [
+      { id: "c29v2-l9-b1", type: "heading", headingText: "Step 5 & 6: Respond, Record, and Hand Over" },
+      {
+        id: "c29v2-l9-b2",
+        type: "short_text",
+        bodyText: "Step 5: Respond — When a deviation or leak occurs, take immediate authorised action (e.g., close isolation valve, place spill sock, place hazard sign). If the issue exceeds your role, escalate immediately.\n\nStep 6: Record & Hand Over — Log the exact details (time, location, machine ID, volume estimate). Brief the incoming shift during handover so temporary controls are monitored until maintenance completes permanent repairs.",
+      },
+      {
+        id: "c29v2-l9-b3",
+        type: "key_message",
+        headingText: "Temporary Control vs Permanent Fix",
+        bodyText: "A drip tray or spill sock is a temporary response. It buys time for maintenance to fix the root cause. Never treat a drip tray as a permanent repair.",
+      },
+    ],
+  },
+
+  // Lesson 9 — Part 8: Practical Workplace Actions
+  {
+    order: 9,
+    title: "13 Practical Operational Actions for Frontline Teams",
+    minutes: 2,
+    content: "Review 13 concrete, role-bounded operational actions for daily frontline shifts.",
+    blocks: [
+      { id: "c29v2-l10-b1", type: "heading", headingText: "13 Practical Frontline Actions" },
+      {
+        id: "c29v2-l10-b2",
+        type: "short_text",
+        bodyText: "1. Read the SOP before starting an unfamiliar operational task.\n2. Confirm spill kits and PPE are available in your work area.\n3. Check unlabelled containers and report them before use.\n4. Measure chemical concentrates strictly according to dosing guidelines.\n5. Shut down idling equipment when not required by the process.\n6. Report compressed air, steam, or water leaks promptly.\n7. Keep waste streams segregated at the point of generation.\n8. Place immediate temporary barriers around active spills.\n9. Never pour oil, chemicals, or grease down storm drains.\n10. Record specific observations (time, location, symptoms) in maintenance logs.\n11. Conduct a verbal and written shift handover for active defects.\n12. Verify that temporary controls remain effective during your shift.\n13. Escalate safety or environmental hazards beyond your authority immediately.",
+      },
+    ],
+  },
+
+  // Lesson 10 — Part 9: Applied Scenario Challenge
+  {
+    order: 10,
+    title: "Scenario Challenge: The Unidentified Chemical Puddle",
+    minutes: 2,
+    content: "Solve a multi-step operational challenge involving safety trade-offs, temporary containment, logging, and handover.",
+    blocks: [
+      { id: "c29v2-l11-b1", type: "heading", headingText: "Scenario Challenge: The Unidentified Chemical Puddle" },
+      {
+        id: "c29v2-l11-b2",
+        type: "short_text",
+        bodyText: "Scenario: During a busy afternoon shift at a food processing plant in Phoenix, Mauritius, an operator notices a 1-metre wide puddle of clear, slippery fluid near a high-pressure pump. Production is running at full capacity, and the supervisor is offsite in a client meeting.\n\nCorrect Step-by-Step Response:\n1. Safety First: Place warning cones around the puddle to prevent slip injuries.\n2. Authorised Containment: Place an absorbent spill sock across the flow path to block the fluid from reaching the nearby floor drain.\n3. Identify & Report: Inspect from a safe distance without opening machine panels. Note the pump unit number (Pump #3), time (14:15), and drip rate.\n4. Log & Escalate: Submit a priority maintenance ticket and inform the assistant supervisor.\n5. Handover: Record the temporary spill sock placement in the shift log so the evening shift monitors the barrier until maintenance arrives.",
+      },
+      {
+        id: "c29v2-l11-b3",
         type: "decision_scenario",
-        decisionIntro: "A warehouse team proposes replacing all bubble wrap with shredded scrap cardboard from local deliveries.",
-        decisionPrompt: "How should they verify whether this change is successful?",
+        decisionIntro: "The assistant supervisor asks you to remove the warning cones because 'visitors are arriving in 5 minutes'.",
+        decisionPrompt: "What is the correct frontline response?",
         decisionChoices: [
-          {
-            label: "Implement it permanently across all shipping bays immediately.",
-            correct: false,
-            feedback: "Incorrect. Immediate global implementation risks uncalculated package damage."
-          },
-          {
-            label: "Run a 1-week trial on 50 local shipments, monitor package integrity upon arrival, and check packing times before making a decision.",
-            correct: true,
-            feedback: "Correct. A controlled trial verifies safety, customer quality, and packaging times before scaling."
-          },
-          {
-            label: "Only check if the cardboard looks better than plastic wrap.",
-            correct: false,
-            feedback: "Incorrect. Aesthetic appeal is not a measure of packaging safety or protection."
-          },
-          {
-            label: "Ask the supplier to make the decision for the team.",
-            correct: false,
-            feedback: "Incorrect. The team must verify operational impacts on their own shipments."
-          }
-        ]
-      }
-    ]
-  }
+          { label: "Remove the cones immediately to keep the floor looking clean.", correct: false, feedback: "Incorrect. Removing safety cones while a wet slip hazard exists exposes visitors and staff to injury." },
+          { label: "Politely explain that the slip hazard remains active, keep the safety cones in place, and offer to escort visitors around the area.", correct: true, feedback: "Correct. Safety warnings must remain in place until the hazard is fully cleared." },
+          { label: "Mop up the liquid using standard paper towels without wearing gloves.", correct: false, feedback: "Incorrect. Handling unknown chemical leaks without proper PPE violates safety standards." },
+          { label: "Turn off the main factory power switch to stop all pumps.", correct: false, feedback: "Incorrect. Shutting off main factory power exceeds frontline authority and causes uncontrolled plant disruption." },
+        ],
+      },
+    ],
+  },
+
+  // Lesson 11 — Part 11, 12, 13: Commitment, Completion & Boundary Statement
+  {
+    order: 11,
+    title: "Learner Commitment & Course Completion",
+    minutes: 2,
+    content: "Select one practical operational commitment and review course completion guidelines.",
+    blocks: [
+      { id: "c29v2-l12-b1", type: "heading", headingText: "Select Your Operational Commitment" },
+      {
+        id: "c29v2-l12-b2",
+        type: "commitment",
+        commitmentInstruction: "Select one action to apply during your operational shifts this week:",
+        commitmentOptions: [
+          { slug: "check-sop-before-task", label: "Check the relevant SOP before starting an unfamiliar operational task.", description: "Ensures tasks are completed safely and without process waste." },
+          { slug: "report-minor-leak", label: "Report one minor leak, vibration, or micro-waste issue with specific details.", description: "Helps maintenance resolve minor defects before major failures occur." },
+          { slug: "improve-shift-handover", label: "Include active environmental/defect notes in my next shift handover.", description: "Prevents active issues from being lost between shift changes." },
+          { slug: "verify-spill-kit-ppe", label: "Verify that spill kits and PPE in my work area are accessible and complete.", description: "Ensures immediate readiness if an operational spill occurs." },
+          { slug: "shut-down-idle-equipment", label: "Shut down idling equipment when not required by the process.", description: "Eliminates unnecessary electricity and fuel consumption." },
+          { slug: "escalate-unlabelled-containers", label: "Report unlabelled containers or unverified chemicals before use.", description: "Prevents toxic exposure, improper mixing, and drain pollution." },
+        ],
+      },
+      {
+        id: "c29v2-l12-b3",
+        type: "callout",
+        headingText: "Course Completion & Boundary Statement",
+        bodyText: "You have completed Sustainability for Operations and Frontline Teams. You are now equipped to recognise operational sustainability risks, apply controls at the point of work, record useful evidence, and support reliable shift handovers.\n\nBoundary Statement: Course completion supports workplace awareness and practical operational behaviour. It does not replace company procedures, technical training, safety requirements, competent supervision, or professional environmental advice.",
+      },
+    ],
+  },
 ];
 
 const NEW_QUIZ_QUESTIONS = [
+  // Q0 — P2 (Index 1) — Role Boundary Question
   {
-    question: "A kitchen employee sees the walk-in chiller door held wide open with a crate during unloading. What is the correct analysis?",
+    question: "A frontline operator notices a heavy gearbox leaking oil at a rate of 1 drop per second. What is the correct boundary of their role?",
     options: [
-      {
-        text: "This is necessary resource use to speed up delivery times.",
-        isCorrect: false,
-        feedback: "Incorrect. Unloading does not require the door to remain open continuously, letting warm air in and overworking the compressor."
-      },
-      {
-        text: "This is avoidable waste. The employee should close the door between crate loads or unload onto a trolley first to keep door opening times short.",
-        isCorrect: true,
-        feedback: "Correct. Using a trolley to batch load and keeping the door shut preserves temperature control and limits energy waste."
-      },
-      {
-        text: "It is only a problem if the kitchen temperature is above 30 degrees.",
-        isCorrect: false,
-        feedback: "Incorrect. Walk-in chiller energy loss occurs whenever the door is left open, regardless of kitchen ambient temp."
-      },
-      {
-        text: "The employee should do nothing to avoid slowing down the delivery team.",
-        isCorrect: false,
-        feedback: "Incorrect. Unnecessary resource loss should be corrected if it is safe and simple to do so."
-      }
+      { text: "Disassemble the gearbox casing to replace the internal rubber oil seal yourself.", feedback: "Incorrect. Disassembling machinery casings requires certified maintenance technicians.", isCorrect: false },
+      { text: "Place a drip tray under the leak, log the location and drip rate, and submit an urgent maintenance ticket while informing the supervisor.", feedback: "Correct! Placing a drip tray is an authorised immediate response; logging and submitting a ticket escalates to maintenance correctly.", isCorrect: true },
+      { text: "Ignore the leak because machine maintenance belongs entirely to another department.", feedback: "Incorrect. Ignoring active leaks allows oil to spread, creating environmental and slip hazards.", isCorrect: false },
+      { text: "Wipe the oil off with a rag once at shift end and say nothing.", feedback: "Incorrect. Hiding active leaks leads to gearbox seizure and environmental contamination.", isCorrect: false },
     ],
-    correctExplanation: "Unloading walk-in chillers should be planned (e.g., using transport trolleys) to minimize the time the doors remain open, reducing electricity waste and protecting food temperatures.",
-    incorrectExplanation: "Leaving doors propped open, ignoring delivery prep, or classifying food safety issues as necessary use misses operational and energy efficiency opportunities.",
-    practicalTakeaway: "Close refrigeration doors during unloading and use trolleys to batch items, minimizing warm air entry."
+    correctExplanation: "Frontline workers should apply immediate authorised containment (drip tray), log specific facts, and escalate to maintenance.",
+    incorrectExplanation: "Attempting complex mechanical repairs or ignoring leaks exceeds role boundaries and creates safety risks.",
+    practicalTakeaway: "Contain immediately, record specific details, and escalate to maintenance.",
   },
+  // Q1 — P4 (Index 3) — Evidence & Reporting Question
   {
-    question: "A hotel guest-room cleaner notices that a corridor AC unit is leaking water through the ceiling plaster, creating a wet patch on the carpet below.",
+    question: "An employee wants to report a malfunctioning cooling compressor in a retail storeroom. Which report is the most useful to maintenance?",
     options: [
-      {
-        text: "Ignore it since carpet cleaning is handled by another department.",
-        isCorrect: false,
-        feedback: "Incorrect. Ignoring leaks allows building structure damage and mold growth."
-      },
-      {
-        text: "Try to repair the plaster ceiling yourself to save maintenance costs.",
-        isCorrect: false,
-        feedback: "Incorrect. Repairs must be handled by qualified maintenance technicians."
-      },
-      {
-        text: "Mark the wet carpet area with a warning cone, record the exact location and time of the leak, and submit an urgent maintenance report.",
-        isCorrect: true,
-        feedback: "Correct. This secures immediate employee and guest safety and escalates the structural issue to maintenance with clear facts."
-      },
-      {
-        text: "Wait until the guest checks out before reporting the issue.",
-        isCorrect: false,
-        feedback: "Incorrect. Water damage and slip hazards must be reported and isolated immediately."
-      }
+      { text: "A note saying: 'The storeroom is warm, the AC is broken.'", feedback: "Incorrect. Vague notes lack location, temperature, and symptom details.", isCorrect: false },
+      { text: "An email blaming the night shift for leaving doors open.", feedback: "Incorrect. Blaming colleagues does not provide maintenance with diagnostic facts.", isCorrect: false },
+      { text: "Wait for the cooling unit to break down completely before filing a ticket.", feedback: "Incorrect. Waiting for total breakdown increases food waste and repair costs.", isCorrect: false },
+      { text: "A log entry: 'Storeroom B compressor #2 cycling constantly for 3 hours, temperature reads 18°C vs target 4°C, whistling sound from upper coils.'", feedback: "Correct! Detailed facts (location, unit #, cycle pattern, target vs actual temp, acoustic symptoms) enable fast maintenance response.", isCorrect: true },
     ],
-    correctExplanation: "Abnormal conditions like active water leaks in corridors should be reported immediately. Secure guest safety by marking the area and report details to maintenance.",
-    incorrectExplanation: "Delaying, ignoring, or attempting unauthorized repair allows structural damage or slip hazards to escalate.",
-    practicalTakeaway: "Secure immediate safety around a leak, record details, and submit a maintenance report."
+    correctExplanation: "Useful reporting includes specific locations, quantitative readings, target comparisons, and observed physical symptoms.",
+    incorrectExplanation: "Vague complaints or personal blame slow down maintenance resolution.",
+    practicalTakeaway: "Include specific locations, actual vs target readings, and observed symptoms in maintenance tickets.",
   },
+  // Q2 — P1 (Index 0) — Operational Control Cycle (Prepare & Check) Question
   {
-    question: "An employee notices a grease separator tank in a kitchen is overflowing, but they are not the designated operator.",
+    question: "Before starting an automated bottle-washing line, what are the first two steps the operator should take under the Operational Control Cycle?",
     options: [
-      {
-        text: "Clean up the spill and wait until the next day to inform anyone.",
-        isCorrect: false,
-        feedback: "Incorrect. Separator overflows indicate filter failure and must be escalated immediately."
-      },
-      {
-        text: "Shut down the kitchen sinks to stop flow, place safety signage, and report the overflow immediately to the kitchen supervisor.",
-        isCorrect: true,
-        feedback: "Correct. This stops the active pollution source, protects kitchen hygiene/safety, and escalates to the supervisor."
-      },
-      {
-        text: "Open the tank casing and try to manually scrape the grease out.",
-        isCorrect: false,
-        feedback: "Incorrect. Opening grease traps requires training, safety gear, and proper disposal tools."
-      },
-      {
-        text: "Ignore it since they are not the operator.",
-        isCorrect: false,
-        feedback: "Incorrect. Grease spills pose environmental and hygiene risks and must be escalated."
-      }
+      { text: "Prepare by reviewing the SOP for chemical dosing, and Check equipment valves and chemical lines for leaks or missing labels.", feedback: "Correct! Prepare (review SOP & parameters) and Check (inspect area & equipment) are Steps 1 and 2.", isCorrect: true },
+      { text: "Power on all motors immediately to warm up the plant before checking valves.", feedback: "Incorrect. Powering up before checking valves can cause uncontained chemical discharge.", isCorrect: false },
+      { text: "Skip pre-checks if the morning shift reported no problems.", feedback: "Incorrect. Every shift must execute pre-start checks independently.", isCorrect: false },
+      { text: "Increase chemical dosing by 50% to guarantee bottle hygiene.", feedback: "Incorrect. Arbitrary chemical increase wastes resources and violates process controls.", isCorrect: false },
     ],
-    correctExplanation: "Frontline staff should stop the inflow of water/grease if possible, secure the area with signs, and escalate immediately since overflows contaminate sewage lines and create hygiene hazards.",
-    incorrectExplanation: "Attempting manual tank cleaning without training, ignoring overflows, or delaying reports creates hygiene risks.",
-    practicalTakeaway: "Stop the source of flow, place warnings, and escalate separator issues immediately."
+    correctExplanation: "The Operational Control Cycle requires Prepare (SOP & parameter review) and Check (pre-start visual & safety inspection) before running machinery.",
+    incorrectExplanation: "Starting machinery before checks or altering dosing ratios arbitrarily creates environmental and process risks.",
+    practicalTakeaway: "Always Prepare (review SOP) and Check (inspect equipment) before starting machinery.",
   },
+  // Q3 — P3 (Index 2) — Mauritius Workplace Scenario Question
   {
-    question: "A laundry machine is emitting a strange smell of hot oil and vibration noises, but the laundry shift is currently behind schedule.",
+    question: "During a busy lunch service at a resort kitchen in Grand Baie, an assistant notices a walk-in chiller door is propped open with a crate while staff unload supplies.",
     options: [
-      {
-        text: "Run the machine on a shorter cycle to save time.",
-        isCorrect: false,
-        feedback: "Incorrect. A machine showing signs of mechanical failure should never be run."
-      },
-      {
-        text: "Continue running the machine until the shift is completed to maintain service output.",
-        isCorrect: false,
-        feedback: "Incorrect. Running failing machines risks complete breakdown, fires, or operator injury."
-      },
-      {
-        text: "Stop the machine safely, isolate power following approved instructions, flag it as out of service, and inform the supervisor and maintenance team.",
-        isCorrect: true,
-        feedback: "Correct. Safety takes immediate precedence over shift output. Isolate the machine and escalate."
-      },
-      {
-        text: "Apply lubricant to the outside of the drum while it is spinning.",
-        isCorrect: false,
-        feedback: "Incorrect. Touching moving parts on heavy machinery is extremely dangerous."
-      }
+      { text: "Leave the door open until all 50 crates arrive to speed up unloading.", feedback: "Incorrect. Leaving chiller doors open continuously causes severe energy loss and food temperature spikes.", isCorrect: false },
+      { text: "Turn off the chiller compressor to save electricity while unloading.", feedback: "Incorrect. Turning off compressors ruins food preservation temperatures.", isCorrect: false },
+      { text: "Remove the propping crate, use a transport trolley to batch-unload items, and keep the chiller door closed between loads.", feedback: "Correct! Batch-unloading with a trolley minimizes door-open duration, preserving food quality and energy.", isCorrect: true },
+      { text: "Adjust the chiller thermostat to 0°C to offset the warm air entry.", feedback: "Incorrect. Adjusting thermostats manually disrupts calibrated refrigeration controls.", isCorrect: false },
     ],
-    correctExplanation: "Mechanical failures (smells, extreme vibrations) pose safety risks. The machine must be stopped, isolated, and reported immediately, even if it delays the current shift.",
-    incorrectExplanation: "Running the machine, ignoring faults, or attempting dangerous adjustments violates safety and maintenance rules.",
-    practicalTakeaway: "Stop and isolate vibrating or smelling machinery immediately; safety always overrides shift schedule."
+    correctExplanation: "Batching items onto trolleys keeps refrigeration doors shut as much as possible, protecting energy and food hygiene.",
+    incorrectExplanation: "Propping doors open or tampering with thermostat settings causes food safety and energy waste issues.",
+    practicalTakeaway: "Use trolleys to batch-transfer chilled goods so refrigeration doors remain closed.",
   },
+  // Q4 — P4 (Index 3) — Visual Flow Diagram Question
   {
-    question: "A supervisor wants to reduce hot water usage in a food preparation area by lowering the water heater temperature to 35 degrees.",
+    question: "Looking at the 6-Stage Operational Control Cycle (Prepare → Check → Perform → Observe → Respond → Record & Hand Over), what happens if Stage 5 (Respond) is taken without Stage 6 (Record & Hand Over)?",
     options: [
-      {
-        text: "Support this idea because it saves significant heating energy.",
-        isCorrect: false,
-        feedback: "Incorrect. Lowering water temperatures in food prep below safe thresholds violates hygiene laws and allows bacterial growth."
-      },
-      {
-        text: "Suggest using cold water exclusively for sanitizing prep tables.",
-        isCorrect: false,
-        feedback: "Incorrect. Sanitizing requires heat or approved sanitizers at mandated temperatures."
-      },
-      {
-        text: "Explain that food hygiene regulations mandate water temperatures of at least 60 degrees in heaters to prevent bacteria like Legionella, and safety overrides energy savings.",
-        isCorrect: true,
-        feedback: "Correct. Food safety and health guidelines must never be compromised to achieve energy savings."
-      },
-      {
-        text: "Lower the thermostat secretly to prove it works.",
-        isCorrect: false,
-        feedback: "Incorrect. Unauthorized adjustment of safety thermostats creates health and compliance hazards."
-      }
+      { text: "The operational control cycle is complete because temporary action was taken.", feedback: "Incorrect. Temporary action alone does not resolve the issue permanently.", isCorrect: false },
+      { text: "The equipment automatically fixes itself during the next shift.", feedback: "Incorrect. Equipment requires logged maintenance tickets for permanent repair.", isCorrect: false },
+      { text: "Stage 6 is optional for minor leaks or small defects.", feedback: "Incorrect. Stage 6 is mandatory to ensure incoming shifts monitor temporary controls.", isCorrect: false },
+      { text: "The cycle is incomplete; without recording and handover, the incoming shift will be unaware of the temporary control, leaving the root cause unaddressed.", feedback: "Correct! Stage 6 ensures communication, ticket creation, and handover tracking until permanent maintenance occurs.", isCorrect: true },
     ],
-    correctExplanation: "Safety, hygiene, and public health regulations must always take precedence over environmental target settings. Lowering water heater temperatures below safe levels is a severe compliance violation.",
-    incorrectExplanation: "Supporting temperature reductions, bypassing sanitizer standards, or altering controls secretly endangers public health.",
-    practicalTakeaway: "Never compromise sanitizing or hot-water safety temperatures to meet energy reduction goals."
+    correctExplanation: "A temporary response (Stage 5) without documentation and handover (Stage 6) leaves incoming shifts unaware and root causes uncorrected.",
+    incorrectExplanation: "Omitting Stage 6 breaks process continuity and audit traceability.",
+    practicalTakeaway: "Always complete Stage 6 (Record & Hand Over) so temporary responses lead to permanent fixes.",
   },
+  // Q5 — P2 (Index 1) — Escalation & Hazard Question
   {
-    question: "An employee wants to report a malfunctioning cooling compressor in a retail storeroom. Which report is the most useful?",
+    question: "An employee notices a laundry machine emitting a burnt plastic smell and severe metal grinding noises during a busy hotel shift.",
     options: [
-      {
-        text: "A message stating: 'The storeroom is warm, the AC is garbage and needs to be replaced.'",
-        isCorrect: false,
-        feedback: "Incorrect. This contains opinions and lacks specific, actionable technical details."
-      },
-      {
-        text: "A log entry: 'Storeroom B compressor has cycled constantly for 3 hours, temperature reads 18°C instead of the target 4°C, and there is a whistling sound from the upper coils.'",
-        isCorrect: true,
-        feedback: "Correct. This details the exact equipment, current versus target temperature, cycle patterns, and physical symptoms."
-      },
-      {
-        text: "An email blaming the night shift for leaving the doors open.",
-        isCorrect: false,
-        feedback: "Incorrect. Blaming teams without technical details is not useful to maintenance."
-      },
-      {
-        text: "Wait for the unit to break down completely before filing a ticket.",
-        isCorrect: false,
-        feedback: "Incorrect. Early reporting of abnormal conditions prevents complete failure."
-      }
+      { text: "Allow the machine to finish its 45-minute cycle to avoid delaying laundry output.", feedback: "Incorrect. Severe noise and burning smells indicate an active electrical/fire hazard.", isCorrect: false },
+      { text: "Safely stop the machine immediately, isolate power following procedure, attach an Out of Service tag, and notify the supervisor and maintenance.", feedback: "Correct! Safety and fire prevention override shift schedules. Stop, isolate, tag, and escalate.", isCorrect: true },
+      { text: "Open the motor housing while running to spray lubricant on the drive belt.", feedback: "Incorrect. Opening motor casings on running machinery is life-threatening.", isCorrect: false },
+      { text: "Pour water onto the motor housing to cool it down.", feedback: "Incorrect. Pouring water on electrical motors creates lethal electrocution risks.", isCorrect: false },
     ],
-    correctExplanation: "Maintenance tickets should contain specific, objective, and quantitative evidence (location, symptoms, specific readings, targeting vs. actual conditions) so teams can prepare the right tools.",
-    incorrectExplanation: "Vague complaints, personal blame, or waiting for total equipment failure delays repairs and increases waste.",
-    practicalTakeaway: "Report equipment faults with specific observations, target values, and physical symptoms."
+    correctExplanation: "Immediate safety hazards (burning smells, grinding noises) require immediate emergency stop, power isolation, tagging, and escalation.",
+    incorrectExplanation: "Running hazardous machinery or attempting unapproved high-risk repairs causes fires and severe injuries.",
+    practicalTakeaway: "Stop, isolate, tag out, and escalate immediately when safety hazards occur.",
   },
+  // Q6 — P3 (Index 2) — Procedure vs Improvisation Question
   {
-    question: "A delivery team finds that a new packaging procedure requires placing plastic stretch wrap around every box, even when loading inside locked delivery vans.",
+    question: "A cleaning supervisor mandates a specific chemical dilution ratio for floor cleaning. An employee believes using double the chemical strength will clean faster.",
     options: [
-      {
-        text: "Stop using the stretch wrap immediately without informing the office.",
-        isCorrect: false,
-        feedback: "Incorrect. Bypassing shipping procedures without approval can lead to damaged stock and customer complaints."
-      },
-      {
-        text: "Follow the current procedure, record the plastic wrap usage and delivery conditions for 5 routes, and submit a suggestion to use reusable strap ties for internal van loads.",
-        isCorrect: true,
-        feedback: "Correct. Follow current quality standards while gathering data to propose a formal, safe, and zero-waste alternative."
-      },
-      {
-        text: "Complain to the client about the company's wasteful policies.",
-        isCorrect: false,
-        feedback: "Incorrect. Discussing internal procedural issues with clients hurts company trust."
-      },
-      {
-        text: "Refuse to wrap the packages and let the stock slide around in the van.",
-        isCorrect: false,
-        feedback: "Incorrect. Ignoring safety/securing guidelines damages inventory."
-      }
+      { text: "Double the chemical dose secretly to finish cleaning early.", feedback: "Incorrect. Over-dosing chemicals causes toxic runoff, floor damage, and chemical waste.", isCorrect: false },
+      { text: "Refuse to clean any floors until the supervisor changes the rule.", feedback: "Incorrect. Refusing work without safety justification is uncollaborative.", isCorrect: false },
+      { text: "Follow the approved dilution ratio specified in the SOP to ensure safety, hygiene, and chemical control.", feedback: "Correct! Approved SOP dilution ratios protect health, surface integrity, and environmental standards.", isCorrect: true },
+      { text: "Pour pure chemical concentrate directly onto the floor drain.", feedback: "Incorrect. Dumping chemical concentrate into drains causes severe water pollution.", isCorrect: false },
     ],
-    correctExplanation: "Procedures must be followed to ensure delivery quality. If a procedure is wasteful, gather data on consumption, and propose a specific alternative (like reusable straps) through the formal feedback process.",
-    incorrectExplanation: "Bypassing wrapping without authority, complaining to clients, or delivering loose stock causes inventory damage.",
-    practicalTakeaway: "Follow wrapping procedures to secure stock, while logging waste and proposing reusable alternatives."
+    correctExplanation: "Always follow approved chemical dilution ratios in SOPs. Unauthorized over-dosing wastes chemicals and pollutes wastewater.",
+    incorrectExplanation: "Improvised chemical over-dosing causes health hazards, surface damage, and environmental non-compliance.",
+    practicalTakeaway: "Follow approved chemical dosing ratios in the SOP exactly.",
   },
+  // Q7 — P1 (Index 0) — Shift Handover & Continuous Improvement Question
   {
-    question: "A team runs a trial to reduce printing in a logistics office by switching to digital delivery logs. How should they check the results?",
+    question: "At shift end, a temporary spill sock is holding back a small oil seep from a hydraulic press. How should the outgoing operator handle shift handover?",
     options: [
-      {
-        text: "Confirm that everyone likes using the new tablets.",
-        isCorrect: false,
-        feedback: "Incorrect. User preference is important but does not prove process safety or actual resource savings."
-      },
-      {
-        text: "Track the number of delivery errors, average loading times, and total paper sheets consumed over a 2-week period compared to the previous month.",
-        isCorrect: true,
-        feedback: "Correct. Checking error rates, loading speeds, and actual paper reduction provides hard evidence of success."
-      },
-      {
-        text: "Assume the trial worked because a manager signed the approval form.",
-        isCorrect: false,
-        feedback: "Incorrect. Management approval is a prerequisite for a trial, not a verification of its performance."
-      },
-      {
-        text: "Stop logging deliveries entirely to save time.",
-        isCorrect: false,
-        feedback: "Incorrect. Eliminating logging records destroys process control and traceability."
-      }
+      { text: "Log the spill sock location, seep rate, and maintenance ticket # in the handover book, and verbally brief the incoming operator.", feedback: "Correct! Logging location, status, ticket #, and verbally briefing incoming staff ensures continuous monitoring and maintenance follow-up.", isCorrect: true },
+      { text: "Remove the spill sock and leave without telling anyone so the floor looks clean.", feedback: "Incorrect. Removing temporary barriers allows uncontained oil to spread.", isCorrect: false },
+      { text: "Assume maintenance fixed it during the shift without checking.", feedback: "Incorrect. Assumptions without verification lead to unmonitored spills.", isCorrect: false },
+      { text: "Tell the incoming operator only if they specifically ask about oil.", feedback: "Incorrect. Active operational hazards must be proactively communicated during handover.", isCorrect: false },
     ],
-    correctExplanation: "Verifying an operational change requires tracking both the environmental metrics (paper sheets avoided) and the operational metrics (processing times, error rates) to ensure safety and quality are preserved.",
-    incorrectExplanation: "Relying on staff opinions, assuming success without data, or removing logs entirely fails to verify the change's safety.",
-    practicalTakeaway: "Verify operational changes by measuring both resource reduction and process metrics (speeds, errors)."
-  }
-];
-
-const NEW_COMMITMENTS = [
-  "I will report one recurring operational waste issue using specific evidence.",
-  "I will check whether equipment or resources are being used unnecessarily in my work area.",
-  "I will raise one procedure that may need clarification.",
-  "I will help separate an immediate action from an issue requiring escalation.",
-  "I will contribute one practical improvement idea during the next team discussion."
+    correctExplanation: "Shift handovers require proactive verbal and written communication of active temporary controls and open maintenance tickets.",
+    incorrectExplanation: "Failing to log or communicate temporary controls leads to spill recurrence and unmonitored hazards.",
+    practicalTakeaway: "Document active temporary controls in the logbook and brief incoming shift staff verbally.",
+  },
 ];
 
 export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse() {
@@ -605,7 +442,7 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
 
   try {
     const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
+      where: eq(systemSeedsTable.name, SEED_NAME),
     });
 
     if (seedRecord) {
@@ -616,11 +453,11 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
     await db.transaction(async (tx) => {
       // 1. Resolve foundation prerequisite (Course 12)
       let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
+        where: eq(coursesTable.courseCode, "ELH-12"),
       });
       if (!course12) {
         course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
+          where: eq(coursesTable.slug, "final-sustainability-certification"),
         });
       }
 
@@ -628,73 +465,77 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
         throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
       }
 
-      // 2. (ELH-17 was incorrectly added as a prerequisite in the original seed. Only ELH-12 is required.)
-
-      // 3. Resolve or insert Course 29
+      // 2. Resolve or insert Course 29
       let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-29")
+        where: eq(coursesTable.courseCode, "ELH-29"),
       });
       if (!existingCourse) {
         existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
+          where: eq(coursesTable.slug, COURSE_SLUG),
         });
       }
 
       let actualCourseId: number;
 
       if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).returning();
+        const [inserted] = await tx
+          .insert(coursesTable)
+          .values({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            status: "published",
+            isPublished: true,
+          })
+          .returning();
         actualCourseId = inserted.id;
       } else {
         actualCourseId = existingCourse.id;
-        await tx.update(coursesTable).set({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+        await tx
+          .update(coursesTable)
+          .set({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            status: "published",
+            isPublished: true,
+          })
+          .where(eq(coursesTable.id, actualCourseId));
       }
 
-      // 4. Update Course 28 recommendedNextCourseId to point to Course 29 preserving admin edits
+      // 3. Update Course 28 recommendedNextCourseId to point to Course 29 preserving admin edits
       let course28 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-28")
+        where: eq(coursesTable.courseCode, "ELH-28"),
       });
       if (!course28) {
         course28 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-sales-and-marketing-teams")
+          where: eq(coursesTable.slug, "sustainability-for-sales-and-marketing-teams"),
         });
       }
 
@@ -702,60 +543,42 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
         let isSystemManaged = false;
         if (course28.recommendedNextCourseId) {
           const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-            where: eq(coursesTable.id, course28.recommendedNextCourseId)
+            where: eq(coursesTable.id, course28.recommendedNextCourseId),
           });
-          if (currentRecommendedCourse && (currentRecommendedCourse.courseCode === "ELH-29")) {
+          if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-29") {
             isSystemManaged = true;
           }
         }
 
-        if (course28.recommendedNextCourseId === null || course28.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-          await tx.update(coursesTable).set({
-            recommendedNextCourseId: actualCourseId
-          }).where(eq(coursesTable.id, course28.id));
+        if (
+          course28.recommendedNextCourseId === null ||
+          course28.recommendedNextCourseId === actualCourseId ||
+          isSystemManaged
+        ) {
+          await tx
+            .update(coursesTable)
+            .set({ recommendedNextCourseId: actualCourseId })
+            .where(eq(coursesTable.id, course28.id));
         } else {
-          logger.warn(`Recommendation conflict: Course 28 currently recommends course ID ${course28.recommendedNextCourseId} instead of Course 29 (ID: ${actualCourseId}). Preserving administrator edit.`);
+          logger.warn(
+            `Recommendation conflict: Course 28 currently recommends course ID ${course28.recommendedNextCourseId} instead of Course 29 (ID: ${actualCourseId}). Preserving administrator edit.`
+          );
         }
       } else {
         logger.warn("Data integrity note: Course 28 not found during Course 29 recommendation configuration.");
       }
 
-      // Clear Course 25's recommendation pointing to Course 29 (which was Course 26), and update Course 25 to recommend Course 27 (Facilities & Property)
-      let course25 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-25")
-      });
-      if (course25) {
-        let course27Ref = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.courseCode, "ELH-27")
-        });
-        if (course27Ref) {
-          if (course25.recommendedNextCourseId === null || course25.recommendedNextCourseId === actualCourseId) {
-            await tx.update(coursesTable).set({
-              recommendedNextCourseId: course27Ref.id
-            }).where(eq(coursesTable.id, course25.id));
-          }
-        }
-      }
-
-      // 5. Ensure Badge Definition exists
+      // 4. Ensure Badge Definition exists
       let existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.code, BADGE_CODE)
+        where: eq(badgeDefinitionsTable.code, BADGE_CODE),
       });
       if (!existingBadge) {
         existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-          where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
+          where: eq(badgeDefinitionsTable.slug, BADGE_SLUG),
         });
       }
 
       if (!existingBadge) {
-        // Remove the old slug if it exists but is not associated with this code
-        await tx.delete(badgeDefinitionsTable).where(
-          and(
-            eq(badgeDefinitionsTable.slug, "sustainable-operations-practitioner"),
-            eq(badgeDefinitionsTable.criteriaType, "all_courses")
-          )
-        );
-
         await tx.insert(badgeDefinitionsTable).values({
           slug: BADGE_SLUG,
           name: COURSE_META.badgeName,
@@ -768,31 +591,32 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
           code: BADGE_CODE,
         });
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          slug: BADGE_SLUG,
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.id, existingBadge.id));
+        await tx
+          .update(badgeDefinitionsTable)
+          .set({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [actualCourseId],
+            code: BADGE_CODE,
+          })
+          .where(eq(badgeDefinitionsTable.id, existingBadge.id));
       }
 
-      // 6. Ensure only ELH-12 (Final Sustainability Certification) is the prerequisite.
-      // ELH-17 was incorrectly added in the original seed — the corrective migration removes it from live data.
+      // 5. Ensure only ELH-12 (Final Sustainability Certification) is the prerequisite
       const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
         where: and(
           eq(coursePrerequisitesTable.courseId, actualCourseId),
           eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
+        ),
       });
       if (!existingPrereq12) {
         await tx.insert(coursePrerequisitesTable).values({
           courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
+          prerequisiteCourseId: course12.id,
         });
       }
 
-      // Remove any prerequisites that are not ELH-12 (including the incorrectly-added ELH-17)
       await tx.delete(coursePrerequisitesTable).where(
         and(
           eq(coursePrerequisitesTable.courseId, actualCourseId),
@@ -800,21 +624,38 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
         )
       );
 
-      // 7. Seed Lessons safely
-      if (NEW_LESSONS.length > 0) {
-        for (const lesson of NEW_LESSONS) {
-          const [existingLesson] = await tx
-            .select()
-            .from(lessonsTable)
-            .where(
-              and(
-                eq(lessonsTable.orderIndex, lesson.order),
-                eq(lessonsTable.courseId, actualCourseId)
-              )
-            )
-            .limit(1);
+      // 6. Seed Lessons safely (only if no progress or skeleton lessons exist)
+      const existingLessons = await tx.query.lessonsTable.findMany({
+        where: eq(lessonsTable.courseId, actualCourseId),
+      });
 
-          if (!existingLesson) {
+      const hasOnlySkeletonLessons =
+        existingLessons.length > 0 &&
+        existingLessons.every((l) => l.content && l.content.includes("[DRAFT SKELETON]"));
+
+      let existingLessonProgress: any[] = [];
+      if (existingLessons.length > 0) {
+        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
+          where: inArray(
+            lessonProgressTable.lessonId,
+            existingLessons.map((l) => l.id)
+          ),
+        });
+      }
+
+      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
+        if (hasOnlySkeletonLessons) {
+          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
+        }
+
+        for (const lesson of NEW_LESSONS) {
+          const lExist = await tx.query.lessonsTable.findFirst({
+            where: and(
+              eq(lessonsTable.orderIndex, lesson.order),
+              eq(lessonsTable.courseId, actualCourseId)
+            ),
+          });
+          if (!lExist) {
             await tx.insert(lessonsTable).values({
               courseId: actualCourseId,
               title: lesson.title,
@@ -823,69 +664,58 @@ export async function ensureSustainabilityForOperationsAndFrontlineTeamsCourse()
               content: lesson.content,
               contentBlocks: lesson.blocks,
             });
-          } else {
-            await tx.update(lessonsTable).set({
-              title: lesson.title,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            }).where(eq(lessonsTable.id, existingLesson.id));
           }
         }
       }
 
-      // 8. Seed Quiz Questions safely
-      for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-        const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-        if (correctOptionIndex === -1) {
-          throw new Error(`Question ${index} is missing a correct option`);
+      // 7. Seed Quiz Questions safely
+      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
+        where: eq(quizQuestionsTable.courseId, actualCourseId),
+      });
+
+      const hasOnlySkeletonQuestions =
+        existingQuestions.length > 0 &&
+        existingQuestions.every((q) => q.question && q.question.includes("[DRAFT SKELETON]"));
+
+      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
+        where: eq(quizAttemptsTable.courseId, actualCourseId),
+      });
+
+      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
+        if (hasOnlySkeletonQuestions) {
+          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
         }
 
-        const [existingQuestion] = await tx
-          .select()
-          .from(quizQuestionsTable)
-          .where(
-            and(
+        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
+          const qExist = await tx.query.quizQuestionsTable.findFirst({
+            where: and(
               eq(quizQuestionsTable.courseId, actualCourseId),
               eq(quizQuestionsTable.orderIndex, index)
-            )
-          )
-          .limit(1);
-
-        if (!existingQuestion) {
-          await tx.insert(quizQuestionsTable).values({
-            courseId: actualCourseId,
-            question: q.question,
-            options: q.options.map(o => o.text),
-            optionFeedback: q.options.map(o => o.feedback),
-            correctOption: correctOptionIndex,
-            orderIndex: index,
-            correctExplanation: q.correctExplanation,
-            incorrectExplanation: q.incorrectExplanation,
-            practicalTakeaway: q.practicalTakeaway,
+            ),
           });
-        } else {
-          await tx.update(quizQuestionsTable).set({
-            question: q.question,
-            options: q.options.map(o => o.text),
-            optionFeedback: q.options.map(o => o.feedback),
-            correctOption: correctOptionIndex,
-            correctExplanation: q.correctExplanation,
-            incorrectExplanation: q.incorrectExplanation,
-            practicalTakeaway: q.practicalTakeaway,
-          }).where(eq(quizQuestionsTable.id, existingQuestion.id));
+
+          if (!qExist) {
+            const correctOptionIndex = q.options.findIndex((o) => o.isCorrect);
+            if (correctOptionIndex === -1) {
+              throw new Error(`ELH-29 Question ${index} is missing a correct option`);
+            }
+
+            await tx.insert(quizQuestionsTable).values({
+              courseId: actualCourseId,
+              question: q.question,
+              options: q.options.map((o) => o.text),
+              optionFeedback: q.options.map((o) => o.feedback),
+              correctOption: correctOptionIndex,
+              orderIndex: index,
+              correctExplanation: q.correctExplanation,
+              incorrectExplanation: q.incorrectExplanation,
+              practicalTakeaway: q.practicalTakeaway,
+            });
+          }
         }
       }
 
-      // Remove any extra quiz questions beyond the index 7
-      await tx.delete(quizQuestionsTable).where(
-        and(
-          eq(quizQuestionsTable.courseId, actualCourseId),
-          eq(quizQuestionsTable.orderIndex, 8) // Or greater
-        )
-      );
-
-      // 9. Record system seed completion marker
+      // 8. Record system seed completion marker
       await tx.insert(systemSeedsTable).values({
         name: SEED_NAME,
         runAt: new Date(),

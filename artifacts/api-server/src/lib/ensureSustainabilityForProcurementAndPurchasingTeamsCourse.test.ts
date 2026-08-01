@@ -17,6 +17,8 @@ import {
 import { eq, and, inArray } from "drizzle-orm";
 import { ensureSustainabilityForProcurementAndPurchasingTeamsCourse } from "./ensureSustainabilityForProcurementAndPurchasingTeamsCourse";
 
+const SEED_NAME_V2 = "sustainability-for-procurement-and-purchasing-teams-v2";
+
 // Thorough cleanup of Course 26 data, recommendations, and orphans
 async function cleanUpCourse26() {
   const [emp] = await db.select().from(employeesTable).where(eq(employeesTable.clerkUserId, "preserve_user_id_26")).limit(1);
@@ -31,6 +33,8 @@ async function cleanUpCourse26() {
     await db.delete(employeesTable).where(eq(employeesTable.id, emp.id));
   }
   await db.delete(quizAttemptsTable).where(eq(quizAttemptsTable.userId, "preserve_user_id_26"));
+  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, SEED_NAME_V2));
+  // Also clean up v1 seed record in case it exists from previous sprints
   await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-procurement-and-purchasing-teams-v1"));
 
   // Reset ELH-25 recommendation link unconditionally
@@ -102,32 +106,62 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
       assert.equal(course.slug, "sustainability-for-procurement-and-purchasing-teams");
       assert.equal(course.title, "Sustainability for Procurement and Purchasing Teams");
       assert.equal(course.level, "Applied Workplace Practice");
-      assert.equal(course.durationMinutes, 18);
+      assert.equal(course.durationMinutes, 20);
       assert.equal(course.passingScore, 80);
       assert.equal(course.courseCode, "ELH-26");
 
-      // Verify lessons count and order
+      // Verify lessons count and order (12 lessons for 13-part standard)
       const lessons = await tx
         .select()
         .from(lessonsTable)
         .where(eq(lessonsTable.courseId, course.id))
         .orderBy(lessonsTable.orderIndex);
-      assert.equal(lessons.length, 6, "Should seed exactly 6 lessons");
-      for (let i = 0; i < 6; i++) {
+      assert.equal(lessons.length, 12, "Should seed exactly 12 lessons");
+      for (let i = 0; i < 12; i++) {
         assert.equal(lessons[i].orderIndex, i, `Lesson ${i} order index must be ${i}`);
       }
-      assert.equal(lessons[0].title, "Start With the Need, Not the Product");
-      assert.equal(lessons[1].title, "Write Clear and Proportionate Requirements");
-      assert.equal(lessons[2].title, "Compare Whole-Life Value, Not Price Alone");
-      assert.equal(lessons[3].title, "Test Supplier Claims and Evidence");
-      assert.equal(lessons[4].title, "Make and Record a Defensible Decision");
-      assert.equal(lessons[5].title, "Manage the Supplier After Award");
+
+      // Verify key lesson titles covering the 13-part quality standard
+      assert.equal(lessons[0].title, "Opening Hook: The Urgent Request", "Lesson 0 must be the opening hook");
+      assert.equal(lessons[1].title, "Why Procurement Decisions Matter", "Lesson 1 must be Why It Matters");
+      assert.equal(lessons[2].title, "Key Terms in Procurement and Purchasing", "Lesson 2 must be vocabulary");
+      assert.equal(lessons[3].title, "Procurement Role and Responsibility Boundaries", "Lesson 3 must be role boundaries");
+      assert.equal(lessons[4].title, "Start With the Need, Not the Product");
+      assert.equal(lessons[5].title, "Write Clear Requirements and Evaluate Evidence");
+      assert.equal(lessons[6].title, "Compare Whole-Life Value, Not Price Alone");
+      assert.equal(lessons[7].title, "The Procurement Cycle: A Visual Guide", "Lesson 7 must be the visual element");
+      assert.equal(lessons[8].title, "Test Supplier Claims and Evidence");
+      assert.equal(lessons[9].title, "Scenario Challenge: The Cleaning Contract Renewal", "Lesson 9 must be the applied scenario");
+      assert.equal(lessons[10].title, "Make and Record a Defensible Decision");
+      assert.equal(lessons[11].title, "Manage the Supplier After Award", "Lesson 11 must include commitment and completion");
+
+      // Verify memorable_fact block exists in lesson 5
+      const lesson5Blocks = (lessons[5].contentBlocks as any[]) || [];
+      const hasMemorableFact = lesson5Blocks.some((b: any) => b.type === "memorable_fact");
+      assert.ok(hasMemorableFact, "Lesson 5 must contain a memorable_fact block");
+
+      // Verify image block exists in lesson 7 (visual element)
+      const lesson7Blocks = (lessons[7].contentBlocks as any[]) || [];
+      const hasImageBlock = lesson7Blocks.some((b: any) => b.type === "image");
+      assert.ok(hasImageBlock, "Lesson 7 must contain an image block for the visual element");
+
+      // Verify commitment block exists in lesson 11
+      const lesson11Blocks = (lessons[11].contentBlocks as any[]) || [];
+      const hasCommitment = lesson11Blocks.some((b: any) => b.type === "commitment");
+      assert.ok(hasCommitment, "Lesson 11 must contain a commitment block");
+
+      // Verify role boundary content in lesson 3
+      const lesson3Blocks = (lessons[3].contentBlocks as any[]) || [];
+      const boundaryText = lesson3Blocks.map((b: any) => b.bodyText || "").join(" ");
+      assert.ok(boundaryText.includes("Procurement owns"), "Lesson 3 must define what procurement owns");
+      assert.ok(boundaryText.includes("escalates"), "Lesson 3 must define escalation responsibilities");
 
       // Verify quiz questions count and structural feedback
       const quizQuestions = await tx
         .select()
         .from(quizQuestionsTable)
-        .where(eq(quizQuestionsTable.courseId, course.id));
+        .where(eq(quizQuestionsTable.courseId, course.id))
+        .orderBy(quizQuestionsTable.orderIndex);
       assert.equal(quizQuestions.length, 8, "Should seed exactly 8 quiz questions");
 
       for (const q of quizQuestions) {
@@ -144,6 +178,26 @@ test("Course 26 Seeding & Integrity Unit Tests", async () => {
         assert.ok(q.incorrectExplanation && q.incorrectExplanation.length > 0, "Must have incorrect explanation");
         assert.ok(q.practicalTakeaway && q.practicalTakeaway.length > 0, "Must have practical takeaway");
       }
+
+      // Verify Sprint 9I answer-position safeguards (2/2/2/2, max streak 1)
+      const positions = quizQuestions.map(q => q.correctOption);
+      const countByPos = [0, 1, 2, 3].map(p => positions.filter(x => x === p).length);
+      assert.equal(countByPos[0], 2, "Exactly 2 questions must have correct answer at position 1 (index 0)");
+      assert.equal(countByPos[1], 2, "Exactly 2 questions must have correct answer at position 2 (index 1)");
+      assert.equal(countByPos[2], 2, "Exactly 2 questions must have correct answer at position 3 (index 2)");
+      assert.equal(countByPos[3], 2, "Exactly 2 questions must have correct answer at position 4 (index 3)");
+
+      let maxStreak = 1;
+      let currentStreak = 1;
+      for (let i = 1; i < positions.length; i++) {
+        if (positions[i] === positions[i - 1]) {
+          currentStreak++;
+          maxStreak = Math.max(maxStreak, currentStreak);
+        } else {
+          currentStreak = 1;
+        }
+      }
+      assert.ok(maxStreak <= 1, `Maximum answer-position streak must be 1, got ${maxStreak}`);
 
       // Verify badge definition
       const [badge] = await tx
@@ -268,7 +322,7 @@ test("Course 26 Learner Data Preservation Unit Tests", async () => {
     });
 
     // Delete seed record to simulate re-run
-    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-procurement-and-purchasing-teams-v1"));
+    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, SEED_NAME_V2));
 
     await ensureSustainabilityForProcurementAndPurchasingTeamsCourse();
 

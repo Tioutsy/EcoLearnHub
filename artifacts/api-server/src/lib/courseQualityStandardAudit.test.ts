@@ -26,12 +26,14 @@ import { ensureEffectiveGreenTeamsCourse } from "./ensureEffectiveGreenTeamsCour
 import { ensureWorkplaceSustainabilityInitiativesCourse } from "./ensureWorkplaceSustainabilityInitiativesCourse";
 import { ensureSustainabilityForHrTeamsCourse } from "./ensureSustainabilityForHrTeamsCourse";
 import { ensureSustainabilityForFinanceTeamsCourse } from "./ensureSustainabilityForFinanceTeamsCourse";
+import { ensureSustainabilityForProcurementAndPurchasingTeamsCourse } from "./ensureSustainabilityForProcurementAndPurchasingTeamsCourse";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
 import { ensureSustainabilityForSalesAndMarketingTeamsCourse } from "./ensureSustainabilityForSalesAndMarketingTeamsCourse";
+import { ensureSustainabilityForOperationsAndFrontlineTeamsCourse } from "./ensureSustainabilityForOperationsAndFrontlineTeamsCourse";
 import { evaluateCourseQuality } from "./courseQualityDiagnostics";
 import { db, coursesTable } from "@workspace/db";
 
-describe("Course Quality Standard Audit (ELH-01 through ELH-28)", () => {
+describe("Course Quality Standard Audit (ELH-01 through ELH-29)", () => {
   before(async () => {
     await ensureSchemaModifications();
     await ensureFoundationsCourse();
@@ -59,8 +61,10 @@ describe("Course Quality Standard Audit (ELH-01 through ELH-28)", () => {
     await ensureWorkplaceSustainabilityInitiativesCourse();
     await ensureSustainabilityForHrTeamsCourse();
     await ensureSustainabilityForFinanceTeamsCourse();
+    await ensureSustainabilityForProcurementAndPurchasingTeamsCourse();
     await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
     await ensureSustainabilityForSalesAndMarketingTeamsCourse();
+    await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
   });
 
   test("1. Active catalogue contains all 29 courses (ELH-01 through ELH-29)", async () => {
@@ -443,4 +447,34 @@ describe("Course Quality Standard Audit (ELH-01 through ELH-28)", () => {
     assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-28 must score points for visual question");
     assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-28 must score points for applied scenario");
   });
+
+  test("55. ELH-26 sustainability for procurement & purchasing teams course reaches target quality score threshold (>= 95)", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-26");
+    assert.ok(scorecard.totalScore >= 95, `ELH-26 score must be >= 95, got ${scorecard.totalScore}`);
+    assert.equal(scorecard.releaseBlockers.length, 0, `ELH-26 must have 0 release blockers, got ${scorecard.releaseBlockers.join("; ")}`);
+    assert.equal(scorecard.isReleaseReady, true, "ELH-26 must be flagged as release ready");
+  });
+
+  test("56. ELH-26 diagnostic breakdown includes memorable fact, visual question, and scenario scores", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-26");
+    assert.ok(scorecard.breakdown.memorableFactScore > 0, "ELH-26 must score points for memorable fact");
+    assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-26 must score points for visual question");
+    assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-26 must score points for applied scenario");
+  });
+
+  test("57. ELH-29 sustainability for operations & frontline teams course reaches target quality score threshold (>= 95)", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-29");
+    assert.ok(scorecard.totalScore >= 95, `ELH-29 score must be >= 95, got ${scorecard.totalScore}`);
+    assert.equal(scorecard.releaseBlockers.length, 0, `ELH-29 must have 0 release blockers, got ${scorecard.releaseBlockers.join("; ")}`);
+    assert.equal(scorecard.isReleaseReady, true, "ELH-29 must be flagged as release ready");
+  });
+
+  test("58. ELH-29 diagnostic breakdown includes memorable fact, visual question, and scenario scores", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-29");
+    assert.ok(scorecard.breakdown.memorableFactScore > 0, "ELH-29 must score points for memorable fact");
+    assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-29 must score points for visual question");
+    assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-29 must score points for applied scenario");
+  });
 });
+
+
