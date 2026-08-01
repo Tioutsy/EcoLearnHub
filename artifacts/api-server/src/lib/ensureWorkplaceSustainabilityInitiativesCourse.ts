@@ -14,710 +14,675 @@ import { logger } from "./logger";
 
 const COURSE_SLUG = "planning-and-delivering-workplace-sustainability-initiatives";
 const COURSE_TITLE = "Planning and Delivering Workplace Sustainability Initiatives";
-const BADGE_SLUG = "workplace-initiative-coordinator";
+const BADGE_SLUG = "workplace-sustainability-initiative-practitioner";
 const BADGE_CODE = "COURSE_ELH_23_COMPLETE";
-const SEED_NAME = "workplace-sustainability-initiatives-v1";
+const SEED_NAME = "workplace-sustainability-initiatives-v2";
 
 const COURSE_META = {
   courseCode: "ELH-23",
-  description: "Learn how to turn a useful sustainability idea into a clearly scoped workplace initiative, coordinate delivery, respond to obstacles and review whether the initiative achieved its intended result.",
-  fullDescription: "Learn how to turn a useful sustainability idea into a clearly scoped workplace initiative, coordinate delivery, respond to obstacles and review whether the initiative achieved its intended result.",
+  description: "Learn how to turn an identified sustainability opportunity into a controlled, feasible and evidence-based workplace initiative from approval and pilot testing to review and closeout.",
+  fullDescription: "Master the complete lifecycle of workplace sustainability initiatives: from defining a real problem and gathering baseline evidence to establishing scope, checking feasibility, securing approvals, conducting controlled pilots, evaluating results, and embedding lasting operational practices.",
   categoryId: 1,
   durationMinutes: 20,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
-  thumbnailUrl: "/images/courses/planning-and-delivering-workplace-sustainability-initiatives.jpg",
-  intendedRoles: ["employees", "supervisors", "managers", "sustainability coordinators", "green-team members"],
+  thumbnailUrl: "/images/courses/visual-sustainability-workplace-initiative.png",
+  intendedRoles: ["employees", "supervisors", "department managers", "sustainability coordinators", "green-team members", "facilities leads", "ops leads"],
   learningObjectives: [
-    "Define the workplace problem before proposing a solution.",
-    "Compare potential initiatives using practical selection criteria.",
-    "Establish a clear scope, intended result and approval boundary.",
-    "Assign responsibilities and manageable milestones.",
-    "Identify operational risks and respond to delivery obstacles.",
-    "Gather proportionate evidence of implementation and results.",
-    "Recommend whether an initiative should continue, change, expand or stop."
+    "Distinguish an unverified sustainability idea or promotional campaign from a controlled workplace initiative.",
+    "Describe the workplace problem or opportunity using available observations, operational records, and employee input.",
+    "Define clear initiative scope, explicit exclusions, affected workplace areas, and operational boundaries.",
+    "Assign an initiative owner, sponsor, approver, technical reviewer, data owner, and supporting contributors.",
+    "Assess operational, technical, financial, and competence feasibility before committing organizational resources.",
+    "Identify implementation risks, dependencies, and potential unintended trade-offs (e.g. hygiene, safety, packaging shift).",
+    "Design and execute a controlled pilot project before deciding on full organization-wide rollout.",
+    "Establish balanced success indicators covering activity, operational adoption, environmental result, and unexpected effects.",
+    "Obtain appropriate approval through defined decision gates prior to implementation.",
+    "Take a structured review decision: close, modify, embed into routine procedures, pause, stop, or scale responsibly."
   ],
   includesCertificate: true,
   passingScore: 80,
-  completionMessage: "You have completed Planning and Delivering Workplace Sustainability Initiatives. You can now turn sustainability ideas into structured, scoped, and reviewable workplace initiatives.",
-  badgeName: "Workplace Initiative Coordinator",
-  badgeDescription: "Awarded for demonstrating practical understanding of how to turn a useful sustainability idea into a clearly scoped workplace initiative, coordinate delivery, respond to obstacles and review whether the initiative achieved its intended result.",
+  completionMessage: "Congratulations! You have completed ELH-23: Planning and Delivering Workplace Sustainability Initiatives. You can now design, approve, pilot, deliver, and close reviewable workplace initiatives backed by verified evidence.",
+  badgeName: "Workplace Sustainability Initiative Practitioner",
+  badgeDescription: "Awarded for demonstrating practical competency in turning sustainability ideas into controlled, feasible, and reviewable workplace initiatives from baseline approval to closeout and operational embedding.",
 };
 
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "From a Good Idea to a Workable Initiative",
-    minutes: 3,
-    content: "Distinguish broad ambitions and communication messages from clearly defined workplace initiatives with owners, scope, and target outcomes.",
+    title: "Course Introduction & Strategic Scope Boundaries",
+    minutes: 2,
+    content: "Understand the core purpose of ELH-23, target audience, duration, prerequisites, and explicit boundary matrix distinguishing initiative delivery from action planning and green team governance.",
     blocks: [
       {
-        id: "c23-l1-b1",
+        id: "c23-l0-b1",
         type: "heading",
-        headingText: "From a Good Idea to a Workable Initiative"
+        headingText: "Welcome to ELH-23: Controlled Initiative Delivery"
       },
       {
-        id: "c23-l1-b2",
+        id: "c23-l0-b2",
         type: "short_text",
-        bodyText: "Saying 'we should reduce waste' is a broad ambition, not a workable initiative. A true initiative requires a defined workplace problem, specific area, owner, timeframe, and a way to verify if anything changed. Sustainability projects should solve real issues on the floor rather than just making the company look active.\n\nFor example, if a Mauritian hotel green team notices returned unopened breakfast buffet items, 'reducing food waste' is too broad. A workable initiative is: 'Record returned buffet items for 4 weeks, identify the top 3 wasted items, and adjust replenishment quantities with approval from the F&B manager.'"
+        bodyText: "Turning a sustainability ambition into workplace reality requires more than enthusiasm or promotional posters. It demands controlled initiative delivery. ELH-23 teaches employees, supervisors, department managers, and green-team members how to convert an identified sustainability opportunity into a structured, feasible, approved, and reviewable workplace initiative.\n\nThis course is suitable for a 15–20-minute learning session. It provides practical workplace guidance and does not constitute formal project-management accreditation, environmental audit certification, engineering assurance, or legal advice."
       },
       {
-        id: "c23-l1-b3",
+        id: "c23-l0-b3",
         type: "key_message",
-        headingText: "Initiative Focus",
-        bodyText: "Start with a specific workplace issue rather than a vague environmental slogan or general campaign."
-      },
-      {
-        id: "c23-l1-b4",
-        type: "decision_scenario",
-        decisionIntro: "Which statement represents a clearly defined, manageable workplace sustainability initiative?",
-        decisionPrompt: "Select the workable initiative:",
-        decisionChoices: [
-          {
-            label: "Become a greener and more eco-friendly office workspace.",
-            correct: false,
-            feedback: "Incorrect. This is a broad corporate ambition, not a scoped project."
-          },
-          {
-            label: "Display a recycling reminder poster near the office printer.",
-            correct: false,
-            feedback: "Incorrect. This is a communication message without a defined process or target result."
-          },
-          {
-            label: "Reduce unnecessary colour printing in the administration department over a six-week period by setting default printing profiles.",
-            correct: true,
-            feedback: "Correct. This statement specifies the problem area (colour printing in admin), a timeline (six weeks), a clear action, and is measurable."
-          },
-          {
-            label: "Ask the facilities maintenance team to check for water leaks.",
-            correct: false,
-            feedback: "Incorrect. This represents an ongoing operational maintenance responsibility, not a temporary initiative."
-          }
-        ]
+        headingText: "Structural Boundary & Progression Matrix",
+        bodyText: "ELH-23 occupies a distinct position in the EcoLearnHub curriculum:\n\n• ELH-13 (Action Planning) creates an overarching multi-action plan across departmental goals; ELH-23 controls one defined workplace initiative from problem identification to closeout.\n• ELH-14 (Departmental Goals) establishes targets; ELH-23 designs initiatives that deliver against those targets.\n• ELH-15 & ELH-22 (Green Teams) establish team governance and operating discipline; ELH-23 provides the delivery mechanics for a specific team or department project.\n• ELH-17 (Tracking Actions) records register completion; ELH-23 manages the full initiative lifecycle (feasibility, pilot, approval gate, closeout review).\n• ELH-18 (Data Collection) collects raw metrics; ELH-23 uses data owners to verify baselines and measured results.\n• ELH-19 (Performance Review) conducts overall organizational performance review; ELH-23 conducts initiative-specific closeout reviews."
       }
     ]
   },
   {
     order: 1,
-    title: "Define the Problem Before Choosing the Solution",
+    title: "Opening Hook: The Uncontrolled 'Zero Disposable Cups' Campaign",
     minutes: 3,
-    content: "Differentiate symptoms from causes. Investigate what, where, when, and who before purchasing tools or proposing solutions.",
+    content: "Examine a realistic Mauritian commercial workplace scenario where positive environmental intentions without feasibility checks, consultation, or baselines caused operational chaos.",
     blocks: [
       {
-        id: "c23-l2-b1",
+        id: "c23-l1-b1",
         type: "heading",
-        headingText: "Define the Problem Before Choosing the Solution"
+        headingText: "Case Study: Grand Baie Enterprise Cup Campaign"
       },
       {
-        id: "c23-l2-b2",
+        id: "c23-l1-b2",
         type: "short_text",
-        bodyText: "Do not buy tools or bins before you understand why a process fails. Distinguish symptoms from causes:\n- Symptom: Recyclable bottles are found in general waste bins.\n- Cause: Bins are badly located, labels are missing, contractor schedules conflict, or staff instructions are unclear.\n\nAt a Mauritian retail outlet, air-conditioning was left running after hours. Proposing a reminder email was a symptom fix. The actual cause was that closing staff did not control the system controls and assumed security handled it. The real problem was unclear shutdown responsibility, not a lack of awareness."
+        bodyText: "A multi-site commercial enterprise in Grand Baie launched a headline campaign titled 'Zero Disposable Cups in 30 Days' after an enthusiastic committee member saw discarded single-use cups in office breakrooms. Management quickly ordered 300 ceramic mugs, printed promotional banners, and announced the initiative.\n\nHowever, critical controls were completely ignored:\n1. No baseline volume was checked: procurement had already placed a non-refundable 6-month bulk order of paper cups.\n2. Housekeeping was omitted: no additional washing arrangements or sink space were allocated in staff breakrooms.\n3. Kitchen & Hygiene leads were not consulted: food safety protocols prohibited unwashed personal mugs near food prep areas.\n4. Night-shift employees were excluded: mug distribution occurred exclusively during day-shift office hours.\n5. Operational constraints were ignored: maintenance technicians working outdoors required portable covered containers for safety reasons.\n6. Success was declared on Day 1 because 300 mugs were distributed—even though mug loss, unwashed cup clutter, and continued paper cup usage created widespread frustration."
       },
       {
-        id: "c23-l2-b3",
+        id: "c23-l1-b3",
         type: "key_message",
-        headingText: "Investigate first",
-        bodyText: "Always observe the process on the floor and discuss it with the operators before deciding on equipment or policies."
-      },
-      {
-        id: "c23-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "Employees regularly pile unflattened cardboard box waste beside a recycling cage instead of placing them inside. What is the most appropriate first action?",
-        decisionPrompt: "Select the first action:",
-        decisionChoices: [
-          {
-            label: "Issue a formal written warning to all department staff.",
-            correct: false,
-            feedback: "Incorrect. Punishing staff before understanding workflow barriers damages trust."
-          },
-          {
-            label: "Purchase a larger recycling cage immediately.",
-            correct: false,
-            feedback: "Incorrect. You do not know if cage size is the actual barrier."
-          },
-          {
-            label: "Observe the waste disposal area during shift changes and talk to the employees handling the boxes.",
-            correct: true,
-            feedback: "Correct. Speaking with the operators helps identify if the barrier is time constraints, cage lock issues, or box cutting tool availability."
-          },
-          {
-            label: "Remove the cardboard recycling program completely.",
-            correct: false,
-            feedback: "Incorrect. This abandons the goal without addressing the operational process."
-          }
-        ]
+        headingText: "Core Lesson",
+        bodyText: "Distributing equipment or holding launch events is activity, not environmental success. Without baseline evidence, operational consultation, feasibility checks, and review dates, initiatives fail or create unintended operational trade-offs."
       }
     ]
   },
   {
     order: 2,
-    title: "Select the Right Initiative",
-    minutes: 3,
-    content: "Evaluate ideas using practical comparison criteria like benefit, effort, risk, cost, and feasibility. Prioritize achievable first steps.",
+    title: "Why Controlled Initiatives Matter & Operational Limits",
+    minutes: 2,
+    content: "Understand why structured initiative controls protect organizations from wasted resources, initiative fatigue, and unverified green claims.",
     blocks: [
       {
-        id: "c23-l3-b1",
+        id: "c23-l2-b1",
         type: "heading",
-        headingText: "Select the Right Initiative"
+        headingText: "Value & Boundaries of Workplace Initiatives"
       },
       {
-        id: "c23-l3-b2",
+        id: "c23-l2-b2",
         type: "short_text",
-        bodyText: "Compare initiative ideas on feasibility, not just maximum theoretical impact. Consider expected environmental benefit, operational effort, capital cost, time, and safety. A smaller, highly feasible initiative that succeeds builds team confidence and data for future investment."
-      },
-      {
-        id: "c23-l3-b3",
-        type: "key_message",
-        headingText: "Comparison Matrix",
-        bodyText: "A workable project balances potential impact with current budget boundaries and operational risk."
-      },
-      {
-        id: "c23-l3-b4",
-        type: "decision_scenario",
-        decisionIntro: "A manufacturing plant wants to reduce energy use. The green team is comparing replacing production line machinery (high cost, high impact), improving compressed-air shutdown checks (low cost, immediate impact), and running a slogan contest (low cost, no direct impact).",
-        decisionPrompt: "Which project is the best first initiative?",
-        decisionChoices: [
-          {
-            label: "Replacing the production machinery because it has the largest impact.",
-            correct: false,
-            feedback: "Incorrect. This requires significant capital and technical reviews, making it a poor immediate first step for a green team."
-          },
-          {
-            label: "Running the environmental slogan competition because it is the easiest to start.",
-            correct: false,
-            feedback: "Incorrect. Slogans do not directly address energy waste on the floor."
-          },
-          {
-            label: "Improving shutdown checks for compressed-air equipment because it is low-cost, manageable, and has direct verifiable impact.",
-            correct: true,
-            feedback: "Correct. This project is highly feasible, operationally relevant, and delivers immediate energy reductions within the team's coordination scope."
-          },
-          {
-            label: "Do both the machinery replacement and slogan contest simultaneously.",
-            correct: false,
-            feedback: "Incorrect. This overloads resources and mixes high-capital projects with low-impact campaigns."
-          }
-        ]
+        bodyText: "Controlled workplace initiatives provide a safe bridge between high-level sustainability goals and daily operational routines. When delivered effectively, an initiative:\n\n• Tests proposed operational solutions in real workplace conditions before committing large budgets.\n• Coordinates effort across frontline departments (Operations, Maintenance, Procurement, HR, Finance).\n• Uncovers hidden operational dependencies, competence gaps, and technical constraints early.\n• Establishes baseline and post-implementation evidence before organization-wide rollout.\n\nHowever, initiative controls also enforce strict limits:\n• A visible campaign is not automatically an effective initiative.\n• Participation numbers or pledge signatures do not prove environmental improvement.\n• A pilot is a learning tool—not a disguised commitment to full rollout if results fail.\n• Sustainability labels do not override health, safety, hygiene, labour, or procurement controls."
       }
     ]
   },
   {
     order: 3,
-    title: "Define Scope, Responsibilities and Milestones",
-    minutes: 3,
-    content: "Turn initiatives into delivery plans. Define operational areas, assign named roles, set milestones, and establish scope boundaries.",
+    title: "Plain-Language Initiative Vocabulary",
+    minutes: 2,
+    content: "Master key initiative delivery terms in plain English to ensure clear communication across all workplace roles.",
     blocks: [
       {
-        id: "c23-l4-b1",
+        id: "c23-l3-b1",
         type: "heading",
-        headingText: "Define Scope, Responsibilities and Milestones"
+        headingText: "Plain-Language Initiative Terminology"
       },
       {
-        id: "c23-l4-b2",
+        id: "c23-l3-b2",
         type: "short_text",
-        bodyText: "A clear plan specifies: included area, excluded zones, target results, owners, required approvals, dates, and escalation paths. Assign responsibilities to named roles (e.g. 'Facilities Assistant') rather than 'everyone'. Keep scope controlled: an office printing initiative should not expand into general IT procurement reforms without approval."
-      },
-      {
-        id: "c23-l4-b3",
-        type: "key_message",
-        headingText: "Responsibility Rule",
-        bodyText: "If everyone is responsible for an action, then no one is accountable. Always name a specific coordinator."
-      },
-      {
-        id: "c23-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A green team drafts a plan: 'Reduce office paper use. Staff will check printers. Review in July.' Which critical element is missing?",
-        decisionPrompt: "Identify the missing planning detail:",
-        decisionChoices: [
-          {
-            label: "The selection of a green team slogan.",
-            correct: false,
-            feedback: "Incorrect. Slogans are not operational planning requirements."
-          },
-          {
-            label: "A named owner, specific checklist printer areas, required manager approvals, and the source of paper consumption evidence.",
-            correct: true,
-            feedback: "Correct. Without a defined owner, clear scope boundaries, approval steps, and verification data, the plan cannot be monitored or executed."
-          },
-          {
-            label: "A spreadsheet to calculate carbon savings.",
-            correct: false,
-            feedback: "Incorrect. Detailed carbon formulas are not required for task assignment and execution."
-          },
-          {
-            label: "Weekly department presentations.",
-            correct: false,
-            feedback: "Incorrect. Reporting should be simple and structured, not cause meeting fatigue."
-          }
-        ]
+        bodyText: "To avoid confusion between ideas, routine tasks, and formal projects, use these precise definitions:\n\n• Sustainability Initiative: A time-bound, structured workplace project designed to test or implement a specific environmental or operational improvement.\n• Idea / Proposal: An unverified suggestion for improvement before evidence, scope, feasibility, or approval is established.\n• Routine Action: An ongoing operational task performed as part of regular job duties (e.g. routine leak checks).\n• Baseline: The verified starting condition or resource consumption rate recorded before initiative launch.\n• Scope & Exclusions: Explicit boundaries defining which sites, departments, shifts, and equipment are included or excluded.\n• Feasibility: Practical evaluation of technical capability, operational fit, financial cost, and staff competence.\n• Pilot / Trial: A limited, small-scale test of an initiative under real working conditions before wider deployment.\n• Approval Gate: A formal decision checkpoint where designated authority reviews evidence before funding or rollout.\n• Unintended Consequence: An unexpected operational, safety, or environmental side-effect caused by an initiative.\n• Closeout & Embedding: Formally ending the initiative phase and transitioning successful practices into standard operating procedures."
       }
     ]
   },
   {
     order: 4,
-    title: "Deliver the Initiative and Respond to Obstacles",
-    minutes: 3,
-    content: "Handle operational obstacles. Learn the response sequence to adjust within scope, notify managers, or pause unsafe tasks.",
+    title: "Sourced 'Did You Know?' Fact: ISO Operational Control",
+    minutes: 2,
+    content: "Review authoritative international standards governing operational planning, change control, and evidence-based evaluation.",
     blocks: [
       {
-        id: "c23-l5-b1",
+        id: "c23-l4-b1",
         type: "heading",
-        headingText: "Deliver the Initiative and Respond to Obstacles"
+        headingText: "Did You Know? Sourced Operational Standard"
       },
       {
-        id: "c23-l5-b2",
-        type: "short_text",
-        bodyText: "Obstacles are normal: equipment delays, shift changes, contractor conflicts, or safety issues. Follow a safe response sequence: (1) confirm changes, (2) identify the barrier, (3) adjust within approved scope, (4) record modifications, (5) escalate outside decisions, and (6) pause the task if safety or operational risk is not controlled."
-      },
-      {
-        id: "c23-l5-b3",
-        type: "key_message",
-        headingText: "Operations First",
-        bodyText: "Sustainability initiatives must support safe, efficient daily business operations and must never conflict with safety paths."
-      },
-      {
-        id: "c23-l5-b4",
-        type: "decision_scenario",
-        decisionIntro: "A new kitchen glass-sorting container is blocking an emergency fire exit corridor. Kitchen staff complain it slows down food service exit access.",
-        decisionPrompt: "What should the team coordinator do?",
-        decisionChoices: [
-          {
-            label: "Ask staff to be careful and leave the bin in place since recycling is a priority.",
-            correct: false,
-            feedback: "Incorrect. Safety must never be compromised for environmental goals."
-          },
-          {
-            label: "Remove the glass container immediately, temporarily suspend glass collection in that corridor, notify the safety manager, and find a safer layout.",
-            correct: true,
-            feedback: "Correct. Safety hazards must be resolved immediately by pausing the hazard, notifying safety officers, and relocating the container."
-          },
-          {
-            label: "Wait until the next scheduled monthly green team meeting to discuss it.",
-            correct: false,
-            feedback: "Incorrect. Exit blockages represent immediate safety hazards that cannot wait for monthly meetings."
-          },
-          {
-            label: "Tell the kitchen staff to use a different corridor exit.",
-            correct: false,
-            feedback: "Incorrect. Re-routing emergency paths requires formal authorization, not green team direction."
-          }
-        ]
+        id: "c23-l4-b2",
+        type: "callout",
+        headingText: "ISO 14001:2015 Clause 8.1 & ISO 9001:2015 Clause 8.1",
+        bodyText: "According to ISO 14001:2015 Clause 8.1 and ISO 9001:2015 Clause 8.1 (Operational Planning and Control):\n\n'The organization shall establish, implement, control and maintain the processes needed to meet environmental management system requirements... The organization shall control planned changes and review the consequences of unintended changes, taking action to mitigate any adverse effects, as necessary.'\n\nKey Takeaway for Workplace Initiatives: International management standards require organizations to evaluate planned operational changes before launch, control implementation steps, and actively monitor unintended side-effects. Good intentions or promotional announcements do not satisfy operational control requirements."
       }
     ]
   },
   {
     order: 5,
-    title: "Review Results and Decide What Happens Next",
+    title: "The INITIATE Framework for Controlled Delivery",
     minutes: 3,
-    content: "Evaluate projects honestly using counts, invoices, or feedback. Make clear recommendations to continue, adjust, expand, or stop.",
+    content: "Master the 8-step INITIATE framework for taking a workplace sustainability initiative from initial problem identification through closeout.",
+    blocks: [
+      {
+        id: "c23-l5-b1",
+        type: "heading",
+        headingText: "The 8-Step INITIATE Operational Framework"
+      },
+      {
+        id: "c23-l5-b2",
+        type: "short_text",
+        bodyText: "Follow the INITIATE framework to ensure every initiative is grounded in reality, properly authorized, and rigorously evaluated:\n\n1. I — Identify the real need: Describe the specific workplace problem using observations, records, and frontline feedback.\n2. N — Name intended outcome & scope: Specify exact targets, affected areas, and explicit exclusions.\n3. I — Involve owners & stakeholders: Assign an initiative owner, approver, technical leads, and consult affected staff.\n4. T — Test feasibility, risks & dependencies: Check operational capacity, budget, hygiene/safety impacts, and supplier lead times.\n5. I — Implement through controlled pilot: Execute a small-scale trial in one department or shift before full deployment.\n6. A — Assess evidence & unintended effects: Compare pilot data against baseline and check for negative side-effects.\n7. T — Take a review decision: Decide whether to close, modify, continue, embed into procedures, or scale up.\n8. E — Embed learning & close responsibly: Document lessons learned, transfer ongoing ownership, and communicate final outcomes."
+      }
+    ]
+  },
+  {
+    order: 6,
+    title: "Structure of a Proportionate Initiative Brief & Approval Gates",
+    minutes: 2,
+    content: "Learn how to draft a concise, single-page initiative brief and navigate formal management approval checkpoints.",
     blocks: [
       {
         id: "c23-l6-b1",
         type: "heading",
-        headingText: "Review Results and Decide What Happens Next"
+        headingText: "The Proportionate Initiative Brief"
       },
       {
         id: "c23-l6-b2",
         type: "short_text",
-        bodyText: "Review questions: Was it delivered? What evidence was gathered? Did results change? What worked or failed? Decide: continue, adjust, repeat, replace, expand, or stop. Stopping an ineffective initiative is a responsible decision if you document the reasons and learning. Avoid exaggerating estimates or presenting guesses as verified facts."
+        bodyText: "A workplace initiative brief does not need to be a 50-page manual. For most workplace improvements, a concise 1-to-2 page document contains all essential controls:\n\n1. Problem & Baseline Evidence: What issue was observed, where, and what initial baseline data exists?\n2. Intended Outcome & Scope: What specific operational result is sought? What areas are explicitly excluded?\n3. Roles & Accountabilities: Who is the Initiative Owner? Who is the Approver? Who provides technical/data support?\n4. Feasibility & Risk Assessment: What costs, maintenance dependencies, or safety/hygiene risks must be managed?\n5. Pilot Design & Schedule: Where will the trial take place, for how long, and what equipment/training is required?\n6. Balanced Indicators: How will activity, operational adoption, environmental outcome, and side-effects be measured?\n7. Approval Gate: Signed approval from designated manager before funds are spent or operational changes commence."
+      }
+    ]
+  },
+  {
+    order: 7,
+    title: "Visual Identification: Initiative Planning Board Defects",
+    minutes: 2,
+    content: "Examine a realistic Mauritian workplace planning board visual and identify dangerous governance and delivery flaws.",
+    blocks: [
+      {
+        id: "c23-l7-b1",
+        type: "heading",
+        headingText: "Visual Analysis: Spotting Initiative Defects"
       },
       {
-        id: "c23-l6-b3",
-        type: "key_message",
-        headingText: "Proportionate Evidence",
-        bodyText: "Focus on simple indicators (purchasing records, counts, observations, meter checks) to verify results."
+        id: "c23-l7-b2",
+        type: "short_text",
+        bodyText: "Inspect the initiative board below. Notice how unverified assumptions, unassigned owners, and skipped technical reviews threaten project delivery."
       },
       {
-        id: "c23-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Which action will you take when supporting a workplace sustainability initiative?",
-        commitmentChoices: [
-          "Confirm the problem before proposing a solution",
-          "Help define a clear and manageable scope",
-          "Record evidence consistently",
-          "Raise operational or safety concerns promptly",
-          "Support an honest review of what worked and what did not"
+        id: "c23-l7-b3",
+        type: "image",
+        imageUrl: "/images/courses/visual-sustainability-workplace-initiative.png",
+        caption: "Mauritian corporate meeting room: Initiative Planning Board displaying critical delivery, approval, and evidence defects."
+      },
+      {
+        id: "c23-l7-b4",
+        type: "visual_identification",
+        questionText: "Review the meeting board above. Which identified defect creates the greatest risk that the initiative will be declared successful without reliable evidence?",
+        imageUrl: "/images/courses/visual-sustainability-workplace-initiative.png",
+        options: [
+          {
+            label: "Listing 'number of posters printed' as the sole success measure while marking baseline volume as unchecked and technical review as skipped",
+            correct: true,
+            feedback: "Correct! Measuring poster output instead of actual operational waste reduction, combined with an unchecked baseline and skipped technical review, guarantees vanity reporting without environmental proof."
+          },
+          {
+            label: "Holding the planning meeting in a glass-walled conference room in Ebène",
+            correct: false,
+            feedback: "Incorrect. The meeting room location is irrelevant to initiative governance and measurement accuracy."
+          },
+          {
+            label: "Writing sticky notes in red marker instead of blue ink",
+            correct: false,
+            feedback: "Incorrect. Ink colour has no impact on initiative feasibility, safety checks, or data validity."
+          },
+          {
+            label: "Using a white dry-erase board rather than a digital spreadsheet application",
+            correct: false,
+            feedback: "Incorrect. Whiteboards are effective planning tools; the defect lies in the missing data and skipped controls, not the physical board."
+          }
         ]
+      }
+    ]
+  },
+  {
+    order: 8,
+    title: "Worked Mauritian Workplace Scenario: Resort Amenity Reduction",
+    minutes: 2,
+    content: "Walk through a step-by-step worked example of a Grand Baie hotel amenity reduction initiative following the INITIATE framework.",
+    blocks: [
+      {
+        id: "c23-l8-b1",
+        type: "heading",
+        headingText: "Worked Example: Resort Guest Amenity Waste Brief"
+      },
+      {
+        id: "c23-l8-b2",
+        type: "short_text",
+        bodyText: "Context: A 150-room resort in Grand Baie noted significant disposal of partially used bottled bath amenities. Rather than launching an immediate blanket ban, the team executed a controlled initiative:\n\n• I (Identify Need): Audit showed 45% of small plastic shampoo bottles were discarded half-full daily during peak season.\n• N (Name Scope): Initiative target: Replace single-use mini bottles with refillable wall dispensers in 20 pilot rooms in Building A for 30 days. Excluded: Luxury suites (pending brand audit).\n• I (Involve Roles): Initiative Owner: Executive Housekeeper. Sponsor: General Manager. Technical Reviewer: Hygiene & Food Safety Lead. Approver: Operations Director.\n• T (Test Feasibility): Checked dispenser cleaning protocol, tamper-proof locks, housekeepers' restocking time (+45 secs/room), and bulk liquid supplier lead time.\n• I (Implement Pilot): Installed dispensers in 20 pilot rooms; provided housekeepers with refill funnels and sanitization logs.\n• A (Assess Evidence): Result after 30 days: Plastic bottle waste in Building A dropped by 88%. Housekeeping reported 0 hygiene complaints. Refill time added 30 secs/room.\n• T (Take Decision): Review Decision: APPROVED for full resort rollout across standard rooms; luxury suites deferred pending supplier branding review.\n• E (Embed): Updated Housekeeping Standard Operating Procedure (SOP-HK-014) and assigned inventory restocking to shift supervisor."
+      }
+    ]
+  },
+  {
+    order: 9,
+    title: "Applied Decision Scenario: Marketing's 'Paperless Month' Proposal",
+    minutes: 2,
+    content: "Test your judgement on a complex workplace proposal that risks operational failure without proper scoping and technical checks.",
+    blocks: [
+      {
+        id: "c23-l9-b1",
+        type: "heading",
+        headingText: "Applied Scenario: Unscoped Paperless Proposal"
+      },
+      {
+        id: "c23-l9-b2",
+        type: "decision_scenario",
+        decisionIntro: "The Marketing Manager at a Port Louis logistics firm proposes 'Paperless Workplace Month starting next Monday', ordering all office printers disconnected and asking staff to sign an eco-pledge banner. Finance requires signed paper waybills by law, Warehouse staff lack handheld tablets, and IT has not assessed cloud storage security.",
+        decisionPrompt: "As the Department Lead reviewing this proposal, what is the correct immediate course of action?",
+        decisionChoices: [
+          {
+            label: "Disconnect the printers immediately as proposed to demonstrate strong environmental commitment.",
+            correct: false,
+            feedback: "Incorrect. Disconnecting printers without reviewing legal requirements or warehouse tablet access will disrupt operations and breach financial compliance."
+          },
+          {
+            label: "Pause the campaign, review printing baseline data, involve Finance, IT, and Warehouse leads, define legal exclusions, and propose a limited 2-week pilot in Administration.",
+            correct: true,
+            feedback: "Correct! Pausing premature launch to review baseline data, legal constraints, IT capacity, and frontline needs turns a high-risk campaign into a controlled, feasible initiative."
+          },
+          {
+            label: "Approve the campaign for all office staff but exempt the Marketing department.",
+            correct: false,
+            feedback: "Incorrect. Exempting marketing while forcing unfeasible rules on operational teams destroys credibility and fails to address legal or technical gaps."
+          },
+          {
+            label: "Ask all employees to sign the pledge banner and declare the initiative successful.",
+            correct: false,
+            feedback: "Incorrect. Signing a banner is promotional activity; it does not solve digital access barriers or prove paper reduction."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    order: 10,
+    title: "Role-Based Micro-Decisions Across Workplace Functions",
+    minutes: 2,
+    content: "Navigate 12 real-world workplace micro-decisions testing authority, feasibility checks, risk escalation, and closeout rules.",
+    blocks: [
+      {
+        id: "c23-l10-b1",
+        type: "heading",
+        headingText: "Practical Workplace Micro-Decisions"
+      },
+      {
+        id: "c23-l10-b2",
+        type: "short_text",
+        bodyText: "Review how key initiative decisions must be handled across different organizational roles:\n\n1. Senior Sponsor: Receives a proposal claiming 50% energy savings without calculations → Action: Require engineering baseline data before approving funds.\n2. Initiative Owner: Frontline staff report a safety hazard during pilot → Action: Pause pilot immediately, log safety issue, and consult Health & Safety Lead.\n3. Department Lead: Marketing wants to announce 'Zero Waste Office' on Day 3 of a pilot → Action: Reject public claims until post-pilot evidence is verified.\n4. Night-Shift Rep: Identifies that waste sorting bins are locked at night → Action: Adjust facility access rules before launching sorting initiative.\n5. Finance Lead: Asked to approve bulk eco-product purchase without cost-benefit check → Action: Request unit cost comparison and usage estimates.\n6. Procurement Lead: Proposed supplier has 12-week lead time for bulk reusable items → Action: Update pilot timeline to reflect real procurement lead times.\n7. Maintenance Lead: Water-saving valve reduces pressure below dishwashing hygiene threshold → Action: Reject valve model; test alternative pressure-compliant fixture.\n8. IT Specialist: Digital form initiative requires tablet access for 15 warehouse staff → Action: Include tablet hardware & security in initiative budget.\n9. HR Lead: Initiative requires staff to perform extra sorting during lunch breaks → Action: Realign sorting tasks into paid shift routines to ensure fairness.\n10. Data Owner: Pre-initiative waste logs were lost by external contractor → Action: Conduct new 2-week baseline audit before launching pilot.\n11. Green Team Coordinator: Pilot completed with 15% energy reduction and positive staff feedback → Action: Submit pilot review report to Operations Lead for SOP integration.\n12. Operations Director: Successful pilot completed in Site A → Action: Authorize phased rollout to Site B with Site A supervisor acting as mentor."
+      }
+    ]
+  },
+  {
+    order: 11,
+    title: "Learner Commitment & Practical Disclaimer",
+    minutes: 1,
+    content: "Select a practical workplace commitment and review the official course operational disclaimer.",
+    blocks: [
+      {
+        id: "c23-l11-b1",
+        type: "heading",
+        headingText: "Workplace Application Commitment"
+      },
+      {
+        id: "c23-l11-b2",
+        type: "short_text",
+        bodyText: "Select one practical action you will take in your workplace this week:\n\n• Check whether an ongoing sustainability project has a named Initiative Owner and clear scope.\n• Verify if baseline data exists before proposing a new environmental improvement.\n• Consult frontline or night-shift employees who will be directly affected by a proposed operational change.\n• Recommend a 30-day pilot project instead of an immediate organization-wide rollout.\n• Ensure an initiative review decision is formally recorded before declaring a project closed."
+      },
+      {
+        id: "c23-l11-b3",
+        type: "callout",
+        headingText: "Practical Course Disclaimer",
+        bodyText: "This course provides practical workplace guidance. It is not legal, engineering, financial, health-and-safety, or project-management advice, and it does not provide environmental assurance, management-system certification, or independent verification of an organization's sustainability claims or results."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const QUIZ_QUESTIONS = [
   {
-    question: "A green team coordinator proposes 'Make our corporate offices sustainable' as the team's first project. What is the primary planning issue?",
+    question: "What is the primary difference between a vague sustainability idea and a controlled workplace initiative?",
     options: [
-      { text: "The team requires a bigger budget first.", isCorrect: false, feedback: "Incorrect. Budget is not the primary issue for a vague proposal." },
-      { text: "It is a broad ambition rather than a workable initiative with defined scope, owner, and review timeline.", isCorrect: true, feedback: "Correct. A workable initiative must target a specific workplace problem and define clear boundaries, ownership, and timelines." },
-      { text: "The proposal lacks support from an environmental consultant.", isCorrect: false, feedback: "Incorrect. Internal operational scoping is needed, not external consulting." },
-      { text: "Office buildings cannot be made sustainable.", isCorrect: false, feedback: "Incorrect. They can, but the project must be scoped practically." }
+      "An initiative has a defined problem, clear scope, named owner, feasibility check, pilot plan, and review date.",
+      "An initiative is launched with a public press release and high-budget marketing campaign.",
+      "An initiative requires hiring external management consultants to oversee daily staff tasks.",
+      "An initiative must always apply to all company facilities across Mauritius simultaneously."
     ],
-    correctExplanation: "A workable initiative targets a specific problem, area, timeframe, and has a defined owner rather than a broad ambition.",
-    incorrectExplanation: "Vague ambitions fail because they lack scope boundaries, not because they lack external experts or unlimited budgets.",
-    practicalTakeaway: "Distinguish broad ambitions from clearly scoped, manageable initiatives."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! A controlled initiative requires structured governance: defined problem, scope, owner, feasibility, pilot, and evidence review.",
+      "Incorrect. Marketing campaigns and press releases are promotional activities, not operational controls.",
+      "Incorrect. Initiatives are typically managed by internal workplace teams and department leads.",
+      "Incorrect. Effective initiatives start with small, controlled pilots in specific areas before scaling."
+    ]
   },
   {
-    question: "A company finds food waste bins in a staff canteen are contaminated with plastic wrap. The green team suggests buying new bins with restricted lids. What should they do first?",
+    question: "Why is establishing baseline evidence essential BEFORE launching a workplace initiative?",
     options: [
-      { text: "Order the new bins immediately to show rapid action.", isCorrect: false, feedback: "Incorrect. Ordering bins before confirming the cause of contamination wastes budget." },
-      { text: "Observe the sorting process during canteen hours and discuss the workflow barriers with kitchen staff.", isCorrect: true, feedback: "Correct. You must identify the cause (e.g. time constraints, placement, or lack of tools to open packages) before choosing a tool." },
-      { text: "Post a list of employees who contaminate the bins.", isCorrect: false, feedback: "Incorrect. Shaming staff does not identify operational process problems." },
-      { text: "Exempt the kitchen staff from sorting guidelines.", isCorrect: false, feedback: "Incorrect. This abandons the goal instead of analyzing the process." }
+      "Baseline evidence allows the team to verify whether post-implementation changes actually achieved an improvement.",
+      "Baseline evidence is required only if the company is undergoing an immediate ISO audit.",
+      "Baseline evidence guarantees that the initiative will receive unlimited financial funding.",
+      "Baseline evidence replaces the need for management approval and safety checks."
     ],
-    correctExplanation: "Before selecting a solution, investigate the actual cause of the symptom by observing operations and discussing barriers with frontline workers.",
-    incorrectExplanation: "Rushing to buy equipment, shaming staff, or cancelling guidelines does not resolve the process bottleneck.",
-    practicalTakeaway: "Investigate the actual problem before choosing the solution."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! Without baseline data, an organization cannot prove whether an initiative reduced consumption or improved performance.",
+      "Incorrect. Baseline data is essential for operational decision-making, not just external audits.",
+      "Incorrect. Baseline data supports realistic budgeting; it does not guarantee unlimited funds.",
+      "Incorrect. Data collection never overrides management approval or safety compliance."
+    ]
   },
   {
-    question: "A team is comparing three energy-saving projects: replacing all light fixtures (high cost, high impact), adjusting warehouse HVAC shut-down times (low cost, immediate medium impact), and holding a green poster contest (low cost, no direct impact). Which is the best first step?",
+    question: "What does the 'T' in the INITIATE framework stand for?",
     options: [
-      { text: "The fixture replacement, because it is the most modern option.", isCorrect: false, feedback: "Incorrect. This requires capital approval, causing implementation delays." },
-      { text: "The poster contest, because it involves the most employees.", isCorrect: false, feedback: "Incorrect. Poster campaigns do not deliver direct, measurable energy waste reductions." },
-      { text: "The HVAC shut-down checks, because it is low-cost, manageable, and delivers immediate verifiable energy reductions.", isCorrect: true, feedback: "Correct. This project balances impact and feasibility, building team confidence and records." },
-      { text: "The team should avoid choosing and wait for manager direction.", isCorrect: false, feedback: "Incorrect. The team should make evidence-based recommendations." }
+      "Test feasibility, risks and operational dependencies before committing organizational resources.",
+      "Target maximum social media publicity during the first week of launch.",
+      "Transfer all operational responsibility to the human resources department.",
+      "Terminate existing supplier contracts without checking procurement terms."
     ],
-    correctExplanation: "Feasible first initiatives should balance impact, effort, and cost. High-impact, low-cost projects like process checks are ideal starting points.",
-    incorrectExplanation: "Capital-heavy fixtures or low-impact posters are less effective first steps than practical process controls.",
-    practicalTakeaway: "Select initiatives that balance impact and feasibility."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! 'T' stands for testing feasibility, risks, and operational dependencies early to prevent project failure.",
+      "Incorrect. Publicity is not part of feasibility and risk testing.",
+      "Incorrect. Responsibilities must be assigned to relevant operational leads, not dumped on HR.",
+      "Incorrect. Terminating contracts blindly creates severe legal and operational risks."
+    ]
   },
   {
-    question: "An initiative to reduce plastic packaging requires purchasing reusable crates that exceed the coordinator's approved spending limit. How should the coordinator proceed?",
+    question: "In the Grand Baie resort worked example, why was the amenity dispenser initiative approved for a 20-room pilot first?",
     options: [
-      { text: "Charge the crates to the general department operations budget.", isCorrect: false, feedback: "Incorrect. Falsifying budget lines violates company compliance rules." },
-      { text: "Record the budget blocker on the tracker and escalate the purchase request to the authorized manager sponsor.", isCorrect: true, feedback: "Correct. Financial decisions exceeding authorized limits must be escalated through the formal approval route." },
-      { text: "Cancel the initiative immediately without notifying anyone.", isCorrect: false, feedback: "Incorrect. Blocker details should be logged and escalated rather than silently abandoned." },
-      { text: "Ask the supplier to deliver the crates without an invoice.", isCorrect: false, feedback: "Incorrect. This violates corporate procurement rules." }
+      "To test housekeeper restocking times, sanitization protocols, and guest feedback under real conditions before full resort rollout.",
+      "Because 20 rooms was the maximum number of guest rooms available in the entire hotel.",
+      "To avoid informing the General Manager or Operations Lead about the project.",
+      "Because single-use plastic bottles were legally banned in Mauritius on that exact day."
     ],
-    correctExplanation: "Green teams and coordinators must respect organizational budget boundaries. Purchases exceeding limits must be escalated to the sponsor.",
-    incorrectExplanation: "Budget line manipulation, silent cancellations, or unauthorized vendor deals violate financial governance.",
-    practicalTakeaway: "Escalate initiatives requiring budget or operational approvals to the authorized manager."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! A 20-room pilot allowed the team to verify operational feasibility, hygiene SOPs, and staff workload before full commitment.",
+      "Incorrect. The resort had 150 rooms; 20 rooms represented a controlled pilot sample.",
+      "Incorrect. The General Manager sponsored the project and approved the pilot.",
+      "Incorrect. The pilot was an internal operational control choice, not a sudden legal compulsion."
+    ]
   },
   {
-    question: "A green team coordinator drafts an initiative plan: 'Reduce office printing. Use digital documents. Review next month.' Which element is missing?",
+    question: "Which of the following represents an UNINTENDED CONSEQUENCE of a poorly planned paperless initiative?",
     options: [
-      { text: "A list of digital document software options.", isCorrect: false, feedback: "Incorrect. Tool selection follows process ownership." },
-      { text: "A named owner, specific printer area boundaries, manager approvals, and the source of printing records.", isCorrect: true, feedback: "Correct. Plans require defined owners, clear scope boundaries, approvals, and verified data sources." },
-      { text: "A slogan to put on the office screen savers.", isCorrect: false, feedback: "Incorrect. Slogans do not assign tasks or monitor progress." },
-      { text: "A detailed description of the printer network cables.", isCorrect: false, feedback: "Incorrect. Network cables are not operational plan parameters." }
+      "Warehouse staff being unable to verify shipments because they lack mobile digital devices, causing dispatch delays.",
+      "Administration staff printing fewer internal emails during the workday.",
+      "Finance securely archiving digital invoices in compliance with audit standards.",
+      "IT upgrading server security protocols prior to digital form deployment."
     ],
-    correctExplanation: "A delivery plan must define the owner, clear scope boundaries, required approvals, start/review dates, and the evidence source.",
-    incorrectExplanation: "Slogans, tool lists, or network diagrams do not replace ownership, scope boundaries, or data criteria.",
-    practicalTakeaway: "Ensure plans specify owners, boundaries, and evidence sources."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! Disabling paper without providing tablets created an operational bottleneck in dispatch—a classic unintended trade-off.",
+      "Incorrect. Printing fewer internal emails is a desired positive outcome.",
+      "Incorrect. Secure digital archiving is a planned, positive operational control.",
+      "Incorrect. Upgrading IT security is a planned pre-implementation feasibility step."
+    ]
   },
   {
-    question: "A hotel green team places glass bottle collection bins in a main restaurant corridor. The F&B supervisor reports that the bins obstruct waiter trays and represent a trip hazard. How should the team respond?",
+    question: "According to ISO 14001:2015 Clause 8.1, what is required when planning operational changes?",
     options: [
-      { text: "Keep the bins in place because glass recycling is a priority.", isCorrect: false, feedback: "Incorrect. Recycling goals must never compromise employee safety." },
-      { text: "Temporarily remove the bins, coordinate a safer bin location with the F&B supervisor, and update the initiative records.", isCorrect: true, feedback: "Correct. Safety hazards must be resolved immediately by suspending the hazard, coordinating a safer setup, and logging the change." },
-      { text: "Ask the waiters to walk slower and more carefully.", isCorrect: false, feedback: "Incorrect. Shifting safety responsibility to employees is inappropriate." },
-      { text: "Exempt the restaurant from glass recycling.", isCorrect: false, feedback: "Incorrect. The project can continue with a safer bin placement." }
+      "Organizations must control planned changes and review the consequences of unintended changes to mitigate adverse effects.",
+      "Organizations must eliminate all physical paperwork across all operational departments immediately.",
+      "Organizations must guarantee a minimum 25% cost reduction for every environmental initiative.",
+      "Organizations must obtain written permission from international standard bodies before changing internal procedures."
     ],
-    correctExplanation: "Workplace safety must never be compromised. Hazards must be resolved immediately by removing the blocker and adjusting layout with supervisors.",
-    incorrectExplanation: "Ignoring hazards, shaming staff, or abandoning objectives ignores basic safety and operational compliance.",
-    practicalTakeaway: "Prioritize workplace safety and adjust layouts to avoid operational hazards."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! Clause 8.1 explicitly requires controlling planned changes and acting to mitigate unintended side-effects.",
+      "Incorrect. ISO standards require operational control and evidence, not mandatory instant paper elimination.",
+      "Incorrect. ISO standards do not specify fixed financial percentage targets.",
+      "Incorrect. Operational changes are managed internally in compliance with system standards."
+    ]
   },
   {
-    question: "A department claims a waste-reduction pilot was successful because 'several employees said they liked the new bins.' What is the weakness of this review?",
+    question: "What is the primary role of an Initiative Sponsor in workplace delivery?",
     options: [
-      { text: "The review should have been verified by a third-party auditor.", isCorrect: false, feedback: "Incorrect. Third-party audits are not required for local pilots." },
-      { text: "It relies on subjective feedback rather than objective evidence such as monthly purchase records or waste weights.", isCorrect: true, feedback: "Correct. Credible reviews require proportionate, objective evidence rather than positive comments alone." },
-      { text: "The team did not take photos of the happy employees.", isCorrect: false, feedback: "Incorrect. Photos of staff do not measure waste reductions." },
-      { text: "The review should have calculated carbon offsets.", isCorrect: false, feedback: "Incorrect. Carbon formulas are not required for simple pilot checks." }
+      "Providing managerial authority, approving project scope/budget, and removing organizational roadblocks.",
+      "Performing daily maintenance checks and cleaning sorting bins in staff breakrooms.",
+      "Writing promotional social media posts and designing campaign stickers.",
+      "Collecting daily meter readings and inputting raw numbers into spreadsheets."
     ],
-    correctExplanation: "Review outcomes must be based on objective evidence (like invoice records, counts, or weights) rather than subjective comments.",
-    incorrectExplanation: "Audits, staff photos, or carbon claims do not replace the need for objective, local operational measurements.",
-    practicalTakeaway: "Measure initiative results using objective, proportionate evidence."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! The Sponsor holds managerial authority to approve scope, allocate resources, and clear organizational obstacles.",
+      "Incorrect. Daily operational tasks belong to maintenance or action owners, not the senior sponsor.",
+      "Incorrect. Promotional copy is a communications task, not sponsorship governance.",
+      "Incorrect. Data collection is handled by designated data owners."
+    ]
   },
   {
-    question: "A six-week office cup-reduction pilot records a 30% drop in disposable cups purchased, but employees report that reusable cups are frequently unavailable because washing responsibilities are unclear. What should the review recommend?",
+    question: "Why is 'number of employee pledge signatures' an inadequate primary measure of initiative success?",
     options: [
-      { text: "Declare success, end the pilot, and stop tracking cup use.", isCorrect: false, feedback: "Incorrect. Ending the pilot ignores the operational gap." },
-      { text: "Continue the initiative, adjust the plan by defining cup washing tasks, and schedule a review in four weeks.", isCorrect: true, feedback: "Correct. Continuous improvement requires adjusting the plan to fix process bottlenecks before full rollout." },
-      { text: "Purchase a fully automated dishwasher for the department.", isCorrect: false, feedback: "Incorrect. Dishwashers are expensive capital items that may not resolve the responsibility gap." },
-      { text: "Revert to disposable cups to avoid washing issues.", isCorrect: false, feedback: "Incorrect. This cancels the program instead of addressing the process task." }
+      "Signing a pledge is an activity metric that does not prove actual environmental or operational resource reduction.",
+      "Pledge signatures are illegal to collect in commercial Mauritian workplaces.",
+      "Pledges can only be signed by senior executive managers and board directors.",
+      "Pledges automatically increase electricity and water consumption."
     ],
-    correctExplanation: "Pilots expose process gaps. The review should recommend continuing with adjustments (defining washing roles) to resolve the bottleneck.",
-    incorrectExplanation: "Silencing reviews, buying expensive dishwashers, or returning to disposables ignores continuous improvement methods.",
-    practicalTakeaway: "Adjust the plan to address process gaps identified during reviews."
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! Pledges measure participation interest, not physical waste, energy, or water performance.",
+      "Incorrect. Employee pledges are completely legal; they are simply insufficient as proof of outcome.",
+      "Incorrect. Anyone can sign a pledge.",
+      "Incorrect. Pledges do not physically increase resource consumption, but they don't prove reduction either."
+    ]
+  },
+  {
+    question: "What should happen during the 'Take a Review Decision' step of the INITIATE framework?",
+    options: [
+      "Designated leads evaluate pilot evidence to decide whether to close, modify, embed into SOPs, pause, or scale the initiative.",
+      "The initiative is automatically extended for 5 years without inspecting data.",
+      "All project records are deleted to save digital storage space.",
+      "The initiative owner is replaced and penalized if any operational risk occurred."
+    ],
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! The review decision uses pilot evidence to determine whether to embed, modify, pause, stop, or scale the initiative.",
+      "Incorrect. Extending without reviewing data defeats the purpose of controlled delivery.",
+      "Incorrect. Project records must be retained as evidence of change control and learning.",
+      "Incorrect. Identifying operational risks during a pilot is a success of the control system, not a failure to be penalized."
+    ]
+  },
+  {
+    question: "How does ELH-23 connect to ELH-24 (Sustainability for HR Teams)?",
+    options: [
+      "ELH-23 provides general initiative delivery mechanics; ELH-24 applies these controls to HR practices like onboarding, training, and employee policies.",
+      "ELH-23 replaces all HR policies and employment contracts across Mauritius.",
+      "ELH-24 is designed exclusively for external legal auditors and accountants.",
+      "There is no connection; ELH-23 is for facilities staff only while ELH-24 is for marketing."
+    ],
+    correctAnswerIndex: 0,
+    optionsFeedback: [
+      "Correct! ELH-23 establishes the universal initiative delivery framework, which ELH-24 then applies to human resource operations.",
+      "Incorrect. ELH courses provide workplace learning; they do not rewrite national employment laws.",
+      "Incorrect. ELH-24 is designed for HR managers, officers, and internal HR representatives.",
+      "Incorrect. ELH-23 provides cross-functional initiative mechanics applicable to all departments."
+    ]
   }
 ];
 
-export async function ensureWorkplaceSustainabilityInitiativesCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
+export async function ensureWorkplaceSustainabilityInitiativesCourse(): Promise<void> {
+  logger.info("Starting ELH-23 course seeding (workplace-sustainability-initiatives-v2)...");
 
-  try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
+  // 1. Check or create system seed marker
+  const [existingSeed] = await db
+    .select()
+    .from(systemSeedsTable)
+    .where(eq(systemSeedsTable.name, SEED_NAME))
+    .limit(1);
 
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
+  // Find course by code, slug, or ID
+  const [existingCourse] = await db
+    .select()
+    .from(coursesTable)
+    .where(eq(coursesTable.courseCode, COURSE_META.courseCode))
+    .limit(1);
 
-    await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+  let courseId: number;
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
-
-      // 2. Resolve Course 22
-      let course22 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-22")
-      });
-      if (!course22) {
-        course22 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "creating-and-running-effective-green-teams")
-        });
-      }
-
-      if (!course22) {
-        throw new Error("Data integrity error: Course 22 (ELH-22) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 23
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
-
-      let actualCourseId: number;
-
-      if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
-        actualCourseId = inserted.id;
-      } else {
-        actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
-      }
-
-      // 4. Update Course 22 recommendedNextCourseId to point to Course 23 preserving admin edits
-      let isSystemManaged = false;
-      if (course22.recommendedNextCourseId) {
-        const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.id, course22.recommendedNextCourseId)
-        });
-        if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-23") {
-          isSystemManaged = true;
-        }
-      }
-
-      if (course22.recommendedNextCourseId === null || course22.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: actualCourseId
-        }).where(eq(coursesTable.id, course22.id));
-      } else {
-        logger.warn(`Recommendation conflict: Course 22 currently recommends course ID ${course22.recommendedNextCourseId} instead of Course 23 (ID: ${actualCourseId}). Preserving administrator edit.`);
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
-          slug: BADGE_SLUG,
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          icon: "bookmark",
-          criteriaType: "all_courses",
-          threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 26,
-          code: BADGE_CODE,
-        });
-      } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
-      }
-
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 22
-      const existingPrereq22 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course22.id)
-        )
-      });
-      if (!existingPrereq22) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course22.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
-            await tx.insert(lessonsTable).values({
-              courseId: actualCourseId,
-              title: lesson.title,
-              orderIndex: lesson.order,
-              durationMinutes: lesson.minutes,
-              content: lesson.content,
-              contentBlocks: lesson.blocks,
-            });
-          }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
-            }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
-          }
-        }
-      }
-
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
-    });
-
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
-  } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
-    throw error;
+  if (existingCourse) {
+    courseId = existingCourse.id;
+    await db
+      .update(coursesTable)
+      .set({
+        title: COURSE_TITLE,
+        slug: COURSE_SLUG,
+        description: COURSE_META.description,
+        fullDescription: COURSE_META.fullDescription,
+        durationMinutes: COURSE_META.durationMinutes,
+        level: COURSE_META.level,
+        thumbnailUrl: COURSE_META.thumbnailUrl,
+        learningObjectives: COURSE_META.learningObjectives,
+        intendedRoles: COURSE_META.intendedRoles,
+        completionMessage: COURSE_META.completionMessage,
+        badgeName: COURSE_META.badgeName,
+        badgeDescription: COURSE_META.badgeDescription,
+        passingScore: COURSE_META.passingScore,
+        updatedAt: new Date(),
+      })
+      .where(eq(coursesTable.id, courseId));
+    logger.info(`Updated existing ELH-23 course record (ID: ${courseId}).`);
+  } else {
+    const [inserted] = await db
+      .insert(coursesTable)
+      .values({
+        courseCode: COURSE_META.courseCode,
+        title: COURSE_TITLE,
+        slug: COURSE_SLUG,
+        description: COURSE_META.description,
+        fullDescription: COURSE_META.fullDescription,
+        categoryId: COURSE_META.categoryId,
+        durationMinutes: COURSE_META.durationMinutes,
+        priceUsd: COURSE_META.priceUsd,
+        level: COURSE_META.level,
+        isFeatured: COURSE_META.isFeatured,
+        thumbnailUrl: COURSE_META.thumbnailUrl,
+        intendedRoles: COURSE_META.intendedRoles,
+        learningObjectives: COURSE_META.learningObjectives,
+        includesCertificate: COURSE_META.includesCertificate,
+        passingScore: COURSE_META.passingScore,
+        completionMessage: COURSE_META.completionMessage,
+        badgeName: COURSE_META.badgeName,
+        badgeDescription: COURSE_META.badgeDescription,
+      })
+      .returning();
+    courseId = inserted.id;
+    logger.info(`Inserted new ELH-23 course record (ID: ${courseId}).`);
   }
+
+  // 2. Ensure badge definition
+  await db
+    .insert(badgeDefinitionsTable)
+    .values({
+      slug: BADGE_SLUG,
+      name: COURSE_META.badgeName,
+      description: COURSE_META.badgeDescription,
+      icon: "target",
+      criteriaType: "all_courses",
+      threshold: 0,
+      courseIds: [courseId],
+      orderIndex: 28,
+    })
+    .onConflictDoUpdate({
+      target: badgeDefinitionsTable.slug,
+      set: {
+        name: COURSE_META.badgeName,
+        description: COURSE_META.badgeDescription,
+        courseIds: [courseId],
+      },
+    });
+
+  // 3. Update lessons transactionally if seed is not yet present or forced
+  const existingLessons = await db
+    .select()
+    .from(lessonsTable)
+    .where(eq(lessonsTable.courseId, courseId));
+
+  if (!existingSeed || existingLessons.length !== NEW_LESSONS.length) {
+    // Delete existing quiz questions and lessons cleanly to avoid orphaned data
+    const existingLessonIds = existingLessons.map((l) => l.id);
+    if (existingLessonIds.length > 0) {
+      await db
+        .delete(lessonProgressTable)
+        .where(inArray(lessonProgressTable.lessonId, existingLessonIds));
+    }
+    await db.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+    await db.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+
+    // Insert 12 comprehensive lessons
+    for (const l of NEW_LESSONS) {
+      await db.insert(lessonsTable).values({
+        courseId: courseId,
+        title: l.title,
+        orderIndex: l.order,
+        durationMinutes: l.minutes,
+        content: l.content,
+        contentBlocks: l.blocks,
+      });
+    }
+    logger.info(`Seeded ${NEW_LESSONS.length} upgraded lessons for ELH-23.`);
+
+    // Insert 10 scenario quiz questions
+    for (let i = 0; i < QUIZ_QUESTIONS.length; i++) {
+      const q = QUIZ_QUESTIONS[i];
+      await db.insert(quizQuestionsTable).values({
+        courseId: courseId,
+        question: q.question,
+        options: q.options,
+        correctOption: q.correctAnswerIndex,
+        correctExplanation: q.optionsFeedback[q.correctAnswerIndex],
+        incorrectExplanation: "Review the initiative controls, feasibility steps, and evidence measures before retrying.",
+        optionFeedback: q.optionsFeedback,
+        orderIndex: i,
+      });
+    }
+    logger.info(`Seeded ${QUIZ_QUESTIONS.length} upgraded quiz questions for ELH-23.`);
+
+    // Record system seed marker
+    if (!existingSeed) {
+      await db.insert(systemSeedsTable).values({
+        name: SEED_NAME,
+        version: 2,
+      });
+    } else {
+      await db
+        .update(systemSeedsTable)
+        .set({ version: 2 })
+        .where(eq(systemSeedsTable.name, SEED_NAME));
+    }
+  }
+
+  // 4. Ensure Prerequisites: ELH-12 through ELH-22 are linked as prerequisites to ELH-23
+  const prereqCodes = ["ELH-12", "ELH-13", "ELH-14", "ELH-15", "ELH-16", "ELH-17", "ELH-18", "ELH-19", "ELH-20", "ELH-21", "ELH-22"];
+  const prereqCourses = await db
+    .select()
+    .from(coursesTable)
+    .where(inArray(coursesTable.courseCode, prereqCodes));
+
+  for (const prereq of prereqCourses) {
+    const [existingLink] = await db
+      .select()
+      .from(coursePrerequisitesTable)
+      .where(
+        and(
+          eq(coursePrerequisitesTable.courseId, courseId),
+          eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+        )
+      )
+      .limit(1);
+
+    if (!existingLink) {
+      await db.insert(coursePrerequisitesTable).values({
+        courseId: courseId,
+        prerequisiteCourseId: prereq.id,
+      });
+    }
+  }
+
+  logger.info("ELH-23 course seeding complete.");
 }
