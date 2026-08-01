@@ -16,14 +16,14 @@ const COURSE_SLUG = "sustainability-for-finance-teams";
 const COURSE_TITLE = "Sustainability for Finance Teams";
 const BADGE_SLUG = "sustainable-finance-supporter";
 const BADGE_CODE = "COURSE_ELH_25_COMPLETE";
-const SEED_NAME = "sustainability-for-finance-teams-v1";
+const SEED_NAME = "sustainability-for-finance-teams-v2";
 
 const COURSE_META = {
   courseCode: "ELH-25",
-  description: "Learn how finance teams can support credible workplace sustainability through budgeting, cost information, financial controls and reliable records.",
-  fullDescription: "Learn how finance teams can support credible workplace sustainability through budgeting, cost information, financial controls and reliable records.",
+  description: "A practical course for finance employees and managers on integrating sustainability into budgeting, expenditure review, financial controls, evidence management and management reporting.",
+  fullDescription: "A practical course for finance employees and managers on integrating sustainability into budgeting, expenditure review, financial controls, evidence management and management reporting without presenting finance as the sole owner of technical environmental performance or calculations.",
   categoryId: 1,
-  durationMinutes: 18,
+  durationMinutes: 25,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
@@ -38,13 +38,12 @@ const COURSE_META = {
     "Managers who work with finance teams on sustainability initiatives"
   ],
   learningObjectives: [
-    "Explain the finance team's supporting role in workplace sustainability.",
-    "Distinguish purchase price from wider operational cost.",
-    "Incorporate approved sustainability actions into normal budgeting processes.",
-    "Maintain reliable financial evidence for sustainability activities.",
-    "Identify and escalate inconsistent, unsupported or misleading information.",
-    "Monitor expenditure without making technical conclusions outside the finance function.",
-    "Contribute to better sustainability decisions while respecting delegated authority."
+    "Clarify finance's role in evaluating financial visibility, budgeting, and controls for sustainability initiatives.",
+    "Distinguish finance responsibilities from technical environmental, ESG, facilities, procurement, or legal ownership.",
+    "Apply total cost of ownership (TCO) and lifecycle cost principles beyond initial purchase invoice prices.",
+    "Incorporate approved sustainability actions into standard budget coding, expenditure tracking, and variance reviews.",
+    "Request, review, and retain credible financial and supporting operational evidence before approving invoices.",
+    "Detect and escalate unverified financial assumptions, greenwashing claims, or inaccurate savings reporting."
   ],
   includesCertificate: true,
   passingScore: 80,
@@ -56,621 +55,519 @@ const COURSE_META = {
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Finance Supports Sustainability Decisions",
+    title: "Opening Workplace Hook: The Flawed Proposal",
     minutes: 3,
-    content: "Understand the boundaries of the finance team's role. Provide reliable cost information and challenge missing parameters without validating technical claims.",
+    content: "Examine a realistic Mauritian commercial proposal where substantial savings are claimed without baseline data, maintenance costs, or verified assumptions.",
     blocks: [
       {
         id: "c25-l1-b1",
         type: "heading",
-        headingText: "Finance Supports Sustainability Decisions"
+        headingText: "Opening Workplace Hook: The Flawed Business Case"
       },
       {
         id: "c25-l1-b2",
         type: "short_text",
-        bodyText: "Finance supports sustainability decisions by supplying reliable cost comparisons, managing budgets, and preserving invoice evidence. Finance does not independently determine whether a technical solution is efficient or approve projects outside established delegation thresholds. Finance helps ensure that business cases are complete, requesting clarification if technical parameters or operating costs are missing."
+        bodyText: "A commercial hotel and property enterprise in Mauritius considers a proposal to upgrade air-conditioning chillers and install LED lighting across three sites. The proposal states that the investment will 'pay for itself within 12 months' and reduce electricity costs by MUR 450,000 annually.\n\nHowever, a initial finance review reveals:\n• The baseline energy consumption uses one unusually high summer peak month as the annual baseline.\n• The quotation covers equipment supply but omits installation labor, electrical upgrades, and disposal fees.\n• Annual maintenance contract costs after year one are completely omitted.\n• The expected savings are presented as 100% guaranteed.\n• No operational lead has been assigned to verify meter readings after installation."
       },
       {
         id: "c25-l1-b3",
         type: "key_message",
-        headingText: "Responsibility Bounds",
-        bodyText: "Finance provides decision-quality financial information but defers technical suitability and final engineering validation to operational heads."
-      },
-      {
-        id: "c25-l1-b4",
-        type: "decision_scenario",
-        decisionIntro: "A facilities manager submits a proposal to replace all air-conditioning units, claiming it will 'pay for itself quickly.' They provide only a quotation for purchase and installation, with no details on current energy use, expected maintenance changes, or who verified the energy-saving claims. What is the correct response?",
-        decisionPrompt: "Select the most appropriate action:",
-        decisionChoices: [
-          {
-            label: "Approve the purchase immediately to support environmental progress.",
-            correct: false,
-            feedback: "Incorrect. Approving projects without complete cost information or delegation authority violates financial controls."
-          },
-          {
-            label: "Request the missing operating costs and ask the facilities head to document who validated the technical energy-saving assumptions.",
-            correct: true,
-            feedback: "Correct. Finance must ensure decision parameters are complete and technical claims are validated by the responsible owner."
-          },
-          {
-            label: "Calculate estimated energy savings yourself based on a web search.",
-            correct: false,
-            feedback: "Incorrect. Finance should not invent technical energy calculations; they must come from a verified operational source."
-          },
-          {
-            label: "Reject the project permanently because of missing paperwork.",
-            correct: false,
-            feedback: "Incorrect. The project may be valid; the correct path is to request the missing data, not arbitrary rejection."
-          }
-        ]
+        headingText: "The Financial Insight",
+        bodyText: "Finance adds value by making assumptions, total costs, evidence gaps, and decision conditions visible before capital is committed."
       }
     ]
   },
   {
     order: 1,
-    title: "Look Beyond the Purchase Price",
+    title: "Why Finance Matters: Personal, Business, and Environmental Value",
     minutes: 3,
-    content: "Evaluate purchasing decisions using lifecycle operating costs (energy, water, maintenance) rather than initial invoice price alone.",
+    content: "Understand why finance involvement ensures affordable, accountable, and evidence-backed workplace sustainability.",
     blocks: [
       {
         id: "c25-l2-b1",
         type: "heading",
-        headingText: "Look Beyond the Purchase Price"
+        headingText: "Why Finance Involvement Matters"
       },
       {
         id: "c25-l2-b2",
         type: "short_text",
-        bodyText: "A cheap purchase price can result in higher overall operating costs. When comparing options, look at lifecycle factors: installation, utility consumption (electricity, water), useful life, maintenance contracts, and disposal costs. The depth of analysis should match the value and risk of the purchase. Note: environmental benefit does not automatically translate to financial return."
-      },
-      {
-        id: "c25-l2-b3",
-        type: "key_message",
-        headingText: "Lifecycle Considerations",
-        bodyText: "Evaluating overall operating costs prevents the organization from buying cheap equipment that consumes excessive utilities."
-      },
-      {
-        id: "c25-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A Mauritian hotel compares two commercial washing machines. Machine A costs MUR 150,000 to buy, but uses high volumes of water. Machine B costs MUR 200,000, uses 40% less water, and includes a 3-year service agreement. How should finance assist in the decision?",
-        decisionPrompt: "Select the correct finance action:",
-        decisionChoices: [
-          {
-            label: "Recommend Machine A because it has the lowest initial invoice price.",
-            correct: false,
-            feedback: "Incorrect. Recommending based on initial price ignores ongoing utility and maintenance costs."
-          },
-          {
-            label: "Provide a comparison modeling purchase price, estimated water costs, and service costs over their useful lives to support a balanced decision.",
-            correct: true,
-            feedback: "Correct. Finance helps compare all relevant lifecycle costs rather than initial price alone."
-          },
-          {
-            label: "Choose Machine B automatically because it has 'green' marketing labels.",
-            correct: false,
-            feedback: "Incorrect. Finance must analyze financial data, not rely on marketing labels without calculation."
-          },
-          {
-            label: "Refuse to compare them because they are in different budget years.",
-            correct: false,
-            feedback: "Incorrect. Lifecycle modeling often crosses budget years to verify long-term viability."
-          }
-        ]
+        bodyText: "Finance involvement connects sustainability ideas to rigorous business discipline:\n• Employee & Personal Value: Finance staff gain clarity on how to review green proposals without acting as technical engineers.\n• Business Value: Credible financial controls protect against unbudgeted cost overruns, greenwashing risks, and unreliable vendor claims.\n• Environmental Value: Rigorous budgeting ensures approved environmental projects receive sustained funding rather than being cancelled mid-way."
       }
     ]
   },
   {
     order: 2,
-    title: "Put Approved Actions Into the Budget",
+    title: "Finance Role Boundary & Responsibility Matrix",
     minutes: 3,
-    content: "Establish formal budget entries, responsible owners, and clear approval limits. Do not use sustainability labels to bypass financial controls.",
+    content: "Define functional boundaries between finance ownership, support duties, and technical environmental leads.",
     blocks: [
       {
         id: "c25-l3-b1",
         type: "heading",
-        headingText: "Put Approved Actions Into the Budget"
+        headingText: "Finance Role Responsibility Matrix"
       },
       {
         id: "c25-l3-b2",
         type: "short_text",
-        bodyText: "Approved sustainability initiatives require defined budget entries, responsible cost owners, and realistic estimates. Sustainability labels must never be used to bypass normal approval limits. Finance must track project stages carefully: proposed, approved, committed, invoiced, and paid."
-      },
-      {
-        id: "c25-l3-b3",
-        type: "key_message",
-        headingText: "Budget Control Integrity",
-        bodyText: "Every green project must follow standard financial authorization thresholds before any purchasing commitments are made."
-      },
-      {
-        id: "c25-l3-b4",
-        type: "decision_scenario",
-        decisionIntro: "A green team secures informal management encouragement for reusable water stations and immediately tries to order MUR 80,000 of equipment. Finance finds no formal budget entry or written approval exists.",
-        decisionPrompt: "What should the finance officer do?",
-        decisionChoices: [
-          {
-            label: "Release the payment immediately to avoid delaying a green initiative.",
-            correct: false,
-            feedback: "Incorrect. Bypassing controls for 'green' projects damages financial governance."
-          },
-          {
-            label: "Explain the missing approval steps to the team, and help them document the formal budget request for management authorization.",
-            correct: true,
-            feedback: "Correct. Standard financial authorization procedures must apply to all sustainability initiatives."
-          },
-          {
-            label: "Pay the invoice and log it as a general marketing expense.",
-            correct: false,
-            feedback: "Incorrect. Miscategorizing expenses to bypass approvals hides the real cost and violates record standards."
-          },
-          {
-            label: "Tell the team that sustainability projects are not allowed.",
-            correct: false,
-            feedback: "Incorrect. The project is valid; it simply needs to follow the standard approval workflow."
-          }
-        ]
+        bodyText: "Finance is a financial evaluator and control custodian—not a technical environmental engineer.\n\nResponsibility Boundaries:\n• Finance Owns: Budget coding, expenditure recording, invoice matching, variance tracking, and financial evidence retention.\n• Finance Supports: Business case evaluation, payback modeling, procurement reviews, and cost-benefit analysis.\n• Finance Does Not Own: Carbon calculations, technical energy engineering, legal permit compliance, or supplier environmental verification."
       }
     ]
   },
   {
     order: 3,
-    title: "Keep Evidence That Can Be Trusted",
+    title: "Plain-Language Financial Vocabulary",
     minutes: 3,
-    content: "Store invoices, payment receipts, and utility bills. Recognize that invoices prove transaction expenditure, not environmental outcomes.",
+    content: "Master core financial terms relevant to workplace sustainability evaluation.",
     blocks: [
       {
         id: "c25-l4-b1",
         type: "heading",
-        headingText: "Keep Evidence That Can Be Trusted"
+        headingText: "Plain-Language Financial Vocabulary"
       },
       {
         id: "c25-l4-b2",
         type: "short_text",
-        bodyText: "Finance must preserve invoice evidence: approved budgets, POs, quotations, payment confirmations, and utility records. Remember that a financial document proves that money was spent; it does not prove environmental success. An invoice for recycling services proves the service was paid for, but does not prove the actual tonnage recycled without collection weight slips."
-      },
-      {
-        id: "c25-l4-b3",
-        type: "key_message",
-        headingText: "Evidence Boundaries",
-        bodyText: "Record what the financial evidence actually proves. Do not inflate transactions into unverified environmental metrics."
-      },
-      {
-        id: "c25-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A department manager wants to classify all office cleaning invoice expenditure as 'Sustainable Procurement' because the supplier has 'Eco-Choice' written on their letterhead. Finance has invoices but no product certifications or approved criteria.",
-        decisionPrompt: "What is the correct finance response?",
-        decisionChoices: [
-          {
-            label: "Classify the expenditure as sustainable procurement based on the letterhead.",
-            correct: false,
-            feedback: "Incorrect. Letterhead marketing does not constitute verified procurement evidence."
-          },
-          {
-            label: "Retain the invoices in the financial archives, but ask the procurement or sustainability head to review and validate the sustainable classification.",
-            correct: true,
-            feedback: "Correct. Finance records expenditures accurately and refers environmental classifications to the designated competent owner."
-          },
-          {
-            label: "Refuse to pay the invoice until the supplier submits a full environmental audit.",
-            correct: false,
-            feedback: "Incorrect. Bypassing payment for standard services over classification disputes disrupts operations."
-          },
-          {
-            label: "Delete the classification field to avoid any debate.",
-            correct: false,
-            feedback: "Incorrect. Deleting fields does not establish a credible record-keeping system."
-          }
-        ]
+        bodyText: "Key Terms Defined:\n• Baseline: Historical, verified consumption data prior to an initiative.\n• Total Cost of Ownership (TCO): Combined purchase price, installation, operating utilities, maintenance, and disposal costs over useful life.\n• Avoided Cost: Future expenditure prevented by an initiative (e.g., lower utility tariff hikes).\n• Sensitivity Check: Testing how financial return changes if energy savings or electricity tariffs vary by +/- 15%.\n• Greenwashing: Exaggerating environmental spending or outcomes to manipulate corporate reports."
       }
     ]
   },
   {
     order: 4,
-    title: "Challenge Unsupported or Misleading Information",
+    title: "Sourced Fact: Business Case Evidence Standards",
     minutes: 3,
-    content: "Respond when financial figures or savings claims are inconsistent. Refuse to alter database records to satisfy ESG reports or audits.",
+    content: "Distinguish verified historical baseline data, supplier estimates, and financial assumptions using international standards.",
     blocks: [
       {
         id: "c25-l5-b1",
         type: "heading",
-        headingText: "Challenge Unsupported or Misleading Information"
+        headingText: "Sourced Fact: Evidence Classification Standards"
       },
       {
         id: "c25-l5-b2",
-        type: "short_text",
-        bodyText: "Flag red flags such as: duplicate savings claims, projected savings presented as achieved savings, or expenses shifted between periods to hide green initiative cost overruns. Refuse to falsify records or change descriptions. Identify the inconsistency, provide the supporting financial data, and request the owner to correct the statement."
-      },
-      {
-        id: "c25-l5-b3",
-        type: "key_message",
-        headingText: "Truth in Data",
-        bodyText: "Credible reporting requires separating forward-looking estimates from actual, observed bank transactions."
-      },
-      {
-        id: "c25-l5-b4",
-        type: "decision_scenario",
-        decisionIntro: "A draft company newsletter states that a departmental waste initiative saved the company MUR 180,000 last quarter. Finance records show that MUR 180,000 is the projected annual saving from the original proposal, not actual observed savings.",
-        decisionPrompt: "What is the correct action?",
-        decisionChoices: [
-          {
-            label: "Let the statement pass since it is only a marketing newsletter.",
-            correct: false,
-            feedback: "Incorrect. Allowing incorrect financial figures in official communications damages corporate credibility."
-          },
-          {
-            label: "Flag the discrepancy, provide the proposal record, and request the editor to correct the text to reflect actual quarterly progress.",
-            correct: true,
-            feedback: "Correct. Finance must identify inaccuracies and insist that public communications align with actual records."
-          },
-          {
-            label: "Change the accounting ledger to show MUR 180,000 in savings.",
-            correct: false,
-            feedback: "Incorrect. Accounting ledgers must record actual transaction history, never arbitrary numbers."
-          },
-          {
-            label: "Exaggerate the savings further to match other department reports.",
-            correct: false,
-            feedback: "Incorrect. Falsification is a direct violation of professional standards."
-          }
-        ]
+        type: "memorable_fact",
+        factTitle: "ISO 14001:2015 Clause 8.1 & ISO 50001:2018 Standards",
+        bodyText: "ISO 14001:2015 Clause 8.1 (Operational Planning) and ISO 50001:2018 Clause 6.6 (Planning for Energy Data) require organizations to base operational change decisions on verified data and document key assumptions.\n\nPractical Finance Implication: A credible business case must explicitly categorize figures into: (1) Verified historical utility invoices, (2) Vendor quotation commitments, and (3) Unverified estimates requiring operational sign-off."
       }
     ]
   },
   {
     order: 5,
-    title: "Monitor Costs and Improve Future Decisions",
+    title: "7-Stage Practical Finance Integration Framework",
     minutes: 3,
-    content: "Compare actual actuals against budget forecasts. Avoid claiming environmental causation where other factors may have influenced cost changes.",
+    content: "Apply the 7-stage framework to evaluate and control sustainability expenditure.",
     blocks: [
       {
         id: "c25-l6-b1",
         type: "heading",
-        headingText: "Monitor Costs and Improve Future Decisions"
+        headingText: "The 7-Stage Financial Integration Framework"
       },
       {
         id: "c25-l6-b2",
         type: "short_text",
-        bodyText: "Monitor performance by comparing approved budgets against actual spending. Do not assume a drop in utility costs was caused only by a green initiative if other variables changed. A decrease in electricity expenditure might be due to seasonal weather, tariff adjustments, or office closures. Disclose these variables honestly."
+        bodyText: "1. Clarify Action & Intended Result: Confirm exact equipment, location, and operational objective.\n2. Identify All Costs: Include purchase price, freight, installation, training, maintenance, and disposal.\n3. Confirm Technical Data Owner: Assign operational lead to verify technical energy/water claims.\n4. Review Evidence & Assumptions: Check baseline invoices and vendor calculations.\n5. Apply Budget & Approval Controls: Verify budget codes and delegation limits.\n6. Track Actual Expenditure & Variance: Compare actual invoices against approved capital baseline.\n7. Review Results & Report Limitations: Report verified cost reductions while disclosing external variables."
+      }
+    ]
+  },
+  {
+    order: 6,
+    title: "Mauritius-Relevant Example: Commercial Laundry Equipment TCO",
+    minutes: 3,
+    content: "Compare initial purchase price versus lifecycle operating costs for a Mauritian hotel laundry upgrade.",
+    blocks: [
+      {
+        id: "c25-l7-b1",
+        type: "heading",
+        headingText: "Lifecycle Costing Example: Hotel Commercial Laundry"
       },
       {
-        id: "c25-l6-b3",
-        type: "key_message",
-        headingText: "Honest Interpretation",
-        bodyText: "By reporting cost variations and disclosing operational changes, finance builds trust in future project budgets."
+        id: "c25-l7-b2",
+        type: "short_text",
+        bodyText: "A Grand Baie resort compares two commercial laundry washing machines:\n• Washer A: Purchase price MUR 180,000. Standard water & energy use. 1-year warranty.\n• Washer B: Purchase price MUR 240,000. 35% less water, heat recovery system, 3-year service agreement included.\n\nLifecycle Analysis: Over a 5-year useful life, Washer B saves MUR 110,000 in water and electricity bills and avoids MUR 35,000 in service fees. Although Washer B costs MUR 60,000 more upfront, its Total Cost of Ownership is MUR 85,000 lower than Washer A."
+      }
+    ]
+  },
+  {
+    order: 7,
+    title: "Visual Element: Business-Case Evidence Flow & Traceability",
+    minutes: 3,
+    content: "Interactive visual diagram connecting vendor quotes, utility invoices, budget codes, and audit trails.",
+    blocks: [
+      {
+        id: "c25-l8-b1",
+        type: "heading",
+        headingText: "Visual Interactive: Budget-to-Results Traceability"
       },
       {
-        id: "c25-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Select one practical finance process to improve in your department:",
-        commitmentChoices: [
-          "Improving cost comparisons",
-          "Recording approval evidence more clearly",
-          "Separating estimates from actual results",
-          "Checking sustainability-related classifications",
-          "Adding clearer budget ownership",
-          "Escalating unsupported claims"
-        ]
+        id: "c25-l8-b2",
+        type: "image",
+        imageUrl: "/images/courses/sustainability-for-finance-teams.jpg",
+        captionText: "Financial Evidence Flow: From Vendor Quote to Ledger Entry and Post-Audit Review."
+      },
+      {
+        id: "c25-l8-b3",
+        type: "short_text",
+        bodyText: "Traceability Principles:\n• Stage 1: Verified Utility Invoice Baseline -> Stage 2: Approved Business Case & Budget Code -> Stage 3: Purchase Order & Vendor Invoice -> Stage 4: Post-Implementation Utility Variance Review.\n\nIf any link in the evidence chain is missing, finance should flag the gap before approving payment."
+      }
+    ]
+  },
+  {
+    order: 8,
+    title: "Practical Workplace Finance Actions",
+    minutes: 3,
+    content: "Execute 12 concrete finance actions to maintain financial control integrity.",
+    blocks: [
+      {
+        id: "c25-l9-b1",
+        type: "heading",
+        headingText: "12 Practical Finance Control Actions"
+      },
+      {
+        id: "c25-l9-b2",
+        type: "short_text",
+        bodyText: "1. Request verified baseline utility bills.\n2. Document source and date of all cost assumptions.\n3. Include installation, training, and maintenance in capital requests.\n4. Separate expected savings from guaranteed savings.\n5. Assign dedicated budget codes for sustainability projects.\n6. Match vendor invoices to approved purchase orders.\n7. Track actual costs against approved budgets monthly.\n8. Record reasons for expenditure variances (+/- 10%).\n9. Require technical sign-off from operational heads.\n10. Retain financial evidence for internal/external audits.\n11. Escalate unverified vendor claims or suspicious invoices.\n12. Disclose external variables (e.g., weather, shift changes) when reporting utility cost drops."
+      }
+    ]
+  },
+  {
+    order: 9,
+    title: "Applied Scenario Challenge: The Multi-Site Equipment Proposal",
+    minutes: 3,
+    content: "Solve a multi-step financial review challenge involving an urgent equipment replacement proposal.",
+    blocks: [
+      {
+        id: "c25-l10-b1",
+        type: "heading",
+        headingText: "Scenario Challenge: Multi-Site Equipment Proposal"
+      },
+      {
+        id: "c25-l10-b2",
+        type: "short_text",
+        bodyText: "Scenario: An operations manager submits a MUR 500,000 equipment upgrade for three sites, demanding immediate finance sign-off before a vendor discount expires. The proposal claims a 1-year payback, but omits electrical installation costs, relies on a peak-month baseline, and includes no technical validation from the engineering lead.\n\nCorrect Finance Decision: Do not reject blindly, but withhold approval until: (1) Installation labor costs are included, (2) A 12-month average baseline is used, and (3) The engineering lead signs off on the technical energy reduction claim."
+      }
+    ]
+  },
+  {
+    order: 10,
+    title: "Learner Commitment & Practical Actions",
+    minutes: 3,
+    content: "Select one practical workplace finance commitment to apply this week.",
+    blocks: [
+      {
+        id: "c25-l11-b1",
+        type: "heading",
+        headingText: "Select Your Practical Finance Commitment"
+      },
+      {
+        id: "c25-l11-b2",
+        type: "short_text",
+        bodyText: "Choose one action for your organization:\n• Review an active sustainability project proposal for missing installation or maintenance costs.\n• Confirm whether reported energy savings are based on verified utility bills or vendor estimates.\n• Create a dedicated budget code for tracking sustainability-related capital expenditure.\n• Require operational sign-off on all vendor energy-saving claims prior to invoice approval."
+      }
+    ]
+  },
+  {
+    order: 11,
+    title: "Completion, Badge & Practical Disclaimer",
+    minutes: 3,
+    content: "Review completion recognition and practical disclaimer guidelines.",
+    blocks: [
+      {
+        id: "c25-l12-b1",
+        type: "heading",
+        headingText: "Completion & Recognition"
+      },
+      {
+        id: "c25-l12-b2",
+        type: "short_text",
+        bodyText: "You have completed Sustainability for Finance Teams. You are now equipped to evaluate business cases, enforce financial controls, perform total cost of ownership analysis, and ensure financial records remain accurate and audit-ready."
+      },
+      {
+        id: "c25-l12-b3",
+        type: "callout",
+        headingText: "Practical Disclaimer",
+        bodyText: "This course provides practical workplace financial guidance. It does not constitute formal tax advice, statutory accounting standards advice, legal counsel, or independent ESG audit certification."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const QUIZ_QUESTIONS = [
   {
-    question: "A facilities manager submits a project proposal with unverified technical energy savings. How should the finance officer respond?",
+    question: "What is the primary boundary of finance's role in evaluating workplace sustainability initiatives?",
     options: [
-      { text: "Approve the project immediately since it supports sustainability.", isCorrect: false, feedback: "Incorrect. Approving projects without verified details violates financial control standards." },
-      { text: "Request the missing operational metrics and ask who validated the technical energy-saving assumptions before proceeding.", isCorrect: true, feedback: "Correct. Finance ensures decision data is complete and refers technical validation to the competent owner." },
-      { text: "Estimate the energy savings yourself using basic internet calculators.", isCorrect: false, feedback: "Incorrect. Finance should analyze costs, not invent or guess technical engineering performance parameters." },
-      { text: "Delete the proposal to save time.", isCorrect: false, feedback: "Incorrect. The project might be valid; request the missing metrics rather than deleting it." }
+      "Finance independently calculates carbon footprint metrics and certifies technical engineering designs.",
+      "Finance evaluates financial viability, enforces budget controls, models total cost of ownership, and verifies supporting evidence while technical leads validate operational claims.",
+      "Finance approves any project immediately if it contains green marketing keywords.",
+      "Finance enforces mandatory salary deductions for departments that exceed energy budgets."
     ],
-    correctExplanation: "Finance ensures decision information is complete and refers technical validation to the competent owner rather than guessing or ignoring it.",
-    incorrectExplanation: "Bypassing approvals, inventing data, or deleting requests violates standard financial verification procedures.",
-    practicalTakeaway: "Request verified cost and technical parameters before proceeding with approvals."
+    correctOption: 1,
+    correctExplanation: "Correct! Finance evaluates financial metrics, budget integrity, TCO, and evidence, while technical leads own operational engineering.",
+    incorrectExplanation: "Review finance role boundaries: Finance evaluates financial viability and evidence; technical leads validate engineering claims.",
+    optionFeedback: [
+      "Incorrect. Carbon calculations belong to ESG leads; engineering designs belong to technical leads.",
+      "Correct! Finance evaluates financial viability, enforces budget controls, models total cost of ownership, and verifies supporting evidence while technical leads validate operational claims.",
+      "Incorrect. Green keywords do not bypass financial review or authorization limits.",
+      "Incorrect. Salary deductions for energy overruns are illegal and unethical."
+    ],
+    orderIndex: 0
   },
   {
-    question: "A company is comparing two options for new equipment. Option A has a lower purchase price, but Option B has lower operating and maintenance costs. How should finance assist?",
+    question: "A proposal claims a new solar lighting system will 'pay for itself in 12 months' based on one peak summer month's electricity bill. Why should finance challenge this claim?",
     options: [
-      { text: "Recommend Option A because it has the lowest initial invoice price.", isCorrect: false, feedback: "Incorrect. This ignores ongoing utility and maintenance costs that affect the total cost." },
-      { text: "Provide a lifecycle cost model comparing purchase price, expected utility use, and maintenance costs over the expected period.", isCorrect: true, feedback: "Correct. Finance looks beyond purchase price to model total cost implications." },
-      { text: "Choose Option B automatically because it has a green leaf logo.", isCorrect: false, feedback: "Incorrect. Finance relies on modeled calculations, not logos or marketing statements." },
-      { text: "Refuse to compare them because utility costs are paid by a different department.", isCorrect: false, feedback: "Incorrect. Total organizational cost must be modeled for capital decisions." }
+      "Solar panels are illegal under Mauritian commercial property regulations.",
+      "Peak summer bills automatically corrupt general ledger accounting software.",
+      "Using a single peak month creates an artificially high baseline that exaggerates annual savings.",
+      "Finance must always reject renewable energy projects regardless of payback period."
     ],
-    correctExplanation: "Finance helps compare total relevant lifecycle costs over the useful life rather than relying solely on the first purchase invoice.",
-    incorrectExplanation: "Relying on invoice price alone, choosing based on logos, or ignoring interdepartmental costs leads to poor capital allocation.",
-    practicalTakeaway: "Model lifecycle operating costs rather than relying only on purchase price."
+    correctOption: 2,
+    correctExplanation: "Correct! Baselines must reflect representative 12-month utility trends rather than an isolated peak month to avoid inflating financial returns.",
+    incorrectExplanation: "Review baseline evaluation: Single peak months distort annual baseline calculations.",
+    optionFeedback: [
+      "Incorrect. Solar lighting is legal and widely supported in Mauritius.",
+      "Incorrect. High utility bills do not corrupt ledger software.",
+      "Correct! Using a single peak month creates an artificially high baseline that exaggerates annual savings.",
+      "Incorrect. Finance supports viable renewable projects that meet financial decision criteria."
+    ],
+    orderIndex: 1
   },
   {
-    question: "A sustainability group wants to order MUR 80,000 of recycling bins after receiving verbal encouragement from a director. No formal budget exists. What should HR/Finance do?",
+    question: "According to ISO 14001:2015 Clause 8.1 and ISO 50001:2018 principles, how should financial proposals classify project figures?",
     options: [
-      { text: "Release the funds immediately because the director supported it verbally.", isCorrect: false, feedback: "Incorrect. Verbal encouragement does not replace budget allocation and formal authorization." },
-      { text: "Confirm the budget, secure formal written approval, and verify the quotation before committing funds.", isCorrect: true, feedback: "Correct. Standard budget controls and authorization limits must apply to green spending." },
-      { text: "Classify the purchase as general office supplies to bypass the budget limit.", isCorrect: false, feedback: "Incorrect. Falsifying classifications to bypass limits violates controls." },
-      { text: "Cancel the initiative because they did not follow procedures.", isCorrect: false, feedback: "Incorrect. The initiative should be guided through the standard approval process, not cancelled." }
+      "Distinguish verified historical utility data, vendor quotation commitments, and unverified estimates requiring operational sign-off.",
+      "Combine all estimates and actual invoices into a single unlabelled total sum.",
+      "Treat vendor advertising claims as verified audit evidence.",
+      "Omit all maintenance and installation costs to keep capital figures low."
     ],
-    correctExplanation: "All sustainability projects must follow standard financial authorization thresholds and budget checks before spending is committed.",
-    incorrectExplanation: "Releasing funds without approvals, falsifying ledger categories, or cancelling projects without guidance violates control policies.",
-    practicalTakeaway: "Ensure green projects follow standard budget check and authorization workflows."
+    correctOption: 0,
+    correctExplanation: "Correct! Standards require clear data classification: historical baseline, vendor quote, and unverified estimate requiring technical sign-off.",
+    incorrectExplanation: "Review evidence standards: Proposals must separate verified historical data, vendor quotes, and estimates.",
+    optionFeedback: [
+      "Correct! Distinguish verified historical utility data, vendor quotation commitments, and unverified estimates requiring operational sign-off.",
+      "Incorrect. Combining data types destroys audit traceability.",
+      "Incorrect. Vendor marketing brochures are promotional, not verified audit evidence.",
+      "Incorrect. Omitting installation or maintenance distorts total cost of ownership."
+    ],
+    orderIndex: 2
   },
   {
-    question: "Finance has received a waste management invoice, but no collection or weight slips are available. How should the transaction be recorded?",
+    question: "When evaluating two commercial appliances, Machine A (lower purchase price, high water/energy use) vs Machine B (higher purchase price, 35% lower utility use), how should finance guide the decision?",
     options: [
-      { text: "Record that the service was paid for, without claiming a specific quantity of waste was recycled.", isCorrect: true, feedback: "Correct. Finance records the transaction payment accurately and does not claim unverified environmental quantities." },
-      { text: "Estimate the recycled tonnage based on average bills and record it as verified.", isCorrect: false, feedback: "Incorrect. Estimating tonnage without logs is unverified and misleading." },
-      { text: "Reject the payment until the supplier submits a full environmental audit.", isCorrect: false, feedback: "Incorrect. You cannot withhold payment for completed services over classification disputes." },
-      { text: "Mark the invoice as 'sustainable recycling certified'.", isCorrect: false, feedback: "Incorrect. Invoices confirm payment, not environmental outcome certification." }
+      "Select Machine A because initial invoice price is the only metric finance considers.",
+      "Select Machine A and hide ongoing water bills in another department's budget.",
+      "Select Machine B automatically without calculating actual utility rates.",
+      "Perform a Total Cost of Ownership (TCO) calculation incorporating purchase price, expected utility bills, maintenance, and useful life."
     ],
-    correctExplanation: "Finance records what the financial document actually proves (expenditure), without asserting unverified environmental metrics like weights recycled.",
-    incorrectExplanation: "Estimating tonnages without slips, withholding payments, or applying unverified certification tags reduces record credibility.",
-    practicalTakeaway: "Record what the financial document actually proves. Do not inflate transactions."
+    correctOption: 3,
+    correctExplanation: "Correct! Total Cost of Ownership (TCO) models lifecycle costs over useful life, preventing cheap purchases with high operating expenses.",
+    incorrectExplanation: "Review TCO principles: Compare purchase price, utilities, maintenance, and useful life.",
+    optionFeedback: [
+      "Incorrect. Initial price alone ignores ongoing operating costs.",
+      "Incorrect. Hiding utility bills in another budget violates financial accounting controls.",
+      "Incorrect. Finance must model actual data rather than choosing blindly.",
+      "Correct! Perform a Total Cost of Ownership (TCO) calculation incorporating purchase price, expected utility bills, maintenance, and useful life."
+    ],
+    orderIndex: 3
   },
   {
-    question: "A departmental report states that a green project saved MUR 180,000 last quarter. Finance notes this MUR 180,000 is the projected annual saving. What should finance do?",
+    question: "A green team requests an immediate MUR 100,000 vendor payment for reusable water stations, claiming management verbally agreed. Finance finds no budget code or written sign-off exists. What should finance do?",
     options: [
-      { text: "Allow the report to be published since it looks positive.", isCorrect: false, feedback: "Incorrect. Reporting incorrect figures damages corporate data credibility." },
-      { text: "Flag the discrepancy, share the proposal forecast, and request the editor to correct the text to reflect actual quarterly progress.", isCorrect: true, feedback: "Correct. Finance must identify inaccuracies and request that public statements match actual data." },
-      { text: "Adjust the ledger to show the MUR 180,000 saving.", isCorrect: false, feedback: "Incorrect. Ledgers must record actual transaction history, never projections." },
-      { text: "Ignore the report because it belongs to the sustainability department.", isCorrect: false, feedback: "Incorrect. Finance is responsible for financial accuracy in official communications." }
+      "Pay the vendor immediately to avoid delaying an environmental project.",
+      "Pause payment, explain missing approval steps, and assist the team in submitting a formal budget request for management authorization.",
+      "Pay the invoice and log it as a general entertainment expense.",
+      "Cancel the water station project permanently without explanation."
     ],
-    correctExplanation: "Finance must flag discrepancies when projections are reported as actuals, ensuring communication remains accurate and supported by evidence.",
-    incorrectExplanation: "Ignoring errors, fabricating ledger adjustments, or deferring responsibility permits misleading data reporting.",
-    practicalTakeaway: "Ensure public reports distinguish projected estimates from actual financial results."
+    correctOption: 1,
+    correctExplanation: "Correct! Sustainability projects must follow standard financial authorization thresholds and formal budget coding before funds are released.",
+    incorrectExplanation: "Review budget controls: Green projects must follow standard approval limits and budget coding.",
+    optionFeedback: [
+      "Incorrect. Verbal promises do not override formal financial delegation limits.",
+      "Correct! Pause payment, explain missing approval steps, and assist the team in submitting a formal budget request for management authorization.",
+      "Incorrect. Misclassifying transactions as entertainment violates accounting standards.",
+      "Incorrect. Finance helps guide proper approval; it does not arbitrarily cancel valid projects."
+    ],
+    orderIndex: 4
   },
   {
-    question: "A manager asks finance to change an office renovation description to 'sustainability investment' to improve the company's ESG report. How should finance respond?",
+    question: "A departmental manager asks finance to change an office refurbishment invoice description to 'carbon reduction investment' to boost the company's ESG report score. How should finance respond?",
     options: [
-      { text: "Change the description to support the company's ESG score.", isCorrect: false, feedback: "Incorrect. Falsifying description labels to exaggerate environmental spending is greenwashing." },
-      { text: "Refuse to alter the record, preserve the accurate transaction history, and escalate the request if pressured.", isCorrect: true, feedback: "Correct. Ledgers must reflect actual transaction reality. Refuse to falsify records." },
-      { text: "Delete the record entirely to avoid conflict.", isCorrect: false, feedback: "Incorrect. Renovation records must be retained in the financial history." },
-      { text: "Charge the manager a fee to change the label.", isCorrect: false, feedback: "Incorrect. Charging fees for ledger falsifications is illegal and unethical." }
+      "Approve the change because ESG scores are a corporate priority.",
+      "Delete the invoice record to prevent audit questions.",
+      "Charge the manager an administrative fee to alter the description.",
+      "Refuse to alter the description, preserve accurate transaction history, and escalate the request if pressured."
     ],
-    correctExplanation: "Finance must maintain ledger integrity. Falsifying transaction descriptions to manipulate ESG reports violates professional standards and controls.",
-    incorrectExplanation: "Altering ledger labels for score appearances, deleting valid records, or demanding fees for alterations violates compliance code.",
-    practicalTakeaway: "Refuse to alter transaction descriptions to exaggerate environmental spending."
+    correctOption: 3,
+    correctExplanation: "Correct! Ledgers must reflect actual transaction reality. Altering descriptions to exaggerate environmental spending is greenwashing.",
+    incorrectExplanation: "Review ledger integrity: Transaction descriptions must accurately reflect actual purchases.",
+    optionFeedback: [
+      "Incorrect. Altering ledger descriptions to inflate ESG metrics is misleading greenwashing.",
+      "Incorrect. Deleting valid invoices destroys accounting history and audit trails.",
+      "Incorrect. Demanding fees to falsify financial records is illegal and unethical.",
+      "Correct! Refuse to alter the description, preserve accurate transaction history, and escalate the request if pressured."
+    ],
+    orderIndex: 5
   },
   {
-    question: "Electricity costs fell by 15% after a lighting retrofit. During that period, office operating hours were also reduced due to shift changes. How should finance report this?",
+    question: "Electricity costs dropped by 18% following an HVAC upgrade. However, office operating hours were also cut by 2 hours daily during that period. How should finance report this result?",
     options: [
-      { text: "Attribute the entire 15% reduction to the lighting retrofit.", isCorrect: false, feedback: "Incorrect. This is misleading as it ignores the impact of reduced operating hours." },
-      { text: "Report the 15% reduction while disclosing that both the retrofit and reduced shift hours contributed to the change.", isCorrect: true, feedback: "Correct. Finance must disclose all variables that could influence the cost variation." },
-      { text: "Report that the retrofit failed because shift hours changed.", isCorrect: false, feedback: "Incorrect. The retrofit likely contributed, but the exact fraction is mixed." },
-      { text: "Omit the cost change from the report.", isCorrect: false, feedback: "Incorrect. Cost changes should be reported, but with appropriate context." }
+      "Report the 18% cost drop while disclosing that both the HVAC upgrade and reduced operating hours contributed to the savings.",
+      "Attribute 100% of the cost drop to the HVAC upgrade in the executive summary.",
+      "Report that the HVAC upgrade failed completely because hours were reduced.",
+      "Omit the cost reduction from financial reports."
     ],
-    correctExplanation: "Finance reports actual cost reductions while disclosing other variables (like shift hours or weather) that influenced the results.",
-    incorrectExplanation: "Attributing all savings to one project, claiming total failure, or hiding the cost change ignores honest context.",
-    practicalTakeaway: "Report cost reductions honestly and disclose other contributing factors."
+    correctOption: 0,
+    correctExplanation: "Correct! Finance must report actual financial results transparently while disclosing external variables (such as shift changes or weather).",
+    incorrectExplanation: "Review honest reporting: Disclose all contributing factors alongside actual financial results.",
+    optionFeedback: [
+      "Correct! Report the 18% cost drop while disclosing that both the HVAC upgrade and reduced operating hours contributed to the savings.",
+      "Incorrect. Attributing 100% savings to one factor when operating hours changed is misleading.",
+      "Incorrect. Operating hour reductions do not mean the HVAC upgrade failed.",
+      "Incorrect. Hiding verified cost drops deprives management of relevant performance data."
+    ],
+    orderIndex: 6
   },
   {
-    question: "A waste sorting project exceeds its budget by 20% but successfully diverts waste. How should finance document this variance?",
+    question: "An urgent multi-site equipment proposal demands immediate finance sign-off before a vendor discount expires, but omits installation costs and lacks engineering sign-off. What is the best finance response?",
     options: [
-      { text: "Hide the overspend in a different department's budget.", isCorrect: false, feedback: "Incorrect. Budget allocations and variances must be recorded transparently." },
-      { text: "Document the variance, identify the cause, and use the findings to improve future budgeting.", isCorrect: true, feedback: "Correct. Reporting variances helps identify process issues and improves future estimates." },
-      { text: "Declare the project an absolute failure and shut it down.", isCorrect: false, feedback: "Incorrect. Operational success and budget variance are distinct parameters." },
-      { text: "Mark the project as under-budget to keep the manager happy.", isCorrect: false, feedback: "Incorrect. Falsifying variance reports violates basic audit standards." }
+      "Reject the project permanently and ban the vendor from future bidding.",
+      "Approve sign-off immediately to secure the vendor discount.",
+      "Withhold approval until installation costs are included, a representative 12-month baseline is used, and the engineering lead validates energy claims.",
+      "Sign off on the proposal but verbally tell the manager that finance is not responsible if it fails."
     ],
-    correctExplanation: "Finance documents the budget variance, identifies the cause, and uses the findings to improve future estimates rather than hiding the overrun.",
-    incorrectExplanation: "Hiding costs, shutting down successful projects, or falsifying variances blocks corporate process improvement.",
-    practicalTakeaway: "Document budget variances transparently and use the findings to improve future planning."
+    correctOption: 2,
+    correctExplanation: "Correct! Evidence-based decision support requires completing missing costs and securing technical validation before approving capital commitments.",
+    incorrectExplanation: "Review decision support: Ensure missing installation costs and technical sign-offs are completed before approval.",
+    optionFeedback: [
+      "Incorrect. Vendor discount urgency does not justify permanent project rejection.",
+      "Incorrect. Discount deadlines should not override basic cost completeness checks.",
+      "Correct! Withhold approval until installation costs are included, a representative 12-month baseline is used, and the engineering lead validates energy claims.",
+      "Incorrect. Verbal disclaimers do not excuse signing off on incomplete financial proposals."
+    ],
+    orderIndex: 7
   }
 ];
 
-export async function ensureSustainabilityForFinanceTeamsCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
+export async function ensureSustainabilityForFinanceTeamsCourse(): Promise<void> {
+  logger.info(`Checking and executing ${COURSE_TITLE} course content migration (${SEED_NAME})...`);
 
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
-
-      // 2. Resolve Course 19
-      let course19 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-19")
-      });
-      if (!course19) {
-        course19 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "reviewing-sustainability-performance-and-corrective-action")
-        });
-      }
-
-      if (!course19) {
-        throw new Error("Data integrity error: Course 19 (ELH-19) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 25
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
+      // Resolve or insert Course 25
+      const [existingCourse] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, COURSE_META.courseCode))
+        .limit(1);
 
       let actualCourseId: number;
 
       if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
+        const [inserted] = await tx
+          .insert(coursesTable)
+          .values({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            badgeName: COURSE_META.badgeName,
+            badgeDescription: COURSE_META.badgeDescription,
+            status: "published",
+            isPublished: true,
+            recommendedNextCourseId: null,
+          })
+          .returning();
         actualCourseId = inserted.id;
+        logger.info(`Inserted new ELH-25 course record (ID: ${actualCourseId}).`);
       } else {
         actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+        await tx
+          .update(coursesTable)
+          .set({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            badgeName: COURSE_META.badgeName,
+            badgeDescription: COURSE_META.badgeDescription,
+            status: "published",
+            isPublished: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(coursesTable.id, actualCourseId));
+        logger.info(`Updated existing ELH-25 course record (ID: ${actualCourseId}).`);
       }
 
-      // 4. Update Course 24 recommendedNextCourseId to point to Course 25 preserving admin edits
-      let course24 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-24")
-      });
-      if (!course24) {
-        course24 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-hr-teams")
-        });
-      }
+      // Ensure Badge Definition exists
+      const [existingBadge] = await tx
+        .select()
+        .from(badgeDefinitionsTable)
+        .where(eq(badgeDefinitionsTable.code, BADGE_CODE))
+        .limit(1);
 
-      if (course24) {
-        let isSystemManaged = false;
-        if (course24.recommendedNextCourseId) {
-          const currentRecommendedCourse = await tx.query.coursesTable.findFirst({
-            where: eq(coursesTable.id, course24.recommendedNextCourseId)
-          });
-          if (currentRecommendedCourse && currentRecommendedCourse.courseCode === "ELH-25") {
-            isSystemManaged = true;
-          }
-        }
-
-        if (course24.recommendedNextCourseId === null || course24.recommendedNextCourseId === actualCourseId || isSystemManaged) {
-          await tx.update(coursesTable).set({
-            recommendedNextCourseId: actualCourseId
-          }).where(eq(coursesTable.id, course24.id));
-        } else {
-          logger.warn(`Recommendation conflict: Course 24 currently recommends course ID ${course24.recommendedNextCourseId} instead of Course 25 (ID: ${actualCourseId}). Preserving administrator edit.`);
-        }
+      if (existingBadge) {
+        await tx
+          .update(badgeDefinitionsTable)
+          .set({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [actualCourseId],
+          })
+          .where(eq(badgeDefinitionsTable.id, existingBadge.id));
       } else {
-        logger.warn("Data integrity note: Course 24 not found during Course 25 recommendation configuration.");
+        await tx
+          .insert(badgeDefinitionsTable)
+          .values({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            icon: "award",
+            criteriaType: "all_courses",
+            threshold: 0,
+            courseIds: [actualCourseId],
+            orderIndex: 28,
+            code: BADGE_CODE,
+          })
+          .onConflictDoNothing();
       }
 
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
+      // Update lessons and quizzes transactionally if seed is not yet present or forced
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, actualCourseId));
 
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
-          slug: BADGE_SLUG,
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          icon: "award",
-          criteriaType: "all_courses",
-          threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 28,
-          code: BADGE_CODE,
-        });
-      } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
-      }
-
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 19
-      const existingPrereq19 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course19.id)
-        )
-      });
-      if (!existingPrereq19) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course19.id
-        });
-      }
-
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.lessonId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
+      if (!existingSeed || existingLessons.length !== NEW_LESSONS.length) {
+        if (existingLessons.length === 0) {
+          for (const lesson of NEW_LESSONS) {
             await tx.insert(lessonsTable).values({
               courseId: actualCourseId,
               title: lesson.title,
@@ -680,66 +577,108 @@ export async function ensureSustainabilityForFinanceTeamsCourse() {
               contentBlocks: lesson.blocks,
             });
           }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
+        } else {
+          for (const lesson of NEW_LESSONS) {
+            const lExist = existingLessons.find((l) => l.orderIndex === lesson.order);
+            if (lExist) {
+              await tx
+                .update(lessonsTable)
+                .set({
+                  title: lesson.title,
+                  durationMinutes: lesson.minutes,
+                  content: lesson.content,
+                  contentBlocks: lesson.blocks,
+                })
+                .where(eq(lessonsTable.id, lExist.id));
+            } else {
+              await tx.insert(lessonsTable).values({
+                courseId: actualCourseId,
+                title: lesson.title,
+                orderIndex: lesson.order,
+                durationMinutes: lesson.minutes,
+                content: lesson.content,
+                contentBlocks: lesson.blocks,
+              });
             }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
           }
         }
+        logger.info(`Seeded ${NEW_LESSONS.length} upgraded lessons for ELH-25.`);
+
+        await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
+        // Insert 8 scenario quiz questions with balanced option positions
+        for (const q of QUIZ_QUESTIONS) {
+          await tx.insert(quizQuestionsTable).values({
+            courseId: actualCourseId,
+            question: q.question,
+            options: q.options,
+            correctOption: q.correctOption,
+            correctExplanation: q.correctExplanation,
+            incorrectExplanation: q.incorrectExplanation,
+            optionFeedback: q.optionFeedback,
+            orderIndex: q.orderIndex,
+          });
+        }
+        logger.info(`Seeded ${QUIZ_QUESTIONS.length} upgraded quiz questions for ELH-25.`);
+
+        // Record system seed completion marker
+        if (!existingSeed) {
+          await tx.insert(systemSeedsTable).values({
+            name: SEED_NAME,
+            version: 2,
+          });
+        } else {
+          await tx
+            .update(systemSeedsTable)
+            .set({ version: 2 })
+            .where(eq(systemSeedsTable.name, SEED_NAME));
+        }
       }
 
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      // Ensure Prerequisite relationships exist: ELH-12 and ELH-19 linked to ELH-25
+      const prereqCodes = ["ELH-12", "ELH-19"];
+      const prereqCourses = await tx
+        .select()
+        .from(coursesTable)
+        .where(inArray(coursesTable.courseCode, prereqCodes));
+
+      for (const prereq of prereqCourses) {
+        const [existingLink] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(
+            and(
+              eq(coursePrerequisitesTable.courseId, actualCourseId),
+              eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+            )
+          )
+          .limit(1);
+
+        if (!existingLink) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId: actualCourseId,
+            prerequisiteCourseId: prereq.id,
+          }).onConflictDoNothing();
+        }
+      }
+
+      // Ensure ELH-24 recommends ELH-25
+      const [course24] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-24"))
+        .limit(1);
+
+      if (course24) {
+        await tx
+          .update(coursesTable)
+          .set({ recommendedNextCourseId: actualCourseId })
+          .where(eq(coursesTable.id, course24.id));
+      }
     });
 
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
+    logger.info(`Successfully seeded ${COURSE_TITLE} content.`);
   } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
+    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content.`);
     throw error;
   }
 }
