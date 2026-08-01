@@ -21,10 +21,11 @@ import { ensureTrackingSustainabilityActionsCourse } from "./ensureTrackingSusta
 import { ensureSustainabilityDataCollectionCourse } from "./ensureSustainabilityDataCollectionCourse";
 import { ensureSustainabilityPerformanceReviewCourse } from "./ensureSustainabilityPerformanceReviewCourse";
 import { ensureSustainabilityRolesAccountabilityCourse } from "./ensureSustainabilityRolesAccountabilityCourse";
+import { ensureEmployeeSustainabilityEngagementCourse } from "./ensureEmployeeSustainabilityEngagementCourse";
 import { evaluateCourseQuality } from "./courseQualityDiagnostics";
 import { db, coursesTable } from "@workspace/db";
 
-describe("Course Quality Standard Audit (ELH-01 through ELH-20)", () => {
+describe("Course Quality Standard Audit (ELH-01 through ELH-21)", () => {
   before(async () => {
     await ensureSchemaModifications();
     await ensureFoundationsCourse();
@@ -47,6 +48,7 @@ describe("Course Quality Standard Audit (ELH-01 through ELH-20)", () => {
     await ensureSustainabilityDataCollectionCourse();
     await ensureSustainabilityPerformanceReviewCourse();
     await ensureSustainabilityRolesAccountabilityCourse();
+    await ensureEmployeeSustainabilityEngagementCourse();
   });
 
   test("1. Active catalogue contains all 29 courses (ELH-01 through ELH-29)", async () => {
@@ -330,5 +332,19 @@ describe("Course Quality Standard Audit (ELH-01 through ELH-20)", () => {
     assert.ok(scorecard.breakdown.memorableFactScore > 0, "ELH-20 must score points for memorable fact");
     assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-20 must score points for visual question");
     assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-20 must score points for applied scenario");
+  });
+
+  test("41. ELH-21 employee engagement course reaches target quality score threshold (>= 95)", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-21");
+    assert.ok(scorecard.totalScore >= 95, `ELH-21 score must be >= 95, got ${scorecard.totalScore}`);
+    assert.equal(scorecard.releaseBlockers.length, 0, `ELH-21 must have 0 release blockers, got ${scorecard.releaseBlockers.join("; ")}`);
+    assert.equal(scorecard.isReleaseReady, true, "ELH-21 must be flagged as release ready");
+  });
+
+  test("42. ELH-21 diagnostic breakdown includes memorable fact, visual question, and scenario scores", async () => {
+    const scorecard = await evaluateCourseQuality("ELH-21");
+    assert.ok(scorecard.breakdown.memorableFactScore > 0, "ELH-21 must score points for memorable fact");
+    assert.ok(scorecard.breakdown.visualQuestionScore > 0, "ELH-21 must score points for visual question");
+    assert.ok(scorecard.breakdown.appliedScenarioScore > 0, "ELH-21 must score points for applied scenario");
   });
 });
