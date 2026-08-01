@@ -347,15 +347,15 @@ const QUIZ_QUESTIONS = [
   {
     question: "What is the primary difference between a vague sustainability idea and a controlled workplace initiative?",
     options: [
-      "An initiative has a defined problem, clear scope, named owner, feasibility check, pilot plan, and review date.",
       "An initiative is launched with a public press release and high-budget marketing campaign.",
+      "An initiative has a defined problem, clear scope, named owner, feasibility check, pilot plan, and review date.",
       "An initiative requires hiring external management consultants to oversee daily staff tasks.",
       "An initiative must always apply to all company facilities across Mauritius simultaneously."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 1,
     optionsFeedback: [
-      "Correct! A controlled initiative requires structured governance: defined problem, scope, owner, feasibility, pilot, and evidence review.",
       "Incorrect. Marketing campaigns and press releases are promotional activities, not operational controls.",
+      "Correct! A controlled initiative requires structured governance: defined problem, scope, owner, feasibility, pilot, and evidence review.",
       "Incorrect. Initiatives are typically managed by internal workplace teams and department leads.",
       "Incorrect. Effective initiatives start with small, controlled pilots in specific areas before scaling."
     ]
@@ -363,16 +363,16 @@ const QUIZ_QUESTIONS = [
   {
     question: "Why is establishing baseline evidence essential BEFORE launching a workplace initiative?",
     options: [
-      "Baseline evidence allows the team to verify whether post-implementation changes actually achieved an improvement.",
-      "Baseline evidence is required only if the company is undergoing an immediate ISO audit.",
       "Baseline evidence guarantees that the initiative will receive unlimited financial funding.",
+      "Baseline evidence is required only if the company is undergoing an immediate ISO audit.",
+      "Baseline evidence allows the team to verify whether post-implementation changes actually achieved an improvement.",
       "Baseline evidence replaces the need for management approval and safety checks."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 2,
     optionsFeedback: [
-      "Correct! Without baseline data, an organization cannot prove whether an initiative reduced consumption or improved performance.",
-      "Incorrect. Baseline data is essential for operational decision-making, not just external audits.",
       "Incorrect. Baseline data supports realistic budgeting; it does not guarantee unlimited funds.",
+      "Incorrect. Baseline data is essential for operational decision-making, not just external audits.",
+      "Correct! Without baseline data, an organization cannot prove whether an initiative reduced consumption or improved performance.",
       "Incorrect. Data collection never overrides management approval or safety compliance."
     ]
   },
@@ -395,31 +395,31 @@ const QUIZ_QUESTIONS = [
   {
     question: "In the Grand Baie resort worked example, why was the amenity dispenser initiative approved for a 20-room pilot first?",
     options: [
-      "To test housekeeper restocking times, sanitization protocols, and guest feedback under real conditions before full resort rollout.",
+      "Because single-use plastic bottles were legally banned in Mauritius on that exact day.",
       "Because 20 rooms was the maximum number of guest rooms available in the entire hotel.",
       "To avoid informing the General Manager or Operations Lead about the project.",
-      "Because single-use plastic bottles were legally banned in Mauritius on that exact day."
+      "To test housekeeper restocking times, sanitization protocols, and guest feedback under real conditions before full resort rollout."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 3,
     optionsFeedback: [
-      "Correct! A 20-room pilot allowed the team to verify operational feasibility, hygiene SOPs, and staff workload before full commitment.",
+      "Incorrect. The pilot was an internal operational control choice, not a sudden legal compulsion.",
       "Incorrect. The resort had 150 rooms; 20 rooms represented a controlled pilot sample.",
       "Incorrect. The General Manager sponsored the project and approved the pilot.",
-      "Incorrect. The pilot was an internal operational control choice, not a sudden legal compulsion."
+      "Correct! A 20-room pilot allowed the team to verify operational feasibility, hygiene SOPs, and staff workload before full commitment."
     ]
   },
   {
     question: "Which of the following represents an UNINTENDED CONSEQUENCE of a poorly planned paperless initiative?",
     options: [
-      "Warehouse staff being unable to verify shipments because they lack mobile digital devices, causing dispatch delays.",
       "Administration staff printing fewer internal emails during the workday.",
+      "Warehouse staff being unable to verify shipments because they lack mobile digital devices, causing dispatch delays.",
       "Finance securely archiving digital invoices in compliance with audit standards.",
       "IT upgrading server security protocols prior to digital form deployment."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 1,
     optionsFeedback: [
-      "Correct! Disabling paper without providing tablets created an operational bottleneck in dispatch—a classic unintended trade-off.",
       "Incorrect. Printing fewer internal emails is a desired positive outcome.",
+      "Correct! Disabling paper without providing tablets created an operational bottleneck in dispatch—a classic unintended trade-off.",
       "Incorrect. Secure digital archiving is a planned, positive operational control.",
       "Incorrect. Upgrading IT security is a planned pre-implementation feasibility step."
     ]
@@ -427,17 +427,17 @@ const QUIZ_QUESTIONS = [
   {
     question: "According to ISO 14001:2015 Clause 8.1, what is required when planning operational changes?",
     options: [
-      "Organizations must control planned changes and review the consequences of unintended changes to mitigate adverse effects.",
+      "Organizations must obtain written permission from international standard bodies before changing internal procedures.",
       "Organizations must eliminate all physical paperwork across all operational departments immediately.",
       "Organizations must guarantee a minimum 25% cost reduction for every environmental initiative.",
-      "Organizations must obtain written permission from international standard bodies before changing internal procedures."
+      "Organizations must control planned changes and review the consequences of unintended changes to mitigate adverse effects."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 3,
     optionsFeedback: [
-      "Correct! Clause 8.1 explicitly requires controlling planned changes and acting to mitigate unintended side-effects.",
+      "Incorrect. Operational changes are managed internally in compliance with system standards.",
       "Incorrect. ISO standards require operational control and evidence, not mandatory instant paper elimination.",
       "Incorrect. ISO standards do not specify fixed financial percentage targets.",
-      "Incorrect. Operational changes are managed internally in compliance with system standards."
+      "Correct! Clause 8.1 explicitly requires controlling planned changes and acting to mitigate unintended side-effects."
     ]
   },
   {
@@ -459,31 +459,31 @@ const QUIZ_QUESTIONS = [
   {
     question: "Why is 'number of employee pledge signatures' an inadequate primary measure of initiative success?",
     options: [
-      "Signing a pledge is an activity metric that does not prove actual environmental or operational resource reduction.",
       "Pledge signatures are illegal to collect in commercial Mauritian workplaces.",
       "Pledges can only be signed by senior executive managers and board directors.",
+      "Signing a pledge is an activity metric that does not prove actual environmental or operational resource reduction.",
       "Pledges automatically increase electricity and water consumption."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 2,
     optionsFeedback: [
-      "Correct! Pledges measure participation interest, not physical waste, energy, or water performance.",
       "Incorrect. Employee pledges are completely legal; they are simply insufficient as proof of outcome.",
       "Incorrect. Anyone can sign a pledge.",
+      "Correct! Pledges measure participation interest, not physical waste, energy, or water performance.",
       "Incorrect. Pledges do not physically increase resource consumption, but they don't prove reduction either."
     ]
   },
   {
     question: "What should happen during the 'Take a Review Decision' step of the INITIATE framework?",
     options: [
-      "Designated leads evaluate pilot evidence to decide whether to close, modify, embed into SOPs, pause, or scale the initiative.",
       "The initiative is automatically extended for 5 years without inspecting data.",
+      "Designated leads evaluate pilot evidence to decide whether to close, modify, embed into SOPs, pause, or scale the initiative.",
       "All project records are deleted to save digital storage space.",
       "The initiative owner is replaced and penalized if any operational risk occurred."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 1,
     optionsFeedback: [
-      "Correct! The review decision uses pilot evidence to determine whether to embed, modify, pause, stop, or scale the initiative.",
       "Incorrect. Extending without reviewing data defeats the purpose of controlled delivery.",
+      "Correct! The review decision uses pilot evidence to determine whether to embed, modify, pause, stop, or scale the initiative.",
       "Incorrect. Project records must be retained as evidence of change control and learning.",
       "Incorrect. Identifying operational risks during a pilot is a success of the control system, not a failure to be penalized."
     ]
@@ -491,17 +491,17 @@ const QUIZ_QUESTIONS = [
   {
     question: "How does ELH-23 connect to ELH-24 (Sustainability for HR Teams)?",
     options: [
-      "ELH-23 provides general initiative delivery mechanics; ELH-24 applies these controls to HR practices like onboarding, training, and employee policies.",
       "ELH-23 replaces all HR policies and employment contracts across Mauritius.",
       "ELH-24 is designed exclusively for external legal auditors and accountants.",
-      "There is no connection; ELH-23 is for facilities staff only while ELH-24 is for marketing."
+      "There is no connection; ELH-23 is for facilities staff only while ELH-24 is for marketing.",
+      "ELH-23 provides general initiative delivery mechanics; ELH-24 applies these controls to HR practices like onboarding, training, and employee policies."
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 3,
     optionsFeedback: [
-      "Correct! ELH-23 establishes the universal initiative delivery framework, which ELH-24 then applies to human resource operations.",
       "Incorrect. ELH courses provide workplace learning; they do not rewrite national employment laws.",
       "Incorrect. ELH-24 is designed for HR managers, officers, and internal HR representatives.",
-      "Incorrect. ELH-23 provides cross-functional initiative mechanics applicable to all departments."
+      "Incorrect. ELH-23 provides cross-functional initiative mechanics applicable to all departments.",
+      "Correct! ELH-23 establishes the universal initiative delivery framework, which ELH-24 then applies to human resource operations."
     ]
   }
 ];
@@ -680,7 +680,7 @@ export async function ensureWorkplaceSustainabilityInitiativesCourse(): Promise<
       await db.insert(coursePrerequisitesTable).values({
         courseId: courseId,
         prerequisiteCourseId: prereq.id,
-      });
+      }).onConflictDoNothing();
     }
   }
 
