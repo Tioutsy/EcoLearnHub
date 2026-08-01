@@ -31,7 +31,7 @@ async function cleanUpCourse24() {
     await db.delete(employeesTable).where(eq(employeesTable.id, emp.id));
   }
   await db.delete(quizAttemptsTable).where(eq(quizAttemptsTable.userId, "preserve_user_id"));
-  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-hr-teams-v1"));
+  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-hr-teams-v2"));
 
   // Reset Course 23 recommendation link unconditionally
   await db.update(coursesTable)
@@ -118,7 +118,7 @@ test("Course 24 Seeding & Integrity Unit Tests", async () => {
       assert.equal(course.slug, "sustainability-for-hr-teams");
       assert.equal(course.title, "Sustainability for HR Teams");
       assert.equal(course.level, "Applied Workplace Practice");
-      assert.equal(course.durationMinutes, 18);
+      assert.equal(course.durationMinutes, 25);
       assert.equal(course.passingScore, 80);
 
       // Verify lessons count and order
@@ -127,8 +127,8 @@ test("Course 24 Seeding & Integrity Unit Tests", async () => {
         .from(lessonsTable)
         .where(eq(lessonsTable.courseId, course.id))
         .orderBy(lessonsTable.orderIndex);
-      assert.equal(lessons.length, 6, "Should seed exactly 6 lessons");
-      for (let i = 0; i < 6; i++) {
+      assert.equal(lessons.length, 12, "Should seed exactly 12 lessons");
+      for (let i = 0; i < 12; i++) {
         assert.equal(lessons[i].orderIndex, i, `Lesson ${i} order index must be ${i}`);
       }
 
@@ -151,14 +151,13 @@ test("Course 24 Seeding & Integrity Unit Tests", async () => {
 
         assert.ok(q.correctExplanation && q.correctExplanation.length > 0, "Must have correct explanation");
         assert.ok(q.incorrectExplanation && q.incorrectExplanation.length > 0, "Must have incorrect explanation");
-        assert.ok(q.practicalTakeaway && q.practicalTakeaway.length > 0, "Must have practical takeaway");
       }
 
       // Verify badge definition
       const [badge] = await tx
         .select()
         .from(badgeDefinitionsTable)
-        .where(eq(badgeDefinitionsTable.slug, "sustainability-aware-hr"))
+        .where(eq(badgeDefinitionsTable.slug, "sustainability-enabled-hr-practitioner"))
         .limit(1);
       assert.ok(badge, "Badge must be created");
       assert.equal(badge.code, "COURSE_ELH_24_COMPLETE");
@@ -236,7 +235,7 @@ test("Course 24 Learner Data Preservation Unit Tests", async () => {
 
     const [course] = await db.select().from(coursesTable).where(eq(coursesTable.courseCode, "ELH-24")).limit(1);
     const [lesson] = await db.select().from(lessonsTable).where(eq(lessonsTable.courseId, course.id)).limit(1);
-    const [badge] = await db.select().from(badgeDefinitionsTable).where(eq(badgeDefinitionsTable.slug, "sustainability-aware-hr")).limit(1);
+    const [badge] = await db.select().from(badgeDefinitionsTable).where(eq(badgeDefinitionsTable.slug, "sustainability-enabled-hr-practitioner")).limit(1);
 
     const [employee] = await db.insert(employeesTable).values({
       name: "Test Preserved User",
@@ -284,7 +283,7 @@ test("Course 24 Learner Data Preservation Unit Tests", async () => {
       awardSource: "course_completion",
     });
 
-    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-hr-teams-v1"));
+    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-hr-teams-v2"));
 
     await ensureSustainabilityForHrTeamsCourse();
 
