@@ -32,7 +32,7 @@ async function cleanUpCourse27() {
     await db.delete(employeesTable).where(eq(employeesTable.id, emp.id));
   }
   await db.delete(quizAttemptsTable).where(eq(quizAttemptsTable.userId, "preserve_facilities_user_id"));
-  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-facilities-and-property-teams-v1"));
+  await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-facilities-and-property-teams-v2"));
 
   // Reset Course 29 recommendation link unconditionally
   await db.update(coursesTable)
@@ -103,7 +103,7 @@ test("Course 27 Seeding & Integrity Unit Tests", async () => {
       assert.equal(course.slug, "sustainability-for-facilities-and-property-teams");
       assert.equal(course.title, "Sustainability for Facilities and Property Teams");
       assert.equal(course.level, "Applied Workplace Practice");
-      assert.equal(course.durationMinutes, 19);
+      assert.equal(course.durationMinutes, 25);
       assert.equal(course.passingScore, 80);
 
       // Verify lessons count and order
@@ -112,8 +112,8 @@ test("Course 27 Seeding & Integrity Unit Tests", async () => {
         .from(lessonsTable)
         .where(eq(lessonsTable.courseId, course.id))
         .orderBy(lessonsTable.orderIndex);
-      assert.equal(lessons.length, 6, "Should seed exactly 6 lessons");
-      for (let i = 0; i < 6; i++) {
+      assert.equal(lessons.length, 12, "Should seed exactly 12 lessons");
+      for (let i = 0; i < 12; i++) {
         assert.equal(lessons[i].orderIndex, i, `Lesson ${i} order index must be ${i}`);
       }
 
@@ -136,7 +136,6 @@ test("Course 27 Seeding & Integrity Unit Tests", async () => {
 
         assert.ok(q.correctExplanation && q.correctExplanation.length > 0, "Must have correct explanation");
         assert.ok(q.incorrectExplanation && q.incorrectExplanation.length > 0, "Must have incorrect explanation");
-        assert.ok(q.practicalTakeaway && q.practicalTakeaway.length > 0, "Must have practical takeaway");
       }
 
       // Verify badge definition
@@ -270,7 +269,7 @@ test("Course 27 Learner Data Preservation Unit Tests", async () => {
       awardSource: "course_completion",
     });
 
-    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-facilities-and-property-teams-v1"));
+    await db.delete(systemSeedsTable).where(eq(systemSeedsTable.name, "sustainability-for-facilities-and-property-teams-v2"));
 
     await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
 

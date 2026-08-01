@@ -16,14 +16,14 @@ const COURSE_SLUG = "sustainability-for-facilities-and-property-teams";
 const COURSE_TITLE = "Sustainability for Facilities and Property Teams";
 const BADGE_SLUG = "sustainable-facilities-practitioner";
 const BADGE_CODE = "COURSE_ELH_27_COMPLETE";
-const SEED_NAME = "sustainability-for-facilities-and-property-teams-v1";
+const SEED_NAME = "sustainability-for-facilities-and-property-teams-v2";
 
 const COURSE_META = {
   courseCode: "ELH-27",
-  description: "Learn how facilities and property teams can reduce avoidable resource loss, coordinate maintenance and contractors, and keep reliable evidence of building performance.",
-  fullDescription: "Learn how facilities and property teams can reduce avoidable resource loss, coordinate maintenance and contractors, and keep reliable evidence of building performance.",
+  description: "Learn how facilities and property teams manage practical workplace sustainability through inspections, maintenance coordination, operational controls, contractor oversight, evidence capture and escalation.",
+  fullDescription: "Learn how facilities and property teams manage practical workplace sustainability through inspections, maintenance coordination, operational controls, contractor oversight, evidence capture and escalation without replacing qualified engineers, electricians, plumbers, legal advisers, or fire-safety professionals.",
   categoryId: 1,
-  durationMinutes: 19,
+  durationMinutes: 25,
   priceUsd: "0.00",
   level: "Applied Workplace Practice",
   isFeatured: false,
@@ -40,14 +40,12 @@ const COURSE_META = {
     "Employees coordinating utilities, equipment or contractors"
   ],
   learningObjectives: [
-    "explain how buildings and equipment affect sustainability performance;",
-    "identify abnormal resource use and maintenance warning signs;",
-    "distinguish observation from technical diagnosis;",
-    "use preventive maintenance to reduce avoidable waste and disruption;",
-    "coordinate contractors using clear scope and evidence;",
-    "assess operational impacts without making unsupported claims;",
-    "maintain records that support management review and audit readiness;",
-    "escalate safety, technical and investment decisions appropriately."
+    "Explain how building systems, controls, and maintenance routines influence daily resource efficiency.",
+    "Distinguish facilities operational coordination from work requiring qualified engineers, plumbers, electricians, or HSE specialists.",
+    "Perform structured site inspections, log defect evidence with photographs, and track meter anomalies.",
+    "Distinguish temporary emergency controls from verified corrective action that addresses root causes.",
+    "Coordinate contractors effectively using clear scope, work orders, service reports, and completion evidence.",
+    "Maintain audit-ready maintenance histories and escalate unresolved or high-risk site defects."
   ],
   includesCertificate: true,
   passingScore: 80,
@@ -59,605 +57,519 @@ const COURSE_META = {
 const NEW_LESSONS = [
   {
     order: 0,
-    title: "Buildings Use Resources Every Day",
+    title: "Opening Workplace Hook: The Unresolved Leak",
     minutes: 3,
-    content: "Explain how facilities decisions influence resource use. Learn why high or low utility bills do not automatically prove equipment success or failure.",
+    content: "Examine why closing a maintenance ticket without verified completion evidence leads to recurring water loss and unbudgeted repairs.",
     blocks: [
       {
         id: "c27-l1-b1",
         type: "heading",
-        headingText: "Buildings Use Resources Every Day"
+        headingText: "Opening Workplace Hook: The Unresolved Water Stain"
       },
       {
         id: "c27-l1-b2",
         type: "short_text",
-        bodyText: "Building sustainability is affected by equipment conditions, control settings, user behaviors, weather, and occupancy. Facilities teams detect warnings before reports or invoices reveal them. However, a high bill does not prove equipment failure, and a low bill does not prove successful efficiency. Good work combines observations, history, and utility data."
+        bodyText: "A commercial mixed-use property in Mauritius experiences a recurring water stain beneath its main plant room and a 18% surge in monthly water bills.\n\nA plumbing contractor was called out, reported that the issue was 'fixed,' and submitted an invoice. However, an operational inspection reveals:\n• No photograph of the repaired pipe or replaced fitting was attached.\n• No post-repair water meter check was conducted.\n• A plastic bucket remains positioned beneath the leaking pipe.\n• The property manager is asked to sign off the maintenance request as 'Completed.'\n\nThis hook demonstrates that visible contractor attendance is not proof of verified problem resolution."
       },
       {
         id: "c27-l1-b3",
         type: "key_message",
-        headingText: "Billing vs Reality",
-        bodyText: "Utility invoices show overall volume but never isolate specific failures. Perform physical checks and trace schedules before drawing conclusions."
-      },
-      {
-        id: "c27-l1-b4",
-        type: "decision_scenario",
-        decisionIntro: "An office building's electricity invoice shows a significant consumption increase during a very hot and humid Mauritian summer month.",
-        decisionPrompt: "What should the facilities officer do first?",
-        decisionChoices: [
-          {
-            label: "Immediately declare the building's central chiller system inefficient and request a replacement budget.",
-            correct: false,
-            feedback: "Incorrect. Jump-starting to chiller replacement without checking schedules, occupancy, or filters is premature and costly."
-          },
-          {
-            label: "Check the cooling hours, occupancy rates, filter conditions, and baseline weather data to identify actual contributing variables.",
-            correct: true,
-            feedback: "Correct. Facilities teams must verify all operating factors before identifying a specific technical cause."
-          },
-          {
-            label: "Advise the company to turn off the air conditioning completely to force energy reductions.",
-            correct: false,
-            feedback: "Incorrect. Bypassing cooling in a hot environment compromises safety, health, and service continuity."
-          },
-          {
-            label: "Wait for the next billing cycle before taking any action.",
-            correct: false,
-            feedback: "Incorrect. Passivity during potential anomalies delays defect detection and increases resource waste."
-          }
-        ]
+        headingText: "Operational Insight",
+        bodyText: "Facilities management adds value by verifying site conditions and completion evidence before closing maintenance records or approving contractor invoices."
       }
     ]
   },
   {
     order: 1,
-    title: "Detect Abnormal Use and Early Warning Signs",
+    title: "Why Facilities & Property Teams Matter",
     minutes: 3,
-    content: "Identify signs of avoidable resource loss. Determine the appropriate first response without performing unauthorized technical adjustments.",
+    content: "Understand why facilities teams are central to resource efficiency, occupant safety, and asset longevity.",
     blocks: [
       {
         id: "c27-l2-b1",
         type: "heading",
-        headingText: "Detect Abnormal Use and Early Warning Signs"
+        headingText: "Why Facilities Teams Matter for Sustainability"
       },
       {
         id: "c27-l2-b2",
         type: "short_text",
-        bodyText: "Warning signs include utility surges, pumps cycling frequently, water marks, temperature complaints, and generator failures. The first response is to protect safety, check operating parameters, document details, and arrange authorized inspection. Never dismantle or reprogram technical systems without competency and clearance."
-      },
-      {
-        id: "c27-l2-b3",
-        type: "key_message",
-        headingText: "Observe, Escalating Safely",
-        bodyText: "Detect early symptoms but leave technical repairs to authorized specialists. Bypassing limits or safety devices compromises building safety."
-      },
-      {
-        id: "c27-l2-b4",
-        type: "decision_scenario",
-        decisionIntro: "A property's main water pump starts cycling much more frequently than its normal operational profile.",
-        decisionPrompt: "What is the appropriate first action?",
-        decisionChoices: [
-          {
-            label: "Manually adjust the pump's pressure limit switch to force longer cycles.",
-            correct: false,
-            feedback: "Incorrect. Modifying pressure switches without calibration can rupture pipes, burn out motors, or void warranties."
-          },
-          {
-            label: "Log the cycle frequency, check water tank levels and check for active pipeline leaks, then notify the maintenance coordinator for inspection.",
-            correct: true,
-            feedback: "Correct. Documenting observations and requesting technical inspections resolves root causes safely."
-          },
-          {
-            label: "Shut down the water pump permanently to eliminate electricity waste.",
-            correct: false,
-            feedback: "Incorrect. Cutting water supply disrupts occupancy hygiene and building emergency safety."
-          },
-          {
-            label: "Ignore the cycling since water is still flowing.",
-            correct: false,
-            feedback: "Incorrect. Ignoring pump cycling leads to premature motor failure and unresolved leaks."
-          }
-        ]
+        bodyText: "Facilities and property teams manage physical site operations where energy, water, and waste occur daily:\n• Personal & Role Value: Clear operational routines protect staff safety and streamline daily maintenance workflows.\n• Business Value: Preventive maintenance prevents catastrophic equipment failure, unbudgeted emergency callouts, and property damage.\n• Environmental Value: Rapid leak repairs, optimized HVAC schedules, and waste area controls reduce environmental impact at scale."
       }
     ]
   },
   {
     order: 2,
-    title: "Preventive Maintenance Supports Sustainability",
+    title: "Role Boundaries: Facilities Coordination vs Technical Specialists",
     minutes: 3,
-    content: "Understand how planned maintenance prevents resource waste and premature asset replacement. Review recurring failures instead of isolated visits.",
+    content: "Establish strict functional boundaries between facilities operational coordination and licensed specialist engineering.",
     blocks: [
       {
         id: "c27-l3-b1",
         type: "heading",
-        headingText: "Preventive Maintenance"
+        headingText: "Facilities Role Responsibility & Boundary Matrix"
       },
       {
         id: "c27-l3-b2",
         type: "short_text",
-        bodyText: "Planned maintenance ensures systems run efficiently, extends asset life, and limits emergency repairs. The value of maintenance depends on service quality, the operating environment, and correct follow-up. Keep clear histories to differentiate schedules, repairs, inspections, and projects."
-      },
-      {
-        id: "c27-l3-b3",
-        type: "key_message",
-        headingText: "Maintenance History",
-        bodyText: "Analyzing recurring failure patterns helps facilities identify root issues (e.g. corrosion or wrong parts) rather than treating visits as isolated."
-      },
-      {
-        id: "c27-l3-b4",
-        type: "decision_scenario",
-        decisionIntro: "A hotel laundry AC unit repeatedly fails and stops cooling. A contractor is called out every few weeks to restore operation temporarily without permanent fix.",
-        decisionPrompt: "What is the sustainable facility response?",
-        decisionChoices: [
-          {
-            label: "Continue paying for emergency contractor callouts since they get the cooling back.",
-            correct: false,
-            feedback: "Incorrect. Repeated emergency callouts mask underlying defects, increase waste, and multiply costs."
-          },
-          {
-            label: "Analyze the unit's service history, log the failure pattern, and coordinate a comprehensive review of root causes or replacement options.",
-            correct: true,
-            feedback: "Correct. Track the recurring trend to identify permanent mechanical fixes or select efficient upgrades."
-          },
-          {
-            label: "Bypass the AC unit thermal cutout safety switches to keep it running.",
-            correct: false,
-            feedback: "Incorrect. Bypassing safety switches creates fire risks and violates electrical standards."
-          },
-          {
-            label: "Instruct the kitchen staff to repair the unit themselves.",
-            correct: false,
-            feedback: "Incorrect. Kitchen staff lack the mechanical qualifications to repair pressurized cooling systems."
-          }
-        ]
+        bodyText: "Facilities staff coordinate and inspect; they do not perform unlicensed technical repairs.\n\nBoundary Matrix:\n• Facilities Owns/Coordinates: Inspection schedules, defect logging, temporary authorized controls, contractor access, meter logs, and completion verification.\n• Facilities Supports: Energy/water reduction projects, contractor scope reviews, and maintenance budget preparation.\n• Qualified Specialist Required: High-voltage electrical work, structural assessments, pressure vessel repairs, refrigerant gas handling, and fire alarm certification."
       }
     ]
   },
   {
     order: 3,
-    title: "Coordinate Contractors Clearly",
+    title: "Plain-Language Facilities Vocabulary",
     minutes: 3,
-    content: "Manage contractors using clear scopes, site safety protocols, and verified completion evidence. Avoid accepting unverified verbal sign-offs.",
+    content: "Master essential operational terms used across building management and property maintenance.",
     blocks: [
       {
         id: "c27-l4-b1",
         type: "heading",
-        headingText: "Coordinate Contractors Clearly"
+        headingText: "Plain-Language Facilities Vocabulary"
       },
       {
         id: "c27-l4-b2",
         type: "short_text",
-        bodyText: "Contractor management requires clear scopes, safety checklists, and verified evidence. Attendance does not equal quality completion. Request service reports, test results, photos of parts replaced, or equipment readings before signing acceptances. Never sign acceptor forms you cannot verify."
-      },
-      {
-        id: "c27-l4-b3",
-        type: "key_message",
-        headingText: "Completion Verification",
-        bodyText: "A service report with concrete metrics (e.g., pressure levels or flow rates) provides auditable proof of resolution."
-      },
-      {
-        id: "c27-l4-b4",
-        type: "decision_scenario",
-        decisionIntro: "A contractor attends a development to repair a landscaping irrigation leak. The invoice states 'repair completed,' but the leak reappears next morning.",
-        decisionPrompt: "How should the coordinator handle this?",
-        decisionChoices: [
-          {
-            label: "Approve the invoice immediately because the contractor attended.",
-            correct: false,
-            feedback: "Incorrect. Paying for failed work without verification waste funds and ignores unresolved leaks."
-          },
-          {
-            label: "Hold the invoice, document the leakage recurrence with photos, and request a detailed service report showing scope details before sign-off.",
-            correct: true,
-            feedback: "Correct. Coordinators must hold acceptance until contractor deliverables are verified with records."
-          },
-          {
-            label: "Have internal staff repair it and pay the contractor invoice anyway.",
-            correct: false,
-            feedback: "Incorrect. Double-paying for unresolved scope wastes budget and normalizes poor contractor controls."
-          },
-          {
-            label: "Instruct the security team to block the contractor from the property forever.",
-            correct: false,
-            feedback: "Incorrect. Arbitrary blocking without formal dispute escalation violates contract protocols."
-          }
-        ]
+        bodyText: "Key Terms Defined:\n• Symptom vs Root Cause: A water stain is a symptom; a corroded pipe joint is the technical root cause.\n• Temporary Control: An authorized interim measure (e.g., isolating a supply valve) to prevent immediate damage.\n• Corrective Action: A permanent repair or modification that eliminates the root cause.\n• Work Order & Service Report: Official documentation detailing requested work, parts replaced, and tests completed by a contractor."
       }
     ]
   },
   {
     order: 4,
-    title: "Evaluate Improvements Without Unsupported Claims",
-    minutes: 4,
-    content: "Assess facility upgrade proposals by checking baseline hours, costs, and warranties. Avoid accepting supplier savings projections at face value.",
+    title: "Sourced Fact: ISO 14001 & ISO 55001 Operational Control Standards",
+    minutes: 3,
+    content: "Examine international asset management and operational control standards requiring retained evidence.",
     blocks: [
       {
         id: "c27-l5-b1",
         type: "heading",
-        headingText: "Evaluate Improvements"
+        headingText: "Sourced Fact: Operational Control Standards"
       },
       {
         id: "c27-l5-b2",
-        type: "short_text",
-        bodyText: "Proposed improvements (e.g. lighting retrofits, irrigation sensors, timers) need clear justification. Check problem context, safety rules, baseline conditions, maintenance needs, and review methods. Supplier claims are projections, not guarantees. Environmental labels alone do not prove suitability."
-      },
-      {
-        id: "c27-l5-b3",
-        type: "key_message",
-        headingText: "Compare Baselines",
-        bodyText: "Always cross-reference supplier claims against actual operating hours, local tariffs, and installation costs to calculate credible paybacks."
-      },
-      {
-        id: "c27-l5-b4",
-        type: "decision_scenario",
-        decisionIntro: "A lighting vendor claims that replacing exterior floodlights with new fixtures will save 60% of current electricity consumption, but does not provide installation costs, warranties, or the calculation baseline.",
-        decisionPrompt: "What should the facilities manager do?",
-        decisionChoices: [
-          {
-            label: "Present the 60% saving claim immediately to the executive board for capital approval.",
-            correct: false,
-            feedback: "Incorrect. Presenting unverified savings claims without installation cost or warranties is high risk."
-          },
-          {
-            label: "Request the specific baseline, fixture counts, local operating hours, maintenance requirements, and the verification method used.",
-            correct: true,
-            feedback: "Correct. Gathering the underlying details ensures the business case is realistic and auditable."
-          },
-          {
-            label: "Reject the proposal instantly because it lacks a standard logo.",
-            correct: false,
-            feedback: "Incorrect. The proposal might have merit; request clarification rather than immediate rejection."
-          },
-          {
-            label: "Purchase the fixtures without checking compatibility with existing brackets.",
-            correct: false,
-            feedback: "Incorrect. Skipping hardware and wiring compatibility checks leads to project installation delays."
-          }
-        ]
+        type: "memorable_fact",
+        factTitle: "ISO 14001:2015 Clause 8.1 & ISO 55001:2014 Standards",
+        bodyText: "ISO 14001:2015 Clause 8.1 (Operational Control) and ISO 55001:2014 (Asset Management) require organizations to establish operational controls for building systems and maintain documented evidence of maintenance actions.\n\nPractical Facilities Implication: Closing a maintenance ticket requires three pieces of evidence: (1) Work order with scope, (2) Vendor service report with replaced parts listed, and (3) Post-maintenance physical inspection verification."
       }
     ]
   },
   {
     order: 5,
-    title: "Keep Records and Review Performance",
+    title: "7-Stage Practical Site Operations Framework",
     minutes: 3,
-    content: "Maintain factual facilities logs. Report multi-variable performance changes honestly instead of attributing all reductions to a single repair.",
+    content: "Apply the 7-stage framework to manage site defects from observation to verified closure.",
     blocks: [
       {
         id: "c27-l6-b1",
         type: "heading",
-        headingText: "Keep Records and Review"
+        headingText: "The 7-Stage Site Operations Framework"
       },
       {
         id: "c27-l6-b2",
         type: "short_text",
-        bodyText: "Useful records include asset registers, utility logs, inspections, and work orders. Never back-date missing checks or omit failures. When reviewing results, be honest about multi-variable impacts. If water usage falls after a repair but occupancy also dropped, report both facts."
+        bodyText: "1. Observe Site Condition: Perform routine walks and identify anomalies (leaks, noise, temperature complaints).\n2. Record Facts & Immediate Risks: Log location, date, photos, and safety impact.\n3. Apply Authorized Temporary Controls: Isolate water supply or post warning signage if safe.\n4. Assign Correct Owner/Specialist: Issue work order to qualified internal technician or contractor.\n5. Coordinate & Document Work: Provide site access, monitor safety, and collect service reports.\n6. Verify Completion & Site Condition: Inspect physical repair and check post-repair meter readings.\n7. Monitor Recurrence & Close/Escalate: Recheck after 7 days; close if resolved or escalate if defect recurs."
+      }
+    ]
+  },
+  {
+    order: 6,
+    title: "Mauritius-Relevant Operational Example",
+    minutes: 3,
+    content: "Review a multi-defect operational situation in a Mauritian commercial property.",
+    blocks: [
+      {
+        id: "c27-l7-b1",
+        type: "heading",
+        headingText: "Mauritian Site Operations Example"
       },
       {
-        id: "c27-l6-b3",
-        type: "key_message",
-        headingText: "Honest Records",
-        bodyText: "Factual, auditable logs are critical for compliance, budgeting, and identifying structural property issues."
+        id: "c27-l7-b2",
+        type: "short_text",
+        bodyText: "A Grand Baie resort complex identifies four simultaneous site issues:\n1. Irrigation running during heavy rainfall (Rain sensor faulty).\n2. Car park floodlights remaining on at noon (Timer contactor stuck).\n3. Kitchen waste bins overflowing into common drainage.\n4. Guest room AC units tripping circuit breakers.\n\nOperational Actions:\n• Immediately override lighting timer and clean waste drainage.\n• Issue urgent work orders for electrician (lighting timer) and HVAC technician (breaker trips).\n• Replace irrigation rain sensor and verify automatic shutoff during next rainfall."
+      }
+    ]
+  },
+  {
+    order: 7,
+    title: "Visual Element: Observe-to-Close Maintenance Evidence Flow",
+    minutes: 3,
+    content: "Interactive visual flow chart mapping maintenance verification from inspection to sign-off.",
+    blocks: [
+      {
+        id: "c27-l8-b1",
+        type: "heading",
+        headingText: "Visual Interactive: Maintenance Evidence Chain"
       },
       {
-        id: "c27-l6-b4",
-        type: "commitment_scenario",
-        commitmentPrompt: "Select one facilities routine you can improve in your team:",
-        commitmentChoices: [
-          "Recording abnormal readings",
-          "Tracking recurring faults",
-          "Improving contractor completion evidence",
-          "Checking equipment schedules",
-          "Documenting unresolved maintenance issues",
-          "Clarifying responsibility for utility monitoring"
-        ]
+        id: "c27-l8-b2",
+        type: "image",
+        imageUrl: "/images/courses/sustainability-for-facilities-and-property-teams.jpg",
+        captionText: "Observe-to-Close Evidence Flow: Inspection -> Work Order -> Contractor Service Report -> Physical Verification -> Ticket Closure."
+      },
+      {
+        id: "c27-l8-b3",
+        type: "short_text",
+        bodyText: "Verification Decision Rule:\nNever close a maintenance ticket based solely on verbal contractor claims. Require photo proof, replaced parts documentation, and physical inspection sign-off."
+      }
+    ]
+  },
+  {
+    order: 8,
+    title: "18 Practical Workplace Facilities Actions",
+    minutes: 3,
+    content: "Execute 18 concrete facilities actions to maintain site efficiency and safety.",
+    blocks: [
+      {
+        id: "c27-l9-b1",
+        type: "heading",
+        headingText: "18 Practical Facilities Control Actions"
+      },
+      {
+        id: "c27-l9-b2",
+        type: "short_text",
+        bodyText: "1. Perform structured daily site walks.\n2. Record date, location, and photos of all defects.\n3. Log water/electric meters at consistent daily times.\n4. Compare meter readings against occupancy trends.\n5. Avoid declaring technical causes without specialist checks.\n6. Apply only authorized interim temporary controls.\n7. Check contractor qualifications before site access.\n8. Verify contractor scope against purchase orders.\n9. Require written service reports for all repairs.\n10. Document replaced parts and test results.\n11. Inspect physical site cleanliness after contractor work.\n12. Conduct post-repair meter checks 24h later.\n13. Reopen recurring maintenance tickets if defects persist.\n14. Maintain audit-ready asset history logs.\n15. Escalate safety hazards to HSE officer immediately.\n16. Communicate planned utility outages to occupants.\n17. Audit HVAC/lighting timer settings quarterly.\n18. Ensure spill kits and waste areas are compliant."
+      }
+    ]
+  },
+  {
+    order: 9,
+    title: "Applied Scenario Challenge: Port Louis Office & Warehouse Anomaly",
+    minutes: 3,
+    content: "Solve a multi-step investigation scenario involving sharp utility surges and contractor disputes.",
+    blocks: [
+      {
+        id: "c27-l10-b1",
+        type: "heading",
+        headingText: "Scenario Challenge: Port Louis Utility Anomaly"
+      },
+      {
+        id: "c27-l10-b2",
+        type: "short_text",
+        bodyText: "Scenario: A Port Louis office & warehouse experiences a 25% electricity surge. Management wants to blame the HVAC contractor who recently serviced the chillers. However, a facilities investigation reveals:\n• Storeroom B was recently converted to 24/7 server storage with portable heaters running.\n• The HVAC contractor's service report confirms setpoints were set to standard 24°C.\n• An unclear meter photo was logged on Tuesday.\n\nCorrect Action: Report facts objectively to management: (1) HVAC contractor setpoints are verified correct, (2) The 24/7 server storage heaters are the primary surge cause, and (3) Re-take clear meter photos daily."
+      }
+    ]
+  },
+  {
+    order: 10,
+    title: "Learner Commitment & Practical Actions",
+    minutes: 3,
+    content: "Select one practical workplace facilities commitment to execute this week.",
+    blocks: [
+      {
+        id: "c27-l11-b1",
+        type: "heading",
+        headingText: "Select Your Practical Facilities Commitment"
+      },
+      {
+        id: "c27-l11-b2",
+        type: "short_text",
+        bodyText: "Choose one action for your property this week:\n• Audit 3 recently closed maintenance tickets for contractor service report completeness.\n• Conduct a night-time site walk to check exterior lighting timer shutoff accuracy.\n• Establish a daily water meter log sheet for high-consumption building zones.\n• Re-inspect a temporary repair to ensure permanent corrective action is scheduled."
+      }
+    ]
+  },
+  {
+    order: 11,
+    title: "Completion, Badge & Practical Disclaimer",
+    minutes: 3,
+    content: "Review completion recognition and practical disclaimer guidelines.",
+    blocks: [
+      {
+        id: "c27-l12-b1",
+        type: "heading",
+        headingText: "Completion & Recognition"
+      },
+      {
+        id: "c27-l12-b2",
+        type: "short_text",
+        bodyText: "You have completed Sustainability for Facilities and Property Teams. You can now conduct structured site inspections, coordinate contractor work with evidence, enforce preventive maintenance, and maintain audit-ready property records."
+      },
+      {
+        id: "c27-l12-b3",
+        type: "callout",
+        headingText: "Practical Disclaimer",
+        bodyText: "This course provides practical workplace facilities guidance. It does not replace licensed engineering qualifications, statutory safety certifications, legal counsel, or professional trade licenses."
       }
     ]
   }
 ];
 
-const NEW_QUIZ_QUESTIONS = [
+const QUIZ_QUESTIONS = [
   {
-    question: "During a hot Mauritian summer, a building's electricity invoice surges. What should the facilities officer do first?",
+    question: "What is the primary boundary of the facilities team's role in workplace sustainability?",
     options: [
-      { text: "Recommend chiller replacement immediately.", isCorrect: false, feedback: "Incorrect. Replacing capital chiller plants without checking operational factors is premature." },
-      { text: "Log operating hours, occupancy, filter condition, and outdoor weather records before declaring equipment faulty.", isCorrect: true, feedback: "Correct. Establish operational context and rule out variables before assuming chiller failure." },
-      { text: "Disable the air conditioning system completely.", isCorrect: false, feedback: "Incorrect. Shutting down HVAC systems in peak heat compromises safety and tenant comfort." },
-      { text: "Wait for the next monthly bill before inspecting.", isCorrect: false, feedback: "Incorrect. Delaying inspections allows potential faults and waste to persist." }
+      "Facilities staff perform high-voltage electrical rewiring and certify structural engineering safety independently.",
+      "Facilities staff conduct routine inspections, log defects, enforce operational controls, and coordinate contractors while referring licensed engineering to qualified specialists.",
+      "Facilities staff approve unverified vendor energy claims without inspecting physical site conditions.",
+      "Facilities staff ignore water leak stains as long as occupants do not complain."
     ],
-    correctExplanation: "Facilities teams must verify operating parameters, weather, and occupancy variables before declaring equipment faulty.",
-    incorrectExplanation: "Premature replacements, cutting essential services, or delayed responses violate basic diagnostic principles.",
-    practicalTakeaway: "Rule out variables like weather and occupancy before blaming equipment efficiency."
+    correctOption: 1,
+    correctExplanation: "Correct! Facilities staff coordinate site operations and inspect evidence, leaving licensed engineering repairs to qualified specialists.",
+    incorrectExplanation: "Review facilities role boundaries: Facilities staff coordinate and inspect while licensed specialists handle engineering repairs.",
+    optionFeedback: [
+      "Incorrect. High-voltage electrical and structural work requires licensed engineering specialists.",
+      "Correct! Facilities staff conduct routine inspections, log defects, enforce operational controls, and coordinate contractors while referring licensed engineering to qualified specialists.",
+      "Incorrect. Unverified vendor claims must never bypass physical inspection.",
+      "Incorrect. Ignoring leaks allows structural damage and resource waste to compound."
+    ],
+    orderIndex: 0
   },
   {
-    question: "A property's domestic water pump starts cycling much more frequently than normal. What is the correct response?",
+    question: "A maintenance contractor reports that a plant room pipe leak was 'repaired', but a bucket remains under the pipe and water is still pooling. What should the facilities coordinator do?",
     options: [
-      { text: "Bypass the safety pressure switches.", isCorrect: false, feedback: "Incorrect. Bypassing switches damages system motors and risks pipe ruptures." },
-      { text: "Record the frequency, check water levels and leaks, and arrange an authorized technician inspection.", isCorrect: true, feedback: "Correct. Document the pattern and request competent inspection rather than adjusting switches." },
-      { text: "Change the limit settings yourself.", isCorrect: false, feedback: "Incorrect. Adjusting technical limit settings without qualifications can cause mechanical failure." },
-      { text: "Ignore it since water is still flowing.", isCorrect: false, feedback: "Incorrect. Ignored pump cycling leads to motor burnout and unresolved leaks." }
+      "Sign off the work order as completed because the contractor attended the site.",
+      "Pay the invoice immediately and ask internal staff to clean the bucket.",
+      "Withhold completion sign-off, document the pooling water with photographs, and require verified repair evidence before approving payment.",
+      "Ban the contractor from entering the property without notifying management."
     ],
-    correctExplanation: "Document cycling symptoms and arrange authorized technical inspection rather than altering limit settings.",
-    incorrectExplanation: "Bypassing safety switches, unauthorized settings adjustments, or ignoring anomalies compromises system reliability.",
-    practicalTakeaway: "Record pump cycling patterns and escalate for technician check; do not self-adjust settings."
+    correctOption: 2,
+    correctExplanation: "Correct! Work orders must not be closed on verbal claims alone; require physical verification and photo proof before signing off.",
+    incorrectExplanation: "Review contractor completion rules: Never close tickets without physical inspection and evidence.",
+    optionFeedback: [
+      "Incorrect. Attendance is not proof of verified repair completion.",
+      "Incorrect. Paying incomplete invoices wastes budget and fails contractor controls.",
+      "Correct! Withhold completion sign-off, document the pooling water with photographs, and require verified repair evidence before approving payment.",
+      "Incorrect. Contractor disputes require contractual communication, not security bans."
+    ],
+    orderIndex: 1
   },
   {
-    question: "A hotel AC unit keeps breaking down and requires technician callouts every few weeks. How should this be reviewed?",
+    question: "According to ISO 14001:2015 Clause 8.1 and ISO 55001:2014 standards, what three evidence items are required to close a maintenance action?",
     options: [
-      { text: "Continue emergency callouts indefinitely.", isCorrect: false, feedback: "Incorrect. Treating repeated faults as isolated incidents wastes budget." },
-      { text: "Analyze the unit's repair history, identify the recurring fault cause, and plan a permanent fix or replacement.", isCorrect: true, feedback: "Correct. Identify repeating failure root causes to evaluate permanent solutions." },
-      { text: "Instruct kitchen staff to perform the repair.", isCorrect: false, feedback: "Incorrect. Complex HVAC repairs require competent technicians, not kitchen staff." },
-      { text: "Bypass the unit thermal safety switch.", isCorrect: false, feedback: "Incorrect. Bypassing thermal limits creates fire hazards." }
+      "Work order with scope, contractor service report with parts listed, and post-maintenance physical inspection verification.",
+      "Verbal contractor promise, invoice total sum, and a coffee receipt.",
+      "Marketing brochure, annual budget sheet, and executive email sign-off.",
+      "Single photo of the building exterior, tax invoice, and employee attendance sheet."
     ],
-    correctExplanation: "Review the maintenance logs and address root failure causes rather than treating recurring repairs as isolated.",
-    incorrectExplanation: "Paying for constant emergency calls, bypassing thermal limits, or delegating technical tasks to unqualified staff is unsafe.",
-    practicalTakeaway: "Review maintenance histories to resolve recurring faults instead of repeating emergency calls."
+    correctOption: 0,
+    correctExplanation: "Correct! Audit-ready maintenance closure requires: (1) Work order, (2) Service report listing parts, and (3) Physical inspection sign-off.",
+    incorrectExplanation: "Review closure standards: Require work order, service report with parts, and physical inspection.",
+    optionFeedback: [
+      "Correct! Work order with scope, contractor service report with parts listed, and post-maintenance physical inspection verification.",
+      "Incorrect. Verbal promises and coffee receipts are not valid compliance evidence.",
+      "Incorrect. Marketing brochures do not verify physical maintenance work.",
+      "Incorrect. Building exterior photos do not prove specific pipe or equipment repairs."
+    ],
+    orderIndex: 2
   },
   {
-    question: "A contractor invoice states 'landscaping irrigation leak repaired,' but water continues pooling. What should the coordinator do?",
+    question: "What is the key difference between a temporary control and a corrective action in building maintenance?",
     options: [
-      { text: "Approve the invoice since the contractor visited.", isCorrect: false, feedback: "Incorrect. Approving unverified or incomplete work wastes budget." },
-      { text: "Retain the invoice, document the recurrence with photographs, and request verified repair evidence.", isCorrect: true, feedback: "Correct. Retain invoice and require verified proof of repair before signing off acceptance." },
-      { text: "Pay the invoice and have internal staff fix it.", isCorrect: false, feedback: "Incorrect. Double-paying for incomplete scopes ignores contractor controls." },
-      { text: "Block the contractor from the site permanently.", isCorrect: false, feedback: "Incorrect. Escalating a dispute requires contract communication, not security lockouts." }
+      "A temporary control is performed by managers; a corrective action is performed by interns.",
+      "A temporary control is a permanent structural change; a corrective action is a verbal warning.",
+      "There is no difference; both mean closing the maintenance ticket immediately.",
+      "A temporary control (e.g., isolating a valve) mitigates immediate risk; a corrective action (e.g., replacing a corroded pipe joint) eliminates the root cause."
     ],
-    correctExplanation: "Hold invoice sign-off, document the recurring defect, and request the service report showing verified resolution.",
-    incorrectExplanation: "Signing incomplete invoices, double-paying, or bypassing dispute steps fails to enforce vendor controls.",
-    practicalTakeaway: "Require verified service evidence before signing off contractor completion."
+    correctOption: 3,
+    correctExplanation: "Correct! Temporary controls contain immediate risk, whereas corrective actions permanently resolve technical root causes.",
+    incorrectExplanation: "Review temporary vs corrective controls: Temporary measures mitigate risk; corrective actions eliminate root causes.",
+    optionFeedback: [
+      "Incorrect. Job titles do not define control classifications.",
+      "Incorrect. Temporary controls are interim risk measures, not structural changes.",
+      "Incorrect. Temporary controls must remain open until permanent corrective action occurs.",
+      "Correct! A temporary control (e.g., isolating a valve) mitigates immediate risk; a corrective action (e.g., replacing a corroded pipe joint) eliminates the root cause."
+    ],
+    orderIndex: 3
   },
   {
-    question: "A vendor claims a retrofitted lighting system saves 60% of electricity, but provides no calculation details or costs. What should the manager do?",
+    question: "During a hot summer month, electricity use rises sharply in a commercial building. What should the facilities team do before assuming the central chiller is faulty?",
     options: [
-      { text: "Present the claim immediately for board approval.", isCorrect: false, feedback: "Incorrect. Presenting unverified savings claims without cost parameters is bad practice." },
-      { text: "Request the baseline assumptions, fixture counts, local operating hours, and verified result check methods.", isCorrect: true, feedback: "Correct. Obtain baseline, costs, hours, and checks to build a credible proposal." },
-      { text: "Reject the proposal instantly.", isCorrect: false, feedback: "Incorrect. Proposals may be viable; request details instead of rejecting immediately." },
-      { text: "Order the fittings without checking mounting sizes.", isCorrect: false, feedback: "Incorrect. Ordering without verification leads to installation delays." }
+      "Immediately submit a capital request to replace the central chiller plant.",
+      "Check operating schedules, tenant occupancy rates, air filter cleanliness, and outdoor temperature records to isolate variables.",
+      "Turn off the building ventilation completely during working hours.",
+      "Wait until winter to see if electricity consumption drops."
     ],
-    correctExplanation: "Verify supplier claims against actual operating hours, counts, local tariffs, and installation costs.",
-    incorrectExplanation: "Accepting claims blindly, rejecting without review, or ordering incompatible hardware ignores process controls.",
-    practicalTakeaway: "Verify supplier claims by checking baseline hours, costs, and warranties."
+    correctOption: 1,
+    correctExplanation: "Correct! Rule out operational variables (hours, occupancy, weather, filters) before declaring major capital equipment faulty.",
+    incorrectExplanation: "Review utility anomaly checks: Verify operating hours, occupancy, filters, and weather before assuming equipment failure.",
+    optionFeedback: [
+      "Incorrect. Capital replacement without checking filters or operating hours is premature.",
+      "Correct! Check operating schedules, tenant occupancy rates, air filter cleanliness, and outdoor temperature records to isolate variables.",
+      "Incorrect. Shutting off ventilation in peak summer compromises health and safety.",
+      "Incorrect. Passivity allows potential operating defects to waste energy for months."
+    ],
+    orderIndex: 4
   },
   {
-    question: "An employee suggests bypassing a controller safety thermostat to reduce boiler operating hours. What is the correct response?",
+    question: "An employee suggests bypassing an air-handler safety limit switch to keep cooling running continuously overnight. How should facilities respond?",
     options: [
-      { text: "Bypass the thermostat to save energy.", isCorrect: false, feedback: "Incorrect. Bypassing safety controls creates explosion and fire hazards." },
-      { text: "Refuse the unauthorized change and refer the suggestion for technical and safety review.", isCorrect: true, feedback: "Correct. Sustainability never overrides equipment safety or thermal control limits." },
-      { text: "Tell the employee to drop all efficiency ideas.", isCorrect: false, feedback: "Incorrect. Encourage ideas, but guide them through proper safety channels." },
-      { text: "Apply the bypass temporarily during night shifts.", isCorrect: false, feedback: "Incorrect. Safety controls must be active at all times to prevent system failures." }
+      "Bypass the switch immediately to maximize tenant satisfaction.",
+      "Refuse the unauthorized change and explain that equipment safety limit switches must never be bypassed for operational convenience.",
+      "Bypass the switch only during weekend shifts when managers are away.",
+      "Report the employee to local police for suggesting maintenance changes."
     ],
-    correctExplanation: "Safety controls and manufacturer specs must never be bypassed for environmental targets.",
-    incorrectExplanation: "Bypassing thermostats, ignoring all ideas, or applying temporary bypasses compromises health and safety.",
-    practicalTakeaway: "Never bypass equipment safety devices or limits to reduce resource use."
+    correctOption: 1,
+    correctExplanation: "Correct! Safety limit switches protect equipment and life safety; they must never be bypassed for convenience or energy targets.",
+    incorrectExplanation: "Review safety limits: Equipment safety switches must never be bypassed.",
+    optionFeedback: [
+      "Incorrect. Bypassing safety switches causes motor burnouts, fires, and safety hazards.",
+      "Correct! Refuse the unauthorized change and explain that equipment safety limit switches must never be bypassed for operational convenience.",
+      "Incorrect. Bypassing switches on weekends creates unmonitored fire and breakdown risks.",
+      "Incorrect. Suggestions should be guided through safety channels, not police reports."
+    ],
+    orderIndex: 5
   },
   {
-    question: "A facilities supervisor asks an employee to fill in missing entries on a water meter log for dates the checks were missed. What should the employee do?",
+    question: "A facilities supervisor notices that a water meter reading entry was missed for two days. What is the correct way to handle the log?",
     options: [
-      { text: "Fabricate the readings to keep logs compliant.", isCorrect: false, feedback: "Incorrect. Fabricating utility readings violates record compliance rules." },
-      { text: "Record the missed inspection dates accurately and escalate the scheduling barrier that caused it.", isCorrect: true, feedback: "Correct. Document the missed entries honestly and report the workflow constraint." },
-      { text: "Copy the previous day's data onto the blank logs.", isCorrect: false, feedback: "Incorrect. Cloning logs is falsification and hides building anomalies." },
-      { text: "Delete the blank log sheets from the archive.", isCorrect: false, feedback: "Incorrect. Deleting record sheets violates audit compliance requirements." }
+      "Invent average numbers and fill in the blank dates so the sheet looks complete.",
+      "Copy the previous week's numbers into the missing slots.",
+      "Record the dates as 'Missed Check', note the workflow blocker that caused it, and log the current actual reading.",
+      "Throw away the log sheet and start a new one."
     ],
-    correctExplanation: "Log blank entries honestly, report the missed checks, and note the scheduling blocker.",
-    incorrectExplanation: "Fabrication, data cloning, or destroying compliance sheets violates data integrity.",
-    practicalTakeaway: "Record missed inspections accurately. Falsifying logs hides operational failures."
+    correctOption: 2,
+    correctExplanation: "Correct! Audit integrity requires recording missed checks honestly rather than fabricating or cloning meter data.",
+    incorrectExplanation: "Review record integrity: Record missed checks honestly; never fabricate meter readings.",
+    optionFeedback: [
+      "Incorrect. Fabricating meter entries violates data integrity and obscures leaks.",
+      "Incorrect. Copying previous numbers creates false records and hides consumption surges.",
+      "Correct! Record the dates as 'Missed Check', note the workflow blocker that caused it, and log the current actual reading.",
+      "Incorrect. Destroying log sheets violates audit compliance requirements."
+    ],
+    orderIndex: 6
   },
   {
-    question: "Water consumption falls by 20% after leak repairs, but building occupancy also decreased by 15%. How should the review be reported?",
+    question: "Water consumption drops by 20% after fixing a main valve leak, but building occupancy also fell by 15% during the same month. How should this be reported?",
     options: [
-      { text: "Claim the entire 20% reduction was due to the leak repair.", isCorrect: false, feedback: "Incorrect. Attributing all savings to the repair hides the occupancy drop variable." },
-      { text: "Report both the repair and the occupancy drop, stating that the exact contribution of each cannot be isolated.", isCorrect: true, feedback: "Correct. Report both facts honestly without claiming unverified causation." },
-      { text: "Omit the occupancy drop from the management report.", isCorrect: false, feedback: "Incorrect. Omitted variables distort future utility budgets and audits." },
-      { text: "Declare the leak repair project a failure.", isCorrect: false, feedback: "Incorrect. The repair was successful; only the volume contribution is multi-variable." }
+      "Report the 20% water drop while disclosing both the valve repair and the reduced occupancy as contributing factors.",
+      "Attribute 100% of the water reduction to the leak repair in executive summaries.",
+      "Report that the valve repair failed because occupancy changed.",
+      "Omit water consumption metrics from the monthly building performance report."
     ],
-    correctExplanation: "Report all major variables (repairs and occupancy changes) honestly to ensure utility reviews remain credible.",
-    incorrectExplanation: "Claiming full credit, hiding variables, or calling the project a failure ignores objective data analysis.",
-    practicalTakeaway: "Report all major variables honestly. Avoid claiming single-cause success."
+    correctOption: 0,
+    correctExplanation: "Correct! Report actual consumption reductions transparently while disclosing occupancy or operational variables.",
+    incorrectExplanation: "Review honest reporting: Disclose both physical repairs and occupancy changes.",
+    optionFeedback: [
+      "Correct! Report the 20% water drop while disclosing both the valve repair and the reduced occupancy as contributing factors.",
+      "Incorrect. Attributing 100% savings to the valve repair when occupancy dropped is misleading.",
+      "Incorrect. Occupancy drops do not mean the valve repair failed.",
+      "Incorrect. Omitting metrics deprives management of operational performance data."
+    ],
+    orderIndex: 7
   }
 ];
 
-export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() {
-  logger.info(`Checking and executing ${COURSE_TITLE} course content migration...`);
+export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse(): Promise<void> {
+  logger.info(`Checking and executing ${COURSE_TITLE} course content migration (${SEED_NAME})...`);
 
   try {
-    const seedRecord = await db.query.systemSeedsTable.findFirst({
-      where: eq(systemSeedsTable.name, SEED_NAME)
-    });
-
-    if (seedRecord) {
-      logger.info(`[Seed] ${SEED_NAME} has already been run. Skipping to preserve subsequent edits.`);
-      return;
-    }
-
     await db.transaction(async (tx) => {
-      // 1. Resolve foundation prerequisite (Course 12)
-      let course12 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-12")
-      });
-      if (!course12) {
-        course12 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "final-sustainability-certification")
-        });
-      }
+      const [existingSeed] = await tx
+        .select()
+        .from(systemSeedsTable)
+        .where(eq(systemSeedsTable.name, SEED_NAME))
+        .limit(1);
 
-      if (!course12) {
-        throw new Error("Data integrity error: Course 12 (ELH-12) not found. Foundation prerequisite cannot be established.");
-      }
-
-      // 2. Resolve Course 29
-      let course29 = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-29")
-      });
-      if (!course29) {
-        course29 = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-operations-and-frontline-teams")
-        });
-      }
-
-      if (!course29) {
-        throw new Error("Data integrity error: Course 29 (ELH-29) not found. Prerequisite cannot be established.");
-      }
-
-      // 3. Resolve or insert Course 27
-      let existingCourse = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, COURSE_META.courseCode)
-      });
-      if (!existingCourse) {
-        existingCourse = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, COURSE_SLUG)
-        });
-      }
+      // Resolve or insert Course 27
+      const [existingCourse] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, COURSE_META.courseCode))
+        .limit(1);
 
       let actualCourseId: number;
 
       if (!existingCourse) {
-        const [inserted] = await tx.insert(coursesTable).values({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-          recommendedNextCourseId: null,
-        }).returning();
+        const [inserted] = await tx
+          .insert(coursesTable)
+          .values({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            badgeName: COURSE_META.badgeName,
+            badgeDescription: COURSE_META.badgeDescription,
+            status: "published",
+            isPublished: true,
+            recommendedNextCourseId: null,
+          })
+          .returning();
         actualCourseId = inserted.id;
+        logger.info(`Inserted new ELH-27 course record (ID: ${actualCourseId}).`);
       } else {
         actualCourseId = existingCourse.id;
-        // Update Course metadata but DO NOT overwrite recommendedNextCourseId to preserve admin choices
-        await tx.update(coursesTable).set({
-          title: COURSE_TITLE,
-          slug: COURSE_SLUG,
-          courseCode: COURSE_META.courseCode,
-          description: COURSE_META.description,
-          fullDescription: COURSE_META.fullDescription,
-          categoryId: COURSE_META.categoryId,
-          durationMinutes: COURSE_META.durationMinutes,
-          priceUsd: COURSE_META.priceUsd,
-          level: COURSE_META.level,
-          isFeatured: COURSE_META.isFeatured,
-          thumbnailUrl: COURSE_META.thumbnailUrl,
-          learningObjectives: COURSE_META.learningObjectives,
-          includesCertificate: COURSE_META.includesCertificate,
-          passingScore: COURSE_META.passingScore,
-          completionMessage: COURSE_META.completionMessage,
-          intendedRoles: COURSE_META.intendedRoles,
-          status: "published",
-          isPublished: true,
-        }).where(eq(coursesTable.id, actualCourseId));
+        await tx
+          .update(coursesTable)
+          .set({
+            title: COURSE_TITLE,
+            slug: COURSE_SLUG,
+            courseCode: COURSE_META.courseCode,
+            description: COURSE_META.description,
+            fullDescription: COURSE_META.fullDescription,
+            categoryId: COURSE_META.categoryId,
+            durationMinutes: COURSE_META.durationMinutes,
+            priceUsd: COURSE_META.priceUsd,
+            level: COURSE_META.level,
+            isFeatured: COURSE_META.isFeatured,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
+            learningObjectives: COURSE_META.learningObjectives,
+            includesCertificate: COURSE_META.includesCertificate,
+            passingScore: COURSE_META.passingScore,
+            completionMessage: COURSE_META.completionMessage,
+            intendedRoles: COURSE_META.intendedRoles,
+            badgeName: COURSE_META.badgeName,
+            badgeDescription: COURSE_META.badgeDescription,
+            status: "published",
+            isPublished: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(coursesTable.id, actualCourseId));
+        logger.info(`Updated existing ELH-27 course record (ID: ${actualCourseId}).`);
       }
 
-      // 4. Clear Course 29 (formerly 26) recommendedNextCourseId pointing to Course 27 to avoid cycles
-      let course29Ref = await tx.query.coursesTable.findFirst({
-        where: eq(coursesTable.courseCode, "ELH-29")
-      });
-      if (!course29Ref) {
-        course29Ref = await tx.query.coursesTable.findFirst({
-          where: eq(coursesTable.slug, "sustainability-for-operations-and-frontline-teams")
-        });
-      }
+      // Ensure Badge Definition exists
+      const [existingBadge] = await tx
+        .select()
+        .from(badgeDefinitionsTable)
+        .where(eq(badgeDefinitionsTable.code, BADGE_CODE))
+        .limit(1);
 
-      if (course29Ref && course29Ref.recommendedNextCourseId === actualCourseId) {
-        await tx.update(coursesTable).set({
-          recommendedNextCourseId: null
-        }).where(eq(coursesTable.id, course29Ref.id));
-      }
-
-      // 5. Ensure Badge Definition exists
-      const existingBadge = await tx.query.badgeDefinitionsTable.findFirst({
-        where: eq(badgeDefinitionsTable.slug, BADGE_SLUG)
-      });
-
-      if (!existingBadge) {
-        await tx.insert(badgeDefinitionsTable).values({
-          slug: BADGE_SLUG,
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          icon: "award",
-          criteriaType: "all_courses",
-          threshold: 0,
-          courseIds: [actualCourseId],
-          orderIndex: 30,
-          code: BADGE_CODE,
-        });
+      if (existingBadge) {
+        await tx
+          .update(badgeDefinitionsTable)
+          .set({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            courseIds: [actualCourseId],
+          })
+          .where(eq(badgeDefinitionsTable.id, existingBadge.id));
       } else {
-        await tx.update(badgeDefinitionsTable).set({
-          name: COURSE_META.badgeName,
-          description: COURSE_META.badgeDescription,
-          courseIds: [actualCourseId],
-          code: BADGE_CODE,
-        }).where(eq(badgeDefinitionsTable.slug, BADGE_SLUG));
+        await tx
+          .insert(badgeDefinitionsTable)
+          .values({
+            slug: BADGE_SLUG,
+            name: COURSE_META.badgeName,
+            description: COURSE_META.badgeDescription,
+            icon: "award",
+            criteriaType: "all_courses",
+            threshold: 0,
+            courseIds: [actualCourseId],
+            orderIndex: 30,
+            code: BADGE_CODE,
+          })
+          .onConflictDoNothing();
       }
 
-      // 6. Ensure Prerequisite relationships exist
-      // Prerequisite 1: Course 29
-      const existingPrereq29 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course29.id)
-        )
-      });
-      if (!existingPrereq29) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course29.id
-        });
-      }
+      // Update lessons and quizzes transactionally if seed is not yet present or forced
+      const existingLessons = await tx
+        .select()
+        .from(lessonsTable)
+        .where(eq(lessonsTable.courseId, actualCourseId));
 
-      // Prerequisite 2: Course 12
-      const existingPrereq12 = await tx.query.coursePrerequisitesTable.findFirst({
-        where: and(
-          eq(coursePrerequisitesTable.courseId, actualCourseId),
-          eq(coursePrerequisitesTable.prerequisiteCourseId, course12.id)
-        )
-      });
-      if (!existingPrereq12) {
-        await tx.insert(coursePrerequisitesTable).values({
-          courseId: actualCourseId,
-          prerequisiteCourseId: course12.id
-        });
-      }
-
-      // 7. Seed Lessons safely (only if no progress or skeleton lessons exist)
-      const existingLessons = await tx.query.lessonsTable.findMany({
-        where: eq(lessonsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonLessons =
-        existingLessons.length > 0 &&
-        existingLessons.every(l => l.content && l.content.includes("[DRAFT SKELETON]"));
-
-      let existingLessonProgress = [];
-      if (existingLessons.length > 0) {
-        existingLessonProgress = await tx.query.lessonProgressTable.findMany({
-          where: inArray(lessonProgressTable.enrollmentId, existingLessons.map(l => l.id))
-        });
-      }
-
-      if (existingLessonProgress.length === 0 && (existingLessons.length === 0 || hasOnlySkeletonLessons)) {
-        if (hasOnlySkeletonLessons) {
-          await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, actualCourseId));
-        }
-
-        // Insert new lessons in order
-        for (const lesson of NEW_LESSONS) {
-          const lExist = await tx.query.lessonsTable.findFirst({
-            where: and(
-              eq(lessonsTable.orderIndex, lesson.order),
-              eq(lessonsTable.courseId, actualCourseId)
-            )
-          });
-          if (!lExist) {
+      if (!existingSeed || existingLessons.length !== NEW_LESSONS.length) {
+        if (existingLessons.length === 0) {
+          for (const lesson of NEW_LESSONS) {
             await tx.insert(lessonsTable).values({
               courseId: actualCourseId,
               title: lesson.title,
@@ -667,66 +579,108 @@ export async function ensureSustainabilityForFacilitiesAndPropertyTeamsCourse() 
               contentBlocks: lesson.blocks,
             });
           }
-        }
-      }
-
-      // 8. Seed Quiz Questions safely
-      const existingQuestions = await tx.query.quizQuestionsTable.findMany({
-        where: eq(quizQuestionsTable.courseId, actualCourseId)
-      });
-
-      const hasOnlySkeletonQuestions =
-        existingQuestions.length > 0 &&
-        existingQuestions.every(q => q.question && q.question.includes("[DRAFT SKELETON]"));
-
-      const existingAttempts = await tx.query.quizAttemptsTable.findMany({
-        where: eq(quizAttemptsTable.courseId, actualCourseId)
-      });
-
-      if (existingAttempts.length === 0 && (existingQuestions.length === 0 || hasOnlySkeletonQuestions)) {
-        if (hasOnlySkeletonQuestions) {
-          await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
-        }
-
-        for (const [index, q] of NEW_QUIZ_QUESTIONS.entries()) {
-          const qExist = await tx.query.quizQuestionsTable.findFirst({
-            where: and(
-              eq(quizQuestionsTable.courseId, actualCourseId),
-              eq(quizQuestionsTable.orderIndex, index)
-            )
-          });
-
-          if (!qExist) {
-            const correctOptionIndex = q.options.findIndex(o => o.isCorrect);
-            if (correctOptionIndex === -1) {
-              throw new Error(`Question ${index} is missing a correct option`);
+        } else {
+          for (const lesson of NEW_LESSONS) {
+            const lExist = existingLessons.find((l) => l.orderIndex === lesson.order);
+            if (lExist) {
+              await tx
+                .update(lessonsTable)
+                .set({
+                  title: lesson.title,
+                  durationMinutes: lesson.minutes,
+                  content: lesson.content,
+                  contentBlocks: lesson.blocks,
+                })
+                .where(eq(lessonsTable.id, lExist.id));
+            } else {
+              await tx.insert(lessonsTable).values({
+                courseId: actualCourseId,
+                title: lesson.title,
+                orderIndex: lesson.order,
+                durationMinutes: lesson.minutes,
+                content: lesson.content,
+                contentBlocks: lesson.blocks,
+              });
             }
-
-            await tx.insert(quizQuestionsTable).values({
-              courseId: actualCourseId,
-              question: q.question,
-              options: q.options.map(o => o.text),
-              optionFeedback: q.options.map(o => o.feedback),
-              correctOption: correctOptionIndex,
-              orderIndex: index,
-              correctExplanation: q.correctExplanation,
-              incorrectExplanation: q.incorrectExplanation,
-              practicalTakeaway: q.practicalTakeaway,
-            });
           }
         }
+        logger.info(`Seeded ${NEW_LESSONS.length} upgraded lessons for ELH-27.`);
+
+        await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, actualCourseId));
+        // Insert 8 scenario quiz questions with balanced option positions
+        for (const q of QUIZ_QUESTIONS) {
+          await tx.insert(quizQuestionsTable).values({
+            courseId: actualCourseId,
+            question: q.question,
+            options: q.options,
+            correctOption: q.correctOption,
+            correctExplanation: q.correctExplanation,
+            incorrectExplanation: q.incorrectExplanation,
+            optionFeedback: q.optionFeedback,
+            orderIndex: q.orderIndex,
+          });
+        }
+        logger.info(`Seeded ${QUIZ_QUESTIONS.length} upgraded quiz questions for ELH-27.`);
+
+        // Record system seed completion marker
+        if (!existingSeed) {
+          await tx.insert(systemSeedsTable).values({
+            name: SEED_NAME,
+            version: 2,
+          });
+        } else {
+          await tx
+            .update(systemSeedsTable)
+            .set({ version: 2 })
+            .where(eq(systemSeedsTable.name, SEED_NAME));
+        }
       }
 
-      // 9. Record system seed completion marker
-      await tx.insert(systemSeedsTable).values({
-        name: SEED_NAME,
-        runAt: new Date(),
-      });
+      // Ensure Prerequisite relationships exist: ELH-12 and ELH-29 linked to ELH-27
+      const prereqCodes = ["ELH-12", "ELH-29"];
+      const prereqCourses = await tx
+        .select()
+        .from(coursesTable)
+        .where(inArray(coursesTable.courseCode, prereqCodes));
+
+      for (const prereq of prereqCourses) {
+        const [existingLink] = await tx
+          .select()
+          .from(coursePrerequisitesTable)
+          .where(
+            and(
+              eq(coursePrerequisitesTable.courseId, actualCourseId),
+              eq(coursePrerequisitesTable.prerequisiteCourseId, prereq.id)
+            )
+          )
+          .limit(1);
+
+        if (!existingLink) {
+          await tx.insert(coursePrerequisitesTable).values({
+            courseId: actualCourseId,
+            prerequisiteCourseId: prereq.id,
+          }).onConflictDoNothing();
+        }
+      }
+
+      // Ensure ELH-25 recommends ELH-27 (or ELH-27 recommends ELH-28/29)
+      const [course25] = await tx
+        .select()
+        .from(coursesTable)
+        .where(eq(coursesTable.courseCode, "ELH-25"))
+        .limit(1);
+
+      if (course25) {
+        await tx
+          .update(coursesTable)
+          .set({ recommendedNextCourseId: actualCourseId })
+          .where(eq(coursesTable.id, course25.id));
+      }
     });
 
-    logger.info(`Successfully seeded ${COURSE_TITLE} content`);
+    logger.info(`Successfully seeded ${COURSE_TITLE} content.`);
   } catch (error) {
-    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content`);
+    logger.error({ err: error }, `Failed to seed ${COURSE_TITLE} course content.`);
     throw error;
   }
 }
