@@ -5,8 +5,20 @@ export interface PricingPlan {
   maxEmployees: number | null;
   monthlyPriceMUR: number | null;
   requiresCustomQuote: boolean;
+  indicativePerEmployeeCopy: string;
   features: string[];
 }
+
+export const PER_EMPLOYEE_COST_MAP: Record<string, string> = {
+  UP_TO_25: "From MUR 120 per employee/month",
+  FROM_26_TO_50: "From MUR 90 per employee/month",
+  FROM_51_TO_80: "From MUR 62.50 per employee/month",
+  FROM_81_TO_120: "From MUR 52.10 per employee/month",
+  OVER_120: "Per-employee cost calculated with your quote",
+};
+
+export const INDICATIVE_CALCULATION_NOTE =
+  "Indicative per-employee amounts are calculated using the maximum number of employees included in each band. Your company subscription remains a fixed monthly fee based on your employee category.";
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
@@ -16,6 +28,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxEmployees: 25,
     monthlyPriceMUR: 3000,
     requiresCustomQuote: false,
+    indicativePerEmployeeCopy: "From MUR 120 per employee/month",
     features: [
       "One monthly company subscription, selected according to your total number of employees.",
       "Access to full sustainability training library.",
@@ -31,6 +44,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxEmployees: 50,
     monthlyPriceMUR: 4500,
     requiresCustomQuote: false,
+    indicativePerEmployeeCopy: "From MUR 90 per employee/month",
     features: [
       "One monthly company subscription, selected according to your total number of employees.",
       "Access to full sustainability training library.",
@@ -46,6 +60,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxEmployees: 80,
     monthlyPriceMUR: 5000,
     requiresCustomQuote: false,
+    indicativePerEmployeeCopy: "From MUR 62.50 per employee/month",
     features: [
       "One monthly company subscription, selected according to your total number of employees.",
       "Access to full sustainability training library.",
@@ -61,6 +76,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxEmployees: 120,
     monthlyPriceMUR: 6250,
     requiresCustomQuote: false,
+    indicativePerEmployeeCopy: "From MUR 52.10 per employee/month",
     features: [
       "One monthly company subscription, selected according to your total number of employees.",
       "Access to full sustainability training library.",
@@ -76,6 +92,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxEmployees: null,
     monthlyPriceMUR: null,
     requiresCustomQuote: true,
+    indicativePerEmployeeCopy: "Per-employee cost calculated with your quote",
     features: [
       "One monthly company subscription, selected according to your total number of employees.",
       "Access to full sustainability training library.",

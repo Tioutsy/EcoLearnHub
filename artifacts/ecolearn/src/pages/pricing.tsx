@@ -19,6 +19,7 @@ import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import { useState, useEffect, useMemo } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
+import { PER_EMPLOYEE_COST_MAP, INDICATIVE_CALCULATION_NOTE } from "@/config/pricing";
 
 interface PlanData {
   id: number;
@@ -177,12 +178,15 @@ export default function Pricing() {
                         MUR {(priceMap.get(`ESSENTIAL_${selectedBandCode}`)?.monthlyAmountMUR || 3000).toLocaleString()}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">per month · billed for {activeBand?.label || "your team"}</span>
+                    <span className="text-xs text-muted-foreground block">per month · billed for {activeBand?.label || "your team"}</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
+                      {PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 120 per employee/month"}
+                    </span>
                   </div>
                 ) : (
                   <div>
                     <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
-                    <span className="text-xs text-muted-foreground block mt-0.5">Tailored pricing for 120+ employees</span>
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium block mt-1">Per-employee cost calculated with your quote</span>
                   </div>
                 )}
               </div>
@@ -247,12 +251,15 @@ export default function Pricing() {
                         MUR {(priceMap.get(`PROFESSIONAL_${selectedBandCode}`)?.monthlyAmountMUR || 4500).toLocaleString()}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">per month · billed for {activeBand?.label || "your team"}</span>
+                    <span className="text-xs text-muted-foreground block">per month · billed for {activeBand?.label || "your team"}</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
+                      {PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 90 per employee/month"}
+                    </span>
                   </div>
                 ) : (
                   <div>
                     <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
-                    <span className="text-xs text-muted-foreground block mt-0.5">Tailored pricing for 120+ employees</span>
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium block mt-1">Per-employee cost calculated with your quote</span>
                   </div>
                 )}
               </div>
@@ -313,12 +320,15 @@ export default function Pricing() {
                         MUR {(priceMap.get(`COMPLETE_${selectedBandCode}`)?.monthlyAmountMUR || 6000).toLocaleString()}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">per month · billed for {activeBand?.label || "your team"}</span>
+                    <span className="text-xs text-muted-foreground block">per month · billed for {activeBand?.label || "your team"}</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
+                      {PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 62.50 per employee/month"}
+                    </span>
                   </div>
                 ) : (
                   <div>
                     <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
-                    <span className="text-xs text-muted-foreground block mt-0.5">Tailored pricing for 120+ employees</span>
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium block mt-1">Per-employee cost calculated with your quote</span>
                   </div>
                 )}
               </div>
@@ -361,6 +371,13 @@ export default function Pricing() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Calculation Note */}
+        <div className="max-w-3xl mx-auto text-center pt-2">
+          <p className="text-xs text-muted-foreground leading-relaxed bg-muted/40 p-4 rounded-xl border">
+            {INDICATIVE_CALCULATION_NOTE}
+          </p>
         </div>
 
         {/* Plan Comparison Matrix */}
