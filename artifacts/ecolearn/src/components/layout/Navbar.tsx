@@ -29,7 +29,7 @@ export function Navbar() {
         { href: "/dashboard", label: "My Learning", icon: UserCircle },
         { href: "/company", label: "Company", icon: Building2 },
         ...(showReviewLink
-          ? [{ href: "/company/challenges-review", label: "Review Queue", icon: ShieldCheck }]
+          ? [{ href: "/company/challenges-review", label: "Employee Challenge Reviews", icon: ShieldCheck }]
           : []),
         ...(showSuperAdminLink
           ? [{ href: "/admin", label: "Admin", icon: ShieldCheck }]

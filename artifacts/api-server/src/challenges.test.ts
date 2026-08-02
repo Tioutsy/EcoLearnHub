@@ -387,7 +387,53 @@ test("Employee Challenges and Final Sustainability Score integration tests", asy
     });
     assert.equal(platApproveRes.status, 200, "Platform admin should approve submission successfully");
 
+    // 7b. GET /submissions — new all-submissions endpoint tests
+    // After approval of ch1 and approval of ch2 resubmission, manager 1 should
+    // see 2 approved submissions in the all-submissions list.
+    const allSubsM1Res = await fetch(`${API_BASE}/challenges/submissions`, { headers: HEADERS_M1 });
+    assert.equal(allSubsM1Res.status, 200, "GET /submissions should succeed for manager");
+    const allSubsM1 = await allSubsM1Res.json() as any[];
+    assert.ok(allSubsM1.length >= 2, "Manager 1 should see at least 2 submissions (ch1 approved, ch2 approved)");
+
+    // All returned submissions must belong to manager's company
+    for (const row of allSubsM1) {
+      assert.ok(
+        typeof row.submissionId === "number",
+        "Each submission must have a submissionId"
+      );
+      assert.ok(
+        row.employeeName,
+        "Each submission must have an employeeName"
+      );
+    }
+
+    // Status filter: ?status=approved should return only approved
+    const approvedSubsRes = await fetch(`${API_BASE}/challenges/submissions?status=approved`, { headers: HEADERS_M1 });
+    assert.equal(approvedSubsRes.status, 200, "Status filter should work");
+    const approvedSubs = await approvedSubsRes.json() as any[];
+    assert.ok(approvedSubs.length >= 1, "Should return at least one approved submission");
+    for (const row of approvedSubs) {
+      assert.equal(row.status, "approved", "All returned submissions must be approved");
+    }
+
+    // Status filter: ?status=submitted should return empty (both are now approved)
+    const pendingSubsRes = await fetch(`${API_BASE}/challenges/submissions?status=submitted`, { headers: HEADERS_M1 });
+    assert.equal(pendingSubsRes.status, 200, "Pending filter should work");
+    const pendingSubs = await pendingSubsRes.json() as any[];
+    assert.equal(pendingSubs.length, 0, "No submissions should be pending after approvals");
+
+    // Cross-tenant: Manager 2 (Comp 2) must NOT see Comp 1 submissions via /submissions
+    const crossSubsRes = await fetch(`${API_BASE}/challenges/submissions`, { headers: HEADERS_M2 });
+    assert.equal(crossSubsRes.status, 200, "GET /submissions returns 200 for manager 2");
+    const crossSubs = await crossSubsRes.json() as any[];
+    assert.equal(crossSubs.length, 0, "Manager 2 must not see Comp 1 submissions via all-submissions endpoint");
+
+    // Employee role cannot access /submissions
+    const empSubsRes = await fetch(`${API_BASE}/challenges/submissions`, { headers: HEADERS_L1 });
+    assert.equal(empSubsRes.status, 403, "Employee role must be blocked from /submissions");
+
     // 8. Verify scoring rules
+
     // Currently learner has 2 approved challenges -> 20 points, +2 bonus
     // Course 12 quiz has not been passed, so Final score should be null
     const finalScoreRes1 = await fetch(`${API_BASE}/challenges/score`, { headers: HEADERS_L1 });

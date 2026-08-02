@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { challengesTable, challengeParticipantsTable, employeesTable, coursesTable } from "@workspace/db";
-import { eq, and, asc, or, desc } from "drizzle-orm";
+import { eq, and, asc, or, desc, inArray } from "drizzle-orm";
+
 import { getCompanyAccess, requireCompanyAdmin, sendHttpError } from "../lib/access";
 import { calculateSustainabilityScore } from "../lib/scoring";
 import { logger } from "../lib/logger";
@@ -37,7 +38,76 @@ router.get("/score", async (req, res): Promise<void> => {
   }
 });
 
-// 2. GET /submissions/pending (Manager review queue)
+// 2a. GET /submissions (All submissions for manager, with optional filters)
+router.get("/submissions", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+
+    const { status: statusFilter, department, employeeId } = req.query;
+
+    const whereClauses: ReturnType<typeof eq>[] = [];
+
+    // Tenant isolation
+    if (access.role !== "platform_admin") {
+      whereClauses.push(eq(challengeParticipantsTable.companyId, access.companyId));
+    }
+
+    // Exclude in_progress (not yet submitted) unless explicitly requested
+    if (typeof statusFilter === "string" && statusFilter !== "all" && statusFilter !== "") {
+      whereClauses.push(eq(challengeParticipantsTable.status, statusFilter));
+    } else if (!statusFilter || statusFilter === "all") {
+      // By default show only submitted/approved/rejected (not bare in_progress)
+      whereClauses.push(inArray(challengeParticipantsTable.status, ["submitted", "approved", "rejected"]));
+    }
+
+    // Optional department filter (requires employee join check below)
+    if (typeof department === "string" && department.trim()) {
+      whereClauses.push(eq(employeesTable.department, department.trim()));
+    }
+
+    // Optional employeeId (clerkUserId) filter
+    if (typeof employeeId === "string" && employeeId.trim()) {
+      whereClauses.push(eq(challengeParticipantsTable.userId, employeeId.trim()));
+    }
+
+    const rows = await db
+      .select({
+        submissionId: challengeParticipantsTable.id,
+        challengeId: challengeParticipantsTable.challengeId,
+        challengeTitle: challengesTable.title,
+        challengeCode: challengesTable.code,
+        courseId: challengesTable.linkedCourseId,
+        courseTitle: coursesTable.title,
+        userId: challengeParticipantsTable.userId,
+        employeeName: employeesTable.name,
+        employeeDepartment: employeesTable.department,
+        jobTitle: employeesTable.jobTitle,
+        evidenceText: challengeParticipantsTable.evidenceText,
+        submittedAt: challengeParticipantsTable.submittedAt,
+        status: challengeParticipantsTable.status,
+        reviewedBy: challengeParticipantsTable.reviewedBy,
+        reviewedAt: challengeParticipantsTable.reviewedAt,
+        reviewNote: challengeParticipantsTable.reviewNote,
+        pointsAwarded: challengeParticipantsTable.pointsAwarded,
+      })
+      .from(challengeParticipantsTable)
+      .innerJoin(challengesTable, eq(challengeParticipantsTable.challengeId, challengesTable.id))
+      .leftJoin(coursesTable, eq(challengesTable.linkedCourseId, coursesTable.id))
+      .innerJoin(employeesTable, eq(challengeParticipantsTable.userId, employeesTable.clerkUserId))
+      .where(and(...whereClauses))
+      .orderBy(desc(challengeParticipantsTable.submittedAt));
+
+    res.json(rows);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      logger.error({ err }, "Failed to get challenge submissions");
+      res.status(500).json({ error: "Failed to load submissions" });
+    }
+  }
+});
+
+// 2b. GET /submissions/pending (Manager review queue — backward-compatible)
+
 router.get("/submissions/pending", async (req, res): Promise<void> => {
   try {
     const access = await requireCompanyAdmin(req);
