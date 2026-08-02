@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import {
   useGetMyCompany,
@@ -22,6 +23,7 @@ import {
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const LEVEL_STYLES: Record<string, { ring: string; text: string; bg: string }> = {
   Starter: { ring: "stroke-slate-400", text: "text-slate-600", bg: "bg-slate-100" },
@@ -64,6 +66,37 @@ export default function SustainabilityImpact() {
   const { data: company, isLoading: isLoadingCompany } = useGetMyCompany();
   const { data: impact, isLoading: isLoadingImpact } = useGetEsgImpact();
   const { data: score, isLoading: isLoadingScore } = useGetSustainabilityScore();
+  const { toast } = useToast();
+  const [esgDownloading, setEsgDownloading] = useState(false);
+
+  const downloadEsgReport = async () => {
+    if (esgDownloading) return;
+    setEsgDownloading(true);
+    try {
+      const response = await fetch("/api/esg/report", { credentials: "include" });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Request failed with status ${response.status}`);
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ESG_Training_Report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast({
+        title: "Download failed",
+        description: err instanceof Error ? err.message : "Could not download the ESG report.",
+        variant: "destructive",
+      });
+    } finally {
+      setEsgDownloading(false);
+    }
+  };
 
   const fmt = (n?: number) => (n ?? 0).toLocaleString();
   const levelStyle = LEVEL_STYLES[score?.level ?? "Starter"] ?? LEVEL_STYLES.Starter;
@@ -105,8 +138,9 @@ export default function SustainabilityImpact() {
               )}
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button asChild>
-                <a href="/api/esg/report"><FileText className="mr-2 h-4 w-4" /> Download ESG Training Report</a>
+              <Button onClick={downloadEsgReport} disabled={esgDownloading}>
+                <FileText className="mr-2 h-4 w-4" />
+                {esgDownloading ? "Downloading..." : "Download ESG Training Report"}
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/company"><ArrowRight className="mr-2 h-4 w-4" /> Back to Dashboard</Link>

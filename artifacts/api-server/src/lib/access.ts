@@ -244,8 +244,6 @@ export function sendHttpError(res: Response, err: unknown): boolean {
     res.status(err.status).json({ error: err.message });
     return true;
   }
-  
-  // Fallback for non-HttpError (e.g. ReferenceError, DB Error) to prevent hanging
-  res.status(500).json({ error: (err as Error).message || "Internal Server Error" });
+  // Non-HttpError: let the caller handle logging and the 500 response.
   return false;
 }

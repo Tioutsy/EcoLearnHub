@@ -145,10 +145,18 @@ export default function CompanyEmployees() {
                 submitLabel={addEmployee.isPending ? "Adding..." : "Add Employee"}
                 pending={addEmployee.isPending}
                 onSubmit={async (values) => {
-                  await addEmployee.mutateAsync({ data: normaliseForm(values) });
-                  setIsAddOpen(false);
-                  invalidateEmployees();
-                  toast({ title: "Employee added" });
+                  try {
+                    await addEmployee.mutateAsync({ data: normaliseForm(values) });
+                    setIsAddOpen(false);
+                    invalidateEmployees();
+                    toast({ title: "Employee added" });
+                  } catch (err: unknown) {
+                    toast({
+                      title: "Failed to add employee",
+                      description: err instanceof Error ? err.message : "Please try again.",
+                      variant: "destructive",
+                    });
+                  }
                 }}
                 trigger={<Button><Plus className="mr-2 h-4 w-4" /> Add Employee</Button>}
               />
@@ -304,10 +312,18 @@ export default function CompanyEmployees() {
         pending={updateEmployee.isPending}
         onSubmit={async (values) => {
           if (!editing) return;
-          await updateEmployee.mutateAsync({ id: editing.id, data: normaliseForm(values) });
-          setEditing(null);
-          invalidateEmployees();
-          toast({ title: "Employee updated" });
+          try {
+            await updateEmployee.mutateAsync({ id: editing.id, data: normaliseForm(values) });
+            setEditing(null);
+            invalidateEmployees();
+            toast({ title: "Employee updated" });
+          } catch (err: unknown) {
+            toast({
+              title: "Failed to update employee",
+              description: err instanceof Error ? err.message : "Please try again.",
+              variant: "destructive",
+            });
+          }
         }}
       />
 

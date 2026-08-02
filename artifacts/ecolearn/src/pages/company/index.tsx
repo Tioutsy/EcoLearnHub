@@ -36,6 +36,7 @@ import {
   Recycle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Area,
   AreaChart,
@@ -147,6 +148,38 @@ export default function CompanyDashboard() {
     customFetch("/api/subscriptions/company").then(res => setSubData(res)).catch(() => {});
   }, []);
 
+  const { toast } = useToast();
+  const [esgDownloading, setEsgDownloading] = useState(false);
+
+  const downloadEsgReport = async () => {
+    if (esgDownloading) return;
+    setEsgDownloading(true);
+    try {
+      const response = await fetch("/api/esg/report", { credentials: "include" });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Request failed with status ${response.status}`);
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ESG_Training_Report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast({
+        title: "Download failed",
+        description: err instanceof Error ? err.message : "Could not download the ESG report.",
+        variant: "destructive",
+      });
+    } finally {
+      setEsgDownloading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="bg-primary/5 border-b py-8">
@@ -179,8 +212,9 @@ export default function CompanyDashboard() {
                   </div>
                 </Link>
               )}
-              <Button asChild>
-                <a href="/api/esg/report"><FileText className="mr-2 h-4 w-4" /> ESG Training Report</a>
+              <Button onClick={downloadEsgReport} disabled={esgDownloading}>
+                <FileText className="mr-2 h-4 w-4" />
+                {esgDownloading ? "Downloading..." : "ESG Training Report"}
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/company/employees"><Users className="mr-2 h-4 w-4" /> Manage Employees</Link>
