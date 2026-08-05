@@ -123,6 +123,11 @@ export async function ensureSchemaModifications() {
       execute: () => db.execute(sql`ALTER TABLE "courses" ADD COLUMN IF NOT EXISTS "course_code" text;`)
     },
     {
+      name: "Add intended_roles to courses",
+      check: () => columnExists("courses", "intended_roles"),
+      execute: () => db.execute(sql`ALTER TABLE "courses" ADD COLUMN IF NOT EXISTS "intended_roles" text[] DEFAULT '{}'::text[] NOT NULL;`)
+    },
+    {
       name: "Backfill course code ELH-01",
       check: () => courseCodeExists("sustainability-foundations", "ELH-01"),
       execute: () => db.execute(sql`UPDATE "courses" SET "course_code" = 'ELH-01' WHERE "slug" = 'sustainability-foundations';`)
