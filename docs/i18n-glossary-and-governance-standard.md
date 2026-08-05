@@ -25,6 +25,10 @@ This document establishes the official English and French translation governance
 | **ESG** | ESG (Environnement, Social, Gouvernance) | Standard acronym widely understood in Mauritian B2B context. |
 | **Report** | Rapport | Exportable compliance and training progress report. |
 | **Training record** | Registre de formation | HRDC / compliance training evidence record. |
+| **Awaiting Review** | En attente de revue | Challenge submission awaiting manager review. |
+| **Approved** | Approuvé | Challenge submission approved by manager. |
+| **Returned** | Retourné | Challenge submission returned for refinement. |
+| **Audit-Ready** | Prêt pour audit | Formal training records suitable for HRDC or compliance audit. |
 
 ---
 

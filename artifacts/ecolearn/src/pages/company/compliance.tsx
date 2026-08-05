@@ -58,7 +58,18 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 const ALL = "all";
+
+function fmtDate(value: string | null | undefined): string {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   completed: {
@@ -75,16 +86,8 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
   },
 };
 
-function fmtDate(value: string | null | undefined): string {
-  if (!value) return "-";
-  return new Date(value).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export default function CompanyCompliance() {
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   // Search & Filter state

@@ -23,6 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 const EMPTY_FORM = {
   name: "",
   email: "",
@@ -56,6 +58,7 @@ function employeeStatusLabel(employee: ManagedEmployee): string {
 }
 
 export default function CompanyEmployees() {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { data: employeeData, isLoading } = useListEmployees();
   const { data: courses } = useListCourses();

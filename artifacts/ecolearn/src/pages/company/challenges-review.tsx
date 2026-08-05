@@ -49,6 +49,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useLanguage } from "@/context/LanguageContext";
 
 const ALL = "all";
 
@@ -105,8 +106,16 @@ function csvValue(value: unknown): string {
 }
 
 export default function ChallengesReview() {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const STATUS_META: Record<string, { label: string; className: string }> = {
+    submitted: { label: t("admin.awaiting_review"), className: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
+    approved: { label: t("admin.approved"), className: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" },
+    rejected: { label: t("admin.returned"), className: "bg-amber-500/10 text-amber-700 border-amber-500/30" },
+    in_progress: { label: t("dashboard.status_in_progress"), className: "bg-slate-400/10 text-slate-700 border-slate-400/30" },
+  };
 
   // Filters
   const [statusFilter, setStatusFilter] = useState(ALL);

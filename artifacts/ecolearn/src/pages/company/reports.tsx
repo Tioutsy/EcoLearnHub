@@ -32,26 +32,9 @@ import {
 import { Link } from "wouter";
 import { useMemo, useState } from "react";
 
-const ALL = "all";
+import { useLanguage } from "@/context/LanguageContext";
 
-const STATUS_META: Record<string, { label: string; className: string }> = {
-  not_started: {
-    label: "Not Started",
-    className: "bg-slate-400/10 text-slate-700 border-slate-400/30",
-  },
-  in_progress: {
-    label: "In Progress",
-    className: "bg-blue-500/10 text-blue-700 border-blue-500/30",
-  },
-  completed: {
-    label: "Completed",
-    className: "bg-green-500/10 text-green-700 border-green-500/30",
-  },
-  overdue: {
-    label: "Overdue",
-    className: "bg-red-500/10 text-red-700 border-red-500/30",
-  },
-};
+const ALL = "all";
 
 function fmtDate(value: string | null | undefined): string {
   if (!value) return "-";
@@ -68,6 +51,26 @@ function csvValue(value: unknown): string {
 }
 
 export default function CompanyReports() {
+  const { t } = useLanguage();
+
+  const STATUS_META: Record<string, { label: string; className: string }> = {
+    not_started: {
+      label: t("dashboard.status_assigned"),
+      className: "bg-slate-400/10 text-slate-700 border-slate-400/30",
+    },
+    in_progress: {
+      label: t("dashboard.status_in_progress"),
+      className: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+    },
+    completed: {
+      label: t("common.completed"),
+      className: "bg-green-500/10 text-green-700 border-green-500/30",
+    },
+    overdue: {
+      label: t("dashboard.status_overdue"),
+      className: "bg-red-500/10 text-red-700 border-red-500/30",
+    },
+  };
   const [employeeId, setEmployeeId] = useState(ALL);
   const [department, setDepartment] = useState(ALL);
   const [courseId, setCourseId] = useState(ALL);

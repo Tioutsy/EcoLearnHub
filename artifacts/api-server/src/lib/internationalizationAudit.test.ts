@@ -114,4 +114,37 @@ describe("Sprint 9V — Internationalisation (i18n) Architecture & Resource Audi
       assert.ok(!jsonStr.includes(name), `Translations must not contain legacy name '${name}'`);
     }
   });
+
+  test("9. Sprint 9X: Company admin & manager key structures exist in both locales", () => {
+    const requiredKeys = [
+      "admin.company_dashboard",
+      "admin.company_overview",
+      "admin.total_employees",
+      "admin.active_learners",
+      "admin.completion_rate",
+      "admin.overdue_training",
+      "admin.employees_title",
+      "admin.add_employee",
+      "admin.edit_employee",
+      "admin.assign_courses",
+      "admin.employee_name",
+      "admin.email",
+      "admin.department",
+      "admin.job_title",
+      "admin.role",
+      "admin.invitation_status",
+      "admin.challenge_reviews",
+      "admin.awaiting_review",
+      "admin.approved",
+      "admin.returned",
+      "admin.reports_title",
+      "admin.compliance_title",
+      "admin.evidence_exports",
+    ];
+
+    for (const key of requiredKeys) {
+      assert.ok(translations.en[key], `English admin key '${key}' must exist`);
+      assert.ok(translations.fr[key], `French admin key '${key}' must exist`);
+    }
+  });
 });
