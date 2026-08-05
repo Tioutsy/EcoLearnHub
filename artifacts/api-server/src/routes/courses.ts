@@ -194,26 +194,37 @@ router.get("/", async (req, res): Promise<void> => {
     prereqsMap.get(p.courseId)!.push(p);
   }
 
-  res.json(
-    courses.map((c) => {
-      const assignedCats = assignmentsMap.get(c.id) || [];
-      const primaryCat = assignedCats.find(a => a.isPrimary) || (c.categoryId && c.categoryName ? { categoryId: c.categoryId, categoryName: c.categoryName, isPrimary: true } : null);
-      const coursePrereqs = prereqsMap.get(c.id) || [];
-      const entitlement = planEntitlementMap.get(c.id) || { requiredPlanCode: "COMPLETE", requiredPlanName: "Complete" };
+  const sortedCourses = courses.map((c) => {
+    const assignedCats = assignmentsMap.get(c.id) || [];
+    const primaryCat = assignedCats.find(a => a.isPrimary) || (c.categoryId && c.categoryName ? { categoryId: c.categoryId, categoryName: c.categoryName, isPrimary: true } : null);
+    const coursePrereqs = prereqsMap.get(c.id) || [];
+    const entitlement = planEntitlementMap.get(c.id) || { requiredPlanCode: "COMPLETE", requiredPlanName: "Complete" };
 
-      return {
-        ...c,
-        categoryName: primaryCat?.categoryName || c.categoryName || "General Sustainability",
-        primaryCategory: primaryCat,
-        categoryAssignments: assignedCats,
-        prerequisites: coursePrereqs,
-        requiredPlanCode: entitlement.requiredPlanCode,
-        requiredPlanName: entitlement.requiredPlanName,
-        priceUsd: parseFloat(c.priceUsd),
-        rating: c.rating ? parseFloat(c.rating) : null,
-      };
-    })
-  );
+    return {
+      ...c,
+      categoryName: primaryCat?.categoryName || c.categoryName || "General Sustainability",
+      primaryCategory: primaryCat,
+      categoryAssignments: assignedCats,
+      prerequisites: coursePrereqs,
+      requiredPlanCode: entitlement.requiredPlanCode,
+      requiredPlanName: entitlement.requiredPlanName,
+      priceUsd: parseFloat(c.priceUsd),
+      rating: c.rating ? parseFloat(c.rating) : null,
+    };
+  }).sort((a, b) => {
+    const codeA = a.courseCode?.toUpperCase() ?? "";
+    const codeB = b.courseCode?.toUpperCase() ?? "";
+    const matchA = codeA.match(/^ELH-(\d+)$/);
+    const matchB = codeB.match(/^ELH-(\d+)$/);
+    if (matchA && matchB) {
+      return parseInt(matchA[1], 10) - parseInt(matchB[1], 10);
+    }
+    if (matchA) return -1;
+    if (matchB) return 1;
+    return codeA.localeCompare(codeB);
+  });
+
+  res.json(sortedCourses);
 });
 
 router.get("/featured", async (_req, res): Promise<void> => {

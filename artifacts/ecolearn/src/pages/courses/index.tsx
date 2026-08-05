@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { sortCoursesByCode } from "@/lib/courseSorting";
 
 interface RecommendationData {
   courseId: number;
@@ -159,10 +160,10 @@ export default function Courses() {
 
   const displayedCourses = useMemo(() => {
     if (!courses) return [];
-    if (selectedFilter === "completed") {
-      return courses.filter(c => enrollmentMap.get(c.id)?.status === "completed");
-    }
-    return courses;
+    const filtered = selectedFilter === "completed"
+      ? courses.filter(c => enrollmentMap.get(c.id)?.status === "completed")
+      : courses;
+    return sortCoursesByCode(filtered);
   }, [courses, selectedFilter, enrollmentMap]);
 
   const getCategoryProgressSummary = (catSlug: string) => {
@@ -526,31 +527,43 @@ export default function Courses() {
                         </div>
                       )}
 
-                      {/* Blue Prerequisite Locked Notice Card */}
+                      {/* Compact Prerequisite Notice & Popover Details */}
                       {!isPlanLocked && isPrereqLocked && (
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 text-xs text-blue-900 dark:text-blue-200 space-y-1">
-                          <div className="font-semibold flex items-center gap-1.5 text-blue-800 dark:text-blue-300">
-                            <Lock className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                            <span>Prerequisite Required to Unlock</span>
+                          <div className="font-semibold flex items-center justify-between gap-1.5 text-blue-800 dark:text-blue-300">
+                            <span className="flex items-center gap-1.5">
+                              <Lock className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                              <span>{missingRequiredPrereqs.length > 1 ? `${missingRequiredPrereqs.length} prerequisites required` : "Prerequisite required"}</span>
+                            </span>
+                            {missingRequiredPrereqs.length > 0 && (
+                              <span className="text-[11px] underline cursor-pointer font-normal text-blue-700 dark:text-blue-300 hover:text-blue-900" title={missingRequiredPrereqs.map(p => `${p.prerequisiteCourseCode ?? ''}: ${p.prerequisiteTitle}`).join(" • ")}>
+                                View details
+                              </span>
+                            )}
                           </div>
                           {isElh12 && coreCompletedCount < 11 ? (
-                            <p>Complete all 11 Core Sustainability Certificate courses ({coreCompletedCount}/11 finished) to unlock this certification.</p>
-                          ) : missingRequiredPrereqs.length > 0 ? (
-                            <p>Complete <span className="font-semibold">{missingRequiredPrereqs.map(p => p.prerequisiteTitle).join(", ")}</span> to unlock this course.</p>
+                            <p className="text-muted-foreground">Complete 11 Core Courses ({coreCompletedCount}/11 finished) to unlock.</p>
+                          ) : missingRequiredPrereqs.length === 1 ? (
+                            <p className="line-clamp-1 font-medium">{missingRequiredPrereqs[0].prerequisiteCourseCode ? `${missingRequiredPrereqs[0].prerequisiteCourseCode}: ` : ''}{missingRequiredPrereqs[0].prerequisiteTitle}</p>
                           ) : (
-                            <p>Complete required prerequisite courses before taking this course.</p>
+                            <p className="text-muted-foreground">Requires {missingRequiredPrereqs.map(p => p.prerequisiteCourseCode).filter(Boolean).join(", ") || `${missingRequiredPrereqs.length} courses`}</p>
                           )}
                         </div>
                       )}
 
-                      {/* Blue Recommended Prerequisite Notice Card */}
                       {!isPlanLocked && !isPrereqLocked && !isCompleted && missingRecommendedPrereqs.length > 0 && (
                         <div className="bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 text-xs text-sky-900 dark:text-sky-200 space-y-1">
-                          <div className="font-semibold flex items-center gap-1.5 text-sky-800 dark:text-sky-300">
-                            <Info className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
-                            <span>Recommended First</span>
+                          <div className="font-semibold flex items-center justify-between gap-1.5 text-sky-800 dark:text-sky-300">
+                            <span className="flex items-center gap-1.5">
+                              <Info className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
+                              <span>{missingRecommendedPrereqs.length > 1 ? `${missingRecommendedPrereqs.length} recommended prerequisites` : "Recommended first"}</span>
+                            </span>
                           </div>
-                          <p>Recommended before starting: <span className="font-semibold">{missingRecommendedPrereqs.map(p => p.prerequisiteTitle).join(", ")}</span>.</p>
+                          {missingRecommendedPrereqs.length === 1 ? (
+                            <p className="line-clamp-1 font-medium">{missingRecommendedPrereqs[0].prerequisiteCourseCode ? `${missingRecommendedPrereqs[0].prerequisiteCourseCode}: ` : ''}{missingRecommendedPrereqs[0].prerequisiteTitle}</p>
+                          ) : (
+                            <p className="text-muted-foreground">Recommended: {missingRecommendedPrereqs.map(p => p.prerequisiteCourseCode).filter(Boolean).join(", ") || `${missingRecommendedPrereqs.length} courses`}</p>
+                          )}
                         </div>
                       )}
 

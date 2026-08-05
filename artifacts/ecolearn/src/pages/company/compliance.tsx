@@ -9,6 +9,7 @@ import {
   useListEmployees,
   useListCourses,
 } from "@workspace/api-client-react";
+import { sortCoursesByCode } from "@/lib/courseSorting";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -120,7 +121,8 @@ export default function CompanyCompliance() {
 
   const { data: employeesData, isLoading: isLoadingEmployees, error: employeesError, refetch: refetchEmployees } = useGetManagerTrainingEmployees(filters);
   const { data: allEmployees } = useListEmployees();
-  const { data: allCourses } = useListCourses();
+  const { data: rawCourses } = useListCourses();
+  const allCourses = useMemo(() => sortCoursesByCode(rawCourses ?? []), [rawCourses]);
 
   // Departments list for dropdown filter
   const departments = useMemo(() => {
