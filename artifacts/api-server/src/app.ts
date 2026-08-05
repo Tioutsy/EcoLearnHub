@@ -54,10 +54,7 @@ app.use(authBypassMiddleware);
 app.use("/api", router);
 
 app.get("/", (req, res) => {
-  res.json({
-    service: "EcoLearnHub API",
-    status: "ok",
-  });
+  res.json({ status: "ok", service: "Elevio API", timestamp: new Date().toISOString() });
 });
 
 export default app;

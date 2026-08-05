@@ -202,7 +202,7 @@ router.get("/export.csv", async (req, res): Promise<void> => {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=ecolearnhub-training-records-${slugify(orgName)}-${dateStr}.csv`
+      `attachment; filename=elevio-training-records-${slugify(orgName)}-${dateStr}.csv`
     );
     res.send(csvContent);
   } catch (err) {
@@ -231,7 +231,7 @@ router.get("/evidence-pack.pdf", async (req, res): Promise<void> => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=ecolearnhub-training-evidence-pack-${slugify(orgName)}-${dateStr}.pdf`
+      `attachment; filename=elevio-training-evidence-pack-${slugify(orgName)}-${dateStr}.pdf`
     );
     res.send(Buffer.from(pdfBytes));
   } catch (err) {

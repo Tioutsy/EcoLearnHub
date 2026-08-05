@@ -104,7 +104,7 @@ router.get("/preview", async (req, res): Promise<void> => {
       courseTitle: (req.query.courseTitle as string) || "Carbon Footprint Awareness & Reduction",
       courseCode: (req.query.courseCode as string) || "ELH-07",
       dueDate: "2026-08-18",
-      actionUrl: "https://app.ecolearnhub.com/learn/carbon-footprint",
+      actionUrl: "https://app.elevio.mu/learn/carbon-footprint",
       overdueCount: 3,
       inProgressCount: 5,
       activationRatePct: 88,

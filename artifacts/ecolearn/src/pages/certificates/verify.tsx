@@ -22,7 +22,7 @@ export default function VerifyCertificate() {
       <div className="bg-primary/5 border-b py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl font-bold font-serif mb-2">Certificate Verification</h1>
-          <p className="text-muted-foreground">Verify the authenticity of an EcoLearn certificate.</p>
+          <p className="text-muted-foreground">Verify the authenticity of an Elevio certificate.</p>
         </div>
       </div>
 

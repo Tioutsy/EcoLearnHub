@@ -293,7 +293,7 @@ router.post("/subscribe", async (req, res): Promise<void> => {
         .insert(employeesTable)
         .values({
           clerkUserId: access.userId,
-          email: access.email || `${access.userId}@ecolearnhub.com`,
+          email: access.email || `${access.userId}@elevio.mu`,
           name: "Company Administrator",
           companyId: access.companyId,
           role: "admin",
@@ -616,7 +616,7 @@ router.get("/onboarding-status", async (req, res): Promise<void> => {
 router.get("/employees/import-template", async (_req, res): Promise<void> => {
   const templateCsv = "first_name,last_name,email,role,department,job_title\nJean,Valjean,jean.valjean@example.com,employee,Operations,Frontline Operator\nMarie,Curie,marie.curie@example.com,manager,Sustainability,Green Lead\n";
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", "attachment; filename=ecolearnhub-employee-import-template.csv");
+  res.setHeader("Content-Disposition", "attachment; filename=elevio-employee-import-template.csv");
   res.send(templateCsv);
 });
 
@@ -1098,7 +1098,7 @@ router.post("/manager/remind", async (req, res): Promise<void> => {
       recipientEmail: emp.email,
       recipientName: emp.name,
       type: "course_assigned",
-      title: "Manager Reminder: EcoLearnHub Training Action Requested",
+      title: "Manager Reminder: Elevio Training Action Requested",
       message: `Hello ${emp.name}, your manager ${access.employee?.name ?? "Administrator"} has sent a reminder regarding your training assignments.`,
     });
 

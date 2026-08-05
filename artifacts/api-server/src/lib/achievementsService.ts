@@ -76,7 +76,7 @@ export async function ensureAchievementDefinitions() {
       code: "CHALLENGE_APPROVED_10",
       slug: "challenge-pathway-complete",
       name: "Challenge Pathway Complete",
-      description: "Earned by successfully completing the full EcoLearnHub workplace challenge pathway.",
+      description: "Earned by successfully completing the full Elevio workplace challenge pathway.",
       icon: "target",
       criteriaType: "challenge",
       threshold: 10,

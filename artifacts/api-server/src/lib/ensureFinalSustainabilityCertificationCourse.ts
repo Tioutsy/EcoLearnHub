@@ -19,7 +19,7 @@ const SKELETON_BADGE_SLUG = "core-sustainability-badge"; // catalogue skeleton s
 
 const COURSE_META = {
   description:
-    "The capstone certification assessment for EcoLearnHub's Core Sustainability Certificate pathway (ELH-01 through ELH-11). Evaluate integrated workplace scenarios, demonstrate practical judgement, and earn your certificate.",
+    "The capstone certification assessment for Elevio's Core Sustainability Certificate pathway (ELH-01 through ELH-11). Evaluate integrated workplace scenarios, demonstrate practical judgement, and earn your certificate.",
   fullDescription:
     "This capstone assessment evaluates your ability to apply integrated sustainability principles across all 11 prerequisite courses in the Core Sustainability Certificate pathway. Assess real-world workplace scenarios involving waste sorting, energy efficiency, water conservation, sustainable procurement, green office practices, carbon footprints, Mauritian biodiversity, ESG evidence, environmental compliance, and circular economy decisions.",
   categoryId: 1,
@@ -41,7 +41,7 @@ const COURSE_META = {
     "Congratulations! You have passed the Final Sustainability Certification assessment, demonstrating practical workplace understanding across the complete Core Sustainability Certificate pathway.",
   badgeName: "Core Sustainability Certificate",
   badgeDescription:
-    "Awarded for completing EcoLearnHub's Core Sustainability Certificate pathway (ELH-01 through ELH-11) and passing the integrated capstone assessment.",
+    "Awarded for completing Elevio's Core Sustainability Certificate pathway (ELH-01 through ELH-11) and passing the integrated capstone assessment.",
 };
 
 const NEW_LESSONS = [
@@ -52,7 +52,7 @@ const NEW_LESSONS = [
     content: "Review capstone assessment rules, pathway prerequisites, and the integrated Mauritian facility case study.",
     blocks: [
       { id: "fc1-h1", type: "heading", position: 1, headingText: "Capstone Assessment Briefing" },
-      { id: "fc1-t1", type: "short_text", position: 2, bodyText: "Welcome to the capstone assessment for EcoLearnHub's Core Sustainability Certificate pathway! This assessment tests your ability to make responsible workplace decisions across all 11 foundation courses: ELH-01 (Foundations), ELH-02 (Waste), ELH-03 (Energy), ELH-04 (Water), ELH-05 (Procurement), ELH-06 (Green Office), ELH-07 (Carbon), ELH-08 (Biodiversity), ELH-09 (ESG), ELH-10 (Compliance), and ELH-11 (Circular Economy)." },
+      { id: "fc1-t1", type: "short_text", position: 2, bodyText: "Welcome to the capstone assessment for Elevio's Core Sustainability Certificate pathway! This assessment tests your ability to make responsible workplace decisions across all 11 foundation courses: ELH-01 (Foundations), ELH-02 (Waste), ELH-03 (Energy), ELH-04 (Water), ELH-05 (Procurement), ELH-06 (Green Office), ELH-07 (Carbon), ELH-08 (Biodiversity), ELH-09 (ESG), ELH-10 (Compliance), and ELH-11 (Circular Economy)." },
       { id: "fc1-k1", type: "key_message", position: 3, headingText: "Assessment Rules & Passing Standard", bodyText: "• Pass Threshold: 80% (12 out of 15 questions correct).\n• Scope: 15 scenario-based questions covering every foundation course and cross-topic workplace integration.\n• Retakes: Unlimited retakes permitted; previous attempt records are preserved.\n• Prerequisites: Enrolment requires 100% completion of ELH-01 through ELH-11." },
       {
         id: "fc1-d1",
@@ -72,13 +72,13 @@ const NEW_LESSONS = [
         position: 5,
         mcqQuestion: "What does the Core Sustainability Certificate represent?",
         mcqOptions: [
-          "Completion of EcoLearnHub's foundation training pathway and passing the integrated workplace scenario assessment",
+          "Completion of Elevio's foundation training pathway and passing the integrated workplace scenario assessment",
           "Statutory government certification as a licensed court judge",
           "An official engineering licence issued by the Ministry of Public Infrastructure",
           "An exemption from paying commercial electricity and water bills"
         ],
         mcqCorrectIndex: 0,
-        mcqCorrectExplanation: "The certificate records training completion and scenario assessment for EcoLearnHub's Core Sustainability pathway.",
+        mcqCorrectExplanation: "The certificate records training completion and scenario assessment for Elevio's Core Sustainability pathway.",
         mcqIncorrectExplanation: "Incorrect. The certificate records workplace training completion and assessment."
       }
     ]
@@ -224,7 +224,7 @@ const NEW_LESSONS = [
         type: "workplace_example",
         position: 4,
         headingText: "Certificate Limitation Disclaimer",
-        bodyText: "DISCLAIMER: The EcoLearnHub Core Sustainability Certificate records successful completion of foundation training and scenario assessment. It does not constitute statutory legal compliance, professional engineering accreditation, HRDC statutory certification, or external regulatory approval."
+        bodyText: "DISCLAIMER: The Elevio Core Sustainability Certificate records successful completion of foundation training and scenario assessment. It does not constitute statutory legal compliance, professional engineering accreditation, HRDC statutory certification, or external regulatory approval."
       }
     ]
   }

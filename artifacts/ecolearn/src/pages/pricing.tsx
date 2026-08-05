@@ -108,7 +108,7 @@ export default function Pricing() {
       <div className="bg-gradient-to-b from-emerald-900/10 via-background to-background pt-16 md:pt-24 pb-12 border-b">
         <div className="container mx-auto px-4 text-center max-w-4xl">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full mb-4">
-            <Sparkles className="h-3.5 w-3.5" /> EcoLearnHub Hybrid Commercial Plans
+            <Sparkles className="h-3.5 w-3.5" /> Elevio Hybrid Commercial Plans
           </span>
           <h1 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-foreground tracking-tight">
             Choose the level of sustainability learning your organisation needs

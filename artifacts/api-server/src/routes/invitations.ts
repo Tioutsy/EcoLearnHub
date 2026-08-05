@@ -48,7 +48,7 @@ router.get("/verify", async (req, res): Promise<void> => {
     email: emp.email,
     name: emp.name,
     role: emp.role,
-    companyName: company?.name ?? "EcoLearn Corporate Member",
+    companyName: company?.name ?? "Elevio Corporate Member",
     logoUrl: company?.logoUrl ?? null,
   });
 });

@@ -189,7 +189,7 @@ export default function LearningPathDetail() {
               <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-bold mb-2">This learning path does not yet contain any courses</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Please check again later or contact your EcoLearnHub administrator.
+                Please check again later or contact your Elevio administrator.
               </p>
             </div>
           ) : (

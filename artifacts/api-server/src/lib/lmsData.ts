@@ -411,7 +411,7 @@ export async function getCompanyLmsOverview(companyId: number) {
   const certificateRefs = rows.filter((row) => row.certificateCode).length;
 
   return {
-    companyName: company?.name ?? "EcoLearn company",
+    companyName: company?.name ?? "Elevio company",
     stats: {
       totalEmployees: employees.length,
       activeLearners: activeLearnerIds.size,

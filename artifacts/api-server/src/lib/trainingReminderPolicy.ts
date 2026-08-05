@@ -26,7 +26,7 @@ export const defaultTrainingReminderPolicy: TrainingReminderPolicy = {
   rules: {
     invitation_pending: {
       category: "invitation_pending",
-      title: "Activate Your EcoLearnHub Corporate Account",
+      title: "Activate Your Elevio Corporate Account",
       triggerDays: [3, 7],
       maxCount: 2,
       cooldownDays: 3,

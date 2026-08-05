@@ -85,7 +85,7 @@ export default function PlatformAdminOverview() {
         <div>
           <h2 className="text-2xl font-bold font-serif">Portal Overview</h2>
           <p className="text-muted-foreground mt-1">
-            A control dashboard for Mauritius EcoLearnHub content, sectors, and SDG mappings.
+            A control dashboard for Mauritius Elevio content, sectors, and SDG mappings.
           </p>
         </div>
 

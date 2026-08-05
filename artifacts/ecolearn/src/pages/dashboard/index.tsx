@@ -283,7 +283,7 @@ export default function Dashboard() {
                       <h3 className="text-xl md:text-2xl font-bold font-serif mb-2">{certBadge.name}</h3>
                       <p className="text-muted-foreground text-sm max-w-2xl mb-4">
                         {certBadge.earned 
-                          ? "Congratulations! You have completed all core coursework and passed the Final Certification, earning the EcoLearnHub Core Sustainability Certificate."
+                          ? "Congratulations! You have completed all core coursework and passed the Final Certification, earning the Elevio Core Sustainability Certificate."
                           : "Prerequisite: Complete 11 Core Courses & 1 voluntary workplace challenge, then pass the Final Certification Exam."
                         }
                       </p>

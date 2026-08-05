@@ -33,8 +33,8 @@ function toCertificateData(row: {
   issuedAt: Date;
 }): CertificateData {
   return {
-    employeeName: row.employeeName ?? "EcoLearn Learner",
-    companyName: row.companyName ?? "EcoLearn Mauritius",
+    employeeName: row.employeeName ?? "Elevio Learner",
+    companyName: row.companyName ?? "Elevio",
     courseName: row.courseName ?? "Sustainability Course",
     uniqueCode: row.uniqueCode,
     issuedAt: new Date(row.issuedAt),
@@ -128,7 +128,7 @@ router.get("/company/export", async (req, res): Promise<void> => {
       return;
     }
 
-    const label = safeFileName(company?.name ?? "EcoLearn");
+    const label = safeFileName(company?.name ?? "Elevio");
 
     const pdfBytes = await generateBulkCertificatesPdf(certs.map(toCertificateData));
     res.setHeader("Content-Type", "application/pdf");
@@ -182,7 +182,7 @@ router.get("/:id/pdf", async (req, res): Promise<void> => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="EcoLearn_Certificate_${safeFileName(cert.uniqueCode)}.pdf"`,
+      `attachment; filename="Elevio-Certificate-${safeFileName(cert.uniqueCode)}.pdf"`,
     );
     res.send(Buffer.from(pdfBytes));
   } catch (err) {

@@ -26,7 +26,7 @@ export default function ImpactDashboard() {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-serif mb-3">Our Collective Impact</h1>
           <p className="text-muted-foreground text-lg">
-            Every course completed and every company that joins EcoLearn adds to a single,
+            Every course completed and every company that joins Elevio adds to a single,
             growing record of environmental and social impact across Mauritius. These numbers
             start at zero and reflect real action. Nothing here is simulated.
           </p>
@@ -185,7 +185,7 @@ export default function ImpactDashboard() {
 
         {!hasActivity && !isLoading && (
           <p className="text-center text-sm text-muted-foreground">
-            EcoLearn is just getting started. These figures grow with every learner and every company that joins.
+            Elevio is just getting started. These figures grow with every learner and every company that joins.
           </p>
         )}
       </div>

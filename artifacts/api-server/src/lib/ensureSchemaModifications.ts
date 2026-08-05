@@ -105,7 +105,7 @@ export async function ensureSchemaModifications() {
     {
       name: "Add provider_label to learning_paths",
       check: () => columnExists("learning_paths", "provider_label"),
-      execute: () => db.execute(sql`ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "provider_label" text DEFAULT 'EcoLearnHub' NOT NULL;`)
+      execute: () => db.execute(sql`ALTER TABLE "learning_paths" ADD COLUMN IF NOT EXISTS "provider_label" text DEFAULT 'Elevio' NOT NULL;`)
     },
     {
       name: "Add is_system_managed to learning_paths",

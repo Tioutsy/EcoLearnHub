@@ -73,7 +73,7 @@ export async function processTrainingReminders(
           recipientName: emp.name,
           category,
           dedupKey,
-          title: "Reminder: Activate Your EcoLearnHub Corporate Access",
+          title: "Reminder: Activate Your Elevio Corporate Access",
           message: `Hello ${emp.name}, your corporate learning account is ready to activate.`,
         });
 

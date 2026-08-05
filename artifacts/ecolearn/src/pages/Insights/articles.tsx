@@ -78,7 +78,7 @@ export default function InsightsArticlesList() {
                       />
                     ) : (
                       <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-serif font-bold text-xl">
-                        EcoLearn
+                        Elevio
                       </div>
                     )}
                   </div>

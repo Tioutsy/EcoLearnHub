@@ -13,10 +13,13 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Leaf className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold font-serif">EcoLearn</span>
+              <span className="text-xl font-bold font-serif">Elevio</span>
             </div>
             <p className="text-secondary-foreground/80 text-sm leading-relaxed">
-              The Corporate Sustainability & ESG Training Platform for Mauritius. Train, track, certify, and demonstrate sustainability.
+              Short, practical workplace learning that helps employees learn, apply and improve.
+            </p>
+            <p className="text-xs text-secondary-foreground/60">
+              Elevio is operated by Recyclean Ltd.
             </p>
           </div>
 
@@ -51,7 +54,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
-                <a href="mailto:ecolearn@gmail.com" className="hover:text-white transition-colors">ecolearn@gmail.com</a>
+                <a href="mailto:support@elevio.mu" className="hover:text-white transition-colors">support@elevio.mu</a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
@@ -63,7 +66,7 @@ export function Footer() {
         </div>
         
         <div className="mt-12 pt-8 border-t border-secondary-foreground/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-secondary-foreground/60">
-          <p>© {new Date().getFullYear()} EcoLearn Mauritius. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Elevio. All rights reserved. Elevio is operated by Recyclean Ltd.</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>

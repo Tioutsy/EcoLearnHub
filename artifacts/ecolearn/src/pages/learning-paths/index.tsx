@@ -56,7 +56,7 @@ export default function LearningPaths() {
             <RouteIcon className="h-16 w-16 text-destructive mx-auto mb-4 opacity-70" />
             <h3 className="text-xl font-bold mb-2">We could not load the learning paths</h3>
             <p className="text-muted-foreground max-w-md mx-auto mb-6">
-              Please try again. If the problem continues, contact your EcoLearnHub administrator.
+              Please try again. If the problem continues, contact your Elevio administrator.
             </p>
             <Button onClick={() => refetch()} variant="destructive">
               Retry

@@ -40,7 +40,7 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
           </div>
           <h1 className="text-2xl font-bold font-serif mb-2">Access Denied</h1>
           <p className="text-muted-foreground mb-6">
-            You do not have permission to view this section. This portal is strictly limited to EcoLearn Mauritius platform administrators.
+            You do not have permission to view this section. This portal is strictly limited to Elevio platform administrators.
           </p>
           <Link
             href="/dashboard"
@@ -67,7 +67,7 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="mb-8">
           <p className="text-sm font-medium text-primary mb-1">Platform Admin Portal</p>
-          <h1 className="text-3xl font-bold font-serif">EcoLearn Administrator</h1>
+          <h1 className="text-3xl font-bold font-serif">Elevio Administrator</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

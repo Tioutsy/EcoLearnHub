@@ -242,15 +242,15 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
         certificateId = existingCert.id;
       } else {
         const code = `ECO-${randomUUID().slice(0, 8).toUpperCase()}`;
-        const certificateTitle = isCertification ? "EcoLearnHub Core Sustainability Certificate" : null;
+        const certificateTitle = isCertification ? "Elevio Core Sustainability Certificate" : null;
         const [cert] = await db
           .insert(certificatesTable)
           .values({
             userId,
             companyId,
             employeeId: employee?.id,
-            employeeName: employee?.name ?? "EcoLearn Learner",
-            companyName: company?.name ?? "EcoLearn Mauritius",
+            employeeName: employee?.name ?? "Elevio Learner",
+            companyName: company?.name ?? "Elevio",
             courseId,
             courseVersion,
             uniqueCode: code,

@@ -303,7 +303,7 @@ const CATALOGUE_COURSES = [
       "Recognise when to act, ask, document or escalate.",
       "Demonstrate readiness to complete the foundation certification pathway."
     ],
-    badgeName: "EcoLearnHub Sustainability Certificate",
+    badgeName: "Elevio Sustainability Certificate",
     badgeDescription: "Awarded for completing all modules and passing the final certification exam.",
     lessons: [
       "Certification briefing and rules",

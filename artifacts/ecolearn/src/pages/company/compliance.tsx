@@ -177,7 +177,7 @@ export default function CompanyCompliance() {
             <div>
               <h1 className="text-3xl font-bold font-serif mb-2">Training Compliance</h1>
               <p className="text-muted-foreground max-w-2xl">
-                Review employee progress across the EcoLearnHub core curriculum and export clear training records for internal reporting.
+                Review employee progress across the Elevio core curriculum and export clear training records for internal reporting.
               </p>
             </div>
             <div className="shrink-0">
@@ -282,7 +282,7 @@ export default function CompanyCompliance() {
                             <p>{c.completed} completed • {c.inProgress} in progress</p>
                             <p>Average quiz score: {c.averageQuizScore ? `${c.averageQuizScore}%` : "-"}</p>
                             {c.courseId === 12 && (
-                              <p className="text-purple-600 font-medium">EcoLearnHub Certifications: {c.certificationCount}</p>
+                              <p className="text-purple-600 font-medium">Elevio Certifications: {c.certificationCount}</p>
                             )}
                           </div>
                           <Progress value={c.completionRate} className="h-2 mb-1" />

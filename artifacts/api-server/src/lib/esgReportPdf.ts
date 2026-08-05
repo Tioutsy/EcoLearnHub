@@ -97,7 +97,7 @@ class ReportBuilder {
   }
 
   drawFooter() {
-    const text = "EcoLearn Mauritius  |  Corporate Sustainability & ESG Training";
+    const text = "Elevio  |  Learn. Apply. Improve.";
     this.page.drawLine({
       start: { x: MARGIN, y: MARGIN + 24 },
       end: { x: PAGE_W - MARGIN, y: MARGIN + 24 },
@@ -309,7 +309,7 @@ class ReportBuilder {
       font: this.fonts.bold,
       color: GREEN,
     });
-    this.page.drawText("EcoLearn Mauritius", {
+    this.page.drawText("Elevio", {
       x: MARGIN + 60,
       y: top - 34,
       size: 16,
@@ -371,7 +371,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
   b.sectionHeading("Executive Summary");
   b.paragraph(
     `This report summarises ${data.company.name}'s environmental and sustainability training performance, ` +
-      `measured through the EcoLearn platform. It covers workforce participation, course completion, assessment ` +
+      `measured through the Elevio platform. It covers workforce participation, course completion, assessment ` +
       `outcomes, certifications earned and the estimated environmental impact of staff training. It is intended ` +
       `to be shared with auditors, clients, investors, ESG consultants and certification bodies as supporting ` +
       `evidence of the organisation's commitment to sustainability capability building.`,
@@ -501,7 +501,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
   // Methodology footer note
   b.sectionHeading("Methodology & Assurance");
   b.paragraph(
-    "All metrics are derived from real training activity recorded on the EcoLearn platform for the organisation " +
+    "All metrics are derived from real training activity recorded on the Elevio platform for the organisation " +
       "named above. Completion, adoption, assessment and engagement rates are calculated from employee records. " +
       "The Sustainability Score is a weighted composite (completion 30%, adoption 25%, assessment 25%, engagement 20%). " +
       "Issued certificates can be independently verified via the QR code printed on each certificate.",

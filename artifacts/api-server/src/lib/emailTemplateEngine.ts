@@ -33,14 +33,14 @@ export function renderEmailTemplate(
   type: TemplateNotificationType,
   data: Record<string, any>
 ): RenderedEmail {
-  const companyName = escapeHtml(data.companyName || "EcoLearnHub Corporate");
+  const companyName = escapeHtml(data.companyName || "Elevio Corporate");
   const recipientName = escapeHtml(data.recipientName || "Team Member");
   const courseTitle = escapeHtml(data.courseTitle || "Sustainability Course");
   const courseCode = escapeHtml(data.courseCode || "");
   const dueDate = data.dueDate ? new Date(data.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
-  const actionUrl = escapeHtml(data.actionUrl || "https://app.ecolearnhub.com");
+  const actionUrl = escapeHtml(data.actionUrl || "https://app.elevio.mu");
 
-  let subject = "EcoLearnHub Notification";
+  let subject = "Elevio Notification";
   let bodyContentHtml = "";
   let bodyContentText = "";
   let ctaText = "Go to Workspace";
@@ -53,7 +53,7 @@ export function renderEmailTemplate(
       bodyContentHtml = `
         <p>Hello ${recipientName},</p>
         <p>You have been invited to join the corporate sustainability learning workspace for <strong>${companyName}</strong>.</p>
-        <p>EcoLearnHub provides structured, accredited sustainability training to help you develop practical ESG skills.</p>
+        <p>Elevio provides short, practical workplace learning that helps employees learn, apply and improve.</p>
       `;
       bodyContentText = `Hello ${recipientName},\n\nYou have been invited to join the corporate sustainability learning workspace for ${companyName}.\n\nActivate your account at: ${actionUrl}`;
       break;
@@ -63,10 +63,10 @@ export function renderEmailTemplate(
       ctaText = "Activate Access";
       bodyContentHtml = `
         <p>Hello ${recipientName},</p>
-        <p>Your invitation to join <strong>${companyName}</strong> on EcoLearnHub will expire shortly.</p>
+        <p>Your invitation to join <strong>${companyName}</strong> on Elevio will expire shortly.</p>
         <p>Please activate your account to access assigned training courses.</p>
       `;
-      bodyContentText = `Hello ${recipientName},\n\nYour invitation to join ${companyName} on EcoLearnHub will expire shortly.\n\nActivate access: ${actionUrl}`;
+      bodyContentText = `Hello ${recipientName},\n\nYour invitation to join ${companyName} on Elevio will expire shortly.\n\nActivate access: ${actionUrl}`;
       break;
 
     case "course_assigned":
@@ -184,7 +184,8 @@ export function renderEmailTemplate(
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
           <tr>
             <td style="background: #0f766e; padding: 24px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 600;">EcoLearnHub</h1>
+              <h1 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 600;">Elevio</h1>
+              <p style="color: #e6fffa; margin: 4px 0 0 0; font-size: 13px;">Learn. Apply. Improve.</p>
             </td>
           </tr>
           <tr>
@@ -197,8 +198,8 @@ export function renderEmailTemplate(
           </tr>
           <tr>
             <td style="background: #f1f5f9; padding: 16px; text-align: center; font-size: 12px; color: #64748b;">
-              <p style="margin: 0;">Sent by EcoLearnHub on behalf of ${companyName}</p>
-              <p style="margin: 4px 0 0 0;">Confidential & Authorised Recipient Communication</p>
+              <p style="margin: 0;">Sent by Elevio on behalf of ${companyName}</p>
+              <p style="margin: 4px 0 0 0;">Elevio is operated by Recyclean Ltd.</p>
             </td>
           </tr>
         </table>

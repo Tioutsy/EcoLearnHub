@@ -12,10 +12,10 @@ export async function ensureDefaultCompany(): Promise<void> {
     const [company] = await db
       .insert(companiesTable)
       .values({
-        name: "EcoLearn Mauritius",
-        slug: "ecolearn-mauritius",
+        name: "Elevio",
+        slug: "elevio",
         industry: "Corporate Training & Sustainability Solutions",
-        logoUrl: "/images/companies/ecolearn-mauritius-logo.png",
+        logoUrl: "/images/companies/elevio-logo.png",
         planId: null,
       })
       .returning();

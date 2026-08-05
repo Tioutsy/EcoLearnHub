@@ -130,7 +130,7 @@ export default function CompanyRecycling() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `ecolearn-recycling-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `elevio-recycling-report-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -158,7 +158,7 @@ export default function CompanyRecycling() {
         onSuccess: () => {
           toast({
             title: "Enquiry sent",
-            description: "The EcoLearnHub team can now follow up from the admin panel.",
+            description: "The Elevio team can now follow up from the admin panel.",
           });
           setContactName("");
           setEmail("");
@@ -237,7 +237,7 @@ export default function CompanyRecycling() {
               <p className="text-muted-foreground mb-5">
                 Recyclean collection clients can track verified recycling
                 volumes, material breakdowns, monthly trends, and exportable
-                reporting data inside EcoLearnHub.
+                reporting data inside Elevio.
               </p>
               <div className="grid sm:grid-cols-3 gap-3">
                 {["Verified kg records", "Monthly trend reports", "Material-level exports"].map((item) => (

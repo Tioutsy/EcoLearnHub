@@ -27,14 +27,14 @@ function formatDate(date: Date): string {
 export async function generateTrainingEvidencePackPdf(companyId: number): Promise<Uint8Array> {
   const recordsData = await getCompanyTrainingRecords({ companyId });
   const company = await getCompany(companyId);
-  const companyName = company?.name ?? "EcoLearn Corporate Member";
+  const companyName = company?.name ?? "Elevio Corporate Member";
 
   const pdf = await PDFDocument.create();
   const fontRegular = await pdf.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const fontOblique = await pdf.embedFont(StandardFonts.HelveticaOblique);
 
-  const packRef = `ECO-EVID-${randomUUID().slice(0, 8).toUpperCase()}`;
+  const packRef = `ELEVIO-EVID-${randomUUID().slice(0, 8).toUpperCase()}`;
   const now = new Date();
   const dateStr = formatDate(now);
 
@@ -50,7 +50,7 @@ export async function generateTrainingEvidencePackPdf(companyId: number): Promis
     color: GREEN,
   });
 
-  page1.drawText("EcoLearnHub Mauritius", {
+  page1.drawText("Elevio", {
     x: MARGIN,
     y: PAGE_H - 50,
     size: 24,
@@ -188,7 +188,7 @@ export async function generateTrainingEvidencePackPdf(companyId: number): Promis
     "• Assessment Threshold: Minimum score of 70-80% required for course completion and certificate issuance.",
     "• Version Integrity: Learner completion records retain the specific course version active at the time of completion.",
     "• Scope & Tenant Isolation: Data is strictly filtered and scoped to verified organization records.",
-    "• Legal Notice: This report provides evidence of training records stored in EcoLearnHub.",
+    "• Legal Notice: This report provides evidence of training records stored in Elevio.",
     "  It does not by itself establish independent external audit assurance or regulatory compliance.",
   ];
 
@@ -287,7 +287,7 @@ export async function generateTrainingEvidencePackPdf(companyId: number): Promis
   });
 
   // Footer Page 2
-  page2.drawText(`Page 2 of 2 — Reference: ${packRef} — EcoLearnHub Corporate LMS`, {
+  page2.drawText(`Page 2 of 2 — Reference: ${packRef} — Elevio Corporate LMS`, {
     x: MARGIN,
     y: MARGIN / 2,
     size: 8,

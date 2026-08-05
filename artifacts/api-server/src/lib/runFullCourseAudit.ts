@@ -181,7 +181,7 @@ async function audit() {
   }
 
   // Format as Markdown table
-  let reportMd = `# EcoLearnHub Sprint 7X Course Content Audit Report\n\n`;
+  let reportMd = `# Elevio Course Content Audit Report\n\n`;
   reportMd += `Audit Date: ${new Date().toISOString()}\n\n`;
   reportMd += `| Course Code | Title | DB ID | Lessons | Quiz Qs | Empty Content | Metadata | Objectives | Scenario | Quiz Quality | Feedback | Mauritius Rel. | Mobile | Prereqs | Recs | Badge/Cert | Issues / Corrections | Status |\n`;
   reportMd += `|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n`;

@@ -79,7 +79,7 @@ export const mauritiusResourcesTable = pgTable("mauritius_resources", {
   slug: text("slug").notNull().unique(),
   resourceType: text("resource_type").notNull(), // Act, Regulation, Rule, Policy, Government guideline, Code, Official notice, Authority, Compliance resource
   shortSummary: text("short_summary").notNull(),
-  mainExplanation: text("main_explanation").notNull(), // Simplified EcoLearnHub explanation
+  mainExplanation: text("main_explanation").notNull(), // Simplified Elevio explanation
   officialName: text("official_name"),
   resourceNumber: text("resource_number"),
   responsibleAuthority: text("responsible_authority"),

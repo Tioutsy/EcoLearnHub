@@ -94,7 +94,7 @@ const NEW_LESSONS = [
   },
   {
     order: 2,
-    title: "The EcoLearnHub Action-Planning Framework",
+    title: "The Elevio Action-Planning Framework",
     minutes: 4,
     content: "Master the 5-step operational framework: DEFINE – PLAN – ASSIGN – EVIDENCE – REVIEW.",
     blocks: [
@@ -199,7 +199,7 @@ const NEW_LESSONS = [
         type: "workplace_example",
         position: 4,
         headingText: "Practical Disclaimer",
-        bodyText: "DISCLAIMER: The EcoLearnHub Action-Planning Framework is an operational learning tool for workplace projects. It does not replace statutory environmental management systems, official legal compliance procedures, or HRDC statutory requirements."
+        bodyText: "DISCLAIMER: The Elevio Action-Planning Framework is an operational learning tool for workplace projects. It does not replace statutory environmental management systems, official legal compliance procedures, or HRDC statutory requirements."
       }
     ]
   }
@@ -325,7 +325,7 @@ const NEW_QUIZ = [
   },
   {
     order: 10,
-    question: "What is the primary takeaway of the EcoLearnHub Action-Planning Framework?",
+    question: "What is the primary takeaway of the Elevio Action-Planning Framework?",
     options: [
       "Structured planning (DEFINE–PLAN–ASSIGN–EVIDENCE–REVIEW) converts sustainability ideas into owned, measurable workplace results",
       "Action planning is an academic exercise meant only for external consultants",

@@ -169,7 +169,7 @@ export default function SustainabilityImpact() {
               </div>
 
               <div className="flex-1 w-full">
-                <h2 className="text-xl font-bold font-serif mb-1">EcoLearn Sustainability Score</h2>
+                <h2 className="text-xl font-bold font-serif mb-1">Elevio Sustainability Score</h2>
                 <p className="text-sm text-muted-foreground mb-4">
                   {score?.nextLevel
                     ? `${score.pointsToNextLevel} points to reach ${score.nextLevel} level.`

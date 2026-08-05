@@ -126,7 +126,7 @@ export default function CompanyReports() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `ecolearn-training-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `elevio-training-report-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -272,6 +272,7 @@ export default function CompanyReports() {
             </Table>
           </div>
         </div>
+      </div>
     </Layout>
   );
 }

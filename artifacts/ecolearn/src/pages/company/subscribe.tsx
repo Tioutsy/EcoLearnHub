@@ -86,7 +86,7 @@ export default function Subscribe() {
       });
 
       setIsSuccess(true);
-      setSuccessMessage(res?.message || "Your EcoLearnHub subscription request has been received.");
+      setSuccessMessage(res?.message || "Your Elevio subscription request has been received.");
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/company"] });
 
       toast({
@@ -158,7 +158,7 @@ export default function Subscribe() {
                         Company & Organization Details
                       </CardTitle>
                       <CardDescription>
-                        Set up your organization account for EcoLearnHub training tracking.
+                        Set up your organization account for Elevio training tracking.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">

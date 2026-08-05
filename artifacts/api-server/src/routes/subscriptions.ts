@@ -221,7 +221,7 @@ router.post("/onboard", async (req, res): Promise<void> => {
     resolvedMonthlyAmountMUR: sub.agreedMonthlyAmount ? parseFloat(sub.agreedMonthlyAmount) : null,
     isTailoredQuote: isTailored,
     message: isTailored 
-      ? "Your EcoLearnHub subscription request has been received. Our corporate team will contact you with a tailored proposal."
+      ? "Your Elevio subscription request has been received. Our corporate team will contact you with a tailored proposal."
       : "Subscription request received and plan activated.",
   });
 });

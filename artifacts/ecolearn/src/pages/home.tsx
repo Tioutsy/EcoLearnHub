@@ -20,13 +20,13 @@ export default function Home() {
             <div className="max-w-2xl">
               <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary mb-6">
                 <span className="flex h-2 w-2 rounded-full bg-primary mr-2" />
-                Corporate Sustainability & ESG Training Platform for Mauritius
+                Short, Practical Workplace Learning for Mauritius
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground font-serif leading-[1.1] mb-6">
-                Train. Track. Certify. <span className="text-primary italic">Demonstrate sustainability.</span>
+                Elevio <span className="text-primary italic">— Learn. Apply. Improve.</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                Engage every employee, measure real results, and build ESG readiness your board can report on. One platform for training, reporting, and compliance support, made for Mauritian organisations.
+                Short, practical workplace learning that helps employees learn, apply and improve. Build practical sustainability capabilities across your organization with self-paced courses tailored for Mauritian teams.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild className="h-12 px-8 text-base">

@@ -780,7 +780,7 @@ Includes non-recyclable residual waste, dirty packaging, and contaminated items.
 
 **Related Course**: [Waste Sorting Course](file:///courses/waste-sorting)  
 **Related Rules**: [Waste Management Act 2023](file:///insights/mauritius-resources/waste-management-resource-recovery-act-2023)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Sustainability Education Team",
       thumbnailUrl: "https://images.unsplash.com/photo-1532996127006-2b2f1bfb8eb9",
       tags: ["workplace", "recycling", "mauritius", "bin-sorting"],
@@ -818,7 +818,7 @@ Establish a monthly pickup schedule with operators like We Recycle. Ensure you l
 
 **Related Course**: [Recycling Strategies](file:///courses/recycling)  
 **Related Rules**: [EPR PET Regulations](file:///insights/mauritius-resources/epr-pet-bottles)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Local Infrastructure Team",
       thumbnailUrl: "https://images.unsplash.com/photo-1591197172021-c8077a8f16a8",
       tags: ["infrastructure", "recycling", "landfill", "mauritius"],
@@ -854,7 +854,7 @@ Local supermarkets replaced thin plastic bags with reusable bags made from woven
 
 **Related Course**: [Circular Economy](file:///courses/circular-economy)  
 **Related Rules**: [Single-Use Plastic Ban](file:///insights/mauritius-resources/single-use-plastic-ban)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Corporate Case Studies",
       thumbnailUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09",
       tags: ["circular-economy", "case-study", "mauritius", "business"],
@@ -887,7 +887,7 @@ The Environment Act 2024 represents a major modernization of environmental polic
 
 **Related Course**: [Environmental Compliance](file:///courses/environmental-compliance)  
 **Related Rules**: [Environment Act 2024](file:///insights/mauritius-resources/environment-act-2024)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Legal Compliance Panel",
       thumbnailUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f",
       tags: ["compliance", "legal", "environment-act-2024", "mauritius"],
@@ -919,7 +919,7 @@ As a Small Island Developing State (SIDS), Mauritius is highly vulnerable to sea
 
 **Related Course**: [Carbon Accounting](file:///courses/carbon-accounting)  
 **Related Rules**: [Climate Change Act 2020](file:///insights/mauritius-resources/climate-change-act-2020)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Climate Action Team",
       thumbnailUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
       tags: ["climate", "sids", "mitigation", "mauritius"],
@@ -951,7 +951,7 @@ The Waste Management and Resource Recovery Act 2023 shifted the national focus f
 
 **Related Course**: [Recycling Strategies](file:///courses/recycling)  
 **Related Rules**: [Waste Management Act 2023](file:///insights/mauritius-resources/waste-management-resource-recovery-act-2023)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Waste and Recycling Division",
       thumbnailUrl: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9",
       tags: ["waste", "recycling", "compliance", "mauritius"],
@@ -984,7 +984,7 @@ New construction projects, facility expansions, or industrial process upgrades i
 
 **Related Course**: [Environmental Compliance](file:///courses/environmental-compliance)  
 **Related Rules**: [Environment Act 2024](file:///insights/mauritius-resources/environment-act-2024)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Licensing and Audits Panel",
       thumbnailUrl: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5",
       tags: ["licensing", "permits", "eia", "mauritius"],
@@ -1016,7 +1016,7 @@ With abundant sunshine, solar energy offers Mauritian commercial facilities a do
 
 **Related Course**: [Energy Efficiency](file:///courses/energy-efficiency)  
 **Related Rules**: [CEB Solar Schemes](file:///insights/mauritius-resources/ceb-renewable-energy-schemes)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Energy Transition Panel",
       thumbnailUrl: "https://images.unsplash.com/photo-1509391366360-2e959784a276",
       tags: ["solar", "energy", "renewable-energy", "mauritius"],
@@ -1048,7 +1048,7 @@ Although tropical, Mauritius faces dry winter periods. Commercial businesses mus
 
 **Related Course**: [Water Conservation](file:///courses/water-conservation)  
 **Related Rules**: [Water Resources Act 1985](file:///insights/mauritius-resources/water-resources-act-1985)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Resource Conservation Team",
       thumbnailUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
       tags: ["water", "conservation", "compliance", "mauritius"],
@@ -1080,7 +1080,7 @@ Sustainable procurement aligns company purchasing with national environmental go
 
 **Related Course**: [Green Procurement](file:///courses/green-procurement)  
 **Related Rules**: [Single-Use Plastic Ban](file:///insights/mauritius-resources/single-use-plastic-ban)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Sustainable Supply Chain Panel",
       thumbnailUrl: "https://images.unsplash.com/photo-1530587191325-3db32d826c18",
       tags: ["procurement", "supply-chain", "compliance", "mauritius"],
@@ -1112,7 +1112,7 @@ The Stock Exchange of Mauritius Sustainability Index (SEMSI) tracks listed busin
 
 **Related Course**: [ESG Reporting](file:///courses/esg-reporting)  
 **Related Rules**: [SEMSI Index Guidelines](file:///insights/mauritius-resources/semsi-index-guide)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Finance and ESG Panel",
       thumbnailUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40",
       tags: ["esg", "semsi", "finance", "mauritius"],
@@ -1144,7 +1144,7 @@ Sustainability is built on safe workspaces. A green initiative is incomplete if 
 
 **Related Course**: [Workplace Safety](file:///courses/workplace-safety)  
 **Related Rules**: [OSHA 2005 Act](file:///insights/mauritius-resources/occupational-safety-health-act-2005)`,
-      authorName: "EcoLearnHub Editorial",
+      authorName: "Elevio Editorial",
       authorTitle: "Workplace Safety Panel",
       thumbnailUrl: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122",
       tags: ["safety", "osha", "workplace", "mauritius"],

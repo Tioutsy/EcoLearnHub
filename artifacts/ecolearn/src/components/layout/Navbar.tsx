@@ -48,7 +48,7 @@ export function Navbar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Leaf className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-foreground font-serif">EcoLearn</span>
+            <span className="text-xl font-bold tracking-tight text-foreground font-serif">Elevio</span>
           </Link>
         </div>
 
