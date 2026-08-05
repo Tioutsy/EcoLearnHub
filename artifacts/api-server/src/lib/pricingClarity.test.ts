@@ -24,8 +24,8 @@ test("Pricing Page Per-Employee Cost Clarity Verification", () => {
 
   assert.equal(
     PER_EMPLOYEE_COST_MAP["FROM_81_TO_120"],
-    "From MUR 52.10 per employee/month",
-    "81–120 employees must show 'From MUR 52.10 per employee/month'"
+    "From MUR 52.08 per employee/month",
+    "81–120 employees must show 'From MUR 52.08 per employee/month'"
   );
 
   assert.equal(
