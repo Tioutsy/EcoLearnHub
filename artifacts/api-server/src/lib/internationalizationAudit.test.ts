@@ -147,4 +147,15 @@ describe("Sprint 9V — Internationalisation (i18n) Architecture & Resource Audi
       assert.ok(translations.fr[key], `French admin key '${key}' must exist`);
     }
   });
+
+  test("10. Full platform content i18n completeness & fallback verification", () => {
+    const enKeys = Object.keys(translations.en);
+    const frKeys = Object.keys(translations.fr);
+
+    assert.equal(enKeys.length, frKeys.length, "English and French translation key counts must match 1:1");
+
+    for (const key of enKeys) {
+      assert.ok(translations.fr[key], `French translation key '${key}' must exist and not be empty`);
+    }
+  });
 });
