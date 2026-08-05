@@ -12,9 +12,12 @@ import { ensureFoundationsCourse } from "./ensureFoundationsCourse";
 import { ensureCarbonFootprintCourse } from "./ensureCarbonFootprintCourse";
 import { ensureAppliedCourseBadges } from "./ensureAppliedCourseBadges";
 
+import { ensureCatalogueSkeletons } from "./ensureCatalogueSkeletons";
+
 describe("Sprint 7X: Full Course Content, Quiz & Learning Experience Audit", () => {
   before(async () => {
-    // Ensure critical seeders and badge metadata have run
+    // Ensure critical seeders and catalogue skeletons have run
+    await ensureCatalogueSkeletons();
     await ensureCarbonFootprintCourse();
     await ensureAppliedCourseBadges();
   });
