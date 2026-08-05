@@ -158,4 +158,27 @@ describe("Sprint 9V — Internationalisation (i18n) Architecture & Resource Audi
       assert.ok(translations.fr[key], `French translation key '${key}' must exist and not be empty`);
     }
   });
+
+  test("11. PDF Certificate Generator supports French and English locales", async () => {
+    const { generateCertificatePdf } = await import("./certificatePdf");
+    const certEn = await generateCertificatePdf({
+      employeeName: "Jean Dupont",
+      companyName: "Elevio Corp",
+      courseName: "Sustainability Foundations",
+      uniqueCode: "CERT-TEST-EN",
+      issuedAt: new Date("2026-08-05"),
+      locale: "en",
+    });
+    const certFr = await generateCertificatePdf({
+      employeeName: "Jean Dupont",
+      companyName: "Elevio Corp",
+      courseName: "Sustainability Foundations",
+      uniqueCode: "CERT-TEST-FR",
+      issuedAt: new Date("2026-08-05"),
+      locale: "fr",
+    });
+
+    assert.ok(certEn && certEn.length > 1000, "English PDF must generate successfully");
+    assert.ok(certFr && certFr.length > 1000, "French PDF must generate successfully");
+  });
 });

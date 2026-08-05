@@ -7,6 +7,7 @@ export interface CertificateData {
   courseName: string;
   uniqueCode: string;
   issuedAt: Date;
+  locale?: "en" | "fr";
 }
 
 const GREEN = rgb(0.13, 0.43, 0.27);
@@ -33,8 +34,8 @@ function centerText(
   });
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-GB", {
+function formatDate(date: Date, locale: "en" | "fr" = "en"): string {
+  return date.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -88,18 +89,27 @@ async function drawCertificatePage(
     color: MUTED,
   });
 
-  centerText(page, "CERTIFICATE OF COMPLETION", height - 170, fonts.bold, 30, DARK);
+  const isFr = data.locale === "fr";
+  const title = isFr ? "CERTIFICAT DE RÉUSSITE" : "CERTIFICATE OF COMPLETION";
+  const certify = isFr ? "Ceci atteste que" : "This is to certify that";
+  const completed = isFr ? "a réussi avec succès le cours" : "has successfully completed the course";
+  const company = isFr ? `délivré aux employés de ${data.companyName}` : `awarded to employees of ${data.companyName}`;
+  const dateLabel = isFr ? "Date de réussite" : "Date of Completion";
+  const idLabel = isFr ? "Code Certificat" : "Certificate ID";
+  const scanLabel = isFr ? "Scannez pour vérifier l'authenticité" : "Scan to verify authenticity";
+
+  centerText(page, title, height - 170, fonts.bold, 28, DARK);
   page.drawRectangle({ x: width / 2 - 60, y: height - 185, width: 120, height: 3, color: GOLD });
 
-  centerText(page, "This is to certify that", height - 225, fonts.italic, 14, MUTED);
+  centerText(page, certify, height - 225, fonts.italic, 14, MUTED);
   centerText(page, data.employeeName, height - 268, fonts.bold, 32, GREEN);
 
-  centerText(page, "has successfully completed the course", height - 305, fonts.italic, 14, MUTED);
+  centerText(page, completed, height - 305, fonts.italic, 14, MUTED);
   centerText(page, data.courseName, height - 340, fonts.bold, 20, DARK);
 
   centerText(
     page,
-    `awarded to employees of ${data.companyName}`,
+    company,
     height - 368,
     fonts.regular,
     12,
@@ -107,8 +117,8 @@ async function drawCertificatePage(
   );
 
   const baseY = 110;
-  page.drawText("Date of Completion", { x: 90, y: baseY, size: 9, font: fonts.regular, color: MUTED });
-  page.drawText(formatDate(data.issuedAt), {
+  page.drawText(dateLabel, { x: 90, y: baseY, size: 9, font: fonts.regular, color: MUTED });
+  page.drawText(formatDate(data.issuedAt, data.locale), {
     x: 90,
     y: baseY - 18,
     size: 13,
@@ -122,7 +132,7 @@ async function drawCertificatePage(
     color: MUTED,
   });
 
-  page.drawText("Certificate ID", {
+  page.drawText(idLabel, {
     x: width - 250,
     y: baseY,
     size: 9,
@@ -156,7 +166,7 @@ async function drawCertificatePage(
     width: qrSize,
     height: qrSize,
   });
-  centerText(page, "Scan to verify authenticity", 34, fonts.regular, 8, MUTED);
+  centerText(page, scanLabel, 34, fonts.regular, 8, MUTED);
 }
 
 function centerTextAt(
