@@ -7,8 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, XCircle, ArrowLeft, Award, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Quiz() {
+  const { t } = useLanguage();
   const { courseId } = useParams();
   const id = parseInt(courseId || "0", 10);
   const [, setLocation] = useLocation();
@@ -44,9 +46,8 @@ export default function Quiz() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-24 text-center">
-          <h2 className="text-2xl font-bold mb-4">Quiz not available</h2>
-          <p className="text-muted-foreground mb-8">This course doesn't have a quiz yet.</p>
-          <Button asChild><Link href="/dashboard">Back to Dashboard</Link></Button>
+          <h2 className="text-2xl font-bold mb-4">{t("quiz.not_available")}</h2>
+          <Button asChild><Link href="/dashboard">{t("common.back_to_dashboard")}</Link></Button>
         </div>
       </Layout>
     );
@@ -58,76 +59,87 @@ export default function Quiz() {
   const enrollment = enrollments?.find((item) => item.courseId === id);
 
   const handleSelectOption = (optionIndex: number) => {
-    setAnswers({ ...answers, [currentQuestion.id]: optionIndex });
+    if (!currentQuestion) return;
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: optionIndex,
+    }));
   };
 
   const handleNext = () => {
-    if (isLastQuestion) {
-      // Submit
-      const formattedAnswers = Object.entries(answers).map(([questionId, selectedOption]) => ({
-        questionId: parseInt(questionId, 10),
-        selectedOption
-      }));
-
-      submitQuiz.mutate(
-        { courseId: id, data: { answers: formattedAnswers } },
-        {
-          onSuccess: (res: any) => {
-            setResult(res);
-            if (res.newAchievements && res.newAchievements.length > 0) {
-              const names = res.newAchievements.map((a: any) => a.name).join(", ");
-              toast({
-                title: "🏆 Achievements Unlocked!",
-                description: `You've earned: ${names}`,
-                variant: "default",
-              });
-            }
-          },
-          onError: () => {
-            toast({ title: "Error submitting quiz", variant: "destructive" });
-          }
-        }
-      );
-    } else {
-      setCurrentQuestionIndex(i => i + 1);
+    if (!isLastQuestion) {
+      setCurrentQuestionIndex((prev) => prev + 1);
     }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    const formattedAnswers = Object.entries(answers).map(([qId, oIdx]) => ({
+      questionId: parseInt(qId, 10),
+      selectedOption: oIdx,
+    }));
+
+    submitQuiz.mutate(
+      {
+        courseId: id,
+        data: { answers: formattedAnswers },
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          toast({
+            title: data.passed ? t("quiz.passed_title") : t("quiz.failed_title"),
+            description: data.passed ? t("quiz.passed_sub", { score: data.score }) : t("quiz.failed_sub", { score: data.score, passing: course?.passingScore ?? 70 }),
+          });
+        },
+        onError: () => {
+          toast({
+            title: t("error.something_went_wrong"),
+            description: t("error.try_again"),
+            variant: "destructive",
+          });
+        },
+      }
+    );
   };
 
   if (result) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-24 max-w-2xl text-center">
+        <div className="container mx-auto px-4 py-16 max-w-3xl text-center">
           {result.passed ? (
             <div className="mb-8">
               <div className="h-24 w-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle2 className="h-12 w-12" />
               </div>
-              <h2 className="text-4xl font-bold font-serif mb-4">Congratulations!</h2>
-              <p className="text-xl text-muted-foreground mb-2">You passed the course quiz.</p>
-              <p className="text-lg font-medium">Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})</p>
+              <h2 className="text-4xl font-bold font-serif mb-4">{t("quiz.passed_title")}</h2>
+              <p className="text-xl text-muted-foreground mb-2">{t("quiz.passed_sub", { score: result.score })}</p>
             </div>
           ) : (
             <div className="mb-8">
               <div className="h-24 w-24 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
                 <XCircle className="h-12 w-12" />
               </div>
-              <h2 className="text-4xl font-bold font-serif mb-4">Not quite there yet.</h2>
-              <p className="text-xl text-muted-foreground mb-2">You didn't pass the quiz this time.</p>
-              <p className="text-lg font-medium">Score: {result.score}% ({result.correctAnswers}/{result.totalQuestions})</p>
-              <p className="text-sm text-muted-foreground mt-4">You need {course?.passingScore ?? 70}% to pass. Please review the material and try again.</p>
+              <h2 className="text-4xl font-bold font-serif mb-4">{t("quiz.failed_title")}</h2>
+              <p className="text-xl text-muted-foreground mb-2">{t("quiz.failed_sub", { score: result.score, passing: course?.passingScore ?? 70 })}</p>
             </div>
           )}
 
           <div className="flex gap-4 justify-center mt-12">
             {result.passed && result.certificateId && (
               <Button asChild size="lg">
-                <Link href="/certificates"><Award className="mr-2 h-5 w-5" /> View Certificate</Link>
+                <Link href="/certificates"><Award className="mr-2 h-5 w-5" /> {t("common.view_certificates")}</Link>
               </Button>
             )}
             {result.passed && result.certificateId && (
               <Button asChild size="lg" variant="outline">
                 <a href={`/api/certificates/${result.certificateId}/pdf`} target="_blank" rel="noopener noreferrer">
-                  <Download className="mr-2 h-5 w-5" /> Download PDF
+                  <Download className="mr-2 h-5 w-5" /> {t("cert.download_pdf")}
                 </a>
               </Button>
             )}
@@ -137,11 +149,11 @@ export default function Quiz() {
                 setCurrentQuestionIndex(0);
                 setAnswers({});
               }}>
-                Retry Quiz
+                {t("quiz.retry_button")}
               </Button>
             )}
             <Button variant={result.passed ? "outline" : "secondary"} size="lg" asChild>
-              <Link href="/dashboard">Back to Dashboard</Link>
+              <Link href="/dashboard">{t("common.back_to_dashboard")}</Link>
             </Button>
           </div>
 

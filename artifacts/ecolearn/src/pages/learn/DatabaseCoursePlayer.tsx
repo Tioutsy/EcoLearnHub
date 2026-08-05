@@ -30,6 +30,7 @@ import {
   GraduationCap,
   AlertCircle,
 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   TextView,
   CalloutView,
@@ -388,6 +389,8 @@ export default function DatabaseCoursePlayer({
     }
   }
 
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="h-16 border-b flex items-center justify-between px-4 shrink-0 bg-card sticky top-0 z-10">
@@ -399,7 +402,7 @@ export default function DatabaseCoursePlayer({
             {enrollment?.course?.title || "Course Player"}
           </div>
         </div>
-        <div className="text-sm font-medium text-muted-foreground shrink-0">{overallPct}% complete</div>
+        <div className="text-sm font-medium text-muted-foreground shrink-0">{overallPct}% {t("common.completed")}</div>
       </header>
 
       <div className="border-b bg-card">
@@ -432,7 +435,7 @@ export default function DatabaseCoursePlayer({
             <div className="space-y-6">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-primary">
-                  Module {moduleIndex + 1} of {lessons.length}
+                  {t("player.module")} {moduleIndex + 1} / {lessons.length}
                 </p>
                 <h1 className="text-3xl font-bold font-serif leading-tight">{module?.title}</h1>
               </div>

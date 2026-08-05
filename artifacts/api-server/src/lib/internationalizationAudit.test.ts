@@ -79,4 +79,39 @@ describe("Sprint 9V — Internationalisation (i18n) Architecture & Resource Audi
     const interpolated = interpolate(template, { page: 1, total: 5 });
     assert.equal(interpolated, "Page 1 of 5");
   });
+
+  test("7. Sprint 9W: Learner dashboard, quiz, player and certificate key structures exist in both locales", () => {
+    const requiredKeys = [
+      "dashboard.my_learning_title",
+      "dashboard.overall_progress",
+      "dashboard.courses_completed",
+      "dashboard.active_assignments",
+      "catalogue.title",
+      "catalogue.search_placeholder",
+      "player.lesson",
+      "player.module",
+      "player.mark_completed",
+      "quiz.title",
+      "quiz.submit_quiz",
+      "quiz.passed_title",
+      "quiz.failed_title",
+      "cert.my_certificates",
+      "cert.download_pdf",
+      "course.available_in_english",
+    ];
+
+    for (const key of requiredKeys) {
+      assert.ok(translations.en[key], `English key '${key}' must exist`);
+      assert.ok(translations.fr[key], `French key '${key}' must exist`);
+    }
+  });
+
+  test("8. Translation dictionaries contain 0 prohibited legacy brand names", () => {
+    const legacyProhibited = ["ecolearnhub", "verdia", "evolia", "paceo", "ebony forest"];
+    const jsonStr = JSON.stringify(translations).toLowerCase();
+
+    for (const name of legacyProhibited) {
+      assert.ok(!jsonStr.includes(name), `Translations must not contain legacy name '${name}'`);
+    }
+  });
 });

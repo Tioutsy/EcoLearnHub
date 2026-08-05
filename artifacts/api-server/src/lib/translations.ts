@@ -31,6 +31,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.try_again": "Try again",
     "common.all": "All",
     "common.completed": "Completed",
+    "common.browse_courses": "Browse Courses",
+    "common.back_to_dashboard": "Back to Dashboard",
+    "common.view_certificates": "View Certificates",
 
     // Footer
     "footer.tagline": "Short, practical workplace learning that helps employees learn, apply and improve.",
@@ -51,6 +54,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "auth.sign_up_title": "Create your Elevio Account",
     "auth.forgot_password": "Forgot password?",
     "auth.accept_invitation": "Accept Invitation",
+    "auth.session_expired": "Your session has expired. Please sign in again.",
+    "auth.unauthorized": "You are not authorized to view this page.",
 
     // Pricing Shell
     "pricing.title": "Choose the level of sustainability learning your organisation needs",
@@ -62,6 +67,77 @@ export const translations: Record<Language, Record<string, string>> = {
     "pricing.contact_us": "Contact us for a quote",
     "pricing.per_month": "per month",
 
+    // Dashboard
+    "dashboard.welcome": "Welcome back, {name}",
+    "dashboard.welcome_sub": "Track your workplace sustainability training progress and active assignments.",
+    "dashboard.my_learning_title": "My Sustainability Learning",
+    "dashboard.overall_progress": "Overall Progress",
+    "dashboard.courses_completed": "Courses Completed",
+    "dashboard.certificates_earned": "Certificates Earned",
+    "dashboard.learning_points": "Learning Points",
+    "dashboard.active_assignments": "Active Course Assignments",
+    "dashboard.recommended_next": "Recommended Next Course",
+    "dashboard.continue_learning": "Continue Learning",
+    "dashboard.start_course": "Start Course",
+    "dashboard.review_course": "Review Course",
+    "dashboard.no_active": "No active assignments currently.",
+    "dashboard.recent_achievements": "Recent Achievements",
+    "dashboard.due_date": "Due: {date}",
+    "dashboard.status_overdue": "Overdue",
+    "dashboard.status_assigned": "Assigned",
+    "dashboard.status_in_progress": "In Progress",
+
+    // Course Catalogue & Details
+    "catalogue.title": "Workplace Sustainability Courses",
+    "catalogue.subtitle": "Short, practical self-paced courses for Mauritian teams.",
+    "catalogue.search_placeholder": "Search courses, categories or topics...",
+    "catalogue.filter_all": "All Courses",
+    "catalogue.filter_completed": "Completed",
+    "catalogue.prereq_required": "Prerequisites required",
+    "catalogue.prereq_popover_title": "Course Prerequisites",
+    "catalogue.view_prereq": "View Prerequisite",
+    "catalogue.view_plan": "View Commercial Plan",
+    "catalogue.start_course": "Start course",
+    "catalogue.continue_course": "Continue course",
+    "catalogue.review_course": "Review course",
+    "course.available_in_english": "Course available in English",
+
+    // Course Player & Navigation
+    "player.lesson": "Lesson",
+    "player.module": "Module",
+    "player.previous": "Previous Lesson",
+    "player.next": "Next Lesson",
+    "player.mark_completed": "Mark as Complete & Continue",
+    "player.take_quiz": "Take Final Quiz",
+    "player.completed_badge": "Completed",
+    "player.exit": "Exit Course",
+    "player.autosaved": "Progress saved automatically",
+    "player.enrollment_not_found": "Enrollment record not found.",
+
+    // Quiz Shell
+    "quiz.title": "Final Knowledge Check",
+    "quiz.subtitle": "Demonstrate your understanding to earn your digital badge and certificate.",
+    "quiz.question_counter": "Question {current} of {total}",
+    "quiz.select_option": "Select the best answer for this workplace scenario:",
+    "quiz.submit_quiz": "Submit Final Quiz",
+    "quiz.next_question": "Next Question",
+    "quiz.previous_question": "Previous Question",
+    "quiz.passed_title": "Congratulations! You Passed!",
+    "quiz.passed_sub": "You scored {score}% on the final assessment.",
+    "quiz.failed_title": "Assessment Not Passed",
+    "quiz.failed_sub": "You scored {score}%. A score of {passing}% is required to pass.",
+    "quiz.retry_button": "Retry Assessment",
+    "quiz.not_available": "Quiz not available for this course yet.",
+
+    // Certificates
+    "cert.my_certificates": "My Certificates",
+    "cert.subtitle": "View and download your earned qualifications.",
+    "cert.no_certs": "No certificates earned yet.",
+    "cert.no_certs_sub": "Complete courses and pass final quizzes to earn recognized certificates in workplace sustainability.",
+    "cert.issued": "Issued: {date}",
+    "cert.verify_link": "Verify Certificate Code",
+    "cert.download_pdf": "Download PDF",
+
     // Errors & Empty States
     "error.page_not_found": "Page Not Found",
     "error.access_denied": "Access Denied",
@@ -69,9 +145,6 @@ export const translations: Record<Language, Record<string, string>> = {
     "error.network_error": "Network error. Please check your connection.",
     "error.no_results": "No results found",
     "error.no_courses": "No courses available",
-
-    // Course Language Notice
-    "course.available_in_english": "Course available in English",
   },
   fr: {
     // Navigation
@@ -103,6 +176,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.try_again": "Réessayer",
     "common.all": "Tous",
     "common.completed": "Terminé",
+    "common.browse_courses": "Parcourir les cours",
+    "common.back_to_dashboard": "Retour au tableau de bord",
+    "common.view_certificates": "Voir les certificats",
 
     // Footer
     "footer.tagline": "Apprentissage professionnel court et pratique qui aide les employés à apprendre, appliquer et s'améliorer.",
@@ -123,6 +199,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "auth.sign_up_title": "Créer votre compte Elevio",
     "auth.forgot_password": "Mot de passe oublié ?",
     "auth.accept_invitation": "Accepter l'invitation",
+    "auth.session_expired": "Votre session a expiré. Veuillez vous re-connecter.",
+    "auth.unauthorized": "Vous n'êtes pas autorisé à accéder à cette page.",
 
     // Pricing Shell
     "pricing.title": "Choisissez le niveau d'apprentissage en développement durable pour votre entreprise",
@@ -134,6 +212,77 @@ export const translations: Record<Language, Record<string, string>> = {
     "pricing.contact_us": "Contactez-nous pour un devis",
     "pricing.per_month": "par mois",
 
+    // Dashboard
+    "dashboard.welcome": "Bienvenue, {name}",
+    "dashboard.welcome_sub": "Suivez votre progression de formation et vos attributions actives.",
+    "dashboard.my_learning_title": "Mon Apprentissage Développement Durable",
+    "dashboard.overall_progress": "Progression Globale",
+    "dashboard.courses_completed": "Cours Terminés",
+    "dashboard.certificates_earned": "Certificats Obtenus",
+    "dashboard.learning_points": "Points d'Apprentissage",
+    "dashboard.active_assignments": "Cours Attribués Actifs",
+    "dashboard.recommended_next": "Prochain Cours Recommandé",
+    "dashboard.continue_learning": "Continuer l'apprentissage",
+    "dashboard.start_course": "Commencer le cours",
+    "dashboard.review_course": "Revoir le cours",
+    "dashboard.no_active": "Aucun cours attribué actuellement.",
+    "dashboard.recent_achievements": "Réalisations Récentes",
+    "dashboard.due_date": "Échéance : {date}",
+    "dashboard.status_overdue": "En retard",
+    "dashboard.status_assigned": "Attribué",
+    "dashboard.status_in_progress": "En cours",
+
+    // Course Catalogue & Details
+    "catalogue.title": "Cours de Développement Durable en Entreprise",
+    "catalogue.subtitle": "Cours courts et pratiques en libre accès pour les équipes mauriciennes.",
+    "catalogue.search_placeholder": "Rechercher des cours, catégories ou thèmes...",
+    "catalogue.filter_all": "Tous les cours",
+    "catalogue.filter_completed": "Terminés",
+    "catalogue.prereq_required": "Prérequis requis",
+    "catalogue.prereq_popover_title": "Prérequis du cours",
+    "catalogue.view_prereq": "Voir le prérequis",
+    "catalogue.view_plan": "Voir le plan commercial",
+    "catalogue.start_course": "Commencer le cours",
+    "catalogue.continue_course": "Continuer le cours",
+    "catalogue.review_course": "Revoir le cours",
+    "course.available_in_english": "Cours disponible en anglais",
+
+    // Course Player & Navigation
+    "player.lesson": "Leçon",
+    "player.module": "Module",
+    "player.previous": "Leçon précédente",
+    "player.next": "Leçon suivante",
+    "player.mark_completed": "Marquer comme terminé & Continuer",
+    "player.take_quiz": "Passer le quiz final",
+    "player.completed_badge": "Terminé",
+    "player.exit": "Quitter le cours",
+    "player.autosaved": "Progression enregistrée automatiquement",
+    "player.enrollment_not_found": "Fiche d'inscription non trouvée.",
+
+    // Quiz Shell
+    "quiz.title": "Évaluation Finale des Connaissances",
+    "quiz.subtitle": "Démontrez votre compréhension pour obtenir votre badge numérique et certificat.",
+    "quiz.question_counter": "Question {current} sur {total}",
+    "quiz.select_option": "Sélectionnez la meilleure réponse pour ce scénario d'entreprise :",
+    "quiz.submit_quiz": "Soumettre le quiz final",
+    "quiz.next_question": "Question suivante",
+    "quiz.previous_question": "Question précédente",
+    "quiz.passed_title": "Félicitations ! Vous avez réussi !",
+    "quiz.passed_sub": "Vous avez obtenu un score de {score}% à l'évaluation finale.",
+    "quiz.failed_title": "Évaluation non réussie",
+    "quiz.failed_sub": "Vous avez obtenu {score}%. Un score de {passing}% est requis pour réussir.",
+    "quiz.retry_button": "Réessayer l'évaluation",
+    "quiz.not_available": "Quiz pas encore disponible pour ce cours.",
+
+    // Certificates
+    "cert.my_certificates": "Mes Certificats",
+    "cert.subtitle": "Consultez et téléchargez vos qualifications obtenues.",
+    "cert.no_certs": "Aucun certificat obtenu pour le moment.",
+    "cert.no_certs_sub": "Terminez des cours et réussissez les quiz finaux pour obtenir des certificats reconnus en développement durable.",
+    "cert.issued": "Délivré le : {date}",
+    "cert.verify_link": "Vérifier le code du certificat",
+    "cert.download_pdf": "Télécharger le PDF",
+
     // Errors & Empty States
     "error.page_not_found": "Page non trouvée",
     "error.access_denied": "Accès refusé",
@@ -141,8 +290,5 @@ export const translations: Record<Language, Record<string, string>> = {
     "error.network_error": "Erreur réseau. Veuillez vérifier votre connexion.",
     "error.no_results": "Aucun résultat trouvé",
     "error.no_courses": "Aucun cours disponible",
-
-    // Course Language Notice
-    "course.available_in_english": "Cours disponible en anglais",
   },
 };

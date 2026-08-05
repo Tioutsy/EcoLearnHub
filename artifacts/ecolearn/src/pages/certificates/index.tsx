@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Award, Download, ExternalLink, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Certificates() {
+  const { t } = useLanguage();
   const { data: certificates, isLoading } = useListCertificates();
 
   return (
     <Layout>
       <div className="bg-primary/5 border-b py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold font-serif mb-2">My Certificates</h1>
-          <p className="text-muted-foreground">View and download your earned qualifications.</p>
+          <h1 className="text-3xl font-bold font-serif mb-2">{t("cert.my_certificates")}</h1>
+          <p className="text-muted-foreground">{t("cert.subtitle")}</p>
         </div>
       </div>
 
@@ -32,12 +34,12 @@ export default function Certificates() {
           ) : certificates?.length === 0 ? (
             <div className="col-span-full py-16 text-center border-2 border-dashed rounded-2xl bg-muted/10">
               <Award className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold mb-2">No certificates yet</h3>
+              <h3 className="text-xl font-bold mb-2">{t("cert.no_certs")}</h3>
               <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                Complete courses and pass the final quizzes to earn recognized certificates in sustainability.
+                {t("cert.no_certs_sub")}
               </p>
               <Button asChild>
-                <Link href="/courses">Browse Courses</Link>
+                <Link href="/courses">{t("common.browse_courses")}</Link>
               </Button>
             </div>
           ) : (

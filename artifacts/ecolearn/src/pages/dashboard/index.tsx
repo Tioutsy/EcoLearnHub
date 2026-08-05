@@ -29,6 +29,8 @@ import type { LucideIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 const BADGE_ICONS: Record<string, LucideIcon> = {
   sprout: Sprout,
   recycle: Recycle,
@@ -48,6 +50,7 @@ type LmsEnrollment = Enrollment & {
 };
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const { data: enrollments, isLoading: isLoadingEnrollments } = useListEnrollments();
   const { data: certificates, isLoading: isLoadingCertificates } = useListCertificates();
   const { data: points, isLoading: isLoadingPoints } = useGetMyPoints();
@@ -73,18 +76,18 @@ export default function Dashboard() {
   })[0];
 
   const statusMeta: Record<string, { label: string; className: string }> = {
-    not_started: { label: "Not Started", className: "bg-slate-400/10 text-slate-700 border-slate-400/30" },
-    in_progress: { label: "In Progress", className: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
-    completed: { label: "Completed", className: "bg-green-500/10 text-green-700 border-green-500/30" },
-    overdue: { label: "Overdue", className: "bg-red-500/10 text-red-700 border-red-500/30" },
+    not_started: { label: t("dashboard.status_assigned"), className: "bg-slate-400/10 text-slate-700 border-slate-400/30" },
+    in_progress: { label: t("dashboard.status_in_progress"), className: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
+    completed: { label: t("common.completed"), className: "bg-green-500/10 text-green-700 border-green-500/30" },
+    overdue: { label: t("dashboard.status_overdue"), className: "bg-red-500/10 text-red-700 border-red-500/30" },
   };
 
   return (
     <Layout>
       <div className="bg-primary/5 border-b py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold font-serif mb-2">My Learning</h1>
-          <p className="text-muted-foreground">Track your progress and continue learning.</p>
+          <h1 className="text-3xl font-bold font-serif mb-2">{t("dashboard.my_learning_title")}</h1>
+          <p className="text-muted-foreground">{t("dashboard.welcome_sub")}</p>
         </div>
       </div>
 
