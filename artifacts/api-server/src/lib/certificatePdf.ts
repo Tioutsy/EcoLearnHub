@@ -73,10 +73,10 @@ async function drawCertificatePage(
 
   page.drawCircle({ x: 80, y: height - 71, size: 18, color: GREEN });
   centerTextAt(page, "E", 73, height - 78, fonts.bold, 22, rgb(1, 1, 1));
-  page.drawText("Elevio", {
+  page.drawText("Elevio by Recyclean", {
     x: 110,
     y: height - 78,
-    size: 20,
+    size: 18,
     font: fonts.bold,
     color: GREEN,
   });

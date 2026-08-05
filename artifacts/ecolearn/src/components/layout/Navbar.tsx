@@ -48,7 +48,10 @@ export function Navbar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Leaf className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-foreground font-serif">Elevio</span>
+            <div className="flex flex-col leading-none">
+              <span className="text-xl font-bold tracking-tight text-foreground font-serif">Elevio</span>
+              <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide uppercase">by Recyclean</span>
+            </div>
           </Link>
         </div>
 

@@ -13,7 +13,10 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Leaf className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold font-serif">Elevio</span>
+              <div className="flex flex-col leading-none">
+                <span className="text-xl font-bold font-serif">Elevio</span>
+                <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wide">by Recyclean</span>
+              </div>
             </div>
             <p className="text-secondary-foreground/80 text-sm leading-relaxed">
               Short, practical workplace learning that helps employees learn, apply and improve.

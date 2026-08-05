@@ -22,7 +22,7 @@ const DONATION_RATE_PCT = 5; // % of each subscription donated
 const TREE_COST = 200; // Rs to plant one endemic tree
 const CO2_PER_TREE_KG = 21; // kg CO2 sequestered per tree per year (standard estimate)
 const AREA_PER_TREE_M2 = 4; // m² of forest restored per tree
-const PARTNER_NAME = "Ebony Forest, Chamarel";
+const PARTNER_NAME = "Endemic Reforestation Initiative, Chamarel";
 
 router.get("/", async (_req, res): Promise<void> => {
   // ── Social impact (real, cumulative) ──────────────────────────────────────

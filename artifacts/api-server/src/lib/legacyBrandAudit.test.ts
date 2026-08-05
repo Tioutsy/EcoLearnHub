@@ -14,6 +14,7 @@ const PROHIBITED_NAMES = [
   "verdia",
   "evolia",
   "paceo",
+  "ebony forest",
 ];
 
 // Documented allowable matches for internal technical compat / test fixtures / historic data
