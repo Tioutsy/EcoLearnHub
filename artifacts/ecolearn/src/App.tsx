@@ -202,6 +202,8 @@ function ClerkApiTokenBridge({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+import { LanguageProvider } from "@/context/LanguageContext";
+
 function ClerkProviderWithRoutes() {
   const [, setLocation] = useLocation();
 
@@ -217,9 +219,10 @@ function ClerkProviderWithRoutes() {
     >
       <QueryClientProvider client={queryClient}>
   <ClerkApiTokenBridge>
-    <ClerkQueryClientCacheInvalidator />
-    <TooltipProvider>
-      <Switch>
+    <LanguageProvider>
+      <ClerkQueryClientCacheInvalidator />
+      <TooltipProvider>
+        <Switch>
             <Route path="/" component={HomeRedirect} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
@@ -284,10 +287,10 @@ function ClerkProviderWithRoutes() {
             <Route path="/platform-admin/subscriptions" component={PlatformAdminSubscriptions} />
             <Route path="/platform-admin/preview/:id" component={AdminCoursePreview} />
             <Route path="/platform-admin/sdg-mapping" component={PlatformAdminSdgMapping} />
-            <Route component={NotFound} />
-                </Switch>
-      <Toaster />
-    </TooltipProvider>
+        </Switch>
+        <Toaster />
+      </TooltipProvider>
+    </LanguageProvider>
   </ClerkApiTokenBridge>
 </QueryClientProvider>
     </ClerkProvider>

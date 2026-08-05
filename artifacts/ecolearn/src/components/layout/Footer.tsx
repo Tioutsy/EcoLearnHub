@@ -1,7 +1,10 @@
 import { Link } from "wouter";
 import { Leaf, Mail, MapPin, Phone } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 py-12">
@@ -19,31 +22,31 @@ export function Footer() {
               </div>
             </div>
             <p className="text-secondary-foreground/80 text-sm leading-relaxed">
-              Short, practical workplace learning that helps employees learn, apply and improve.
+              {t("footer.tagline")}
             </p>
             <p className="text-xs text-secondary-foreground/60">
-              Elevio is operated by Recyclean Ltd.
+              {t("footer.operator")}
             </p>
           </div>
 
           {/* Platform */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Platform</h4>
+            <h4 className="font-semibold text-lg">{t("footer.platform")}</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/80">
-              <li><Link href="/courses" className="hover:text-white transition-colors">Course Catalog</Link></li>
-              <li><Link href="/impact" className="hover:text-white transition-colors">Impact Dashboard</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">Corporate Plans</Link></li>
-              <li><Link href="/certificates/verify" className="hover:text-white transition-colors">Verify Certificate</Link></li>
+              <li><Link href="/courses" className="hover:text-white transition-colors">{t("footer.course_catalog")}</Link></li>
+              <li><Link href="/impact" className="hover:text-white transition-colors">{t("footer.impact_dashboard")}</Link></li>
+              <li><Link href="/pricing" className="hover:text-white transition-colors">{t("footer.corporate_plans")}</Link></li>
+              <li><Link href="/certificates/verify" className="hover:text-white transition-colors">{t("footer.verify_certificate")}</Link></li>
             </ul>
           </div>
 
           {/* Company */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Company</h4>
+            <h4 className="font-semibold text-lg">{t("footer.company")}</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/80">
-              <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition-colors">Sustainability Blog</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">{t("footer.about_us")}</Link></li>
+              <li><Link href="/blog" className="hover:text-white transition-colors">{t("footer.blog")}</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">{t("footer.contact_support")}</Link></li>
             </ul>
           </div>
 

@@ -25,6 +25,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { sortCoursesByCode } from "@/lib/courseSorting";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface RecommendationData {
   courseId: number;
@@ -55,6 +56,7 @@ interface CompanySubscriptionData {
 }
 
 export default function Courses() {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("all"); // 'all' | 'completed' | category slug
   const [recommendation, setRecommendation] = useState<RecommendationData | null>(null);
@@ -514,6 +516,14 @@ export default function Courses() {
                         <p className="text-muted-foreground text-sm line-clamp-2">
                           {course.description}
                         </p>
+                        
+                        {/* Course Language Notice (Sprint 9V Workstream E) */}
+                        <div className="pt-1">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded border">
+                            <Info className="h-3 w-3 text-emerald-600" />
+                            {t("course.available_in_english")}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Commercial Subscription Plan Lock Notice */}

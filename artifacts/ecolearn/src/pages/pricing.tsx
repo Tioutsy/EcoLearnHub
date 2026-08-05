@@ -20,6 +20,7 @@ import { useState, useEffect, useMemo } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 import { PER_EMPLOYEE_COST_MAP, INDICATIVE_CALCULATION_NOTE } from "@/config/pricing";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PlanData {
   id: number;
@@ -51,6 +52,7 @@ interface PriceData {
 }
 
 export default function Pricing() {
+  const { t } = useLanguage();
   const { isSignedIn } = useAuth();
   const [selectedBandCode, setSelectedBandCode] = useState<string>("UP_TO_25");
   const [plans, setPlans] = useState<PlanData[]>([]);
@@ -75,18 +77,6 @@ export default function Pricing() {
     return () => { isMounted = false; };
   }, []);
 
-  // Map prices by planCode and bandCode
-  const priceMap = useMemo(() => {
-    const map = new Map<string, PriceData>();
-    for (const p of prices) {
-      map.set(`${p.planCode}_${p.bandCode}`, p);
-    }
-    return map;
-  }, [prices]);
-
-  const activeBand = bands.find(b => b.code === selectedBandCode);
-  const isOver120 = selectedBandCode === "OVER_120" || activeBand?.requiresTailoredQuote;
-
   const comparisonRows = [
     { name: "Core Sustainability Certificate (ELH-01 to ELH-12)", essential: true, professional: true, complete: true },
     { name: "Sustainability Foundations & Environmental Compliance", essential: true, professional: true, complete: true },
@@ -102,6 +92,18 @@ export default function Pricing() {
     { name: "Full Standard Catalogue Access & Future Additions", essential: false, professional: false, complete: true },
   ];
 
+  // Map prices by planCode and bandCode
+  const priceMap = useMemo(() => {
+    const map = new Map<string, PriceData>();
+    for (const p of prices) {
+      map.set(`${p.planCode}_${p.bandCode}`, p);
+    }
+    return map;
+  }, [prices]);
+
+  const activeBand = bands.find(b => b.code === selectedBandCode);
+  const isOver120 = selectedBandCode === "OVER_120" || activeBand?.requiresTailoredQuote;
+
   return (
     <Layout>
       {/* Header Banner */}
@@ -111,10 +113,10 @@ export default function Pricing() {
             <Sparkles className="h-3.5 w-3.5" /> Elevio Hybrid Commercial Plans
           </span>
           <h1 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-foreground tracking-tight">
-            Choose the level of sustainability learning your organisation needs
+            {t("pricing.title")}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Select a commercial plan for your required course coverage, with transparent monthly pricing based on your total employee category.
+            {t("pricing.subtitle")}
           </p>
           <p className="text-xs text-muted-foreground mt-3 font-medium">
             All prices are shown in Mauritian Rupees (MUR) per month. Higher plans include all lower-plan course content.
@@ -126,7 +128,7 @@ export default function Pricing() {
         {/* Employee Band Selector */}
         <div className="max-w-3xl mx-auto space-y-4 text-center">
           <label className="text-sm font-bold text-foreground uppercase tracking-wider block">
-            Step 1: Select your total employee category
+            {t("pricing.step1")}
           </label>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 bg-muted/60 p-2 rounded-2xl border">
