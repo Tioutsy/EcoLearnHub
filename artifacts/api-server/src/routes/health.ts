@@ -5,11 +5,14 @@ import { sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-// GET /healthz — Liveness check
-router.get("/healthz", (_req, res) => {
+// GET /healthz & /health — Liveness check
+const handleLiveness = (_req: any, res: any) => {
   const data = HealthCheckResponse.parse({ status: "ok" });
   res.json(data);
-});
+};
+
+router.get("/healthz", handleLiveness);
+router.get("/health", handleLiveness);
 
 // GET /ready — Readiness check verifying database connectivity
 router.get("/ready", async (_req, res): Promise<void> => {
