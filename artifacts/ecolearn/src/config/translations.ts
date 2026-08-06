@@ -53,12 +53,30 @@ export const translations: Record<Language, Record<string, string>> = {
     "footer.all_rights_reserved": "All rights reserved.",
 
     // Auth Shell
-    "auth.sign_in_title": "Sign in to Elevio",
-    "auth.sign_up_title": "Create your Elevio Account",
+    "auth.sign_in_title": "Sign in to Elevio Skills",
+    "auth.sign_up_title": "Create your Elevio Skills Account",
     "auth.forgot_password": "Forgot password?",
     "auth.accept_invitation": "Accept Invitation",
     "auth.session_expired": "Your session has expired. Please sign in again.",
     "auth.unauthorized": "You are not authorized to view this page.",
+
+    // Home Page
+    "home.hero_tag": "Short, Practical Workplace Learning for Mauritius",
+    "home.hero_title": "Elevio Skills — Learn. Apply. Improve.",
+    "home.hero_sub": "Short, practical workplace learning that helps employees learn, apply and improve. Build practical sustainability capabilities across your organization with self-paced courses tailored for Mauritian teams.",
+    "home.explore_courses": "Explore Courses",
+    "home.view_corporate_plans": "View Corporate Plans",
+    "home.value_props_title": "Built for measurable ESG results",
+    "home.value_props_sub": "Drive employee engagement, track measurable results, and turn training hours into board-ready ESG reporting and compliance evidence.",
+    "home.vp1_title": "Employee engagement",
+    "home.vp1_desc": "Keep teams learning with challenges, leaderboards, and badges. Substantive, practical sustainability tailored to the Mauritian context, never greenwashing.",
+    "home.vp2_title": "Measurable results & reporting",
+    "home.vp2_desc": "Track progress in real time and turn learning hours into ESG KPIs. Export board-ready ESG training reports whenever you need them.",
+    "home.vp3_title": "ESG readiness & compliance support",
+    "home.vp3_desc": "Stay audit-ready with mandatory training tracking, expiry reminders, and verifiable employee certificates that demonstrate your ESG commitment.",
+    "home.strategic_title": "Strategic Training Programs",
+    "home.strategic_sub": "Expert-led courses designed for immediate organizational application.",
+    "home.view_all_catalog": "View All Catalog",
 
     // Pricing Shell
     "pricing.title": "Choose the level of sustainability learning your organisation needs",
@@ -231,12 +249,30 @@ export const translations: Record<Language, Record<string, string>> = {
     "footer.all_rights_reserved": "Tous droits réservés.",
 
     // Auth Shell
-    "auth.sign_in_title": "Connexion à Elevio",
-    "auth.sign_up_title": "Créer votre compte Elevio",
+    "auth.sign_in_title": "Connexion à Elevio Skills",
+    "auth.sign_up_title": "Créer votre compte Elevio Skills",
     "auth.forgot_password": "Mot de passe oublié ?",
     "auth.accept_invitation": "Accepter l'invitation",
     "auth.session_expired": "Votre session a expiré. Veuillez vous re-connecter.",
     "auth.unauthorized": "Vous n'êtes pas autorisé à accéder à cette page.",
+
+    // Home Page
+    "home.hero_tag": "Apprentissage professionnel court et pratique pour Maurice",
+    "home.hero_title": "Elevio Skills — Apprendre. Appliquer. S'améliorer.",
+    "home.hero_sub": "Un apprentissage professionnel court et pratique qui aide les employés à apprendre, appliquer et s'améliorer. Développez des compétences pratiques en développement durable au sein de votre entreprise avec des cours en autonomie adaptés aux équipes mauriciennes.",
+    "home.explore_courses": "Explorer les cours",
+    "home.view_corporate_plans": "Voir les plans d'entreprise",
+    "home.value_props_title": "Conçu pour des résultats RSE/ESG mesurables",
+    "home.value_props_sub": "Favorisez l'engagement des employés, suivez des résultats mesurables et transformez les heures de formation en données de reporting et de conformité ESG prêtes pour le conseil d'administration.",
+    "home.vp1_title": "Engagement des employés",
+    "home.vp1_desc": "Maintenez l'apprentissage des équipes grâce aux défis, classements et badges. Un développement durable concret et adapté au contexte mauricien, sans éco-blanchiment.",
+    "home.vp2_title": "Résultats mesurables & reporting",
+    "home.vp2_desc": "Suivez la progression en temps réel et convertissez les heures de formation en indicateurs ESG. Exportez des rapports de formation ESG prêts pour le conseil d'administration à tout moment.",
+    "home.vp3_title": "Préparation ESG & conformité",
+    "home.vp3_desc": "Restez prêt pour les audits grâce au suivi des formations obligatoires, aux rappels d'échéance et aux certificats vérifiables qui démontrent votre engagement ESG.",
+    "home.strategic_title": "Programmes de formation stratégiques",
+    "home.strategic_sub": "Des cours conçus par des experts pour une application immédiate en entreprise.",
+    "home.view_all_catalog": "Voir tout le catalogue",
 
     // Pricing Shell
     "pricing.title": "Choisissez le niveau d'apprentissage en développement durable pour votre entreprise",

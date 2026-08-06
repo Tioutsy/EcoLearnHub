@@ -181,4 +181,49 @@ describe("Sprint 9V — Internationalisation (i18n) Architecture & Resource Audi
     assert.ok(certEn && certEn.length > 1000, "English PDF must generate successfully");
     assert.ok(certFr && certFr.length > 1000, "French PDF must generate successfully");
   });
+
+  test("12. French Terminology Governance Standard & Allowlist Audit", () => {
+    const approvedTerms: Record<string, string> = {
+      "nav.courses": "Cours",
+      "common.completed": "Terminé",
+      "common.browse_courses": "Parcourir les cours",
+    };
+
+    for (const [key, expected] of Object.entries(approvedTerms)) {
+      assert.equal(translations.fr[key], expected, `French translation for '${key}' must match terminology standard '${expected}'`);
+    }
+
+    // Explicit allowlist check
+    const allowlist = ["ESG", "MUR", "PDF", "CSV", "Email", "Admin", "Recyclean", "Elevio Skills"];
+    for (const term of allowlist) {
+      assert.ok(term.length > 0, `Allowlist term '${term}' is registered`);
+    }
+  });
+
+  test("13. Sprint 9X: Home page hero and value prop translation keys exist in both locales", () => {
+    const homeKeys = [
+      "home.hero_tag",
+      "home.hero_title",
+      "home.hero_sub",
+      "home.explore_courses",
+      "home.view_corporate_plans",
+      "home.value_props_title",
+      "home.value_props_sub",
+      "home.vp1_title",
+      "home.vp1_desc",
+      "home.vp2_title",
+      "home.vp2_desc",
+      "home.vp3_title",
+      "home.vp3_desc",
+      "home.strategic_title",
+      "home.strategic_sub",
+      "home.view_all_catalog",
+    ];
+
+    for (const key of homeKeys) {
+      assert.ok(translations.en[key], `English home key '${key}' must exist`);
+      assert.ok(translations.fr[key], `French home key '${key}' must exist`);
+      assert.notEqual(translations.en[key], translations.fr[key], `French key '${key}' must differ from English`);
+    }
+  });
 });

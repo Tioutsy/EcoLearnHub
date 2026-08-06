@@ -7,8 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function Home() {
   const { data: featuredCourses, isLoading } = useGetFeaturedCourses();
+  const { t } = useLanguage();
 
   return (
     <Layout>
@@ -20,20 +23,20 @@ export default function Home() {
             <div className="max-w-2xl">
               <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary mb-6">
                 <span className="flex h-2 w-2 rounded-full bg-primary mr-2" />
-                Short, Practical Workplace Learning for Mauritius
+                {t("home.hero_tag")}
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground font-serif leading-[1.1] mb-6">
-                Elevio <span className="text-primary italic">— Learn. Apply. Improve.</span>
+                {t("home.hero_title")}
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                Short, practical workplace learning that helps employees learn, apply and improve. Build practical sustainability capabilities across your organization with self-paced courses tailored for Mauritian teams.
+                {t("home.hero_sub")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild className="h-12 px-8 text-base">
-                  <Link href="/courses">Explore Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/courses">{t("home.explore_courses")} <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild className="h-12 px-8 text-base border-primary/20 hover:bg-primary/5">
-                  <Link href="/pricing">View Corporate Plans</Link>
+                  <Link href="/pricing">{t("home.view_corporate_plans")}</Link>
                 </Button>
               </div>
               
@@ -67,26 +70,26 @@ export default function Home() {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold font-serif mb-4">Built for measurable ESG results</h2>
-            <p className="text-muted-foreground text-lg">Drive employee engagement, track measurable results, and turn training hours into board-ready ESG reporting and compliance evidence.</p>
+            <h2 className="text-3xl font-bold font-serif mb-4">{t("home.value_props_title")}</h2>
+            <p className="text-muted-foreground text-lg">{t("home.value_props_sub")}</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: Leaf,
-                title: "Employee engagement",
-                description: "Keep teams learning with challenges, leaderboards, and badges. Substantive, practical sustainability tailored to the Mauritian context, never greenwashing."
+                title: t("home.vp1_title"),
+                description: t("home.vp1_desc")
               },
               {
                 icon: BarChart3,
-                title: "Measurable results & reporting",
-                description: "Track progress in real time and turn learning hours into ESG KPIs. Export board-ready ESG training reports whenever you need them."
+                title: t("home.vp2_title"),
+                description: t("home.vp2_desc")
               },
               {
                 icon: ShieldCheck,
-                title: "ESG readiness & compliance support",
-                description: "Stay audit-ready with mandatory training tracking, expiry reminders, and verifiable employee certificates that demonstrate your ESG commitment."
+                title: t("home.vp3_title"),
+                description: t("home.vp3_desc")
               }
             ].map((prop, i) => (
               <motion.div 
@@ -113,11 +116,11 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <h2 className="text-3xl font-bold font-serif mb-4">Strategic Training Programs</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl">Expert-led courses designed for immediate organizational application.</p>
+              <h2 className="text-3xl font-bold font-serif mb-4">{t("home.strategic_title")}</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl">{t("home.strategic_sub")}</p>
             </div>
             <Button variant="ghost" asChild className="hidden sm:flex">
-              <Link href="/courses">View All Catalog <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link href="/courses">{t("home.view_all_catalog")} <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
 

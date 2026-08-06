@@ -46,6 +46,10 @@ router.get("/", async (req, res): Promise<void> => {
   }
   const { categoryId, search, featured } = params.data;
 
+  // Resolve locale preference
+  const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
+  const isFrench = rawLocale.toLowerCase().startsWith("fr");
+
   let allowedCourseIds: number[] | null = null;
   if (categoryId) {
     const assignments = await db
