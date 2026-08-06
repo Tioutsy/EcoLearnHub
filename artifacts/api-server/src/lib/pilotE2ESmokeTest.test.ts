@@ -5,34 +5,34 @@ describe("Sprint 10A — End-to-End Pilot Workflow Smoke Test Suite", () => {
   // Mock Pilot Organisation A & B Fixtures
   const orgA = {
     id: 1,
-    name: "Lux Resorts Mauritius",
-    code: "LUX-MU",
+    name: "Coral Bay Hospitality Ltd",
+    code: "CORAL-MU",
     sector: "Hospitality & Tourism",
     subscriptionBand: "FROM_51_TO_80",
     maxEmployees: 80,
-    admin: { id: "user_lux_admin", email: "admin@luxresorts.mu", role: "company_admin" },
-    manager: { id: "user_lux_manager", email: "manager@luxresorts.mu", role: "manager" },
+    admin: { id: "user_coral_admin", email: "admin@coralbay.mu", role: "company_admin" },
+    manager: { id: "user_coral_manager", email: "manager@coralbay.mu", role: "manager" },
     learners: [
-      { id: 101, email: "jean.dupont@luxresorts.mu", name: "Jean Dupont", dept: "Front Office", lang: "fr" },
-      { id: 102, email: "sarah.smith@luxresorts.mu", name: "Sarah Smith", dept: "Housekeeping", lang: "en" }
+      { id: 101, email: "jean.dupont@coralbay.mu", name: "Jean Dupont", dept: "Front Office", lang: "fr" },
+      { id: 102, email: "sarah.smith@coralbay.mu", name: "Sarah Smith", dept: "Housekeeping", lang: "en" }
     ]
   };
 
   const orgB = {
     id: 2,
-    name: "Mauritius Commercial Bank",
-    code: "MCB-MU",
+    name: "Island Professional Services Ltd",
+    code: "ISLAND-MU",
     sector: "Financial Services",
     subscriptionBand: "FROM_81_TO_120",
     maxEmployees: 120,
-    admin: { id: "user_mcb_admin", email: "admin@mcb.mu", role: "company_admin" },
+    admin: { id: "user_island_admin", email: "admin@islandprof.mu", role: "company_admin" },
     learners: [
-      { id: 201, email: "pierre.vallet@mcb.mu", name: "Pierre Vallet", dept: "Finance", lang: "fr" }
+      { id: 201, email: "pierre.vallet@islandprof.mu", name: "Pierre Vallet", dept: "Finance", lang: "fr" }
     ]
   };
 
   test("1. Organisation A setup and admin authentication context", () => {
-    assert.equal(orgA.name, "Lux Resorts Mauritius");
+    assert.equal(orgA.name, "Coral Bay Hospitality Ltd");
     assert.equal(orgA.admin.role, "company_admin");
     assert.equal(orgA.subscriptionBand, "FROM_51_TO_80");
   });

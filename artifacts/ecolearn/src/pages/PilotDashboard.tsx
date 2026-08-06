@@ -5,7 +5,7 @@ export function PilotDashboardPage() {
 
   // Mock Pilot Metrics
   const metrics = {
-    companyName: "Lux Resorts Mauritius (Pilot Slot 1)",
+    companyName: "Coral Bay Hospitality Ltd (Pilot Slot 1)",
     status: "active",
     totalEmployees: 80,
     activatedEmployees: 68,
