@@ -13,13 +13,8 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4 md:col-span-1">
             <div className="flex items-center gap-3">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/80 p-1">
-                <svg viewBox="0 0 100 100" className="h-7 w-7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 65 C 25 50, 45 42, 60 40 C 50 60, 35 72, 15 65 Z" fill="#15803D" />
-                  <path d="M22 55 C 32 38, 55 30, 72 26 C 60 50, 42 62, 22 55 Z" fill="#22C55E" />
-                  <path d="M30 45 C 42 25, 68 12, 85 10 L 78 30 C 65 32, 48 42, 30 45 Z" fill="#4ADE80" />
-                  <path d="M58 22 L 85 10 L 72 34 Z" fill="#16A34A" />
-                </svg>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
+                <Leaf className="h-5 w-5" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-lg font-extrabold tracking-wider text-white font-sans uppercase">
