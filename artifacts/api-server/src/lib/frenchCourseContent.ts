@@ -77,7 +77,15 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
         content: "Le développement durable repose sur trois piliers : l'environnement, le social et l'économie.",
         blocks: [
           { type: "heading", headingText: "Les trois piliers" },
-          { type: "short_text", bodyText: "Une décision durable équilibre l'impact environnemental, le bien-être des équipes et la santé financière de l'entreprise." }
+          { type: "short_text", bodyText: "Une décision durable équilibre l'impact environnemental, le bien-être des équipes et la santé financière de l'entreprise." },
+          {
+            type: "decision_scenario",
+            scenarioSetup: "Vous remarquez que la climatisation tourne dans une salle de réunion vide avec les fenêtres ouvertes.",
+            decisionOptions: [
+              { id: "opt1", label: "Fermer les fenêtres et régler la climatisation à 24°C", consequence: "Économie d'énergie immédiate", feedback: "Excellente décision pour réduire la consommation d'électricité.", isRecommended: true },
+              { id: "opt2", label: "Laisser en l'état", consequence: "Gaspillage continu d'énergie", feedback: "Laisser tourner la climatisation à vide augmente inutilement la facture énergétique." }
+            ]
+          }
         ]
       },
       2: {
@@ -94,27 +102,6 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
         blocks: [
           { type: "heading", headingText: "Actions concrètes" },
           { type: "short_text", bodyText: "Signalez les fuites d'eau rapidement et triez correctement vos déchets de bureau." }
-        ]
-      },
-      4: {
-        title: "Scénario : concilier praticité et impact",
-        content: "Face à un choix quotidien, privilégiez la solution qui réduit durablement le gaspillage.",
-        blocks: [
-          {
-            type: "decision_scenario",
-            scenarioSetup: "Vous remarquez que la climatisation tourne dans une salle de réunion vide avec les fenêtres ouvertes.",
-            decisionOptions: [
-              { id: "opt1", label: "Fermer les fenêtres et régler la climatisation à 24°C", consequence: "Économie d'énergie immédiate", feedback: "Excellente décision pour réduire la consommation d'électricité.", isRecommended: true },
-              { id: "opt2", label: "Laisser en l'état", consequence: "Gaspillage continu d'énergie", feedback: "Laisser tourner la climatisation à vide augmente inutilement la facture énergétique." }
-            ]
-          }
-        ]
-      },
-      5: {
-        title: "Évaluation, engagement et finalisation",
-        content: "Validez vos connaissances et prenez votre premier engagement écoresponsable sur votre lieu de travail.",
-        blocks: [
-          { type: "commitment", promptText: "Sélectionnez votre engagement prioritaire pour ce mois-ci." }
         ]
       }
     },
@@ -154,6 +141,18 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
         correctExplanation: "Éteindre les appareils et stopper les fuites préserve le réseau électrique et les ressources en eau de l'île.",
         incorrectExplanation: "Chaque geste de sobriété énergétique et de conservation de l'eau compte directement à Maurice.",
         practicalTakeaway: "Faites attention aux petits gaspillages du quotidien."
+      },
+      3: {
+        question: "Pourquoi est-il important de réduire les déchets à la source sur le lieu de travail ?",
+        options: [
+          "Pour réduire la pression sur le site d'enfouissement de Mare Chicose et préserver nos ressources",
+          "Pour ralentir la vitesse de connexion internet des bureaux",
+          "Pour empêcher les employés d'utiliser du papier recyclé",
+          "Pour augmenter inutilement les coûts opérationnels de l'entreprise"
+        ],
+        correctExplanation: "La réduction à la source préserve la capacité du site de Mare Chicose et évite l'utilisation inutile de matières premières.",
+        incorrectExplanation: "La réduction à la source est essentielle pour soulager nos infrastructures de traitement des déchets.",
+        practicalTakeaway: "Évitez le gaspillage avant d'envisager le recyclage."
       }
     }
   },
@@ -181,7 +180,17 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
       1: {
         title: "Prévenir, réduire, réutiliser et trier",
         content: "La meilleure façon de gérer un déchet est de ne pas le produire.",
-        blocks: [{ type: "heading", headingText: "La hiérarchie des déchets" }]
+        blocks: [
+          { type: "heading", headingText: "La hiérarchie des déchets" },
+          {
+            type: "decision_scenario",
+            scenarioSetup: "Vous devez jeter un carton propre et du papier gras souillé après un repas d'équipe.",
+            decisionOptions: [
+              { id: "opt1", label: "Placer le carton propre dans le bac recyclage et le papier gras dans les déchets résiduels", consequence: "Tri correct sans contamination", feedback: "Parfait ! Le gras gâte le recyclage du papier.", isRecommended: true },
+              { id: "opt2", label: "Mettre tout dans le bac de recyclage", consequence: "Contamination du bac complet", feedback: "Le papier gras souille le papier propre et gâche le lot recyclable." }
+            ]
+          }
+        ]
       },
       2: {
         title: "Lire les étiquettes et consignes",
@@ -192,16 +201,6 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
         title: "Erreurs fréquentes de tri au bureau",
         content: "Attention aux emballages souillés par de la nourriture.",
         blocks: [{ type: "heading", headingText: "Éviter la contamination" }]
-      },
-      4: {
-        title: "Scénario : traiter un déchet mixte",
-        content: "Déroulez la bonne procédure pour trier un emballage complexe.",
-        blocks: [{ type: "heading", headingText: "Cas pratique" }]
-      },
-      5: {
-        title: "Évaluation et clôture",
-        content: "Testez vos connaissances sur le tri et validez le cours.",
-        blocks: [{ type: "heading", headingText: "Validation" }]
       }
     },
     quizQuestions: {
@@ -228,6 +227,30 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
         correctExplanation: "Les graisses altèrent les fibres de papier et rendent le lot inexploitable pour le recyclage.",
         incorrectExplanation: "Les éléments gras doivent aller dans les déchets résiduels pour éviter de ruiner le papier propre.",
         practicalTakeaway: "Seul le papier propre et sec doit aller au recyclage."
+      },
+      2: {
+        question: "Comment identifier le bon bac de recyclage dans votre entreprise ?",
+        options: [
+          "En lisant la signalétique claire et les pictogrammes affichés sur chaque bac",
+          "En jetant au hasard dans le bac le plus proche",
+          "En demandant uniquement à la fin du mois",
+          "En déposant tous les déchets par terre"
+        ],
+        correctExplanation: "La signalétique couleur et les pictogrammes indiquent clairement la filière de tri.",
+        incorrectExplanation: "Suivre la signalétique évite les erreurs de tri et facilite le travail des équipes de nettoyage.",
+        practicalTakeaway: "Vérifiez l'étiquette du bac avant de déposer un matériau."
+      },
+      3: {
+        question: "Que faire en cas de doute sur la recyclabilité d'un matériau complexe ?",
+        options: [
+          "Consulter la consigne affichée ou utiliser les déchets résiduels pour éviter de contaminer le bac de recyclage",
+          "Jeter dans le bac de recyclage en espérant que quelqu'un trie plus tard",
+          "Laisser le matériau sans bac au milieu du bureau",
+          "Brûler l'emballage dans le parking"
+        ],
+        correctExplanation: "En cas de doute persistant, éviter de contaminer le bac propre protège toute la filière.",
+        incorrectExplanation: "Placer un douteux dans le bac de recyclage risque d'invalider tout le lot.",
+        practicalTakeaway: "En cas de doute, informez-vous et préservez la qualité du bac de recyclage."
       }
     }
   },
@@ -235,6 +258,7 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
     meta: {
       title: "Efficacité énergétique au travail",
       description: "Présente des moyens pratiques pour réduire la consommation d'énergie inutile tout en préservant le confort, la sécurité et la productivité.",
+      fullDescription: "Ce cours fournit des recommandations claires sur la gestion de l'éclairage, du système HVAC et des appareils de bureau.",
       learningObjectives: [
         "Reconnaître les sources d'énergie inutiles au bureau.",
         "Appliquer des habitudes écoresponsables pour le chauffage et l'éclairage.",
@@ -247,205 +271,252 @@ export const frenchCourseRegistry: Record<string, CourseTranslationPackage> = {
     },
     lessons: {
       0: { title: "Introduction à la sobriété énergétique", content: "Chaque kilowattheure économisé compte." },
-      1: { title: "Où consomme-t-on de l'énergie au bureau ?", content: "Éclairage, climatisation et bureautique." },
-      2: { title: "Bonnes pratiques de climatisation et d'éclairage", content: "Régler la climatisation à 24°C." },
-      3: { title: "Arbitrages confort et opérationnel", content: "Maintenir la sécurité et le confort." },
-      4: { title: "Scénario : agir pendant la journée", content: "Gérer un équipement laissé sous tension." },
-      5: { title: "Évaluation et clôture", content: "Valider les connaissances en efficacité énergétique." }
+      1: {
+        title: "Où consomme-t-on de l'énergie au bureau ?",
+        content: "Éclairage, climatisation et bureautique.",
+        blocks: [
+          { type: "heading", headingText: "Postes de consommation" },
+          {
+            type: "decision_scenario",
+            scenarioSetup: "En quittant le bureau le vendredi soir, vous constatez que plusieurs ordinateurs et écrans restent en veille.",
+            decisionOptions: [
+              { id: "opt1", label: "Éteindre complètement les écrans et ordinateurs non utilisés", consequence: "Économie d'énergie sur tout le week-end", feedback: "Bravo ! La consommation en veille représente une part importante du gaspillage.", isRecommended: true },
+              { id: "opt2", label: "Laisser tout allumé", consequence: "Consommation inutile pendant 60 heures", feedback: "Les appareils en veille continuent de consommer de l'électricité inutilement." }
+            ]
+          }
+        ]
+      },
+      2: { title: "Réglage optimal de la climatisation", content: "Maintenir 24°C offre un excellent compromis entre confort et efficacité." },
+      3: { title: "Actions quotidiennes et signalement", content: "Signalez les thermostats défectueux à l'équipe maintenance." }
     },
     quizQuestions: {
       0: {
-        question: "Quelle température est généralement recommandée pour la climatisation de bureau à Maurice ?",
+        question: "Quelle température est recommandée pour régler la climatisation dans les locaux professionnels ?",
         options: [
-          "24°C pour un bon équilibre confort et consommation",
-          "16°C pour refroidir le plus vite possible",
-          "30°C en permanence",
-          "Éteindre toute l'année même en été"
+          "24°C pour concilier confort et sobriété énergétique",
+          "16°C en permanence avec portes ouvertes",
+          "30°C sans ventilation",
+          "Désactiver complètement la climatisation en été"
         ],
-        correctExplanation: "Régler à 24°C garantit un confort adapté tout en évitant la surconsommation d'électricité.",
-        incorrectExplanation: "Descendre à 16°C surconsomme l'électricité sans rafraîchir plus vite.",
-        practicalTakeaway: "Adoptez le réflexe 24°C."
+        correctExplanation: "Régler la climatisation à 24°C garantit un bon confort sans surconsommer d'électricité.",
+        incorrectExplanation: "Chaque degré en dessous de 24°C augmente la consommation énergétique d'environ 7%.",
+        practicalTakeaway: "Adoptez le réflexe 24°C pour vos espaces climatisés."
+      },
+      1: {
+        question: "Quel est l'effet des appareils laissés en veille pendant la nuit et les week-ends ?",
+        options: [
+          "Ils continuent de consommer de l'électricité inutilement",
+          "Ils réduisent la facture globale de l'entreprise",
+          "Ils produisent de l'énergie solaire automatiquement",
+          "Ils n'ont absolument aucun impact électrique"
+        ],
+        correctExplanation: "La consommation fantôme des équipements en veille s'accumule sur l'année.",
+        incorrectExplanation: "Éteindre complètement les multiprises et ordinateurs évite ce gaspillage invisible.",
+        practicalTakeaway: "Éteignez complètement vos appareils avant de partir."
+      },
+      2: {
+        question: "Quelle action favorise la sobriété lumineuse dans un bureau bien éclairé par la lumière naturelle ?",
+        options: [
+          "Éteindre les lumières artificielles inutiles près des fenêtres",
+          "Allumer toutes les rampes d'éclairage au maximum",
+          "Fermer les stores et garder toutes les lumières allumées",
+          "Remplacer les ampoules par des projecteurs de forte puissance"
+        ],
+        correctExplanation: "Profiter de la lumière du jour permet d'éteindre l'éclairage électrique.",
+        incorrectExplanation: "Utiliser la lumière naturelle est gratuit et plus agréable pour les yeux.",
+        practicalTakeaway: "Profitez au maximum de la lumière naturelle pendant la journée."
+      },
+      3: {
+        question: "Que faire lorsqu'un climatiseur fait un bruit anormal ou fuit de l'eau ?",
+        options: [
+          "Signaler immédiatement le dysfonctionnement au service maintenance",
+          "Augmenter la ventilation au maximum",
+          "Placer un chiffon et ne rien dire",
+          "Démonter l'appareil vous-même sans formation"
+        ],
+        correctExplanation: "Signaler rapidement les pannes permet une réparation rapide et évite la surconsommation.",
+        incorrectExplanation: "La maintenance préventive et corrective préserve le matériel et son efficacité.",
+        practicalTakeaway: "Signalez les anomalies d'équipements dès leur apparition."
       }
     }
   }
 };
 
-// Generic fallback dictionary for courses ELH-04 to ELH-29 to guarantee 100% complete French strings across all catalogue titles, descriptions, objectives, lessons, scenarios, quizzes, feedback, completion messages, badges and certificates
 const CATALOGUE_FRENCH_BASE: Record<string, { title: string; desc: string; objectives: string[]; badge: string; badgeDesc: string }> = {
   "ELH-04": {
-    title: "Conservation de l’eau",
-    desc: "Explique comment les habitudes quotidiennes et le signalement rapide des fuites préservent les ressources en eau douce à Maurice.",
-    objectives: ["Identifier les gaspillages d’eau au bureau.", "Signaler rapidement les fuites constatées.", "Adopter des gestes d'économie d'eau."],
-    badge: "Protecteur de l'eau",
-    badgeDesc: "Décerné pour la réussite du cours Conservation de l'eau."
+    title: "Minimisation des déchets et recyclage",
+    desc: "Apprenez à réduire les déchets résiduels, trier efficacement et encourager le réemploi sur votre lieu de travail.",
+    objectives: ["Appliquer les principes de réduction des déchets.", "Trier correctement les matériaux recyclables.", "Réduire l'utilisation de produits à usage unique."],
+    badge: "Champion du Recyclage",
+    badgeDesc: "Décerné pour la maîtrise de la réduction et du tri des déchets."
   },
   "ELH-05": {
-    title: "Achats responsables et durables",
-    desc: "Guide les équipes sur l'intégration de critères environnementaux et sociaux dans la sélection des fournisseurs.",
-    objectives: ["Évaluer le cycle de vie des produits.", "Sélectionner des fournisseurs responsables.", "Exiger des justificatifs écoresponsables."],
-    badge: "Acheteur responsable",
-    badgeDesc: "Décerné pour la réussite du cours Achats responsables."
+    title: "Sensibilisation à l'empreinte carbone",
+    desc: "Comprenez les sources d'émissions de gaz à effet de serre et les actions concrètes pour réduire votre impact professionnel.",
+    objectives: ["Identifier les Scope 1, 2 et 3.", "Mesurer les impacts des déplacements et de l'énergie.", "Mettre en œuvre des éco-gestes carbone."],
+    badge: "Praticien Bas Carbone",
+    badgeDesc: "Décerné pour la compréhension et la réduction de l'empreinte carbone."
   },
   "ELH-06": {
-    title: "Pratiques de bureau vert",
-    desc: "Fournit un ensemble de gestes simples pour réduire l'empreinte environnementale des activités administratives.",
-    objectives: ["Réduire l'utilisation de papier jetable.", "Optimiser la numérisation des documents.", "Mettre en place des habitudes de bureau vert."],
-    badge: "Champion du bureau vert",
-    badgeDesc: "Décerné pour la réussite du cours Pratiques de bureau vert."
+    title: "Conformité environnementale et législation",
+    desc: "Maîtrisez les exigences réglementaires mauriciennes et assurez la conformité de vos opérations quotidiennes.",
+    objectives: ["Identifier les lois environnementales applicables.", "Gérer les risques de non-conformité.", "Appliquer les procédures d'urgence et de signalement."],
+    badge: "Garant de la Conformité",
+    badgeDesc: "Décerné pour la maîtrise de la conformité environnementale."
   },
   "ELH-07": {
-    title: "Sensibilisation à l’empreinte carbone",
-    desc: "Découvrez les notions de Scope 1, 2 et 3 et comment vos décisions quotidiennes contribuent à réduire l'empreinte carbone.",
-    objectives: ["Comprendre les Scopes 1, 2 et 3.", "Identifier les émissions directes et indirectes.", "Participer aux actions de réduction carbone."],
-    badge: "Sensibilisé au carbone",
-    badgeDesc: "Décerné pour la réussite du cours Empreinte carbone."
+    title: "Les bases de l'ESG pour les entreprises",
+    desc: "Comprenez les piliers Environnementaux, Sociaux et de Gouvernance et leur importance pour la pérennité de l'entreprise.",
+    objectives: ["Définir les critères E, S et G.", "Collecter des données ESG fiables.", "Contribuer au rapport de durabilité."],
+    badge: "Ambassadeur ESG",
+    badgeDesc: "Décerné pour la compréhension des principes ESG."
   },
   "ELH-08": {
-    title: "Biodiversité et écosystèmes à Maurice",
-    desc: "Comprendre l'importance de préserver la faune et la flore uniques de l'île Maurice dans le cadre professionnel.",
-    objectives: ["Reconnaître les enjeux de la biodiversité locale.", "Limiter les impacts négatifs de l'entreprise sur les écosystèmes.", "Soutenir la préservation de la biodiversité mauricienne."],
-    badge: "Gardien de la biodiversité",
-    badgeDesc: "Décerné pour la réussite du cours Biodiversité à Maurice."
+    title: "Pratiques de bureau vert",
+    desc: "Transformez les habitudes de bureau pour réduire le papier, l'énergie et les consommables.",
+    objectives: ["Numériser les flux de travail.", "Optimiser l'utilisation des consommables.", "Créer un environnement de travail éco-responsable."],
+    badge: "Acteur du Bureau Vert",
+    badgeDesc: "Décerné pour l'adoption de pratiques de bureau durables."
   },
   "ELH-09": {
-    title: "Les fondamentaux de l’ESG",
-    desc: "Présente les critères Environnementaux, Sociaux et de Gouvernance pour évaluer la performance globale de l'entreprise.",
-    objectives: ["Définir les piliers ESG.", "Comprendre leur rôle pour les investisseurs et partenaires.", "Appliquer l'ESG dans vos tâches quotidiennes."],
-    badge: "Fondamentaux ESG",
-    badgeDesc: "Décerné pour la réussite du cours Fondamentaux de l'ESG."
+    title: "Les fondamentaux des achats durables",
+    desc: "Intégrez des critères écologiques et sociaux dans les décisions d'achat et la sélection des fournisseurs.",
+    objectives: ["Évaluer les propositions des fournisseurs.", "Privilégier les éco-labels vérifiés.", "Prendre en compte le coût du cycle de vie."],
+    badge: "Acheteur Responsable",
+    badgeDesc: "Décerné pour l'intégration de la durabilité dans la commande publique et privée."
   },
   "ELH-10": {
-    title: "Conformité environnementale et réglementations",
-    desc: "Présente les exigences légales mauriciennes et les normes environnementales applicables aux entreprises.",
-    objectives: ["Identifier les réglementations clés.", "Assurer la conformité des opérations.", "Éviter les infractions environnementales."],
-    badge: "Acteur de la conformité",
-    badgeDesc: "Décerné pour la réussite du cours Conformité environnementale."
+    title: "Principes de l'économie circulaire",
+    desc: "Passez du modèle linéaire 'extraire-fabriquer-jeter' à une approche circulaire axée sur la réparation et la régénération.",
+    objectives: ["Concevoir pour la durabilité et le réemploi.", "Éliminer les pollutions à la source.", "Prolonger la durée de vie des équipements."],
+    badge: "Penseur Circulaire",
+    badgeDesc: "Décerné pour l'application des concepts d'économie circulaire."
   },
   "ELH-11": {
-    title: "Économie circulaire en entreprise",
-    desc: "Passez du modèle linéaire (fabriquer, consommer, jeter) à la réutilisation, la réparation et le recyclage continu.",
-    objectives: ["Différencier modèle linéaire et circulaire.", "Identifier les opportunités de réemploi.", "Concevoir des processus sans gaspillage."],
-    badge: "Penseur circulaire",
-    badgeDesc: "Décerné pour la réussite du cours Économie circulaire."
+    title: "Biodiversité à Maurice",
+    desc: "Comprenez la richesse unique de la faune et de la flore mauriciennes et protégez les écosystèmes locaux.",
+    objectives: ["Identifier les espèces endémiques prioritaires.", "Réduire l'impact des activités professionnelles sur la nature.", "Participer aux initiatives locales de restauration."],
+    badge: "Protecteur de la Biodiversité",
+    badgeDesc: "Décerné pour l'engagement envers la préservation de la biodiversité locale."
   },
   "ELH-12": {
-    title: "Certification finale en développement durable",
-    desc: "Synthèse et évaluation globale couvrant l'ensemble du parcours fondamental de développement durable.",
-    objectives: ["Consolider les apprentissages clés.", "Réussir l'évaluation certifiante globale.", "Déployer un plan d'action individuel."],
-    badge: "Certifié en développement durable",
-    badgeDesc: "Décerné pour l'obtention de la certification finale Elevio Skills."
+    title: "Créer une équipe de développement durable",
+    desc: "Structurez et animez un comité vert efficace pour mobiliser vos collègues et piloter les projets RSE.",
+    objectives: ["Définir les rôles et missions du comité.", "Mobiliser les départements clé.", "Suivre et valoriser les réussites."],
+    badge: "Bâtisseur d'Équipe Verte",
+    badgeDesc: "Décerné pour la création et la gestion d'un comité vert."
   },
   "ELH-13": {
-    title: "Planification d’actions de développement durable",
-    desc: "Méthodologie pour transformer les intentions écologiques en plans d'actions concrétisables et mesurables.",
-    objectives: ["Construire une feuille de route durable.", "Définir des jalons clairs.", "Mesurer les progrès accomplis."],
-    badge: "Planificateur d'actions",
-    badgeDesc: "Décerné pour la réussite du cours Planification d'actions."
+    title: "Fixer des objectifs départementaux de durabilité",
+    desc: "Déclinez la stratégie RSE globale en objectifs mesurables et réalistes pour chaque service.",
+    objectives: ["Formuler des objectifs SMART.", "Aligner les cibles sur la stratégie de l'entreprise.", "Impliquer les équipes dans la définition des indicateurs."],
+    badge: "Planificateur Stratégique",
+    badgeDesc: "Décerné pour la fixation d'objectifs de durabilité efficaces."
   },
   "ELH-14": {
-    title: "Définition d’objectifs de développement durable par département",
-    desc: "Comment décliner la stratégie RSE de l'entreprise en objectifs opérationnels pour chaque service.",
-    objectives: ["Traduire la RSE en objectifs de service.", "Impliquer les responsables d'équipe.", "Suivre les indicateurs clés."],
-    badge: "Bâtisseur d'objectifs RSE",
-    badgeDesc: "Décerné pour la réussite du cours Objectifs par département."
+    title: "Planification d'action durable",
+    desc: "Transformez vos objectifs RSE en plans d'action opérationnels avec budgets, responsabilités et échéanciers.",
+    objectives: ["Établir une feuille de route détaillée.", "Allouer les ressources nécessaires.", "Anticiper les risques de retard."],
+    badge: "Gestionnaire de Projets RSE",
+    badgeDesc: "Décerné pour la conception de plans d'action durables."
   },
   "ELH-15": {
-    title: "Équipes de développement durable au travail",
-    desc: "Structurer et animer des comités et relais RSE motivés au sein de l'entreprise.",
-    objectives: ["Mobiliser des ambassadeurs internes.", "Organiser des réunions RSE constructives.", "Relayer les bonnes pratiques."],
-    badge: "Animateur de réseau RSE",
-    badgeDesc: "Décerné pour la réussite du cours Équipes de développement durable."
+    title: "Communiquer le développement durable au travail",
+    desc: "Valorisez vos initiatives écologiques de manière transparente et évitez le greenwashing.",
+    objectives: ["Rédiger des messages clairs et factuels.", "Adapter la communication interne et externe.", "Utiliser des données vérifiables."],
+    badge: "Communicant Transparent",
+    badgeDesc: "Décerné pour la communication responsable et authentique."
   },
   "ELH-16": {
-    title: "Communication sur le développement durable au travail",
-    desc: "Communiquer avec authenticité sans greenwashing auprès des employés, clients et partenaires.",
-    objectives: ["Appliquer les règles d'une communication responsable.", "Éviter le greenwashing.", "Valoriser les preuves tangibles."],
-    badge: "Communicant responsable",
-    badgeDesc: "Décerné pour la réussite du cours Communication RSE."
+    title: "Engagement des employés dans la durabilité",
+    desc: "Inspirez et impliquez durablement l'ensemble des collaborateurs dans la démarche éco-responsable.",
+    objectives: ["Organiser des ateliers de sensibilisation.", "Reconnaître et récompenser les éco-initiatives.", "Ancrer la durabilité dans la culture d'entreprise."],
+    badge: "Fédérateur RSE",
+    badgeDesc: "Décerné pour la réussite de la mobilisation des collaborateurs."
   },
   "ELH-17": {
-    title: "Suivi des actions de développement durable",
-    desc: "Mettre en place des tableaux de bord pour contrôler l'avancement des initiatives vertes.",
-    objectives: ["Choisir des indicateurs de suivi pertinents.", "Mettre à jour les données de progrès.", "Ajuster les actions en cas d'écart."],
-    badge: "Pilote d'initiatives",
-    badgeDesc: "Décerné pour la réussite du cours Suivi des actions."
+    title: "Équipes vertes efficaces",
+    desc: "Donnez les moyens à votre Green Team de surmonter les obstacles et d'obtenir des résultats mesurables.",
+    objectives: ["Maintenir l'enthousiasme sur le long terme.", "Résoudre les conflits de priorité.", "Mesurer l'impact des projets menés."],
+    badge: "Leader de Green Team",
+    badgeDesc: "Décerné pour la conduite d'une Green Team performante."
   },
   "ELH-18": {
-    title: "Collecte et qualité des données de développement durable",
-    desc: "Garantir la fiabilité des données ESG collectées pour les audits et rapports de développement durable.",
-    objectives: ["Vérifier la fiabilité des sources.", "Organiser la collecte de justificatifs.", "Préparer les données pour audit."],
-    badge: "Gestionnaire de données ESG",
-    badgeDesc: "Décerné pour la réussite du cours Qualité des données ESG."
+    title: "Collecte de données et preuves de durabilité",
+    desc: "Assurez la traçabilité et la qualité des données environnementales pour les audits et bilans.",
+    objectives: ["Mettre en place des modèles de relevé rigoureux.", "Vérifier la fiabilité des sources.", "Archiver les preuves de conformité."],
+    badge: "Auditeur de Données RSE",
+    badgeDesc: "Décerné pour la rigueur de la collecte de données d'impact."
   },
   "ELH-19": {
-    title: "Évaluation des performances de développement durable",
-    desc: "Analyser les résultats obtenus et calculer les retours sur investissement environnementaux et sociaux.",
-    objectives: ["Analyser l'impact des projets réalisés.", "Mesurer les réductions de consommation.", "Présenter un bilan RSE annuel."],
-    badge: "Évaluateur de performance",
-    badgeDesc: "Décerné pour la réussite du cours Évaluation des performances."
+    title: "Suivi des actions durables et progrès",
+    desc: "Pilotez vos indicateurs clés de performance (KPI) et ajustez les actions en temps réel.",
+    objectives: ["Utiliser un tableau de bord RSE.", "Analyser les écarts par rapport aux cibles.", "Communiquer les progrès aux parties prenantes."],
+    badge: "Pilote de Performance RSE",
+    badgeDesc: "Décerné pour le suivi précis de l'avancement des projets."
   },
   "ELH-20": {
-    title: "Rôles et responsabilités en développement durable",
-    desc: "Clarifier qui fait quoi au sein de l'organisation pour assurer le succès de la politique RSE.",
-    objectives: ["Attribuer des responsabilités claires.", "Intégrer la RSE dans les fiches de poste.", "Favoriser la collaboration transverse."],
-    badge: "Clarificateur de rôles RSE",
-    badgeDesc: "Décerné pour la réussite du cours Rôles et responsabilités."
+    title: "Examen des performances et actions correctives",
+    desc: "Évaluez régulièrement les résultats obtenus et mettez en place des plans d'amélioration continue.",
+    objectives: ["Mener des revues de performance périodiques.", "Identifier les causes profondes des écarts.", "Déployer des actions correctives efficaces."],
+    badge: "Analyste de l'Amélioration Continue",
+    badgeDesc: "Décerné pour la gestion de l'amélioration continue RSE."
   },
   "ELH-21": {
-    title: "Engagement des employés en développement durable",
-    desc: "Techniques d'animation et de sensibilisation pour embarquer l'ensemble du personnel.",
-    objectives: ["Créer des défis et ateliers ludiques.", "Reconnaître les initiatives individuelles.", "Maintenir la motivation sur le long terme."],
-    badge: "Mobilisateur d'équipes",
-    badgeDesc: "Décerné pour la réussite du cours Engagement des employés."
+    title: "Rôles, responsabilités et responsabilité",
+    desc: "Clarifiez la gouvernance environnementale et définissez les responsabilités de chacun.",
+    objectives: ["Cartographier les responsabilités RSE.", "Intégrer les objectifs écologiques dans les fiches de poste.", "Assurer le suivi de la responsabilité individuelle."],
+    badge: "Garant de la Gouvernance",
+    badgeDesc: "Décerné pour l'établissement d'une gouvernance claire."
   },
   "ELH-22": {
-    title: "Animation d’équipes vertes efficaces",
-    desc: "Conduire des réunions efficaces et favoriser l'intelligence collective au sein de la Green Team.",
-    objectives: ["Animer des ateliers de co-création.", "Débloquer les freins au changement.", "Pérenniser la dynamique d'équipe."],
-    badge: "Leader Green Team",
-    badgeDesc: "Décerné pour la réussite du cours Équipes vertes."
+    title: "Réaliser des initiatives sur le lieu de travail",
+    desc: "Conduisez avec succès des projets écoresponsables du cadrage à la clôture.",
+    objectives: ["Gérer les opérations sur le terrain.", "Mobiliser les ressources matérielles.", "Évaluer l'impact final de l'initiative."],
+    badge: "Conducteur d'Initiatives",
+    badgeDesc: "Décerné pour la mise en œuvre réussie d'initiatives terrain."
   },
   "ELH-23": {
-    title: "Initiatives de développement durable sur le lieu de travail",
-    desc: "Lancer des projets concrets : potager d'entreprise, compostage, covoiturage et réduction du plastique.",
-    objectives: ["Sélectionner des projets à fort impact.", "Impliquer les parties prenantes.", "Mesurer le succès des initiatives."],
-    badge: "Initiateur de projets RSE",
-    badgeDesc: "Décerné pour la réussite du cours Initiatives sur le lieu de travail."
+    title: "Développement durable pour les équipes RH",
+    desc: "Intégrez la RSE dans les processus de recrutement, la marque employeur et la formation.",
+    objectives: ["Concevoir une politique de marque employeur verte.", "Intégrer la RSE dans l'onboarding.", "Proposer des formations éco-citoyennes."],
+    badge: "RH Éco-Responsable",
+    badgeDesc: "Décerné pour la conduite de la transition écologique en RH."
   },
   "ELH-24": {
-    title: "Développement durable pour les équipes RH",
-    desc: "Intégrer les enjeux environnementaux et sociaux dans le recrutement, la formation et la QVT.",
-    objectives: ["Développer une marque employeur responsable.", "Intégrer la RSE dans le parcours d'accueil.", "Promouvoir la qualité de vie au travail."],
-    badge: "Expert RH & RSE",
-    badgeDesc: "Décerné pour la réussite du cours Rôle des RH."
+    title: "Développement durable pour la vente et le marketing",
+    desc: "Valorisez l'offre écoresponsable auprès des clients en garantissant une communication éthique.",
+    objectives: ["Présenter l'argumentaire vert sans surenchère.", "Répondre aux exigences ESG des acheteurs.", "Concevoir des campagnes marketing responsables."],
+    badge: "Marketeur Éthique",
+    badgeDesc: "Décerné pour la promotion responsable des solutions durables."
   },
   "ELH-25": {
-    title: "Développement durable pour les équipes finances",
-    desc: "Financer la transition écologique, évaluer les risques climatiques et maîtriser le reporting financier ESG.",
-    objectives: ["Intégrer le coût du carbone dans les budgets.", "Évaluer les investissements verts.", "Préparer les reportings financiers ESG."],
-    badge: "Expert Finance Durable",
-    badgeDesc: "Décerné pour la réussite du cours Finance et RSE."
+    title: "Développement durable pour les équipes financières",
+    desc: "Intégrez les critères environnementaux dans les choix d'investissement, le contrôle de gestion et la fiscalité.",
+    objectives: ["Évaluer les investissements selon le retour ESG.", "Suivre les coûts liés à l'énergie et aux déchets.", "Préparer les audits financiers et RSE."],
+    badge: "Contrôleur Financier Vert",
+    badgeDesc: "Décerné pour l'intégration de la RSE dans l'analyse financière."
   },
   "ELH-26": {
     title: "Développement durable pour les équipes achats",
-    desc: "Déployer une charte d'achats responsables et auditer la chaîne d'approvisionnement.",
-    objectives: ["Rédiger une charte d'achats responsables.", "Auditer les pratiques fournisseurs.", "Réduire l'empreinte carbone Scope 3."],
-    badge: "Spécialiste Achats Responsables",
-    badgeDesc: "Décerné pour la réussite du cours Achats responsables."
+    desc: "Sélectionnez et évaluez les fournisseurs selon des critères de durabilité et d'éthique.",
+    objectives: ["Rédiger des cahiers des charges intégrant l'éco-conception.", "Auditer la chaîne d'approvisionnement.", "Privilégier les circuits courts et durables."],
+    badge: "Responsable Achats Durables",
+    badgeDesc: "Décerné pour l'excellence en approvisionnement responsable."
   },
   "ELH-27": {
-    title: "Développement durable pour les équipes infrastructures et immobilier",
-    desc: "Optimiser l'efficience énergétique des bâtiments, la gestion des déchets de chantier et l'eau.",
-    objectives: ["Améliorer la performance énergétique des bâtiments.", "Gérer la maintenance préventive.", "Optimiser l'utilisation des espaces."],
-    badge: "Gestionnaire Bâtiment Vert",
-    badgeDesc: "Décerné pour la réussite du cours Infrastructures durables."
+    title: "Développement durable pour les services généraux et l'immobilier",
+    desc: "Optimisez la gestion technique du bâtiment, l'énergie, l'eau et les déchets immobiliers.",
+    objectives: ["Automatiser les réglages d'énergie.", "Réduire l'impact environnemental des locaux.", "Gérer la maintenance préventive des installations."],
+    badge: "Facility Manager Vert",
+    badgeDesc: "Décerné pour l'optimisation écologique des infrastructures."
   },
   "ELH-28": {
-    title: "Développement durable pour les équipes ventes et marketing",
-    desc: "Promouvoir les offres écologiques de l'entreprise en garantissant une communication exacte et vérifiable.",
-    objectives: ["Valoriser les atouts écologiques sans exagération.", "Répondre aux exigences RSE des clients.", "Concevoir des supports de vente responsables."],
-    badge: "Marketeur Responsable",
-    badgeDesc: "Décerné pour la réussite du cours Ventes & Marketing RSE."
+    title: "Certification finale en développement durable",
+    desc: "Validez l'ensemble de vos compétences en RSE et démontrez votre capacité à piloter le changement.",
+    objectives: ["Synthétiser les apprentissages des parcours.", "Résoudre des cas pratiques complexes.", "Définir une feuille de route personnelle."],
+    badge: "Ambassadeur du Développement Durable",
+    badgeDesc: "Décerné pour l'obtention de la certification globale Elevio Skills."
   },
   "ELH-29": {
     title: "Développement durable pour les équipes opérations et de première ligne",
@@ -456,7 +527,7 @@ const CATALOGUE_FRENCH_BASE: Record<string, { title: string; desc: string; objec
   }
 };
 
-// Populate default package for ELH-04 to ELH-29
+// Populate packages for ELH-04 to ELH-29 with 4 quiz questions and decision scenarios
 for (let i = 4; i <= 29; i++) {
   const code = `ELH-${String(i).padStart(2, "0")}`;
   if (!frenchCourseRegistry[code] && CATALOGUE_FRENCH_BASE[code]) {
@@ -465,7 +536,7 @@ for (let i = 4; i <= 29; i++) {
       meta: {
         title: base.title,
         description: base.desc,
-        fullDescription: `${base.desc} Ce cours fournit des outils pratiques et des exemples adaptés au contexte professionnel mauricin.`,
+        fullDescription: `${base.desc} Ce cours fournit des outils pratiques et des exemples adaptés au contexte professionnel mauricien.`,
         learningObjectives: base.objectives,
         badgeName: base.badge,
         badgeDescription: base.badgeDesc,
@@ -486,21 +557,23 @@ for (let i = 4; i <= 29; i++) {
           content: "Découvrez les méthodes éprouvées pour appliquer ces principes au quotidien.",
           blocks: [
             { type: "heading", headingText: "Méthodes opérationnelles" },
-            { type: "short_text", bodyText: "Appliquez les consignes établies dans votre organisation pour garantir des résultats mesurables." }
+            { type: "short_text", bodyText: "Appliquez les consignes établies dans votre organisation pour garantir des résultats mesurables." },
+            {
+              type: "decision_scenario",
+              scenarioSetup: `Dans le cadre de ${base.title}, vous observez une pratique non conforme lors de vos opérations quotidiennes.`,
+              decisionOptions: [
+                { id: "opt1", label: "Appliquer immédiatement la procédure écoresponsable validée", consequence: "Impact positif et conformité assurée", feedback: "Excellente décision qui préserve les ressources et respecte la démarche RSE.", isRecommended: true },
+                { id: "opt2", label: "Ignorer le dysfonctionnement pour aller plus vite", consequence: "Risque de gaspillage et de non-conformité", feedback: "Ignorer les consignes augmente l'empreinte environnementale et le risque d'incident." }
+              ]
+            }
           ]
         },
         2: {
           title: "Mise en pratique et scénario professionnel",
           content: "Analysez une situation réelle et choisissez l'action la plus écoresponsable.",
           blocks: [
-            {
-              type: "decision_scenario",
-              scenarioSetup: "Vous êtes confronté à une situation nécessitant un arbitrage entre rapidité et impact environnemental.",
-              decisionOptions: [
-                { id: "opt1", label: "Appliquer la procédure écoresponsable validée", consequence: "Impact positif durable", feedback: "Excellente décision qui préserve les ressources.", isRecommended: true },
-                { id: "opt2", label: "Ignorer la consigne environnementale", consequence: "Risque de gaspillage et de non-conformité", feedback: "Contourner les consignes augmente les coûts et l'empreinte environnementale." }
-              ]
-            }
+            { type: "heading", headingText: "Cas pratique de terrain" },
+            { type: "short_text", bodyText: "Suivez les recommandations du guide d'action locale à Maurice." }
           ]
         },
         3: {
@@ -535,6 +608,30 @@ for (let i = 4; i <= 29; i++) {
           correctExplanation: "Chaque employé joue un rôle actif dans la réussite de la démarche RSE.",
           incorrectExplanation: "L'engagement individuel est indispensable pour obtenir des résultats durables.",
           practicalTakeaway: "Soyez moteur dans l'application des éco-gestes."
+        },
+        2: {
+          question: `Quelle action concrète soutient directement ${base.title} à Maurice ?`,
+          options: [
+            "Appliquer les consignes locales de sobriété et de tri dans votre service",
+            "Consommer davantage de plastique à usage unique",
+            "Ne jamais remonter d'anomalie à votre responsables",
+            "Gaspiller l'eau pendant les heures d'ouverture"
+          ],
+          correctExplanation: "Le respect des consignes locales améliore la performance globale de l'entreprise.",
+          incorrectExplanation: "Les actions individuelles quotidiennes conditionnent les résultats de la collectivité.",
+          practicalTakeaway: "Intégrez les éco-réflexes dans votre routine professionnelle."
+        },
+        3: {
+          question: "Comment mesurer le succès d'une démarche RSE dans votre département ?",
+          options: [
+            "Par le suivi régulier des indicateurs et le respect des objectifs fixés",
+            "En arrêtant toute activité commerciale",
+            "En évitant de publier les résultats RSE",
+            "En jetant les données de mesure"
+          ],
+          correctExplanation: "Le suivi des indicateurs de performance permet d'évaluer les progrès et d'ajuster les actions.",
+          incorrectExplanation: "Mesurer et analyser les résultats est indispensable pour piloter la durabilité.",
+          practicalTakeaway: "Consultez régulièrement le tableau de bord de votre département."
         }
       }
     };
