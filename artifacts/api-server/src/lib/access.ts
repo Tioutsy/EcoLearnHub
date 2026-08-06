@@ -9,7 +9,7 @@ import {
   type Employee,
 } from "@workspace/db";
 
-export type AccessRole = "platform_admin" | "company_admin" | "employee";
+export type AccessRole = "platform_admin" | "company_admin" | "manager" | "employee";
 
 export interface CompanyAccess {
   userId: string;
@@ -81,7 +81,29 @@ function isPlatformRole(role: string | null): boolean {
 }
 
 function isCompanyAdminRole(role: string | null): boolean {
-  return role === "company_admin" || role === "admin" || role === "manager";
+  return role === "company_admin" || role === "admin";
+}
+
+function isManagerRole(role: string | null): boolean {
+  return role === "manager";
+}
+
+export function hasCapability(role: AccessRole, capability: string): boolean {
+  if (role === "platform_admin") return true;
+  if (role === "company_admin") return true;
+  if (role === "manager") {
+    return [
+      "employees.view",
+      "reports.team",
+      "certificates.download",
+      "courses.assign",
+      "challenges.review",
+    ].includes(capability);
+  }
+  if (role === "employee") {
+    return ["certificates.download"].includes(capability);
+  }
+  return false;
 }
 
 export async function getPrimaryCompany(): Promise<Company | null> {
@@ -164,13 +186,12 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
   if (!companyId) throw new HttpError(404, "No company found");
 
   let role: AccessRole = "employee";
-  if (isPlatformRole(claimRole)) role = "platform_admin";
-  else if (
-    isCompanyAdminRole(claimRole) ||
-    employee?.role === "admin" ||
-    employee?.role === "manager"
-  ) {
+  if (isPlatformRole(claimRole)) {
+    role = "platform_admin";
+  } else if (isCompanyAdminRole(claimRole) || employee?.role === "admin") {
     role = "company_admin";
+  } else if (isManagerRole(claimRole) || employee?.role === "manager") {
+    role = "manager";
   }
 
   return {
@@ -185,7 +206,7 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
 
 export async function requireCompanyAdmin(req: Request): Promise<CompanyAccess> {
   const access = await getCompanyAccess(req);
-  if (access.role === "employee") {
+  if (access.role !== "company_admin" && access.role !== "platform_admin") {
     throw new HttpError(403, "Company administrator access required");
   }
   return access;
@@ -210,7 +231,7 @@ export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess>
   return {
     userId,
     email,
-    companyId: 0, // No company record is required for platform operations
+    companyId: 0,
     role: "platform_admin",
     employee: null,
     isDemo: false,
@@ -244,6 +265,5 @@ export function sendHttpError(res: Response, err: unknown): boolean {
     res.status(err.status).json({ error: err.message });
     return true;
   }
-  // Non-HttpError: let the caller handle logging and the 500 response.
   return false;
 }

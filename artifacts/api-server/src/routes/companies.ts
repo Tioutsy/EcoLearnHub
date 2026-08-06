@@ -511,6 +511,43 @@ router.patch("/employees/:id", async (req, res): Promise<void> => {
       return;
     }
 
+    const [existing] = await db
+      .select()
+      .from(employeesTable)
+      .where(and(eq(employeesTable.id, id), eq(employeesTable.companyId, access.companyId)))
+      .limit(1);
+
+    if (!existing) {
+      res.status(404).json({ error: "Employee not found" });
+      return;
+    }
+
+    // Sole Administrator Safeguard
+    if (existing.role === "admin") {
+      const isDemoting = parsed.data.role && parsed.data.role !== "admin";
+      const isDeactivating = parsed.data.status && parsed.data.status === "deactivated";
+
+      if (isDemoting || isDeactivating) {
+        const activeAdmins = await db
+          .select()
+          .from(employeesTable)
+          .where(
+            and(
+              eq(employeesTable.companyId, access.companyId),
+              eq(employeesTable.role, "admin"),
+              eq(employeesTable.status, "active")
+            )
+          );
+
+        if (activeAdmins.length <= 1) {
+          res.status(409).json({
+            error: "Cannot demote or deactivate the sole active company administrator. Assign another active administrator first.",
+          });
+          return;
+        }
+      }
+    }
+
     const [updated] = await db
       .update(employeesTable)
       .set(parsed.data)
@@ -586,6 +623,27 @@ router.delete("/employees/:id", async (req, res): Promise<void> => {
     if (!employee) {
       res.status(404).json({ error: "Employee not found" });
       return;
+    }
+
+    // Sole Administrator Safeguard
+    if (employee.role === "admin" && employee.status === "active") {
+      const activeAdmins = await db
+        .select()
+        .from(employeesTable)
+        .where(
+          and(
+            eq(employeesTable.companyId, access.companyId),
+            eq(employeesTable.role, "admin"),
+            eq(employeesTable.status, "active")
+          )
+        );
+
+      if (activeAdmins.length <= 1) {
+        res.status(409).json({
+          error: "Cannot delete the sole active company administrator. Assign another active administrator first.",
+        });
+        return;
+      }
     }
 
     await db.delete(enrollmentsTable).where(eq(enrollmentsTable.employeeId, id));

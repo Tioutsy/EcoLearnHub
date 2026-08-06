@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth, useUser, UserButton } from "@clerk/react";
 import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as RouteIcon, Target, MapPin, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isPlatformAdmin, isCompanyAdmin } from "@/lib/authHelpers";
+import { isPlatformAdmin, isCompanyAdmin, getUserRoleLabel } from "@/lib/authHelpers";
+import { Badge } from "@/components/ui/badge";
 import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -103,7 +104,12 @@ export function Navbar() {
           <div className="flex items-center gap-3 border-l pl-4 ml-2">
             <LanguageSelector />
             {isSignedIn ? (
-              <UserButton />
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="hidden sm:inline-flex text-xs bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
+                  {getUserRoleLabel(user)}
+                </Badge>
+                <UserButton />
+              </div>
             ) : (
               <>
                 <Button variant="ghost" asChild className="hidden lg:flex">
