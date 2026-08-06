@@ -8,6 +8,7 @@ import {
   type CertificateData,
 } from "../lib/certificatePdf";
 import { getCompanyAccess, requireCompanyAdmin, sendHttpError } from "../lib/access";
+import { getFrenchCoursePackage } from "../lib/frenchCourseContent";
 
 const router = Router();
 
@@ -19,25 +20,36 @@ const certSelect = {
   employeeName: certificatesTable.employeeName,
   companyName: certificatesTable.companyName,
   courseId: certificatesTable.courseId,
+  courseCode: coursesTable.courseCode,
   courseName: coursesTable.title,
   uniqueCode: certificatesTable.uniqueCode,
   pdfUrl: certificatesTable.pdfUrl,
   issuedAt: certificatesTable.issuedAt,
 };
 
-function toCertificateData(row: {
-  employeeName: string | null;
-  companyName: string | null;
-  courseName: string | null;
-  uniqueCode: string;
-  issuedAt: Date;
-}): CertificateData {
+function toCertificateData(
+  row: {
+    employeeName: string | null;
+    companyName: string | null;
+    courseName: string | null;
+    uniqueCode: string;
+    issuedAt: Date;
+    courseCode?: string | null;
+  },
+  locale: "en" | "fr" = "en"
+): CertificateData {
+  let courseTitle = row.courseName ?? "Sustainability Course";
+  if (locale === "fr" && row.courseCode) {
+    const frPkg = getFrenchCoursePackage(row.courseCode);
+    if (frPkg) courseTitle = frPkg.meta.title;
+  }
   return {
     employeeName: row.employeeName ?? "Elevio Learner",
     companyName: row.companyName ?? "Elevio",
-    courseName: row.courseName ?? "Sustainability Course",
+    courseName: courseTitle,
     uniqueCode: row.uniqueCode,
     issuedAt: new Date(row.issuedAt),
+    locale,
   };
 }
 
@@ -128,9 +140,11 @@ router.get("/company/export", async (req, res): Promise<void> => {
       return;
     }
 
+    const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
+    const certLocale = rawLocale.toLowerCase().startsWith("fr") ? "fr" : "en";
     const label = safeFileName(company?.name ?? "Elevio");
 
-    const pdfBytes = await generateBulkCertificatesPdf(certs.map(toCertificateData));
+    const pdfBytes = await generateBulkCertificatesPdf(certs.map(c => toCertificateData(c, certLocale)));
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
@@ -147,6 +161,9 @@ router.get("/company/export", async (req, res): Promise<void> => {
 
 // Download a single certificate as a branded PDF (employee or company).
 router.get("/:id/pdf", async (req, res): Promise<void> => {
+  const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
+  const certLocale = rawLocale.toLowerCase().startsWith("fr") ? "fr" : "en";
+
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
   if (isNaN(id)) {
@@ -178,7 +195,7 @@ router.get("/:id/pdf", async (req, res): Promise<void> => {
   }
 
   try {
-    const pdfBytes = await generateCertificatePdf(toCertificateData(cert));
+    const pdfBytes = await generateCertificatePdf(toCertificateData(cert, certLocale));
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",

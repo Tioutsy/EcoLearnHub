@@ -32,10 +32,12 @@ import invitationsRouter from "./invitations";
 import remindersRouter from "./reminders";
 import notificationsRouter from "./notifications";
 import analyticsRouter from "./analytics";
+import governanceRouter from "./governance";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use("/governance", governanceRouter);
 router.use("/courses", coursesRouter);
 router.use("/categories", categoriesRouter);
 router.use("/enrollments", enrollmentsRouter);
@@ -67,6 +69,7 @@ router.use("/recycling", recyclingRouter);
 router.use("/platform-admin", platformAdminRouter);
 router.use("/platform-admin", platformAdminHealthRouter);
 router.use("/platform-admin/pilots", pilotsRouter);
+router.use("/pilots", pilotsRouter);
 router.use("/manager/training", managerTrainingRouter);
 router.use(blogRouter);
 

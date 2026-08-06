@@ -37,9 +37,11 @@ interface EmployeePayload {
   department?: string | null;
   jobTitle?: string | null;
   role?: EmployeeRole;
+  status?: "active" | "deactivated";
 }
 
 const VALID_ROLES = new Set<EmployeeRole>(["employee", "manager", "admin"]);
+const VALID_STATUSES = new Set(["active", "deactivated"]);
 const VALID_REPORT_STATUSES = new Set<AssignmentStatus | "all">([
   "all",
   "not_started",
@@ -60,12 +62,15 @@ function parseEmployeePayload(body: unknown, partial = false): { data?: Employee
   const jobTitle = readText(raw["jobTitle"]);
   const roleRaw = readText(raw["role"]) ?? (partial ? null : "employee");
   const role = VALID_ROLES.has(roleRaw as EmployeeRole) ? (roleRaw as EmployeeRole) : null;
+  const statusRaw = readText(raw["status"]);
+  const status = statusRaw && VALID_STATUSES.has(statusRaw) ? (statusRaw as "active" | "deactivated") : null;
 
   if (!partial && (!name || !email)) return { error: "Name and email are required" };
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Enter a valid email address" };
   }
   if (roleRaw && !role) return { error: "Invalid employee role" };
+  if (statusRaw && !status) return { error: "Invalid employee status" };
 
   return {
     data: {
@@ -74,6 +79,7 @@ function parseEmployeePayload(body: unknown, partial = false): { data?: Employee
       ...(!partial || Object.prototype.hasOwnProperty.call(raw, "department") ? { department } : {}),
       ...(!partial || Object.prototype.hasOwnProperty.call(raw, "jobTitle") ? { jobTitle } : {}),
       ...(role ? { role } : {}),
+      ...(status ? { status } : {}),
     },
   };
 }

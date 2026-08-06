@@ -45,3 +45,15 @@ This document defines approved French terminology across Elevio Skills for all w
 1. **Brand Names & Lockups**: `Elevio Skills`, `Reclean`, `Elevio Skills By Recyclean`, `Elevio is operated by Recyclean Ltd.` remain unmutated in all languages.
 2. **Technical Standards & Acronyms**: `ESG`, `MUR`, `PDF`, `CSV`, `Scope 1`, `Scope 2`, `Scope 3`, `ELH-01` through `ELH-29` preserve exact casing and acronyms across locales.
 3. **Plural & Gender Agreement**: Maintain professional formal address (**vous**) across all instructions and feedback screens.
+
+---
+
+## 3. Accepted Context-Sensitive Variations & Guidelines
+
+1. **RSE (Responsabilité Sociétale des Entreprises)**: Accepted alongside *développement durable* in B2B management and departmental courses (e.g. ELH-14, ELH-15, ELH-24).
+2. **Éco-gestes / Pratiques écoresponsables**: Accepted for everyday employee workplace actions and habits.
+3. **Déchets résiduels**: Approved standard for non-recyclable general waste (*general waste*).
+4. **CEB (Central Electricity Board)**: Retained as the official public utility name in energy courses.
+5. **Mare Chicose**: Retained as the official name of the principal landfill facility in Mauritius.
+6. **Tone & Plain Language**: Use active, direct phrasing avoiding overly complex academic or France-specific legal jargon.
+

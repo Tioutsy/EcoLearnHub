@@ -17,9 +17,14 @@ import { getCompanyAccess, sendHttpError } from "../lib/access";
 import { syncEmployeeLearningStats } from "../lib/lmsData";
 import { awardCourseBadge, evaluateCourseMilestones } from "../lib/achievementsService";
 
+import { getFrenchCoursePackage } from "../lib/frenchCourseContent";
+
 const router = Router();
 
 router.get("/:courseId/quiz", async (req, res): Promise<void> => {
+  const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
+  const isFrench = rawLocale.toLowerCase().startsWith("fr");
+
   const raw = Array.isArray(req.params.courseId) ? req.params.courseId[0] : req.params.courseId;
   const courseId = parseInt(raw, 10);
   if (isNaN(courseId)) {
@@ -28,7 +33,7 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
   }
 
   const [course] = await db
-    .select({ isPublished: coursesTable.isPublished })
+    .select({ isPublished: coursesTable.isPublished, courseCode: coursesTable.courseCode })
     .from(coursesTable)
     .where(eq(coursesTable.id, courseId));
 
@@ -68,15 +73,35 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
     return;
   }
 
-  const questions = await db
+  const frPkg = isFrench && course.courseCode ? getFrenchCoursePackage(course.courseCode) : undefined;
+
+  const rawQuestions = await db
     .select({
       id: quizQuestionsTable.id,
       question: quizQuestionsTable.question,
       options: quizQuestionsTable.options,
+      orderIndex: quizQuestionsTable.orderIndex,
+      correctExplanation: quizQuestionsTable.correctExplanation,
+      incorrectExplanation: quizQuestionsTable.incorrectExplanation,
+      optionFeedback: quizQuestionsTable.optionFeedback,
+      practicalTakeaway: quizQuestionsTable.practicalTakeaway,
     })
     .from(quizQuestionsTable)
     .where(eq(quizQuestionsTable.courseId, courseId))
     .orderBy(quizQuestionsTable.orderIndex);
+
+  const questions = rawQuestions.map((q) => {
+    const qTr = frPkg?.quizQuestions[q.orderIndex];
+    return {
+      id: q.id,
+      question: qTr?.question || q.question,
+      options: qTr?.options || q.options,
+      correctExplanation: qTr?.correctExplanation || q.correctExplanation,
+      incorrectExplanation: qTr?.incorrectExplanation || q.incorrectExplanation,
+      optionFeedback: qTr?.optionFeedback || q.optionFeedback,
+      practicalTakeaway: qTr?.practicalTakeaway || q.practicalTakeaway,
+    };
+  });
 
   res.json({ courseId, questions });
 });

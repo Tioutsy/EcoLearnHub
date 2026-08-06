@@ -1,140 +1,294 @@
 import { Router } from "express";
-import { getCompanyAccess, sendHttpError } from "../lib/access";
 import {
-  createPilotCompany,
-  approvePilotCompany,
-  submitPilotFeedback,
-  logPilotIssue,
-} from "../lib/pilotOperationsService";
-import { generatePilotOutcomeReport } from "../lib/pilotOutcomeReportService";
-import { db, pilotCompaniesTable } from "@workspace/db";
+  db,
+  pilotCompaniesTable,
+  pilotFeedbackResponsesTable,
+  pilotIssuesTable,
+  companiesTable,
+  employeesTable,
+  enrollmentsTable,
+  quizAttemptsTable,
+  certificatesTable,
+  learnerCommitmentsTable,
+} from "@workspace/db";
+import { and, eq, sql } from "drizzle-orm";
+import { getCompanyAccess, requireCompanyAdmin, sendHttpError } from "../lib/access";
+import { logAuditEvent } from "../lib/auditLogService";
 
 const router = Router();
 
-// GET /api/platform-admin/pilots — List pilot records
-router.get("/", async (req, res): Promise<void> => {
+const VALID_PILOT_STATUSES = new Set([
+  "preparing",
+  "ready_to_launch",
+  "active",
+  "paused",
+  "completed",
+  "withdrawn",
+  "converted",
+  "archived",
+]);
+
+// GET /api/pilots/overview — Platform Admin overview of all pilots
+router.get("/overview", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
     if (access.role !== "platform_admin") {
-      res.status(403).json({ error: "Platform administrator access required" });
+      res.status(403).json({ error: "Access denied to platform admin overview" });
       return;
     }
 
     const pilots = await db.select().from(pilotCompaniesTable);
-    res.json({ pilots });
+    const issues = await db.select().from(pilotIssuesTable);
+    const feedback = await db.select().from(pilotFeedbackResponsesTable);
+
+    res.json({
+      totalPilots: pilots.length,
+      activePilots: pilots.filter((p) => p.pilotStatus === "active").length,
+      completedPilots: pilots.filter((p) => p.pilotStatus === "completed").length,
+      totalIssues: issues.length,
+      unresolvedIssues: issues.filter((i) => i.status !== "resolved" && i.status !== "closed").length,
+      totalFeedbackResponses: feedback.length,
+      pilots,
+    });
   } catch (err) {
     if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to list pilot records" });
+      res.status(500).json({ error: "Failed to load pilot overview" });
     }
   }
 });
 
-// POST /api/platform-admin/pilots — Create candidate pilot company
+// GET /api/pilots/monitoring — Tenant-scoped pilot monitoring metrics
+router.get("/monitoring", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    const companyId = access.companyId;
+
+    const [company] = await db.select().from(companiesTable).where(eq(companiesTable.id, companyId)).limit(1);
+    const employees = await db.select().from(employeesTable).where(eq(employeesTable.companyId, companyId));
+    const enrollments = await db.select().from(enrollmentsTable).where(eq(enrollmentsTable.userId, access.userId));
+    const quizAttempts = await db.select().from(quizAttemptsTable).where(eq(quizAttemptsTable.userId, access.userId));
+    const certificates = await db.select().from(certificatesTable).where(eq(certificatesTable.companyId, companyId));
+    const commitments = await db.select().from(learnerCommitmentsTable).where(eq(learnerCommitmentsTable.companyId, companyId));
+    const feedback = await db.select().from(pilotFeedbackResponsesTable).where(eq(pilotFeedbackResponsesTable.companyId, companyId));
+    const issues = await db.select().from(pilotIssuesTable).where(eq(pilotIssuesTable.companyId, companyId));
+
+    const activatedEmployees = employees.filter((e) => e.status === "active").length;
+    const completedEnrollments = enrollments.filter((e) => e.status === "completed").length;
+    const avgScore = quizAttempts.length > 0
+      ? Math.round(quizAttempts.reduce((acc, q) => acc + (q.score ?? 0), 0) / quizAttempts.length)
+      : 0;
+
+    res.json({
+      companyId,
+      companyName: company?.name ?? "Elevio Pilot Company",
+      totalEmployees: employees.length,
+      activatedEmployees,
+      enrollmentCount: enrollments.length,
+      completedEnrollments,
+      completionRatePct: enrollments.length > 0 ? Math.round((completedEnrollments / enrollments.length) * 100) : 0,
+      certificatesIssued: certificates.length,
+      actionCommitmentsSubmitted: commitments.length,
+      averageQuizScorePct: avgScore,
+      feedbackResponseCount: feedback.length,
+      openIssueCount: issues.filter((i) => i.status !== "resolved" && i.status !== "closed").length,
+    });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to load pilot monitoring metrics" });
+    }
+  }
+});
+
+// POST /api/pilots — Create or register a company pilot
 router.post("/", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
     if (access.role !== "platform_admin") {
-      res.status(403).json({ error: "Platform administrator access required" });
+      res.status(403).json({ error: "Only platform admins can register pilot companies" });
       return;
     }
 
-    const pilot = await createPilotCompany(req.body);
-    res.status(201).json({ pilot });
+    const { companyId, approvedLearnerLimit, primaryContactName, primaryContactEmail } = req.body ?? {};
+    const targetCompanyId = Number(companyId) || access.companyId;
+
+    const [entry] = await db
+      .insert(pilotCompaniesTable)
+      .values({
+        companyId: targetCompanyId,
+        pilotStatus: "preparing",
+        pilotStage: "configuration",
+        approvedLearnerLimit: Number(approvedLearnerLimit) || 50,
+        primaryContactName: primaryContactName ?? null,
+        primaryContactEmail: primaryContactEmail ?? null,
+        approvedByUserId: access.userId,
+        approvedAt: new Date(),
+      })
+      .returning();
+
+    await logAuditEvent({
+      companyId: targetCompanyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "pilot.created",
+      targetType: "pilot_company",
+      targetId: entry.id,
+    });
+
+    res.status(201).json(entry);
   } catch (err) {
     if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to create pilot record" });
+      res.status(500).json({ error: "Failed to register pilot company" });
     }
   }
 });
 
-// POST /api/platform-admin/pilots/:id/approve — Approve pilot company
-router.post("/:id/approve", async (req, res): Promise<void> => {
+// PATCH /api/pilots/:id/status — Update pilot status
+router.patch("/:id/status", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
     if (access.role !== "platform_admin") {
-      res.status(403).json({ error: "Platform administrator access required" });
+      res.status(403).json({ error: "Only platform admins can update pilot status" });
       return;
     }
 
     const pilotId = Number(req.params.id);
-    const learnerLimit = Number(req.body.learnerLimit) || 50;
+    const { pilotStatus } = req.body ?? {};
 
-    const approved = await approvePilotCompany(pilotId, access.userId, learnerLimit);
-    res.json({ pilot: approved });
-  } catch (err) {
-    if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to approve pilot record" });
-    }
-  }
-});
-
-// POST /api/platform-admin/pilots/:id/feedback — Submit pilot feedback
-router.post("/:id/feedback", async (req, res): Promise<void> => {
-  try {
-    const access = await getCompanyAccess(req);
-    const pilotId = Number(req.params.id);
-
-    const feedback = await submitPilotFeedback({
-      pilotCompanyId: pilotId,
-      companyId: access.companyId,
-      respondentUserId: access.userId,
-      respondentRole: access.role === "company_admin" ? "buyer" : "learner",
-      overallRating: Number(req.body.overallRating) || 5,
-      easeOfUseRating: Number(req.body.easeOfUseRating) || 5,
-      contentRelevanceRating: Number(req.body.contentRelevanceRating) || 5,
-      reportingUsefulnessRating: req.body.reportingUsefulnessRating ? Number(req.body.reportingUsefulnessRating) : undefined,
-      freeTextFeedback: req.body.freeTextFeedback,
-      consentForFollowUp: !!req.body.consentForFollowUp,
-    });
-
-    res.status(201).json({ feedback });
-  } catch (err) {
-    if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to submit pilot feedback" });
-    }
-  }
-});
-
-// POST /api/platform-admin/pilots/:id/issues — Log pilot issue
-router.post("/:id/issues", async (req, res): Promise<void> => {
-  try {
-    const access = await getCompanyAccess(req);
-    const pilotId = Number(req.params.id);
-
-    const issue = await logPilotIssue({
-      pilotCompanyId: pilotId,
-      companyId: access.companyId,
-      reportedByUserId: access.userId,
-      issueType: req.body.issueType || "content",
-      severity: req.body.severity || "medium",
-      title: req.body.title || "Pilot Issue",
-      description: req.body.description,
-      affectedCourseId: req.body.affectedCourseId ? Number(req.body.affectedCourseId) : undefined,
-    });
-
-    res.status(201).json({ issue });
-  } catch (err) {
-    if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to log pilot issue" });
-    }
-  }
-});
-
-// GET /api/platform-admin/pilots/:id/report — Generate pilot outcome report
-router.get("/:id/report", async (req, res): Promise<void> => {
-  try {
-    const access = await getCompanyAccess(req);
-    if (access.role !== "platform_admin") {
-      res.status(403).json({ error: "Platform administrator access required" });
+    if (!pilotStatus || !VALID_PILOT_STATUSES.has(pilotStatus)) {
+      res.status(400).json({ error: "Invalid pilotStatus" });
       return;
     }
 
-    const pilotId = Number(req.params.id);
-    const report = await generatePilotOutcomeReport(pilotId);
-    res.json({ report });
+    const [updated] = await db
+      .update(pilotCompaniesTable)
+      .set({ pilotStatus, updatedAt: new Date() })
+      .where(eq(pilotCompaniesTable.id, pilotId))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "Pilot record not found" });
+      return;
+    }
+
+    await logAuditEvent({
+      companyId: updated.companyId,
+      actorUserId: access.userId,
+      actorRole: access.role,
+      action: "pilot.status_updated",
+      targetType: "pilot_company",
+      targetId: pilotId,
+      metadata: { newStatus: pilotStatus },
+    });
+
+    res.json(updated);
   } catch (err) {
     if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to generate pilot outcome report" });
+      res.status(500).json({ error: "Failed to update pilot status" });
+    }
+  }
+});
+
+// POST /api/pilots/surveys — Submit pilot survey response
+router.post("/surveys", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    const { feedbackStage, overallRating, easeOfUseRating, contentRelevanceRating, reportingUsefulnessRating, freeTextFeedback, consentForFollowUp } = req.body ?? {};
+
+    const [entry] = await db
+      .insert(pilotFeedbackResponsesTable)
+      .values({
+        companyId: access.companyId,
+        respondentUserId: access.userId,
+        respondentRole: access.role === "company_admin" || access.role === "platform_admin" ? "buyer" : "learner",
+        feedbackStage: feedbackStage ?? "midpoint",
+        overallRating: Number(overallRating) || 5,
+        easeOfUseRating: Number(easeOfUseRating) || 5,
+        contentRelevanceRating: Number(contentRelevanceRating) || 5,
+        reportingUsefulnessRating: reportingUsefulnessRating ? Number(reportingUsefulnessRating) : null,
+        freeTextFeedback: freeTextFeedback ?? null,
+        consentForFollowUp: Boolean(consentForFollowUp),
+      })
+      .returning();
+
+    res.status(201).json(entry);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to submit survey response" });
+    }
+  }
+});
+
+// GET /api/pilots/surveys — Fetch tenant-scoped survey responses
+router.get("/surveys", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    const responses = await db
+      .select()
+      .from(pilotFeedbackResponsesTable)
+      .where(eq(pilotFeedbackResponsesTable.companyId, access.companyId));
+
+    res.json({ responses });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to fetch survey responses" });
+    }
+  }
+});
+
+// GET /api/pilots/company-report — Generate structured company pilot report payload
+router.get("/company-report", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const companyId = access.companyId;
+
+    const [company] = await db.select().from(companiesTable).where(eq(companiesTable.id, companyId)).limit(1);
+    const employees = await db.select().from(employeesTable).where(eq(employeesTable.companyId, companyId));
+    const enrollments = await db.select().from(enrollmentsTable).where(eq(enrollmentsTable.userId, access.userId));
+    const quizAttempts = await db.select().from(quizAttemptsTable).where(eq(quizAttemptsTable.userId, access.userId));
+    const certificates = await db.select().from(certificatesTable).where(eq(certificatesTable.companyId, companyId));
+    const commitments = await db.select().from(learnerCommitmentsTable).where(eq(learnerCommitmentsTable.companyId, companyId));
+    const feedback = await db.select().from(pilotFeedbackResponsesTable).where(eq(pilotFeedbackResponsesTable.companyId, companyId));
+
+    const avgScore = quizAttempts.length > 0
+      ? Math.round(quizAttempts.reduce((acc, q) => acc + (q.score ?? 0), 0) / quizAttempts.length)
+      : 0;
+
+    const reportPayload = {
+      reportMetadata: {
+        generatedAt: new Date().toISOString(),
+        companyId,
+        companyName: company?.name ?? "Elevio Pilot Company",
+        companySlug: company?.slug ?? "pilot",
+      },
+      adoption: {
+        totalEmployees: employees.length,
+        activatedEmployees: employees.filter((e) => e.status === "active").length,
+        enrollmentCount: enrollments.length,
+        completedCount: enrollments.filter((e) => e.status === "completed").length,
+        completionRatePct: enrollments.length > 0 ? Math.round((enrollments.filter((e) => e.status === "completed").length / enrollments.length) * 100) : 0,
+      },
+      learning: {
+        averageQuizScorePct: avgScore,
+        certificatesIssued: certificates.length,
+      },
+      workplaceApplication: {
+        actionCommitmentsSubmitted: commitments.length,
+        selfReportedNotice: "Workplace action commitments and manager reviews are self-reported participation indicators.",
+      },
+      userFeedback: {
+        totalResponses: feedback.length,
+        averageOverallRating: feedback.length > 0 ? (feedback.reduce((a, f) => a + f.overallRating, 0) / feedback.length).toFixed(1) : "5.0",
+      },
+      recommendations: [
+        "Continue core sustainability pathways (ELH-01 to ELH-03).",
+        "Expand departmental training for HR, Finance, and Procurement teams.",
+      ],
+    };
+
+    res.json(reportPayload);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to generate company pilot report" });
     }
   }
 });
