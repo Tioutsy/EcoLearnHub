@@ -86,13 +86,21 @@ describe("Sprint ELH-30 — ELH-30 Climate Risk & Workplace Resilience Assurance
       .where(eq(coursesTable.courseCode, "ELH-30"))
       .limit(1);
 
-    assert.ok(course30, "ELH-30 must exist");
-
-    const prereqs = await db
-      .select()
-      .from(coursePrerequisitesTable)
-      .where(eq(coursePrerequisitesTable.courseId, course30.id));
-
     assert.ok(prereqs.length >= 1, "ELH-30 must have at least one prerequisite");
+  });
+
+  test("5. ELH-30 has non-empty valid realistic course thumbnail image reference", async () => {
+    const [course30] = await db
+      .select({ thumbnailUrl: coursesTable.thumbnailUrl })
+      .from(coursesTable)
+      .where(eq(coursesTable.courseCode, "ELH-30"))
+      .limit(1);
+
+    assert.ok(course30?.thumbnailUrl, "ELH-30 must have a non-empty thumbnailUrl");
+    assert.equal(
+      course30.thumbnailUrl,
+      "/images/courses/climate-risk-and-workplace-resilience.jpg",
+      "Thumbnail URL must reference the realistic course asset"
+    );
   });
 });
