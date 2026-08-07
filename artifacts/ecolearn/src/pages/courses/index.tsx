@@ -26,6 +26,14 @@ import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { sortCoursesByCode } from "@/lib/courseSorting";
 import { useLanguage } from "@/context/LanguageContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface RecommendationData {
   courseId: number;
@@ -62,6 +70,7 @@ export default function Courses() {
   const [recommendation, setRecommendation] = useState<RecommendationData | null>(null);
   const [isLoadingRec, setIsLoadingRec] = useState<boolean>(true);
   const [companySub, setCompanySub] = useState<CompanySubscriptionData | null>(null);
+  const [selectedDetailsCourse, setSelectedDetailsCourse] = useState<any | null>(null);
 
   const { data: categories, isLoading: isLoadingCategories } = useListCategories();
   
@@ -517,21 +526,47 @@ export default function Courses() {
                           {course.description}
                         </p>
                         
-                        {/* Course Language Notice (Sprint 9V Workstream E) */}
-                        <div className="pt-1">
+                        {/* Course Language & View Details Control (Sprint 9V / 11K) */}
+                        <div className="pt-1 flex items-center justify-between">
                           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded border">
                             <Info className="h-3 w-3 text-emerald-600" />
                             {t("course.available_in_english")}
                           </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedDetailsCourse(course);
+                            }}
+                            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
+                            aria-label={`View details for ${course.title}`}
+                          >
+                            <span>View details</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
 
                       {/* Commercial Subscription Plan Lock Notice */}
                       {isPlanLocked && (
                         <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-xs text-purple-900 dark:text-purple-200 space-y-1">
-                          <div className="font-semibold flex items-center gap-1.5 text-purple-800 dark:text-purple-300">
-                            <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600" />
-                            <span>Included in {reqPlanName} Plan</span>
+                          <div className="font-semibold flex items-center justify-between gap-1.5 text-purple-800 dark:text-purple-300">
+                            <span className="flex items-center gap-1.5">
+                              <Building2 className="h-3.5 w-3.5 shrink-0 text-purple-600" />
+                              <span>Included in {reqPlanName} Plan</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedDetailsCourse(course);
+                              }}
+                              className="text-[11px] underline font-normal text-purple-700 dark:text-purple-300 hover:text-purple-900 cursor-pointer"
+                            >
+                              View details
+                            </button>
                           </div>
                           <p>This course is included in your company's <span className="font-semibold">{reqPlanName}</span> plan. Contact your company administrator to upgrade access.</p>
                         </div>
@@ -545,11 +580,17 @@ export default function Courses() {
                               <Lock className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
                               <span>{missingRequiredPrereqs.length > 1 ? `${missingRequiredPrereqs.length} prerequisites required` : "Prerequisite required"}</span>
                             </span>
-                            {missingRequiredPrereqs.length > 0 && (
-                              <span className="text-[11px] underline cursor-pointer font-normal text-blue-700 dark:text-blue-300 hover:text-blue-900" title={missingRequiredPrereqs.map(p => `${p.prerequisiteCourseCode ?? ''}: ${p.prerequisiteTitle}`).join(" • ")}>
-                                View details
-                              </span>
-                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedDetailsCourse(course);
+                              }}
+                              className="text-[11px] underline font-normal text-blue-700 dark:text-blue-300 hover:text-blue-900 cursor-pointer"
+                            >
+                              View details
+                            </button>
                           </div>
                           {isElh12 && coreCompletedCount < 11 ? (
                             <p className="text-muted-foreground">Complete 11 Core Courses ({coreCompletedCount}/11 finished) to unlock.</p>
@@ -568,6 +609,17 @@ export default function Courses() {
                               <Info className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
                               <span>{missingRecommendedPrereqs.length > 1 ? `${missingRecommendedPrereqs.length} recommended prerequisites` : "Recommended first"}</span>
                             </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedDetailsCourse(course);
+                              }}
+                              className="text-[11px] underline font-normal text-sky-700 dark:text-sky-300 hover:text-sky-900 cursor-pointer"
+                            >
+                              View details
+                            </button>
                           </div>
                           {missingRecommendedPrereqs.length === 1 ? (
                             <p className="line-clamp-1 font-medium">{missingRecommendedPrereqs[0].prerequisiteCourseCode ? `${missingRecommendedPrereqs[0].prerequisiteCourseCode}: ` : ''}{missingRecommendedPrereqs[0].prerequisiteTitle}</p>
@@ -602,6 +654,177 @@ export default function Courses() {
           )}
         </div>
       </div>
+
+      {/* Accessible Course Details & Prerequisites Dialog */}
+      <Dialog open={!!selectedDetailsCourse} onOpenChange={(open) => { if (!open) setSelectedDetailsCourse(null); }}>
+        {selectedDetailsCourse && (() => {
+          const course = selectedDetailsCourse;
+          const enrollment = enrollmentMap.get(course.id);
+          const isCompleted = enrollment?.status === "completed";
+          const isInProgress = (enrollment?.status as string) === "active" || (enrollment?.status as string) === "in_progress";
+          
+          let isPlanLocked = false;
+          if (companySub) {
+            isPlanLocked = !companySub.entitledCourseIds.includes(course.id) && !isCompleted;
+          }
+
+          const prereqsList: PrerequisiteItem[] = (course as any).prerequisites || [];
+          const missingRequired = prereqsList.filter(p => 
+            p.requirementType === "required" && enrollmentMap.get(p.prerequisiteCourseId)?.status !== "completed"
+          );
+          const isElh12 = (course as any).courseCode === "ELH-12";
+          const coreCompletedCount = Array.from(enrollmentMap.entries()).filter(([_, e]) => e.status === "completed").length;
+          const elh12CoreLocked = isElh12 && coreCompletedCount < 11;
+          const isPrereqLocked = !isCompleted && (missingRequired.length > 0 || elh12CoreLocked);
+
+          let actionText = "Start course";
+          let actionHref = `/courses/${course.id}`;
+          if (isCompleted) {
+            actionText = "Review course";
+            actionHref = enrollment ? `/learn/${enrollment.id}` : `/courses/${course.id}`;
+          } else if (isPlanLocked) {
+            actionText = "View upgrade options";
+            actionHref = `/pricing`;
+          } else if (isInProgress && enrollment) {
+            actionText = "Continue course";
+            actionHref = `/learn/${enrollment.id}`;
+          } else if (isPrereqLocked) {
+            actionText = "Complete prerequisite first";
+            const firstMissing = missingRequired[0];
+            actionHref = firstMissing ? `/courses/${firstMissing.prerequisiteCourseId}` : `/courses/${course.id}`;
+          }
+
+          return (
+            <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl p-6">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-2">
+                  {(course as any).courseCode && (
+                    <span className="bg-primary/10 text-primary font-mono text-xs px-2.5 py-0.5 rounded-md font-semibold">
+                      {(course as any).courseCode}
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" /> {course.durationMinutes} minutes
+                  </span>
+                  <span className="text-xs text-muted-foreground font-medium border-l pl-2">
+                    {course.level}
+                  </span>
+                </div>
+                <DialogTitle className="text-2xl font-bold font-serif">{course.title}</DialogTitle>
+                <DialogDescription className="text-muted-foreground text-sm leading-relaxed">
+                  {course.description}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-5 py-3 border-y my-2">
+                {/* Course Objectives */}
+                {course.learningObjectives && course.learningObjectives.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Learning Objectives</h5>
+                    <ul className="space-y-1.5 text-xs text-foreground">
+                      {(course.learningObjectives as string[]).map((obj, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 mt-0.5" />
+                          <span>{obj}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Prerequisites Section */}
+                <div className="space-y-3">
+                  <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                    <span>Prerequisites</span>
+                    <span className="text-[11px] font-normal normal-case text-muted-foreground">
+                      {prereqsList.length === 0 && !isElh12 ? "None required" : `${prereqsList.length} defined`}
+                    </span>
+                  </h5>
+
+                  {isElh12 && coreCompletedCount < 11 && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-xs space-y-1.5">
+                      <div className="font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                        <Lock className="h-4 w-4 shrink-0 text-amber-600" />
+                        <span>11 Foundation Core Courses Required</span>
+                      </div>
+                      <p className="text-muted-foreground">You have completed {coreCompletedCount}/11 core courses. Complete all 11 foundation modules before attempting the final certification exam.</p>
+                    </div>
+                  )}
+
+                  {prereqsList.length === 0 && !isElh12 ? (
+                    <div className="bg-muted/50 border rounded-xl p-3.5 text-xs text-muted-foreground flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <span>None — you can start this course directly without prerequisites.</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {prereqsList.map((p) => {
+                        const isDone = enrollmentMap.get(p.prerequisiteCourseId)?.status === "completed";
+                        return (
+                          <div
+                            key={p.prerequisiteCourseId}
+                            className={cn(
+                              "flex items-center justify-between p-3 rounded-xl border text-xs transition-colors",
+                              isDone ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-900 dark:text-emerald-200" : "bg-card border-border text-foreground"
+                            )}
+                          >
+                            <div className="space-y-0.5 max-w-[75%]">
+                              <div className="font-semibold flex items-center gap-1.5">
+                                {p.prerequisiteCourseCode && (
+                                  <span className="font-mono text-[11px] text-muted-foreground">{p.prerequisiteCourseCode}:</span>
+                                )}
+                                <span>{p.prerequisiteTitle}</span>
+                              </div>
+                              <span className="text-[11px] text-muted-foreground capitalize">
+                                {p.requirementType === "required" ? "Required prerequisite" : "Recommended preliminary course"}
+                              </span>
+                            </div>
+                            <span className={cn(
+                              "px-2.5 py-1 rounded-md text-[11px] font-semibold border flex items-center gap-1 shrink-0",
+                              isDone ? "bg-emerald-600 text-white border-emerald-700" : "bg-muted text-muted-foreground border-border"
+                            )}>
+                              {isDone ? (
+                                <>
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  <span>Completed</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Lock className="h-3 w-3" />
+                                  <span>Required</span>
+                                </>
+                              )}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={() => setSelectedDetailsCourse(null)}>
+                  Close
+                </Button>
+                <Link href={actionHref} onClick={() => setSelectedDetailsCourse(null)}>
+                  <Button
+                    variant={isCompleted ? "outline" : isPrereqLocked ? "secondary" : "default"}
+                    className={cn(
+                      "font-semibold rounded-xl transition-all",
+                      !isCompleted && !isPrereqLocked && "bg-primary text-primary-foreground hover:bg-primary/90"
+                    )}
+                  >
+                    <span>{actionText}</span>
+                    <ArrowRight className="h-4 w-4 ml-1.5" />
+                  </Button>
+                </Link>
+              </div>
+            </DialogContent>
+          );
+        })()}
+      </Dialog>
     </Layout>
   );
 }
