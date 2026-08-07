@@ -477,6 +477,12 @@ export default function Courses() {
                         <img
                           src={course.thumbnailUrl}
                           alt={course.title}
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (course.courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience") {
+                              target.src = "https://raw.githubusercontent.com/Tioutsy/EcoLearnHub/main/artifacts/ecolearn/public/images/courses/climate-risk-and-workplace-resilience.jpg";
+                            }
+                          }}
                           className={cn(
                             "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105",
                             (isPrereqLocked || isPlanLocked) && "opacity-85 grayscale-[20%]"

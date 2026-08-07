@@ -136,7 +136,17 @@ export default function CourseDetail() {
             <div className="bg-card border rounded-2xl shadow-xl overflow-hidden sticky top-24">
               {course.thumbnailUrl && (
                 <div className="aspect-video relative">
-                  <img src={course.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                  <img 
+                    src={course.thumbnailUrl} 
+                    alt="" 
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (course.courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience") {
+                        target.src = "https://raw.githubusercontent.com/Tioutsy/EcoLearnHub/main/artifacts/ecolearn/public/images/courses/climate-risk-and-workplace-resilience.jpg";
+                      }
+                    }}
+                    className="w-full h-full object-cover" 
+                  />
                   {course.previewVideoUrl && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <Button size="icon" variant="secondary" className="rounded-full w-14 h-14 bg-white/90 text-primary hover:bg-white hover:scale-110 transition-all">
