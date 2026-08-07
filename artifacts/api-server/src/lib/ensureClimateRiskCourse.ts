@@ -432,7 +432,7 @@ export async function ensureClimateRiskCourse(): Promise<void> {
             fullDescription: COURSE_META.fullDescription,
             categoryId: COURSE_META.categoryId,
             durationMinutes: COURSE_META.durationMinutes,
-            level: COURSE_META.level,
+            thumbnailUrl: COURSE_META.thumbnailUrl,
             learningObjectives: COURSE_META.learningObjectives,
             completionMessage: COURSE_META.completionMessage,
             badgeName: COURSE_META.badgeName,
