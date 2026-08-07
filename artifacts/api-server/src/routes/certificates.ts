@@ -8,7 +8,6 @@ import {
   type CertificateData,
 } from "../lib/certificatePdf";
 import { getCompanyAccess, requireCompanyAdmin, sendHttpError } from "../lib/access";
-import { getFrenchCoursePackage } from "../lib/frenchCourseContent";
 
 const router = Router();
 
@@ -35,14 +34,9 @@ function toCertificateData(
     uniqueCode: string;
     issuedAt: Date;
     courseCode?: string | null;
-  },
-  locale: "en" | "fr" = "en"
-): CertificateData {
-  let courseTitle = row.courseName ?? "Sustainability Course";
-  if (locale === "fr" && row.courseCode) {
-    const frPkg = getFrenchCoursePackage(row.courseCode);
-    if (frPkg) courseTitle = frPkg.meta.title;
   }
+): CertificateData {
+  const courseTitle = row.courseName ?? "Sustainability Course";
   return {
     employeeName: row.employeeName ?? "Elevio Learner",
     companyName: row.companyName ?? "Elevio",

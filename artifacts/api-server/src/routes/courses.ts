@@ -19,7 +19,6 @@ import { getCompanyAccess, CompanyAccess } from "../lib/access";
 import { checkCourseEligibility } from "../lib/prerequisites";
 import { getRecommendedNextCourse } from "../lib/recommendationService";
 import { evaluateCourseAccess } from "../lib/courseAccessService";
-import { getFrenchCoursePackage } from "../lib/frenchCourseContent";
 
 const router = Router();
 
@@ -205,13 +204,8 @@ router.get("/", async (req, res): Promise<void> => {
     const coursePrereqs = prereqsMap.get(c.id) || [];
     const entitlement = planEntitlementMap.get(c.id) || { requiredPlanCode: "COMPLETE", requiredPlanName: "Complete" };
 
-    const frPkg = isFrench && c.courseCode ? getFrenchCoursePackage(c.courseCode) : undefined;
-
     return {
       ...c,
-      title: frPkg?.meta.title || c.title,
-      description: frPkg?.meta.description || c.description,
-      learningObjectives: frPkg?.meta.learningObjectives || c.learningObjectives,
       categoryName: primaryCat?.categoryName || c.categoryName || "General Sustainability",
       primaryCategory: primaryCat,
       categoryAssignments: assignedCats,
@@ -336,8 +330,6 @@ router.get("/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const frPkg = isFrench && course.courseCode ? getFrenchCoursePackage(course.courseCode) : undefined;
-
   const lessons = await db
     .select()
     .from(lessonsTable)
@@ -347,32 +339,15 @@ router.get("/:id", async (req, res): Promise<void> => {
   const accessDecision = await evaluateCourseAccess(id, accessContext);
 
   let safeLessons = lessons.map((l) => {
-    const lessonTr = frPkg?.lessons[l.orderIndex];
     return {
       ...l,
-      title: lessonTr?.title || l.title,
-      content: lessonTr?.content || l.content,
-      contentBlocks: lessonTr?.blocks || l.contentBlocks,
+      contentBlocks: accessDecision.canAccessContent ? l.contentBlocks : [],
+      content: accessDecision.canAccessContent ? l.content : undefined,
     };
   });
 
-  if (!accessDecision.allowed && accessContext?.role !== "platform_admin") {
-    safeLessons = safeLessons.map((l) => ({
-      ...l,
-      content: null,
-      contentBlocks: [],
-    }));
-  }
-
   res.json({
     ...course,
-    title: frPkg?.meta.title || course.title,
-    description: frPkg?.meta.description || course.description,
-    fullDescription: frPkg?.meta.fullDescription || course.fullDescription,
-    learningObjectives: frPkg?.meta.learningObjectives || course.learningObjectives,
-    badgeName: frPkg?.meta.badgeName || course.badgeName,
-    badgeDescription: frPkg?.meta.badgeDescription || course.badgeDescription,
-    completionMessage: frPkg?.meta.completionMessage || course.completionMessage,
     priceUsd: parseFloat(course.priceUsd),
     rating: course.rating ? parseFloat(course.rating) : null,
     lessons: safeLessons,

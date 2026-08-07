@@ -15,67 +15,7 @@ import { SubmitQuizBody } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
 import { getCompanyAccess, sendHttpError } from "../lib/access";
 import { syncEmployeeLearningStats } from "../lib/lmsData";
-import { awardCourseBadge, evaluateCourseMilestones } from "../lib/achievementsService";
-
-import { getFrenchCoursePackage } from "../lib/frenchCourseContent";
-
-const router = Router();
-
-router.get("/:courseId/quiz", async (req, res): Promise<void> => {
-  const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
-  const isFrench = rawLocale.toLowerCase().startsWith("fr");
-
-  const raw = Array.isArray(req.params.courseId) ? req.params.courseId[0] : req.params.courseId;
-  const courseId = parseInt(raw, 10);
-  if (isNaN(courseId)) {
-    res.status(400).json({ error: "Invalid courseId" });
-    return;
-  }
-
-  const [course] = await db
-    .select({ isPublished: coursesTable.isPublished, courseCode: coursesTable.courseCode })
-    .from(coursesTable)
-    .where(eq(coursesTable.id, courseId));
-
-  if (!course) {
-    res.status(404).json({ error: "Course not found" });
-    return;
-  }
-
-  let accessContext = null;
-  try {
-    accessContext = await getCompanyAccess(req);
-  } catch (e) {
-    // Ignore auth errors for guest/learner accesses
-  }
-
-  const isPlatformAdmin = accessContext?.role === "platform_admin";
-  if (!course.isPublished && !isPlatformAdmin) {
-    res.status(403).json({ error: "Cannot access quiz for an unpublished course" });
-    return;
-  }
-
-  const { evaluateCourseAccess } = await import("../lib/courseAccessService");
-  const accessDecision = await evaluateCourseAccess(courseId, accessContext);
-  if (!accessDecision.allowed) {
-    res.status(403).json({
-      error: accessDecision.reason === "PREREQUISITE_REQUIRED" ? "PREREQUISITES_INCOMPLETE" : accessDecision.reason,
-      message: accessDecision.reason === "PLAN_UPGRADE_REQUIRED"
-        ? `Quiz is restricted. This course requires the ${accessDecision.requiredPlanName} plan.`
-        : accessDecision.reason === "PREREQUISITE_REQUIRED"
-        ? "You must complete all prerequisite courses before accessing this quiz."
-        : "Access denied.",
-      requiredPlanCode: accessDecision.requiredPlanCode,
-      requiredPlanName: accessDecision.requiredPlanName,
-      missingPrerequisiteCourseIds: accessDecision.missingPrerequisiteCourseIds,
-      prerequisites: accessDecision.prerequisiteDetails,
-    });
-    return;
-  }
-
-  const frPkg = isFrench && course.courseCode ? getFrenchCoursePackage(course.courseCode) : undefined;
-
-  const rawQuestions = await db
+  const questions = await db
     .select({
       id: quizQuestionsTable.id,
       question: quizQuestionsTable.question,
@@ -89,19 +29,6 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
     .from(quizQuestionsTable)
     .where(eq(quizQuestionsTable.courseId, courseId))
     .orderBy(quizQuestionsTable.orderIndex);
-
-  const questions = rawQuestions.map((q) => {
-    const qTr = frPkg?.quizQuestions[q.orderIndex];
-    return {
-      id: q.id,
-      question: qTr?.question || q.question,
-      options: qTr?.options || q.options,
-      correctExplanation: qTr?.correctExplanation || q.correctExplanation,
-      incorrectExplanation: qTr?.incorrectExplanation || q.incorrectExplanation,
-      optionFeedback: qTr?.optionFeedback || q.optionFeedback,
-      practicalTakeaway: qTr?.practicalTakeaway || q.practicalTakeaway,
-    };
-  });
 
   res.json({ courseId, questions });
 });
