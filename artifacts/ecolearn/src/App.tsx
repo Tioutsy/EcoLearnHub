@@ -5,6 +5,7 @@ import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wo
 import { QueryClientProvider, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { LanguageProvider } from "@/context/LanguageContext";
 import {
   setBaseUrl,
   setAuthTokenGetter,
@@ -59,22 +60,15 @@ import PlatformAdminSubscriptions from "@/pages/platform-admin/subscriptions";
 
 const queryClient = new QueryClient();
 
-const clerkPubKey = publishableKeyFromHost(
-  window.location.hostname,
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
-);
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_cHJvbW90ZWQtY2l2ZXQtMTMuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+const basePath = (import.meta.env.BASE_URL || "").replace(/\/$/, "");
 
 function stripBase(path: string): string {
   return basePath && path.startsWith(basePath)
     ? path.slice(basePath.length) || "/"
     : path;
-}
-
-if (!clerkPubKey) {
-  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
 }
 
 const clerkAppearance = {
@@ -288,9 +282,10 @@ function ClerkProviderWithRoutes() {
           </Switch>
           <Toaster />
         </TooltipProvider>
+      </LanguageProvider>
     </ClerkApiTokenBridge>
-</QueryClientProvider>
-    </ClerkProvider>
+  </QueryClientProvider>
+</ClerkProvider>
   );
 }
 
