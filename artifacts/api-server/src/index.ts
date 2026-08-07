@@ -63,81 +63,85 @@ import { ensureSchemaModifications } from "./lib/ensureSchemaModifications";
 import { verifyDatabaseIntegrity } from "./lib/verifyDatabaseIntegrity";
 
 async function start(): Promise<void> {
-  // Ensure any schema modifications that were missed by the remote migration runner are applied
-  await ensureSchemaModifications();
-
-  // Run database schema integrity verification
-  const report = await verifyDatabaseIntegrity();
-  if (!report.valid) {
-    logger.error({ issues: report.issues }, "Database schema verification failed. Startup aborted.");
-    process.exit(1);
-  }
-
-  if (report.issues.length === 0) {
-    logger.info("Database schema verification completed successfully.");
-  } else {
-    logger.info("Database schema is current. No modifications required.");
-  }
-
-  // Synchronize auto-increment sequences with actual table data
-  await syncSequences();
-
-  // Seed plans if table is empty
-  await ensurePlans();
-
-  // Seed default company if none exists
-  await ensureDefaultCompany();
-
-  // Seed challenges
-  await ensureChallenges();
-
-  // Seed achievement definitions
-  await ensureAchievementDefinitions();
-
-  // Ensure required course content exists before accepting traffic so the first
-  // requests after a deploy deterministically see the seeded course.
-  await ensureFoundationsCourse();
-  await ensureWasteSortingCourse();
-  await ensureEnergyEfficiencyCourse();
-  await ensureWaterConservationCourse();
-  await ensureSustainableProcurementCourse();
-  await ensureGreenOfficePracticesCourse();
-  await ensureCarbonFootprintCourse();
-  await ensureBiodiversityCourse();
-  await ensureEsgBasicsCourse();
-  await ensureEnvironmentalComplianceCourse();
-  await ensureCircularEconomyCourse();
-  await seedInitialSectors();
-  await ensureCatalogueSkeletons();
-  await ensureFinalSustainabilityCertificationCourse();
-  await ensureActionPlanningCourse();
-  await ensureDepartmentalSustainabilityGoalsCourse();
-  await ensureWorkplaceSustainabilityTeamCourse();
-  await ensureCommunicatingSustainabilityAtWorkCourse();
-  await ensureTrackingSustainabilityActionsCourse();
-  await ensureSustainabilityDataCollectionCourse();
-  await ensureSustainabilityPerformanceReviewCourse();
-  await ensureSustainabilityRolesAccountabilityCourse();
-  await ensureEmployeeSustainabilityEngagementCourse();
-  await ensureEffectiveGreenTeamsCourse();
-  await ensureWorkplaceSustainabilityInitiativesCourse();
-  await ensureSustainabilityForHrTeamsCourse();
-  await ensureSustainabilityForFinanceTeamsCourse();
-  await ensureSustainabilityForProcurementAndPurchasingTeamsCourse();
-  await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
-  await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
-  await ensureSustainabilityForSalesAndMarketingTeamsCourse();
-  await ensureClimateRiskCourse();
-  await ensureAppliedCourseBadges();
-  await ensureCoreSustainabilityPath();
-  await ensureCategoriesAndAssignments();
-  await ensureHybridSubscriptions();
-  await ensureInsightsMigrated();
-
-
+  // Start HTTP listener immediately so Render health checks pass during startup database tasks
   const server = app.listen(port, "0.0.0.0", () => {
     logger.info({ port }, "Server listening on 0.0.0.0");
   });
+
+  try {
+    // Ensure any schema modifications that were missed by the remote migration runner are applied
+    await ensureSchemaModifications();
+
+    // Run database schema integrity verification
+    const report = await verifyDatabaseIntegrity();
+    if (!report.valid) {
+      logger.error({ issues: report.issues }, "Database schema verification failed. Startup aborted.");
+      process.exit(1);
+    }
+
+    if (report.issues.length === 0) {
+      logger.info("Database schema verification completed successfully.");
+    } else {
+      logger.info("Database schema is current. No modifications required.");
+    }
+
+    // Synchronize auto-increment sequences with actual table data
+    await syncSequences();
+
+    // Seed plans if table is empty
+    await ensurePlans();
+
+    // Seed default company if none exists
+    await ensureDefaultCompany();
+
+    // Seed challenges
+    await ensureChallenges();
+
+    // Seed achievement definitions
+    await ensureAchievementDefinitions();
+
+    // Ensure required course content exists
+    await ensureFoundationsCourse();
+    await ensureWasteSortingCourse();
+    await ensureEnergyEfficiencyCourse();
+    await ensureWaterConservationCourse();
+    await ensureSustainableProcurementCourse();
+    await ensureGreenOfficePracticesCourse();
+    await ensureCarbonFootprintCourse();
+    await ensureBiodiversityCourse();
+    await ensureEsgBasicsCourse();
+    await ensureEnvironmentalComplianceCourse();
+    await ensureCircularEconomyCourse();
+    await seedInitialSectors();
+    await ensureCatalogueSkeletons();
+    await ensureFinalSustainabilityCertificationCourse();
+    await ensureActionPlanningCourse();
+    await ensureDepartmentalSustainabilityGoalsCourse();
+    await ensureWorkplaceSustainabilityTeamCourse();
+    await ensureCommunicatingSustainabilityAtWorkCourse();
+    await ensureTrackingSustainabilityActionsCourse();
+    await ensureSustainabilityDataCollectionCourse();
+    await ensureSustainabilityPerformanceReviewCourse();
+    await ensureSustainabilityRolesAccountabilityCourse();
+    await ensureEmployeeSustainabilityEngagementCourse();
+    await ensureEffectiveGreenTeamsCourse();
+    await ensureWorkplaceSustainabilityInitiativesCourse();
+    await ensureSustainabilityForHrTeamsCourse();
+    await ensureSustainabilityForFinanceTeamsCourse();
+    await ensureSustainabilityForProcurementAndPurchasingTeamsCourse();
+    await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
+    await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
+    await ensureSustainabilityForSalesAndMarketingTeamsCourse();
+    await ensureClimateRiskCourse();
+    await ensureAppliedCourseBadges();
+    await ensureCoreSustainabilityPath();
+    await ensureCategoriesAndAssignments();
+    await ensureHybridSubscriptions();
+    await ensureInsightsMigrated();
+    logger.info("Database initialization and course seeding completed.");
+  } catch (err) {
+    logger.error({ err }, "Error during background database seeding sequence");
+  }
 
   server.on("error", (err) => {
     logger.error({ err }, "Error listening on port");
