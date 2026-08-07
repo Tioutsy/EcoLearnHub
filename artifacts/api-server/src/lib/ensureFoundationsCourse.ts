@@ -280,18 +280,18 @@ const NEW_QUIZ = [
     order: 0,
     question: "Which of the following best describes what sustainability means in a daily workplace context?",
     options: [
-      "Using resource-saving practices that ensure our actions today do not compromise the resources available for future generations.",
       "Stopping all business operations and paper use completely, regardless of operational impacts.",
       "Focusing exclusively on recycling office waste while ignoring other resource uses.",
+      "Using resource-saving practices that ensure our actions today do not compromise the resources available for future generations.",
       "Applying theories only when mandated by external government inspectors."
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Correct! Sustainability balances current resource use with future needs.",
     incorrectExplanation: "Incorrect. The main idea of sustainability is balancing current and future needs.",
     optionFeedback: [
-      "Correct. This represents balanced, practical resource stewardship.",
       "Incorrect. Halting operations is not viable; sustainability is about responsible efficiency.",
       "Incorrect. Recycling is only one small part; preventing waste and saving energy are equally important.",
+      "Correct. This represents balanced, practical resource stewardship.",
       "Incorrect. Sustainability is a proactive cultural practice, not just compliance."
     ]
   },
@@ -338,18 +338,18 @@ const NEW_QUIZ = [
     question: "During a busy day, you notice that a faucet in the restrooms is running continuously due to a faulty valve. What is the most appropriate first action?",
     options: [
       "Leave it alone, as minor leaks do not affect company resources or island supply.",
-      "Close the isolation valve underneath if possible, report the leak to maintenance immediately, and notify your team.",
       "Place a bucket under the leak and check it at the end of your weekly shift.",
-      "Wait for a platform administrator or external inspector to log the issue."
+      "Wait for a platform administrator or external inspector to log the issue.",
+      "Close the isolation valve underneath if possible, report the leak to maintenance immediately, and notify your team."
     ],
-    correct: 1,
+    correct: 3,
     correctExplanation: "Correct! Taking immediate action to stop or report a leak prevents significant water waste, which is crucial for Mauritian water security.",
     incorrectExplanation: "Incorrect. Prompt reporting and isolating the leak is the most responsible response.",
     optionFeedback: [
       "Incorrect. A dripping tap or running faucet can waste thousands of liters of fresh water weekly.",
-      "Correct. This minimizes active waste and ensures a permanent repair is scheduled.",
       "Incorrect. Buckets fill quickly; a week is too long to leave a running leak unresolved.",
-      "Incorrect. Maintenance is everyone's responsibility, not just administrators."
+      "Incorrect. Maintenance is everyone's responsibility, not just administrators.",
+      "Correct. This minimizes active waste and ensures a permanent repair is scheduled."
     ]
   },
   {
