@@ -473,15 +473,15 @@ export default function Courses() {
                   )}>
                     {/* Thumbnail Header */}
                     <div className="relative aspect-video overflow-hidden bg-muted">
-                      {course.thumbnailUrl ? (
+                      {(course.thumbnailUrl || (course as any).courseCode === "ELH-30") ? (
                         <img
-                          src={course.thumbnailUrl}
+                          src={((course as any).courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience")
+                            ? "/images/courses/climate-risk-and-workplace-resilience.jpg"
+                            : course.thumbnailUrl}
                           alt={course.title}
                           onError={(e) => {
                             const target = e.currentTarget;
-                            if (course.courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience") {
-                              target.src = "https://raw.githubusercontent.com/Tioutsy/EcoLearnHub/main/artifacts/ecolearn/public/images/courses/climate-risk-and-workplace-resilience.jpg";
-                            }
+                            target.src = "https://raw.githubusercontent.com/Tioutsy/EcoLearnHub/main/artifacts/ecolearn/public/images/courses/climate-risk-and-workplace-resilience.jpg";
                           }}
                           className={cn(
                             "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105",

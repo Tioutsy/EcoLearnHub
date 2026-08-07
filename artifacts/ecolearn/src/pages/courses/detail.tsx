@@ -134,16 +134,16 @@ export default function CourseDetail() {
             </div>
             
             <div className="bg-card border rounded-2xl shadow-xl overflow-hidden sticky top-24">
-              {course.thumbnailUrl && (
+              {(course.thumbnailUrl || (course as any).courseCode === "ELH-30") && (
                 <div className="aspect-video relative">
                   <img 
-                    src={course.thumbnailUrl} 
+                    src={((course as any).courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience")
+                      ? "/images/courses/climate-risk-and-workplace-resilience.jpg"
+                      : course.thumbnailUrl} 
                     alt="" 
                     onError={(e) => {
                       const target = e.currentTarget;
-                      if (course.courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience") {
-                        target.src = "https://raw.githubusercontent.com/Tioutsy/EcoLearnHub/main/artifacts/ecolearn/public/images/courses/climate-risk-and-workplace-resilience.jpg";
-                      }
+                      target.src = "https://raw.githubusercontent.com/Tioutsy/EcoLearnHub/main/artifacts/ecolearn/public/images/courses/climate-risk-and-workplace-resilience.jpg";
                     }}
                     className="w-full h-full object-cover" 
                   />
