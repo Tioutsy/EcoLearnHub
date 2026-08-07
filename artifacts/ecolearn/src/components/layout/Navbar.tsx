@@ -6,7 +6,6 @@ import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as Rou
 import { cn } from "@/lib/utils";
 import { isPlatformAdmin, isCompanyAdmin, getUserRoleLabel } from "@/lib/authHelpers";
 import { Badge } from "@/components/ui/badge";
-import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 
 export function Navbar() {
@@ -94,7 +93,6 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3 border-l pl-4 ml-2">
-            <LanguageSelector />
             {isSignedIn ? (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="hidden sm:inline-flex text-xs bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
@@ -159,10 +157,6 @@ export function Navbar() {
             ))}
 
             <div className="pt-4 border-t flex flex-col gap-3">
-              <div className="flex items-center justify-between px-2">
-                <span className="text-xs font-semibold text-muted-foreground uppercase">Language / Langue</span>
-                <LanguageSelector />
-              </div>
               {isSignedIn ? (
                 <div className="flex items-center gap-2 p-2">
                   <UserButton />
