@@ -629,13 +629,27 @@ export default function Courses() {
                         </div>
                       )}
 
-                      {/* Primary Action Button */}
-                      <div className="pt-3 border-t">
-                        <Link href={actionHref}>
+                      {/* Action Buttons Area (Sprint 11K) */}
+                      <div className="pt-3 border-t flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setSelectedDetailsCourse(course);
+                          }}
+                          className="font-medium rounded-xl text-xs px-3 h-9 shrink-0 border-border text-foreground hover:bg-muted"
+                          aria-label={`View details for ${course.title}`}
+                        >
+                          <span>View details</span>
+                        </Button>
+                        <Link href={actionHref} className="flex-1">
                           <Button
                             variant={isCompleted ? "outline" : isPlanLocked ? "secondary" : isPrereqLocked ? "secondary" : "default"}
                             className={cn(
-                              "w-full justify-between font-medium rounded-xl text-sm transition-all",
+                              "w-full justify-between font-medium rounded-xl text-sm h-9 transition-all",
                               isPlanLocked && "bg-purple-700 text-white hover:bg-purple-800 shadow-sm",
                               !isPlanLocked && isPrereqLocked && "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
                               !isCompleted && !isPlanLocked && !isPrereqLocked && "bg-primary text-primary-foreground hover:bg-primary/90"
