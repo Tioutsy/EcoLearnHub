@@ -265,6 +265,31 @@ const CATALOGUE_COURSES = [
     ]
   },
   {
+    code: "ELH-30",
+    slug: "climate-risk-and-workplace-resilience",
+    title: "Climate Risk & Workplace Resilience",
+    level: "advanced",
+    estimatedMinutes: 18,
+    shortDescription: "Shows how climate hazards affect operations, distinguishes mitigation from adaptation, and maps workplace vulnerabilities to build operational resilience.",
+    aim: "Help employees and managers recognise climate-related operational risks, protect assets and people, and support business continuity.",
+    learningObjectives: [
+      "Distinguish climate mitigation from climate adaptation.",
+      "Map risks using the Hazard → Exposure → Vulnerability → Consequence sequence.",
+      "Inspect 8 core operational areas for workplace resilience.",
+      "Apply the 5-step STOP–CHECK–PROTECT–REPORT–ESCALATE protocol safely."
+    ],
+    badgeName: "Workplace Climate Resilience",
+    badgeDescription: "Awarded for completing the Climate Risk & Workplace Resilience course.",
+    lessons: [
+      "Opening Workplace Hook: The Heavy Rainfall Warning",
+      "Understanding Mitigation vs Adaptation",
+      "Mapping Vulnerability: Hazard to Consequence",
+      "The 8 Core Operational Resilience Areas",
+      "Action Protocol & Sector Scenarios",
+      "Knowledge check, commitment and completion"
+    ]
+  },
+  {
     code: "ELH-11",
     slug: "circular-economy",
     title: "Circular Economy",

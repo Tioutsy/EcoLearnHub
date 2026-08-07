@@ -258,7 +258,7 @@ export async function ensureHybridSubscriptions(): Promise<void> {
 
       // Professional Plan: Essential + Action + Department
       const isAction = (code >= "ELH-13" && code <= "ELH-23") || course.categoryId === actionCategory?.id;
-      const isDepartment = (code >= "ELH-24" && code <= "ELH-29") || course.categoryId === departmentCategory?.id;
+      const isDepartment = (code >= "ELH-24" && code <= "ELH-30") || course.categoryId === departmentCategory?.id;
       if (isCore || isAction || isDepartment) {
         await upsertCourseEntitlement(professionalPlanId, course.id);
       }

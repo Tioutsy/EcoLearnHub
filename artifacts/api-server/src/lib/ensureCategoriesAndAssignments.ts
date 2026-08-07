@@ -62,7 +62,7 @@ const ACTION_CODES = [
 ];
 
 const DEPARTMENT_CODES = [
-  "ELH-24", "ELH-25", "ELH-26", "ELH-27", "ELH-28", "ELH-29"
+  "ELH-24", "ELH-25", "ELH-26", "ELH-27", "ELH-28", "ELH-29", "ELH-30"
 ];
 
 const LEADERSHIP_CODES = [

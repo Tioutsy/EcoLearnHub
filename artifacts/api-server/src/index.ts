@@ -10,6 +10,7 @@ import { ensureCarbonFootprintCourse } from "./lib/ensureCarbonFootprintCourse";
 import { ensureBiodiversityCourse } from "./lib/ensureBiodiversityCourse";
 import { ensureEsgBasicsCourse } from "./lib/ensureEsgBasicsCourse";
 import { ensureEnvironmentalComplianceCourse } from "./lib/ensureEnvironmentalComplianceCourse";
+import { ensureClimateRiskCourse } from "./lib/ensureClimateRiskCourse";
 import { ensureCircularEconomyCourse } from "./lib/ensureCircularEconomyCourse";
 import { ensureFinalSustainabilityCertificationCourse } from "./lib/ensureFinalSustainabilityCertificationCourse";
 import { ensureActionPlanningCourse } from "./lib/ensureActionPlanningCourse";
@@ -126,6 +127,7 @@ async function start(): Promise<void> {
   await ensureSustainabilityForOperationsAndFrontlineTeamsCourse();
   await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
   await ensureSustainabilityForSalesAndMarketingTeamsCourse();
+  await ensureClimateRiskCourse();
   await ensureAppliedCourseBadges();
   await ensureCoreSustainabilityPath();
   await ensureCategoriesAndAssignments();

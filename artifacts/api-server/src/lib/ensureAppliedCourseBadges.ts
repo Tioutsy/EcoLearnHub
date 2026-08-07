@@ -134,6 +134,13 @@ export const APPLIED_COURSE_BADGES: CourseBadgeMetadata[] = [
     badgeName: "Frontline Operations Specialist",
     badgeDescription: "Awarded for implementing daily sustainable operational procedures and resource reduction on the frontline.",
   },
+  {
+    courseCode: "ELH-30",
+    slug: "climate-risk-and-workplace-resilience",
+    badgeSlug: "workplace-climate-resilience",
+    badgeName: "Workplace Climate Resilience Practitioner",
+    badgeDescription: "Awarded for demonstrating practical understanding of workplace climate risk assessment and business resilience protocols.",
+  },
 ];
 
 export async function ensureAppliedCourseBadges(): Promise<void> {
