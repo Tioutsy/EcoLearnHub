@@ -130,7 +130,7 @@ export default function Pricing() {
           <label className="text-sm font-bold text-foreground uppercase tracking-wider block">
             {t("pricing.step1")}
           </label>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 bg-muted/60 p-2 rounded-2xl border">
             {(bands.length > 0 ? bands : [
               { code: "UP_TO_25", label: "Up to 25" },
@@ -218,15 +218,15 @@ export default function Pricing() {
 
             <div className="pt-8">
               {!isOver120 ? (
-                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90">
+                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
                   <Link href={isSignedIn ? `/company/subscribe?planCode=ESSENTIAL&bandCode=${selectedBandCode}` : `/sign-up?redirect_url=/company/subscribe?planCode=ESSENTIAL&bandCode=${selectedBandCode}`}>
-                    Choose Essential
+                    Get Started — Essential
                   </Link>
                 </Button>
               ) : (
                 <LeadCaptureDialog
                   interest="proposal"
-                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us</Button>}
+                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us for an organisation plan</Button>}
                 />
               )}
             </div>
@@ -293,13 +293,13 @@ export default function Pricing() {
               {!isOver120 ? (
                 <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
                   <Link href={isSignedIn ? `/company/subscribe?planCode=PROFESSIONAL&bandCode=${selectedBandCode}` : `/sign-up?redirect_url=/company/subscribe?planCode=PROFESSIONAL&bandCode=${selectedBandCode}`}>
-                    Choose Professional
+                    Get Started — Professional
                   </Link>
                 </Button>
               ) : (
                 <LeadCaptureDialog
                   interest="proposal"
-                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us</Button>}
+                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us for an organisation plan</Button>}
                 />
               )}
             </div>
@@ -360,15 +360,15 @@ export default function Pricing() {
 
             <div className="pt-8">
               {!isOver120 ? (
-                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
                   <Link href={isSignedIn ? `/company/subscribe?planCode=COMPLETE&bandCode=${selectedBandCode}` : `/sign-up?redirect_url=/company/subscribe?planCode=COMPLETE&bandCode=${selectedBandCode}`}>
-                    Choose Complete
+                    Get Started — Complete
                   </Link>
                 </Button>
               ) : (
                 <LeadCaptureDialog
                   interest="proposal"
-                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us</Button>}
+                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us for an organisation plan</Button>}
                 />
               )}
             </div>

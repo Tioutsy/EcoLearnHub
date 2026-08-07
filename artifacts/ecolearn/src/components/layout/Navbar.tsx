@@ -52,7 +52,7 @@ export function Navbar() {
               <Leaf className="h-5 w-5" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-lg font-extrabold tracking-wider text-emerald-950 dark:text-emerald-50 font-sans uppercase">
+              <span className="text-lg font-bold tracking-wider text-emerald-950 dark:text-emerald-50 font-serif uppercase">
                 ELEVIO SKILLS
               </span>
               <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 tracking-tight mt-0.5">

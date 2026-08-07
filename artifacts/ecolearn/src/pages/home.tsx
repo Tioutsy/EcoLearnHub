@@ -242,29 +242,18 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-secondary" />
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-        
+      <section className="py-24 relative overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white">
         <div className="container relative mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold font-serif text-white mb-6">
-            Ready to demonstrate your sustainability?
+            Ready to build practical sustainability skills?
           </h2>
-          <p className="text-secondary-foreground/80 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-            Join Mauritian companies who train their teams, track engagement, and certify ESG readiness with reporting their stakeholders can trust.
+          <p className="text-emerald-100/90 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            Train your team, track progress and maintain clear sustainability learning records — all in one place.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild className="bg-white text-secondary hover:bg-white/90 h-12 px-8 text-base">
+          <div className="flex justify-center">
+            <Button size="lg" asChild className="bg-white text-emerald-950 hover:bg-emerald-50 h-12 px-8 text-base font-semibold rounded-xl shadow-lg transition-all">
               <Link href="/pricing">View Corporate Plans</Link>
             </Button>
-            <LeadCaptureDialog
-              interest="proposal"
-              trigger={
-                <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 h-12 px-8 text-base">
-                  Request a Proposal
-                </Button>
-              }
-            />
           </div>
         </div>
       </section>
