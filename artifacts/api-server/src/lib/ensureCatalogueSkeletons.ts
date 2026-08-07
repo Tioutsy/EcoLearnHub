@@ -280,6 +280,7 @@ const CATALOGUE_COURSES = [
     ],
     badgeName: "Workplace Climate Resilience",
     badgeDescription: "Awarded for completing the Climate Risk & Workplace Resilience course.",
+    thumbnailUrl: "/images/courses/climate-risk-and-workplace-resilience.jpg",
     lessons: [
       "Opening Workplace Hook: The Heavy Rainfall Warning",
       "Understanding Mitigation vs Adaptation",
@@ -413,7 +414,8 @@ export async function ensureCatalogueSkeletons(): Promise<void> {
               status: "draft", // Draft status (Safeguard 8)
               learningObjectives: targetCourse.learningObjectives,
               badgeName: targetCourse.badgeName,
-              badgeDescription: targetCourse.badgeDescription
+              badgeDescription: targetCourse.badgeDescription,
+              thumbnailUrl: (targetCourse as any).thumbnailUrl || null
             })
             .returning({ id: coursesTable.id });
 

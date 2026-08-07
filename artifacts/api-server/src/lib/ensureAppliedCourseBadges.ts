@@ -155,12 +155,13 @@ export async function ensureAppliedCourseBadges(): Promise<void> {
 
     if (!course) continue;
 
-    // 1. Update coursesTable badgeName and badgeDescription
+    // 1. Update coursesTable badgeName, badgeDescription and thumbnailUrl
     await db
       .update(coursesTable)
       .set({
         badgeName: item.badgeName,
         badgeDescription: item.badgeDescription,
+        thumbnailUrl: item.courseCode === "ELH-30" ? "/images/courses/climate-risk-and-workplace-resilience.jpg" : undefined,
       })
       .where(eq(coursesTable.id, course.id));
 
