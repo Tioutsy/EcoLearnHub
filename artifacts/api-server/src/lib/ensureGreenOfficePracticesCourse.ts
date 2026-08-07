@@ -253,12 +253,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "What is the primary objective of practicing green office routines?",
     options: [
-      "Building effortless daily habits in shared spaces, meetings, and document workflows that eliminate waste without compromising productivity",
       "Banning all paper printing and electrical devices in commercial offices",
       "Policing colleagues and publicly reporting personal errors",
+      "Building effortless daily habits in shared spaces, meetings, and document workflows that eliminate waste without compromising productivity",
       "Switching off central IT server infrastructure every weekend"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Green office practices focus on building seamless, shared daily habits that eliminate waste while maintaining productivity.",
     incorrectExplanation: "Incorrect. Green office practices create efficient daily habits without policing colleagues or risking IT operations."
   },
@@ -279,12 +279,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "Which piece of office equipment must NEVER be powered down or unplugged by general employees during end-of-day shut-down routines?",
     options: [
-      "Central IT server racks, network cabinets, and building security systems",
       "Individual desktop workstation computer monitors",
+      "Central IT server racks, network cabinets, and building security systems",
       "Desk lamps in unoccupied private offices",
       "Presentation display screens in empty meeting rooms"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Server racks and network cabinets maintain business systems and data security—never switch them off.",
     incorrectExplanation: "Incorrect. Server racks and IT infrastructure must remain powered continuously."
   },
@@ -292,12 +292,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "What is a key principle of lower-waste meeting planning?",
     options: [
-      "Confirming attendee numbers before ordering catering and sharing digital documents in advance",
       "Printing 50 extra paper packs for unconfirmed guests",
       "Leaving presentation screens powered on 24 hours before the meeting",
-      "Ordering individual plastic bottled drinks for every internal participant"
+      "Ordering individual plastic bottled drinks for every internal participant",
+      "Confirming attendee numbers before ordering catering and sharing digital documents in advance"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Confirming attendance and sharing digital agendas prevents unnecessary paper and catering waste.",
     incorrectExplanation: "Incorrect. Confirming attendance and sharing digital links eliminates meeting waste."
   },
@@ -305,12 +305,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "What is the most effective way to encourage sustainable habits among office colleagues?",
     options: [
-      "Model good habits yourself and suggest process improvements constructively during team meetings",
       "Publicly confront and shame colleagues who leave lights on",
+      "Model good habits yourself and suggest process improvements constructively during team meetings",
       "Hide shared office stationery so colleagues cannot use it",
       "Report minor personal habits to senior management immediately"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Modeling positive habits and making constructive process suggestions builds a collaborative, lasting culture.",
     incorrectExplanation: "Incorrect. Constructive suggestions and leading by example build a positive workplace culture."
   }

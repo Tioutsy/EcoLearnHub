@@ -224,12 +224,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "Which operational item represents valid Social (S) pillar evidence for a Mauritian business?",
     options: [
-      "Signed attendance logs for employee health, safety, and first-aid training",
       "A CEB utility bill for facility electricity consumption",
       "A board-approved anti-bribery and corruption policy document",
+      "Signed attendance logs for employee health, safety, and first-aid training",
       "A marketing poster advertising organic fruit in the canteen"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Staff safety and health training records represent direct Social (S) pillar evidence.",
     incorrectExplanation: "Incorrect. Safety training records represent Social pillar evidence."
   },
@@ -250,12 +250,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "What is the primary risk of publishing absolute marketing claims like '100% Eco-Friendly & Zero Impact' without verified evidence?",
     options: [
-      "It exposes the company to greenwashing liability, client tender disqualification, and reputational damage",
       "It automatically increases company tax rates by 50%",
+      "It exposes the company to greenwashing liability, client tender disqualification, and reputational damage",
       "It prevents employees from receiving safety certificates",
       "It causes office computers to run slower"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Unverified absolute claims mislead clients and create major legal and reputational greenwashing risks.",
     incorrectExplanation: "Incorrect. Unverified green claims expose the firm to greenwashing liabilities."
   },
@@ -263,12 +263,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "A client tender asks for water recycling volume data, but facility flow meters were broken for two months. What should the team do?",
     options: [
-      "Provide verified data for active months, declare the two-month meter gap honestly, and explain repair steps taken",
       "Invent guessed figures for the missing months to make the spreadsheet look complete",
       "Copy water data from a neighboring hotel and present it as own data",
-      "Refuse to submit the tender and delete all water bills"
+      "Refuse to submit the tender and delete all water bills",
+      "Provide verified data for active months, declare the two-month meter gap honestly, and explain repair steps taken"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Honest disclosure of data gaps with verified records maintains credibility; guessing data violates governance.",
     incorrectExplanation: "Incorrect. Always declare data gaps honestly with verified evidence."
   },
@@ -276,12 +276,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "What is the final step in the Check–Record–Report–Confirm protocol before submitting ESG disclosure data to an external client?",
     options: [
-      "Obtain formal review and authorization from the designated manager or compliance lead",
       "Post the draft data on personal social media accounts for public feedback",
+      "Obtain formal review and authorization from the designated manager or compliance lead",
       "Delete all supporting utility bills to keep files small",
       "Change the company logo to bright green"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Confirming requires obtaining formal management review and authorization before external release.",
     incorrectExplanation: "Incorrect. Confirming requires formal management review and authorization."
   }

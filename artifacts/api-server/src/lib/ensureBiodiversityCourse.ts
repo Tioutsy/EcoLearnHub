@@ -231,12 +231,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "What is the difference between a native species and an endemic species in Mauritius?",
     options: [
-      "Native species arrived in Mauritius naturally without human aid; endemic species are native species found ONLY in Mauritius and nowhere else on Earth",
       "Native species are imported garden plants; endemic species are wild farm animals",
       "Native species only live in lagoons; endemic species only live in urban offices",
+      "Native species arrived in Mauritius naturally without human aid; endemic species are native species found ONLY in Mauritius and nowhere else on Earth",
       "There is no difference; both terms mean plastic decorative plants"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Native species arrived naturally; endemic species are unique native species found exclusively in Mauritius.",
     incorrectExplanation: "Incorrect. Endemic species are native species found exclusively in Mauritius."
   },
@@ -257,12 +257,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "What should a maintenance employee do if an unfamiliar nest or wild animal is found in a work zone?",
     options: [
-      "Follow Pause–Protect–Report–Record: pause work in that area, protect the site, report to the environmental lead, and record facts",
       "Capture the animal in a box and release it in another town",
+      "Follow Pause–Protect–Report–Record: pause work in that area, protect the site, report to the environmental lead, and record facts",
       "Spray chemical pesticide over the nest immediately",
       "Destroy the nest quickly before anyone notices"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Always apply Pause–Protect–Report–Record to ensure safety and prevent unauthorized species harm.",
     incorrectExplanation: "Incorrect. Apply Pause–Protect–Report–Record instead of capturing or destroying wildlife."
   },
@@ -270,12 +270,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "Why should chemical drums and loose plastic litter never be stored near open storm drains on commercial property?",
     options: [
-      "Rainwater washes chemicals and plastics directly into rivers, wetlands, and coastal lagoons, causing aquatic habitat destruction",
       "Storing items near drains makes the storm water evaporate faster",
       "Plastic litter in drains automatically turns into native fish food",
-      "Chemicals in drains increase solar panel power generation"
+      "Chemicals in drains increase solar panel power generation",
+      "Rainwater washes chemicals and plastics directly into rivers, wetlands, and coastal lagoons, causing aquatic habitat destruction"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Storm drains discharge directly into waterways; chemical runoff and plastics degrade aquatic and coastal ecosystems.",
     incorrectExplanation: "Incorrect. Chemical spills and plastic litter entering storm drains destroy aquatic and lagoon habitats."
   },
@@ -283,12 +283,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "A landscaping contractor offers to sell 'fast-growing exotic groundcover' for an office garden. What should the buyer do before approving?",
     options: [
-      "Verify that the plant is non-invasive and preferably native, avoiding species known to spread aggressively into local ecosystems",
       "Approve the purchase immediately without checking plant species lists",
+      "Verify that the plant is non-invasive and preferably native, avoiding species known to spread aggressively into local ecosystems",
       "Order double the quantity if the plants are bright red",
       "Replace all surrounding trees with concrete to match the groundcover"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Always check plant species to prevent introducing aggressive invasive alien plants into local ecosystems.",
     incorrectExplanation: "Incorrect. Verify plant species to ensure they are non-invasive and eco-friendly."
   }

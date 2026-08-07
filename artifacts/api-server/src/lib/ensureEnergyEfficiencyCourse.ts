@@ -232,12 +232,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "What is the primary goal of workplace energy efficiency?",
     options: [
-      "Achieving required business results while eliminating unnecessary energy waste",
       "Switching off all building power indiscriminately every evening",
       "Setting thermostats to 16°C to cool spaces faster",
+      "Achieving required business results while eliminating unnecessary energy waste",
       "Disconnecting critical IT servers and refrigeration equipment"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Energy efficiency focuses on eliminating waste while maintaining operational safety, comfort, and business continuity.",
     incorrectExplanation: "Incorrect. Energy efficiency prioritizes operational needs and safety over indiscriminate shut-downs."
   },
@@ -258,12 +258,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "What is 'vampire' or standby power draw?",
     options: [
-      "Continuous background electricity drawn by electronic appliances while sitting idle in standby mode",
       "Power drawn exclusively by heavy industrial solar farms",
+      "Continuous background electricity drawn by electronic appliances while sitting idle in standby mode",
       "Backup power supplied by emergency batteries during outages",
       "Electricity used by lighting fixtures during daylight hours"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Standby power refers to the continuous idle energy draw of connected electronics and displays when not in active use.",
     incorrectExplanation: "Incorrect. Standby power is the continuous background draw of idle electronics."
   },
@@ -271,12 +271,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "Which of the following equipment must NEVER be switched off or unplugged by general employees during end-of-day shut-downs?",
     options: [
-      "Critical food refrigerators, server racks, or appliances marked 'DO NOT UNPLUG'",
       "Individual desktop display monitors at your personal workstation",
       "Overhead lights in an empty meeting room",
-      "Desk lamps in unoccupied offices"
+      "Desk lamps in unoccupied offices",
+      "Critical food refrigerators, server racks, or appliances marked 'DO NOT UNPLUG'"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Refrigerators, server infrastructure, and critical safety appliances must remain powered continuously to prevent spoilage and data loss.",
     incorrectExplanation: "Incorrect. Critical refrigeration and server equipment must never be disconnected by general staff."
   },
@@ -284,12 +284,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "What is the correct action when you notice a thermostat displaying a technical error code or an AC unit leaking water?",
     options: [
-      "Escalate the technical fault to facilities or maintenance staff immediately",
       "Open the internal electrical panel and attempt to re-wire the unit yourself",
+      "Escalate the technical fault to facilities or maintenance staff immediately",
       "Ignore it and leave it leaking on the floor",
       "Unplug the entire building's main power switch"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Technical maintenance, thermostat errors, and leaks require trained facilities escalation—never DIY electrical repairs.",
     incorrectExplanation: "Incorrect. Technical faults must be reported to facilities staff for safe professional repair."
   }

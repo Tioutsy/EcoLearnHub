@@ -239,12 +239,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "What is the relationship between activity data and emission factors in carbon accounting?",
     options: [
-      "Activity data measures operational quantities (litres of fuel, kWh of electricity), while emission factors convert that data into estimated CO2e emissions",
       "Activity data and emission factors are identical terms for utility bills",
       "Emission factors are guessed numbers invented by frontline employees",
+      "Activity data measures operational quantities (litres of fuel, kWh of electricity), while emission factors convert that data into estimated CO2e emissions",
       "Activity data is only collected when a company is carbon neutral"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Activity data measures physical consumption (litres, kWh), while emission factors convert activity data into CO2e estimates.",
     incorrectExplanation: "Incorrect. Activity data measures physical usage; emission factors convert activity data to CO2e."
   },
@@ -265,12 +265,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "Why are AC refrigerant gas leaks considered a high-priority carbon issue for Mauritian facilities?",
     options: [
-      "Fluorinated refrigerant gases have global warming potentials up to 2,000 times greater than CO2 per kilogram",
       "Refrigerant gas leaks increase paper printing costs",
+      "Fluorinated refrigerant gases have global warming potentials up to 2,000 times greater than CO2 per kilogram",
       "Refrigerants automatically turn grid electricity green",
       "Refrigerant leaks are required by law in commercial offices"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Refrigerant gases have extreme global warming potentials compared to CO2, making leak repair a top priority.",
     incorrectExplanation: "Incorrect. Fluorinated refrigerants trap heat up to thousands of times more effectively than CO2."
   },
@@ -278,12 +278,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "How should a company evaluate a supplier claiming a product is '100% Carbon Neutral'?",
     options: [
-      "Request verifiable reporting boundaries, methodology details, and third-party verification before accepting the claim",
       "Publish the claim immediately on marketing brochures without asking for data",
       "Assume the supplier has eliminated all environmental impact",
-      "Pay the supplier extra money without checking records"
+      "Pay the supplier extra money without checking records",
+      "Request verifiable reporting boundaries, methodology details, and third-party verification before accepting the claim"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Unverified 'carbon neutral' claims require defined reporting boundaries, methodology evidence, and verification.",
     incorrectExplanation: "Incorrect. Carbon neutral claims require verifiable reporting boundaries and methodology evidence."
   },
@@ -291,12 +291,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "At the end of the year, facility electricity draw fell by 10%, but total company carbon emissions rose due to heavy generator fuel use. How should management respond?",
     options: [
-      "Acknowledge total emissions across all sources accurately and investigate generator usage rather than claiming a false 10% reduction",
       "Delete generator fuel records so total emissions appear lower",
+      "Acknowledge total emissions across all sources accurately and investigate generator usage rather than claiming a false 10% reduction",
       "Claim 10% carbon reduction publicly based solely on electricity and ignore generator fuel",
       "Fire the maintenance team for tracking generator fuel"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Total carbon footprints evaluate all emissions sources. Omitting generator fuel creates false, misleading reports.",
     incorrectExplanation: "Incorrect. Total carbon footprints evaluate all fuel and energy sources accurately."
   }

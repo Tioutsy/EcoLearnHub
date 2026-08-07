@@ -239,12 +239,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "What is the primary goal of sustainable procurement in commercial organizations?",
     options: [
-      "Evaluating whole-life value across purchase price, operating efficiency, durability, and supplier evidence while maintaining safety and operational quality",
       "Always purchasing the cheapest item available regardless of quality or lifespan",
       "Selecting products exclusively based on green marketing slogans without requesting data",
+      "Evaluating whole-life value across purchase price, operating efficiency, durability, and supplier evidence while maintaining safety and operational quality",
       "Bypassing company financial controls to buy expensive eco-certified goods"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Sustainable procurement balances total cost of ownership, operational reliability, supplier evidence, and safety standards.",
     incorrectExplanation: "Incorrect. Sustainable procurement evaluates total whole-life value without compromising safety or governance."
   },
@@ -265,12 +265,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "How should a workplace buyer evaluate a supplier quote claiming a product is '100% Eco-Friendly'?",
     options: [
-      "Request verifiable technical data sheets, energy ratings, or recognized independent certifications supporting the claim",
       "Accept the claim at face value without asking for evidence",
+      "Request verifiable technical data sheets, energy ratings, or recognized independent certifications supporting the claim",
       "Reject the supplier immediately because all green claims are false",
       "Ask the supplier for a cash refund in exchange for accepting the claim"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Vague marketing buzzwords require verifiable data sheets or independent certification details before being accepted.",
     incorrectExplanation: "Incorrect. Vague green claims must be verified with technical data sheets or certified documentation."
   },
@@ -278,12 +278,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "What should an employee do if a prospective supplier offers a personal gift or financial favor alongside a quotation?",
     options: [
-      "Refuse and report the personal gift offer to management/ethics officers immediately according to anti-bribery rules",
       "Accept the gift quietly if the product price is low",
       "Keep the gift and promise to award all future contracts to that supplier",
-      "Share the gift with department colleagues to make it acceptable"
+      "Share the gift with department colleagues to make it acceptable",
+      "Refuse and report the personal gift offer to management/ethics officers immediately according to anti-bribery rules"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Personal vendor gifts create severe conflicts of interest and violate anti-bribery policies. Report them immediately.",
     incorrectExplanation: "Incorrect. Personal supplier gifts violate anti-bribery policies and must be reported immediately."
   },
@@ -291,12 +291,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "Which decision must be ESCALATED to senior management or procurement specialists?",
     options: [
-      "Exceeding delegated financial approval limits or modifying standard supplier contract terms",
       "Asking a supplier for an updated product data sheet",
+      "Exceeding delegated financial approval limits or modifying standard supplier contract terms",
       "Comparing energy consumption figures between two approved models",
       "Checking existing inventory stock before placing a requisition"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Exceeding approval limits, altering legal contracts, or accepting material risk requires senior management escalation.",
     incorrectExplanation: "Incorrect. Contract alterations and exceeding approval limits require senior management escalation."
   }

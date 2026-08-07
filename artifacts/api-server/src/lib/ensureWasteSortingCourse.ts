@@ -238,12 +238,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "Where does unsorted general waste in Mauritius ultimately end up?",
     options: [
-      "The Mare Chicose landfill",
       "Community compost facilities across the island",
       "Exported for international recycling",
+      "The Mare Chicose landfill",
       "Incinerated for renewable grid electricity"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Most unsorted waste in Mauritius goes to Mare Chicose landfill, making waste reduction and proper sorting essential.",
     incorrectExplanation: "Incorrect. Mare Chicose is the central landfill site in Mauritius."
   },
@@ -264,12 +264,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "How does food grease or residual liquid affect a bin of clean paper and cardboard?",
     options: [
-      "It ruins paper fibers during repulping, often causing the entire batch to be sent to landfill",
       "It gets washed off automatically during industrial paper recycling",
+      "It ruins paper fibers during repulping, often causing the entire batch to be sent to landfill",
       "It turns the paper into organic compost instantly",
       "It increases the commercial value of recycled paper"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Grease and moisture disrupt repulping processes, contaminating dry paper streams beyond recovery.",
     incorrectExplanation: "Incorrect. Food oil and moisture permanently spoil recyclable paper streams."
   },
@@ -277,12 +277,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "Which item requires special hazardous waste handling and should NEVER go into standard office recycling or general bins?",
     options: [
-      "Used batteries and electronic waste",
       "Clean PET plastic water bottles",
       "Flattened cardboard shipping boxes",
-      "Clean aluminum soda cans"
+      "Clean aluminum soda cans",
+      "Used batteries and electronic waste"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Batteries contain hazardous heavy metals and chemicals that require dedicated collection procedures.",
     incorrectExplanation: "Incorrect. Batteries and e-waste must be escalated to special collection points."
   },
@@ -290,12 +290,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "What is the best action when preparing a plastic bottle containing leftover liquid for recycling?",
     options: [
-      "Empty all liquid, rinse if possible, and place in the plastic recycling bin",
       "Throw it into the recycling bin with the liquid inside",
+      "Empty all liquid, rinse if possible, and place in the plastic recycling bin",
       "Throw it into the paper recycling bin",
       "Leave it on your desk for cleaning staff to handle"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Emptying liquids prevents leaks that destroy adjacent paper and cardboard recyclables.",
     incorrectExplanation: "Incorrect. Liquids must be emptied before placing containers into recycling streams."
   }

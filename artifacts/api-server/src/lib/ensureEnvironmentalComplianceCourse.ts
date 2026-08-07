@@ -243,12 +243,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "What is the difference between a Legal Requirement and a Company Procedure?",
     options: [
-      "Legal Requirements are binding national laws (e.g. Environment Protection Act); Company Procedures are internal operational rules set by management to meet those laws and standards",
       "Legal Requirements only apply to police officers; Company Procedures only apply to hotel guests",
       "Company Procedures override national laws whenever a deadline is near",
+      "Legal Requirements are binding national laws (e.g. Environment Protection Act); Company Procedures are internal operational rules set by management to meet those laws and standards",
       "There is no difference; both are optional suggestions for office workers"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Legal requirements are binding statutory laws; company procedures are internal rules designed to achieve compliance.",
     incorrectExplanation: "Incorrect. Laws are statutory rules; company procedures are internal operational controls."
   },
@@ -269,12 +269,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "Why should chemical spills or contaminated washwater NEVER be hosed into stormwater drains?",
     options: [
-      "Stormwater drains discharge directly into rivers, groundwater, and lagoons without water treatment, causing severe environmental contamination",
       "Hosing water into drains makes the pavement too clean for delivery trucks",
+      "Stormwater drains discharge directly into rivers, groundwater, and lagoons without water treatment, causing severe environmental contamination",
       "Stormwater drains are reserved exclusively for drinking water storage",
       "Chemicals in storm drains automatically destroy solar panels"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Storm drains lead untreated into waterways and lagoons; hosing chemicals into drains causes severe pollution.",
     incorrectExplanation: "Incorrect. Storm drains flow untreated into aquatic ecosystems; never wash chemicals into drains."
   },
@@ -282,12 +282,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "An environmental inspector arrives in 15 minutes, but Q3 chemical disposal forms cannot be found. A supervisor tells you to 'guess the weights and sign for Q3.' What is the correct response?",
     options: [
-      "Refuse to invent figures or forge signatures; present available verified records, declare the data gap honestly, and notify the environmental lead",
       "Guess the numbers quickly and forge the contractor's signature so the file looks neat",
       "Delete all Q1 and Q2 records so the inspector has nothing to check",
-      "Lock the office door and pretend no one is inside"
+      "Lock the office door and pretend no one is inside",
+      "Refuse to invent figures or forge signatures; present available verified records, declare the data gap honestly, and notify the environmental lead"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Falsifying data or forging signatures is illegal. Present verified records honestly and declare data gaps.",
     incorrectExplanation: "Incorrect. Never invent data or forge signatures; present verified records and declare gaps honestly."
   },
@@ -295,12 +295,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "How does contractor management connect to a company's environmental compliance?",
     options: [
-      "Companies share responsibility for activities occurring on their property and must ensure contractors follow site environmental controls and permits",
       "Contractors can do whatever they want on private property without rules",
+      "Companies share responsibility for activities occurring on their property and must ensure contractors follow site environmental controls and permits",
       "Contractors automatically absorb all legal liability so companies never need site controls",
       "Contractors are exempt from environmental legislation in Mauritius"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Companies maintain site oversight and must ensure third-party contractors comply with site permits and controls.",
     incorrectExplanation: "Incorrect. Companies must oversee contractors on their property to ensure environmental permit compliance."
   }

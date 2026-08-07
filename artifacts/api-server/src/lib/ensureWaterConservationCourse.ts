@@ -237,12 +237,12 @@ const NEW_QUIZ = [
     order: 1,
     question: "Why should employees report minor dripping taps or refilling cisterns promptly?",
     options: [
-      "Persistent minor drips waste thousands of litres of clean water annually and signal potential pipe failure",
       "Dripping taps improve building air humidity and should not be reported",
       "Water meters do not register small dripping leaks",
+      "Persistent minor drips waste thousands of litres of clean water annually and signal potential pipe failure",
       "Building management pays cash rewards for every reported drip"
     ],
-    correct: 0,
+    correct: 2,
     correctExplanation: "Minor drips add up to thousands of litres of cumulative waste and can lead to severe pipe bursts if neglected.",
     incorrectExplanation: "Incorrect. Minor leaks waste large volumes of treated water and require early reporting."
   },
@@ -263,12 +263,12 @@ const NEW_QUIZ = [
     order: 3,
     question: "Which action should be classified under 'TECHNICAL ESCALATION' rather than direct employee action?",
     options: [
-      "Repairing a concealed wall pipe leak or water near an electrical panel",
       "Closing a tap fully after washing hands",
+      "Repairing a concealed wall pipe leak or water near an electrical panel",
       "Sweeping hardstanding before washing with a bucket",
       "Reporting an unclosed outdoor garden hose"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Concealed plumbing repairs and leaks near electrical equipment pose extreme safety risks and require technical facilities escalation.",
     incorrectExplanation: "Incorrect. Concealed leaks and electrical water hazards require professional technical maintenance."
   },
@@ -276,12 +276,12 @@ const NEW_QUIZ = [
     order: 4,
     question: "What is a water-efficient alternative to hosing down outdoor hardstanding and walkways?",
     options: [
-      "Sweeping surfaces thoroughly with a broom before spot-cleaning with a bucket",
       "Leaving water running continuously for two hours",
       "Using high-pressure hot water on clean concrete",
-      "Flooding walkways with drinking water"
+      "Flooding walkways with drinking water",
+      "Sweeping surfaces thoroughly with a broom before spot-cleaning with a bucket"
     ],
-    correct: 0,
+    correct: 3,
     correctExplanation: "Broom sweeping removes debris dry, using up to 90% less water than continuous hose washing.",
     incorrectExplanation: "Incorrect. Sweeping prior to spot cleaning dramatically cuts water consumption."
   },
@@ -289,12 +289,12 @@ const NEW_QUIZ = [
     order: 5,
     question: "At the end of your shift, you notice water pooling under a staff sink near an electrical socket. What is the safest response?",
     options: [
-      "Report the hazard immediately to after-hours facilities/safety contact without touching electrical equipment",
       "Attempt to rewire the electrical socket yourself using wet towels",
+      "Report the hazard immediately to after-hours facilities/safety contact without touching electrical equipment",
       "Ignore it and leave the building without telling anyone",
       "Step into the water pool to inspect the socket closely"
     ],
-    correct: 0,
+    correct: 1,
     correctExplanation: "Water near electrical sockets presents fatal shock risks. Escalate to safety/facilities personnel immediately.",
     incorrectExplanation: "Incorrect. Water near electrical equipment requires immediate professional safety escalation."
   }
