@@ -169,6 +169,10 @@ export function useCompanyRecyclingSummary(params: RecyclingSummaryParams = {}) 
     queryKey: ["company-recycling-summary", params],
     queryFn: () =>
       apiJson<RecyclingSummary>(`/api/recycling/company/summary${query(params)}`),
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes("404") || error?.message?.includes("403")) return false;
+      return failureCount < 2;
+    },
   });
 }
 

@@ -109,6 +109,10 @@ export function useCompanyLmsOverview() {
   return useQuery({
     queryKey: ["company-lms-overview"],
     queryFn: () => apiJson<CompanyLmsOverview>("/api/company/lms-overview"),
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes("404") || error?.message?.includes("403")) return false;
+      return failureCount < 2;
+    },
   });
 }
 
