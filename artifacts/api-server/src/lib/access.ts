@@ -3,6 +3,7 @@ import { getAuth } from "@clerk/express";
 import { and, eq, or, sql } from "drizzle-orm";
 import {
   companiesTable,
+  companySubscriptionsTable,
   db,
   employeesTable,
   type Company,
@@ -203,6 +204,23 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
     employee,
     isDemo: false,
   };
+}
+
+export async function requireActiveCompanySubscription(req: Request): Promise<CompanyAccess> {
+  const access = await getCompanyAccess(req);
+  if (access.role === "platform_admin") return access;
+  if (!access.companyId) throw new HttpError(403, "Subscription required: No company associated with user account");
+
+  const [sub] = await db
+    .select()
+    .from(companySubscriptionsTable)
+    .where(eq(companySubscriptionsTable.companyId, access.companyId))
+    .limit(1);
+
+  if (!sub || sub.status !== "ACTIVE") {
+    throw new HttpError(402, "Subscription payment pending: Complete subscription payment to unlock LMS training and administration.");
+  }
+  return access;
 }
 
 export async function requireCompanyAdmin(req: Request): Promise<CompanyAccess> {
