@@ -87,16 +87,129 @@ const englishTranslations: Record<string, string> = {
   "pricing.contact_us": "Contact us for a quote",
   "pricing.per_month": "per month",
 
+  // Dashboard
+  "dashboard.welcome": "Welcome back, {name}",
+  "dashboard.welcome_sub": "Track your workplace sustainability training progress and active assignments.",
+  "dashboard.my_learning_title": "My Sustainability Learning",
+  "dashboard.overall_progress": "Overall Progress",
+  "dashboard.courses_completed": "Courses Completed",
+  "dashboard.certificates_earned": "Certificates Earned",
+  "dashboard.learning_points": "Learning Points",
+  "dashboard.active_assignments": "Active Course Assignments",
+  "dashboard.recommended_next": "Recommended Next Course",
+  "dashboard.continue_learning": "Continue Learning",
+  "dashboard.start_course": "Start Course",
+  "dashboard.review_course": "Review Course",
+  "dashboard.no_active": "No active assignments currently.",
+  "dashboard.recent_achievements": "Recent Achievements",
+  "dashboard.due_date": "Due: {date}",
+  "dashboard.status_overdue": "Overdue",
+  "dashboard.status_assigned": "Assigned",
+  "dashboard.status_in_progress": "In Progress",
+
+  // Admin & Company Management
+  "admin.company_dashboard": "Company Dashboard",
+  "admin.company_overview": "Company Sustainability Overview",
+  "admin.total_employees": "Total Employees",
+  "admin.active_learners": "Active Learners",
+  "admin.completion_rate": "Completion Rate",
+  "admin.overdue_training": "Overdue Training",
+  "admin.employees_title": "Employee Management",
+  "admin.add_employee": "Add Employee",
+  "admin.edit_employee": "Edit Employee",
+  "admin.assign_courses": "Assign Courses",
+  "admin.employee_name": "Employee Name",
+  "admin.email": "Email",
+  "admin.department": "Department",
+  "admin.job_title": "Job Title",
+  "admin.role": "Role",
+  "admin.invitation_status": "Invitation Status",
+  "admin.status_active": "Active",
+  "admin.status_invited": "Invited",
+  "admin.status_not_invited": "Not Invited",
+  "admin.send_invite": "Send Invite",
+  "admin.resend_invite": "Resend Invite",
+  "admin.challenge_reviews": "Employee Challenge Reviews",
+  "admin.awaiting_review": "Awaiting Review",
+  "admin.approved": "Approved",
+  "admin.returned": "Returned",
+  "admin.reports_title": "Training & Compliance Reports",
+  "admin.compliance_title": "Employee Training & Compliance Overview",
+  "admin.evidence_exports": "Audit-Ready Training Records",
+
+  // Course Catalogue & Details
+  "catalogue.title": "Workplace Sustainability Courses",
+  "catalogue.subtitle": "Short, practical self-paced courses for Mauritian teams.",
+  "catalogue.search_placeholder": "Search courses, categories or topics...",
+  "catalogue.filter_all": "All Courses",
+  "catalogue.filter_completed": "Completed",
+  "catalogue.prereq_required": "Prerequisites required",
+  "catalogue.prereq_popover_title": "Course Prerequisites",
+  "catalogue.view_prereq": "View Prerequisite",
+  "catalogue.view_plan": "View Commercial Plan",
+  "catalogue.start_course": "Start course",
+  "catalogue.continue_course": "Continue course",
+  "catalogue.review_course": "Review course",
+  "course.available_in_english": "Course available in English",
+
+  // Course Player & Navigation
+  "player.lesson": "Lesson",
+  "player.module": "Module",
+  "player.previous": "Previous Lesson",
+  "player.next": "Next Lesson",
+  "player.mark_completed": "Mark as Complete & Continue",
+  "player.take_quiz": "Take Final Quiz",
+  "player.completed_badge": "Completed",
+  "player.exit": "Exit Course",
+  "player.autosaved": "Progress saved automatically",
+  "player.enrollment_not_found": "Enrollment record not found.",
+
+  // Quiz Shell
+  "quiz.title": "Final Knowledge Check",
+  "quiz.subtitle": "Demonstrate your understanding to earn your digital badge and certificate.",
+  "quiz.question_counter": "Question {current} of {total}",
+  "quiz.select_option": "Select the best answer for this workplace scenario:",
+  "quiz.submit_quiz": "Submit Final Quiz",
+  "quiz.next_question": "Next Question",
+  "quiz.previous_question": "Previous Question",
+  "quiz.passed_title": "Congratulations! You Passed!",
+  "quiz.passed_sub": "You scored {score}% on the final assessment.",
+  "quiz.failed_title": "Assessment Not Passed",
+  "quiz.failed_sub": "You scored {score}%. A score of {passing}% is required to pass.",
+  "quiz.retry_button": "Retry Assessment",
+  "quiz.not_available": "Quiz not available for this course yet.",
+
+  // Certificates
+  "cert.my_certificates": "My Certificates",
+  "cert.subtitle": "View and download your earned qualifications.",
+  "cert.no_certs": "No certificates earned yet.",
+  "cert.no_certs_sub": "Complete courses and pass final quizzes to earn recognized certificates in workplace sustainability.",
+  "cert.issued": "Issued: {date}",
+  "cert.verify_link": "Verify Certificate Code",
+  "cert.download_pdf": "Download PDF",
+
   // Errors
   "error.page_not_found": "Page Not Found",
-  "error.something_went_wrong": "Did you take a wrong turn? The page you are looking for does not exist.",
+  "error.access_denied": "Access Denied",
+  "error.something_went_wrong": "Something went wrong",
+  "error.network_error": "Network error. Please check your connection.",
+  "error.no_results": "No results found",
+  "error.no_courses": "No courses available",
 };
 
 export function useLanguage() {
   return {
     language: "en" as const,
     setLanguage: () => {},
-    t: (key: string) => englishTranslations[key] || key,
+    t: (key: string, params?: Record<string, string | number>) => {
+      let text = englishTranslations[key] || key;
+      if (params) {
+        Object.entries(params).forEach(([paramKey, value]) => {
+          text = text.replace(new RegExp(`\\{${paramKey}\\}`, "g"), String(value));
+        });
+      }
+      return text;
+    },
   };
 }
 
