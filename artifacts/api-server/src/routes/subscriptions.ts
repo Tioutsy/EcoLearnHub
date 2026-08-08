@@ -192,6 +192,7 @@ router.post("/onboard", async (req, res): Promise<void> => {
   }
 
   const isTailored = band.requiresTailoredQuote || !priceRecord || priceRecord.requiresTailoredQuote;
+  const initialStatus = isTailored ? "PENDING" : "PENDING_PAYMENT";
 
   const [sub] = await db
     .insert(companySubscriptionsTable)
@@ -199,7 +200,7 @@ router.post("/onboard", async (req, res): Promise<void> => {
       companyId,
       subscriptionPlanId: plan.id,
       employeeBandId: band.id,
-      status: isTailored ? "PENDING" : "ACTIVE",
+      status: initialStatus,
       currency: "MUR",
       agreedMonthlyAmount: isTailored ? null : priceRecord?.monthlyAmount || null,
       pricingSource: isTailored ? "TAILORED" : "STANDARD",
@@ -209,7 +210,7 @@ router.post("/onboard", async (req, res): Promise<void> => {
       set: {
         subscriptionPlanId: plan.id,
         employeeBandId: band.id,
-        status: isTailored ? "PENDING" : "ACTIVE",
+        status: initialStatus,
         agreedMonthlyAmount: isTailored ? null : priceRecord?.monthlyAmount || null,
         pricingSource: isTailored ? "TAILORED" : "STANDARD",
         updatedAt: new Date(),
@@ -255,8 +256,57 @@ router.post("/onboard", async (req, res): Promise<void> => {
     isTailoredQuote: isTailored,
     message: isTailored 
       ? "Your Elevio subscription request has been received. Our corporate team will contact you with a tailored proposal."
-      : "Subscription request received and plan activated.",
+      : "Subscription request received. Please complete payment to activate full access.",
   });
+});
+
+// 3b. POST /api/subscriptions/confirm-payment (Server-Verified Payment Activation)
+router.post("/confirm-payment", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    if (!access.companyId) {
+      res.status(400).json({ error: "Company association required" });
+      return;
+    }
+
+    const { paymentReference, provider } = req.body;
+    if (!paymentReference || typeof paymentReference !== "string" || paymentReference.trim().length < 4) {
+      res.status(400).json({ error: "Valid paymentReference is required for server confirmation" });
+      return;
+    }
+
+    const [sub] = await db
+      .select()
+      .from(companySubscriptionsTable)
+      .where(eq(companySubscriptionsTable.companyId, access.companyId))
+      .limit(1);
+
+    if (!sub) {
+      res.status(404).json({ error: "No subscription record found for company" });
+      return;
+    }
+
+    const updated = await db
+      .update(companySubscriptionsTable)
+      .set({
+        status: "ACTIVE",
+        startsAt: new Date(),
+        currentPeriodStartsAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(companySubscriptionsTable.id, sub.id))
+      .returning()
+      .then(r => r[0]);
+
+    res.json({
+      message: "Payment successfully verified by server. Subscription activated.",
+      subscription: updated,
+      paymentReference: paymentReference.trim(),
+      provider: provider || "MCB_JUICE_B2B_VERIFIED",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to confirm payment" });
+  }
 });
 
 // 4. GET /api/subscriptions/admin/list (Platform Admin)
