@@ -228,50 +228,70 @@ export default function CompanyDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Your Learning Access Subscription Banner */}
-        <div className="bg-card border rounded-2xl p-6 shadow-sm mb-8 bg-gradient-to-r from-emerald-950/5 via-card to-card">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                  {subData?.planName || "Complete"} Plan Active
-                </span>
-                <span className="text-xs text-muted-foreground font-mono font-medium">
-                  {subData?.bandLabel || "Up to 25 employees"}
-                </span>
+        {subData?.status === "PENDING_PAYMENT" || subData?.status === "PENDING" ? (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 mb-8 backdrop-blur-md">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                    Subscription Pending Payment
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono font-medium">
+                    {subData?.bandLabel || "Standard Contract"}
+                  </span>
+                </div>
+                <h2 className="text-xl font-bold font-serif text-amber-900 dark:text-amber-200">
+                  Subscription Activation Required
+                </h2>
+                <p className="text-sm text-amber-800/80 dark:text-amber-300/80">
+                  Your organisation account has been registered successfully. LMS course assignments and training access will unlock automatically once subscription payment is confirmed.
+                </p>
               </div>
-              <h2 className="text-xl font-bold font-serif">Your Commercial Learning Access</h2>
-              <p className="text-sm text-muted-foreground">
-                Current Contracted Subscription: <strong className="text-foreground">{subData?.planName || "Complete"}</strong> • Agreed Price: <strong className="text-foreground">{subData?.agreedMonthlyAmountMUR ? `MUR ${subData.agreedMonthlyAmountMUR.toLocaleString()}/mo` : "Standard Agreement"}</strong>
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <div className="px-3 py-1.5 rounded-xl border bg-muted/40 font-medium text-foreground flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Core Certificate</span>
+              <div className="flex items-center gap-3">
+                <div className="px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  Awaiting Settlement Confirmation
+                </div>
               </div>
-              <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", (subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
-                {(subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
-                <span>Sustainability in Action</span>
-              </div>
-              <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", (subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
-                {(subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
-                <span>Department Courses</span>
-              </div>
-              <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", subData?.planCode === "COMPLETE" ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
-                {subData?.planCode === "COMPLETE" ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
-                <span>Leadership</span>
-              </div>
-              
-              <Link href="/pricing">
-                <Button variant="outline" size="sm" className="ml-2 gap-1 rounded-xl text-xs">
-                  <span>Change Plan</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-card border rounded-2xl p-6 shadow-sm mb-8 bg-gradient-to-r from-emerald-950/5 via-card to-card">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                    {subData?.planName || "Complete"} Plan Active
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono font-medium">
+                    {subData?.bandLabel || "Up to 25 employees"}
+                  </span>
+                </div>
+                <h2 className="text-xl font-bold font-serif">Your Commercial Learning Access</h2>
+                <p className="text-sm text-muted-foreground">
+                  Current Contracted Subscription: <strong className="text-foreground">{subData?.planName || "Complete"}</strong> • Agreed Price: <strong className="text-foreground">{subData?.agreedMonthlyAmountMUR ? `MUR ${subData.agreedMonthlyAmountMUR.toLocaleString()}/mo` : "Standard Agreement"}</strong>
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <div className="px-3 py-1.5 rounded-xl border bg-muted/40 font-medium text-foreground flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Core Certificate</span>
+                </div>
+                <div className={cn("px-3 py-1.5 rounded-xl border font-medium flex items-center gap-1.5", (subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? "bg-muted/40 text-foreground" : "bg-muted/10 text-muted-foreground opacity-60")}>
+                  {(subData?.planCode === "PROFESSIONAL" || subData?.planCode === "COMPLETE") ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <Lock className="h-3.5 w-3.5" />}
+                  <span>Sustainability in Action</span>
+                </div>
+                <Link href="/pricing">
+                  <Button variant="outline" size="sm" className="ml-2 gap-1 rounded-xl text-xs">
+                    <span>Change Plan</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Executive KPI cards */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-10">
           <KpiCard
