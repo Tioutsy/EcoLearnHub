@@ -64,7 +64,7 @@ import PlatformAdminSubscriptions from "@/pages/platform-admin/subscriptions";
 
 const queryClient = new QueryClient();
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_cHJvbW90ZWQtY2l2ZXQtMTMuY2xlcmsuYWNjb3VudHMuZGV2JA";
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? "";
 
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = (import.meta.env.BASE_URL || "").replace(/\/$/, "");

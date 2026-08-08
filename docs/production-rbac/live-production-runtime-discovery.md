@@ -12,7 +12,7 @@ This document records the discovery of the live production environment for **ELE
 | **Frontend Host** | `http://localhost:5173` / `24777` | `https://ecolearnhub.com` |
 | **API Server Host** | `http://localhost:8080` | Production Express Backend |
 | **Git Commit SHA** | Uncommitted working tree | `96010052bb45586ad39fa2979fb6bde216afdd1e` |
-| **Clerk Secret Environment** | `sk_test_nu4y7eLWywLqkuEP0x0wqZYYKc4frD4mn4iQHDZATx` | Live Production Clerk Credentials |
+| **Clerk Secret Environment** | Development Keys (Masked) | Live Production Clerk Credentials |
 | **Database Connection** | Neon PostgreSQL (`neondb`) | Neon Production Database |
 | **Owner Identity Role (`slennon2206@gmail.com`)** | `platform_admin` | Pending Git Commit & Deployment Push |
 
