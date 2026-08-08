@@ -341,8 +341,8 @@ router.get("/:id", async (req, res): Promise<void> => {
   let safeLessons = lessons.map((l) => {
     return {
       ...l,
-      contentBlocks: accessDecision.canAccessContent ? l.contentBlocks : [],
-      content: accessDecision.canAccessContent ? l.content : undefined,
+      contentBlocks: accessDecision.allowed ? l.contentBlocks : [],
+      content: accessDecision.allowed ? l.content : undefined,
     };
   });
 

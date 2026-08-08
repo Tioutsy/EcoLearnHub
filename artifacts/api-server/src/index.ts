@@ -30,6 +30,10 @@ import { ensureSustainabilityForProcurementAndPurchasingTeamsCourse } from "./li
 import { ensureSustainabilityForOperationsAndFrontlineTeamsCourse } from "./lib/ensureSustainabilityForOperationsAndFrontlineTeamsCourse";
 import { ensureSustainabilityForFacilitiesAndPropertyTeamsCourse } from "./lib/ensureSustainabilityForFacilitiesAndPropertyTeamsCourse";
 import { ensureSustainabilityForSalesAndMarketingTeamsCourse } from "./lib/ensureSustainabilityForSalesAndMarketingTeamsCourse";
+import { ensureSocialResponsibilityAtWorkCourse } from "./lib/ensureSocialResponsibilityAtWorkCourse";
+import { ensureEthicsGovernanceCourse } from "./lib/ensureEthicsGovernanceCourse";
+import { ensureEsgDataCourse } from "./lib/ensureEsgDataCourse";
+import { ensureEsgInMyJobCourse } from "./lib/ensureEsgInMyJobCourse";
 import { ensureAppliedCourseBadges } from "./lib/ensureAppliedCourseBadges";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
@@ -133,6 +137,10 @@ async function start(): Promise<void> {
     await ensureSustainabilityForFacilitiesAndPropertyTeamsCourse();
     await ensureSustainabilityForSalesAndMarketingTeamsCourse();
     await ensureClimateRiskCourse();
+    await ensureSocialResponsibilityAtWorkCourse();
+    await ensureEthicsGovernanceCourse();
+    await ensureEsgDataCourse();
+    await ensureEsgInMyJobCourse();
     await ensureAppliedCourseBadges();
     await ensureCoreSustainabilityPath();
     await ensureCategoriesAndAssignments();

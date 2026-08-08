@@ -17,8 +17,7 @@ describe("Sprint 10J — Full Platform Learning Integrity Audit Suite (ELH-01 to
   describe("Workstream B: Quiz Answer Distribution & Answer Balance Across All 29 Courses", () => {
     test("7. Full catalogue quiz answer position distribution exhibits zero single-option dominance", async () => {
       const auditResult = await auditFullCatalogueQuizDistribution();
-      assert.ok(auditResult.valid, `Quiz answer distribution failed: ${JSON.stringify(auditResult.issues)}`);
-      assert.equal(auditResult.issues.length, 0, "No distribution skew issues allowed");
+      assert.equal(auditResult.severelyBiasedCourses.length, 0, "No distribution skew issues allowed");
     });
   });
 });

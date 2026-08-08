@@ -456,74 +456,55 @@ export async function ensureSustainabilityForFinanceTeamsCourse(): Promise<void>
         .where(eq(systemSeedsTable.name, SEED_NAME))
         .limit(1);
 
-      // Resolve or insert Course 25
-      const [existingCourse] = await tx
-        .select()
-        .from(coursesTable)
-        .where(eq(coursesTable.courseCode, COURSE_META.courseCode))
-        .limit(1);
-
       let actualCourseId: number;
 
-      if (!existingCourse) {
-        const [inserted] = await tx
-          .insert(coursesTable)
-          .values({
+      const [upserted] = await tx
+        .insert(coursesTable)
+        .values({
+          title: COURSE_TITLE,
+          slug: COURSE_SLUG,
+          courseCode: COURSE_META.courseCode,
+          description: COURSE_META.description,
+          fullDescription: COURSE_META.fullDescription,
+          categoryId: COURSE_META.categoryId,
+          durationMinutes: COURSE_META.durationMinutes,
+          priceUsd: COURSE_META.priceUsd,
+          level: COURSE_META.level,
+          isFeatured: COURSE_META.isFeatured,
+          thumbnailUrl: COURSE_META.thumbnailUrl,
+          learningObjectives: COURSE_META.learningObjectives,
+          includesCertificate: COURSE_META.includesCertificate,
+          passingScore: COURSE_META.passingScore,
+          isPublished: true,
+          intendedRoles: COURSE_META.intendedRoles,
+          badgeName: COURSE_META.badgeName,
+          badgeDescription: COURSE_META.badgeDescription,
+          completionMessage: COURSE_META.completionMessage,
+          status: "published",
+        })
+        .onConflictDoUpdate({
+          target: coursesTable.slug,
+          set: {
             title: COURSE_TITLE,
-            slug: COURSE_SLUG,
             courseCode: COURSE_META.courseCode,
             description: COURSE_META.description,
             fullDescription: COURSE_META.fullDescription,
-            categoryId: COURSE_META.categoryId,
             durationMinutes: COURSE_META.durationMinutes,
-            priceUsd: COURSE_META.priceUsd,
             level: COURSE_META.level,
-            isFeatured: COURSE_META.isFeatured,
             thumbnailUrl: COURSE_META.thumbnailUrl,
             learningObjectives: COURSE_META.learningObjectives,
-            includesCertificate: COURSE_META.includesCertificate,
-            passingScore: COURSE_META.passingScore,
-            completionMessage: COURSE_META.completionMessage,
             intendedRoles: COURSE_META.intendedRoles,
             badgeName: COURSE_META.badgeName,
             badgeDescription: COURSE_META.badgeDescription,
-            status: "published",
-            isPublished: true,
-            recommendedNextCourseId: null,
-          })
-          .returning();
-        actualCourseId = inserted.id;
-        logger.info(`Inserted new ELH-25 course record (ID: ${actualCourseId}).`);
-      } else {
-        actualCourseId = existingCourse.id;
-        await tx
-          .update(coursesTable)
-          .set({
-            title: COURSE_TITLE,
-            slug: COURSE_SLUG,
-            courseCode: COURSE_META.courseCode,
-            description: COURSE_META.description,
-            fullDescription: COURSE_META.fullDescription,
-            categoryId: COURSE_META.categoryId,
-            durationMinutes: COURSE_META.durationMinutes,
-            priceUsd: COURSE_META.priceUsd,
-            level: COURSE_META.level,
-            isFeatured: COURSE_META.isFeatured,
-            thumbnailUrl: COURSE_META.thumbnailUrl,
-            learningObjectives: COURSE_META.learningObjectives,
-            includesCertificate: COURSE_META.includesCertificate,
-            passingScore: COURSE_META.passingScore,
             completionMessage: COURSE_META.completionMessage,
-            intendedRoles: COURSE_META.intendedRoles,
-            badgeName: COURSE_META.badgeName,
-            badgeDescription: COURSE_META.badgeDescription,
-            status: "published",
+            passingScore: COURSE_META.passingScore,
             isPublished: true,
-            updatedAt: new Date(),
-          })
-          .where(eq(coursesTable.id, actualCourseId));
-        logger.info(`Updated existing ELH-25 course record (ID: ${actualCourseId}).`);
-      }
+            status: "published",
+          },
+        })
+        .returning({ id: coursesTable.id });
+
+      actualCourseId = upserted.id;
 
       // Ensure Badge Definition exists
       const [existingBadge] = await tx

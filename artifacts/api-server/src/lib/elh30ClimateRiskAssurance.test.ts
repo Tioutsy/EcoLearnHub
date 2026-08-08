@@ -86,6 +86,7 @@ describe("Sprint ELH-30 — ELH-30 Climate Risk & Workplace Resilience Assurance
       .where(eq(coursesTable.courseCode, "ELH-30"))
       .limit(1);
 
+    const prereqs = course30 ? await db.select().from(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.courseId, course30.id)) : [];
     assert.ok(prereqs.length >= 1, "ELH-30 must have at least one prerequisite");
   });
 

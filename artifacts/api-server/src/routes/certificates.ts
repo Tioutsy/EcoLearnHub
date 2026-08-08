@@ -34,7 +34,8 @@ function toCertificateData(
     uniqueCode: string;
     issuedAt: Date;
     courseCode?: string | null;
-  }
+  },
+  locale: "en" | "fr" = "en"
 ): CertificateData {
   const courseTitle = row.courseName ?? "Sustainability Course";
   return {

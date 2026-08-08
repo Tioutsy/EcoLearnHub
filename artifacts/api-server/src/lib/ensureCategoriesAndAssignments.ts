@@ -58,15 +58,15 @@ const CORE_CODES = [
 
 const ACTION_CODES = [
   "ELH-13", "ELH-14", "ELH-15", "ELH-16", "ELH-17",
-  "ELH-18", "ELH-19", "ELH-20", "ELH-21", "ELH-22", "ELH-23"
+  "ELH-18", "ELH-19", "ELH-20", "ELH-21", "ELH-22", "ELH-23", "ELH-31", "ELH-32", "ELH-33", "ELH-34"
 ];
 
 const DEPARTMENT_CODES = [
-  "ELH-24", "ELH-25", "ELH-26", "ELH-27", "ELH-28", "ELH-29", "ELH-30"
+  "ELH-24", "ELH-25", "ELH-26", "ELH-27", "ELH-28", "ELH-29", "ELH-30", "ELH-31", "ELH-32", "ELH-33", "ELH-34"
 ];
 
 const LEADERSHIP_CODES = [
-  "ELH-13", "ELH-19", "ELH-20", "ELH-21", "ELH-22", "ELH-23"
+  "ELH-13", "ELH-19", "ELH-20", "ELH-21", "ELH-22", "ELH-23", "ELH-32"
 ];
 
 // Recommended prerequisites (soft recommendations, requirementType: 'recommended')

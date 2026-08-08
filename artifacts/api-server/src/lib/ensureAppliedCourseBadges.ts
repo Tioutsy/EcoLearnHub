@@ -141,6 +141,34 @@ export const APPLIED_COURSE_BADGES: CourseBadgeMetadata[] = [
     badgeName: "Workplace Climate Resilience Practitioner",
     badgeDescription: "Awarded for demonstrating practical understanding of workplace climate risk assessment and business resilience protocols.",
   },
+  {
+    courseCode: "ELH-31",
+    slug: "social-responsibility-at-work",
+    badgeSlug: "social-responsibility-practitioner",
+    badgeName: "Social Responsibility Practitioner",
+    badgeDescription: "Awarded for demonstrating practical understanding of workplace social responsibility, human-centric decision-making, and stakeholder care.",
+  },
+  {
+    courseCode: "ELH-32",
+    slug: "ethics-governance-and-responsible-business",
+    badgeSlug: "responsible-business-practitioner",
+    badgeName: "Responsible Business Practitioner",
+    badgeDescription: "Awarded for demonstrating practical understanding of workplace ethics, governance controls, conflict-of-interest disclosure, and transparent business conduct.",
+  },
+  {
+    courseCode: "ELH-33",
+    slug: "esg-data-measurement-and-reporting-basics",
+    badgeSlug: "esg-data-awareness",
+    badgeName: "ESG Data Awareness",
+    badgeDescription: "Awarded for demonstrating practical understanding of workplace ESG data quality, measurement principles, evidence verification, and trustworthy recordkeeping.",
+  },
+  {
+    courseCode: "ELH-34",
+    slug: "esg-in-my-job-from-policy-to-everyday-action",
+    badgeSlug: "esg-action-practitioner",
+    badgeName: "ESG Action Practitioner",
+    badgeDescription: "Awarded for demonstrating practical understanding of workplace ESG application, role-based decision-making, and responsible operational habits.",
+  },
 ];
 
 export async function ensureAppliedCourseBadges(): Promise<void> {

@@ -57,22 +57,26 @@ describe("Course Ordering Tests (Sprint 9R Workstream E)", () => {
     assert.equal(sorted[1].courseCode, "ELH-27");
   });
 
-  test("4. ELH-30 appears after ELH-29", () => {
-    const input = [{ courseCode: "ELH-30" }, { courseCode: "ELH-29" }];
+  test("4. ELH-30 appears after ELH-29, ELH-31 appears after ELH-30, ELH-32 appears after ELH-31, ELH-33 appears after ELH-32, and ELH-34 appears after ELH-33", () => {
+    const input = [{ courseCode: "ELH-34" }, { courseCode: "ELH-33" }, { courseCode: "ELH-32" }, { courseCode: "ELH-31" }, { courseCode: "ELH-30" }, { courseCode: "ELH-29" }];
     const sorted = sortCoursesByCode(input);
     assert.equal(sorted[0].courseCode, "ELH-29");
     assert.equal(sorted[1].courseCode, "ELH-30");
+    assert.equal(sorted[2].courseCode, "ELH-31");
+    assert.equal(sorted[3].courseCode, "ELH-32");
+    assert.equal(sorted[4].courseCode, "ELH-33");
+    assert.equal(sorted[5].courseCode, "ELH-34");
   });
 
-  test("5. A shuffled list returns ELH-01 through ELH-30 in exact numerical order", () => {
-    const fullList = Array.from({ length: 30 }, (_, i) => ({
+  test("5. A shuffled list returns ELH-01 through ELH-34 in exact numerical order", () => {
+    const fullList = Array.from({ length: 34 }, (_, i) => ({
       courseCode: `ELH-${(i + 1).toString().padStart(2, "0")}`,
     }));
     // Shuffled copy
     const shuffled = [...fullList].sort(() => Math.random() - 0.5);
     const sorted = sortCoursesByCode(shuffled);
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 34; i++) {
       const expectedCode = `ELH-${(i + 1).toString().padStart(2, "0")}`;
       assert.equal(
         sorted[i].courseCode,

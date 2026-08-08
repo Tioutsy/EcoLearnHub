@@ -42,7 +42,7 @@ describe("Sprint 10T — Role Access Control, Permission & Cross-Tenant Audit Su
     test("6. Cross-tenant company access checks enforce strict companyId matching", () => {
       const companyAlphaId = 101;
       const companyBetaId = 102;
-      const isSameCompany = companyAlphaId === companyBetaId;
+      const isSameCompany = (companyAlphaId as number) === companyBetaId;
       assert.equal(isSameCompany, false);
     });
 

@@ -516,22 +516,37 @@ export async function ensureWorkplaceSustainabilityInitiativesCourse(): Promise<
     .where(eq(systemSeedsTable.name, SEED_NAME))
     .limit(1);
 
-  // Find course by code, slug, or ID
-  const [existingCourse] = await db
-    .select()
-    .from(coursesTable)
-    .where(eq(coursesTable.courseCode, COURSE_META.courseCode))
-    .limit(1);
-
   let courseId: number;
 
-  if (existingCourse) {
-    courseId = existingCourse.id;
-    await db
-      .update(coursesTable)
-      .set({
+  const [upserted] = await db
+    .insert(coursesTable)
+    .values({
+      courseCode: COURSE_META.courseCode,
+      title: COURSE_TITLE,
+      slug: COURSE_SLUG,
+      description: COURSE_META.description,
+      fullDescription: COURSE_META.fullDescription,
+      categoryId: COURSE_META.categoryId,
+      durationMinutes: COURSE_META.durationMinutes,
+      priceUsd: COURSE_META.priceUsd,
+      level: COURSE_META.level,
+      isFeatured: COURSE_META.isFeatured,
+      thumbnailUrl: COURSE_META.thumbnailUrl,
+      intendedRoles: COURSE_META.intendedRoles,
+      learningObjectives: COURSE_META.learningObjectives,
+      includesCertificate: COURSE_META.includesCertificate,
+      passingScore: COURSE_META.passingScore,
+      completionMessage: COURSE_META.completionMessage,
+      badgeName: COURSE_META.badgeName,
+      badgeDescription: COURSE_META.badgeDescription,
+      isPublished: true,
+      status: "published",
+    })
+    .onConflictDoUpdate({
+      target: coursesTable.slug,
+      set: {
+        courseCode: COURSE_META.courseCode,
         title: COURSE_TITLE,
-        slug: COURSE_SLUG,
         description: COURSE_META.description,
         fullDescription: COURSE_META.fullDescription,
         durationMinutes: COURSE_META.durationMinutes,
@@ -544,36 +559,12 @@ export async function ensureWorkplaceSustainabilityInitiativesCourse(): Promise<
         badgeDescription: COURSE_META.badgeDescription,
         passingScore: COURSE_META.passingScore,
         updatedAt: new Date(),
-      })
-      .where(eq(coursesTable.id, courseId));
-    logger.info(`Updated existing ELH-23 course record (ID: ${courseId}).`);
-  } else {
-    const [inserted] = await db
-      .insert(coursesTable)
-      .values({
-        courseCode: COURSE_META.courseCode,
-        title: COURSE_TITLE,
-        slug: COURSE_SLUG,
-        description: COURSE_META.description,
-        fullDescription: COURSE_META.fullDescription,
-        categoryId: COURSE_META.categoryId,
-        durationMinutes: COURSE_META.durationMinutes,
-        priceUsd: COURSE_META.priceUsd,
-        level: COURSE_META.level,
-        isFeatured: COURSE_META.isFeatured,
-        thumbnailUrl: COURSE_META.thumbnailUrl,
-        intendedRoles: COURSE_META.intendedRoles,
-        learningObjectives: COURSE_META.learningObjectives,
-        includesCertificate: COURSE_META.includesCertificate,
-        passingScore: COURSE_META.passingScore,
-        completionMessage: COURSE_META.completionMessage,
-        badgeName: COURSE_META.badgeName,
-        badgeDescription: COURSE_META.badgeDescription,
-      })
-      .returning();
-    courseId = inserted.id;
-    logger.info(`Inserted new ELH-23 course record (ID: ${courseId}).`);
-  }
+      },
+    })
+    .returning({ id: coursesTable.id });
+
+  courseId = upserted.id;
+  logger.info(`Upserted ELH-23 course record (ID: ${courseId}).`);
 
   // 2. Ensure badge definition
   await db

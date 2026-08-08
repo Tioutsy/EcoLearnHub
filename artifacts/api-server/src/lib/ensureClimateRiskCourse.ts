@@ -451,9 +451,8 @@ export async function ensureClimateRiskCourse(): Promise<void> {
           orderIndex: lessonData.order,
           title: lessonData.title,
           durationMinutes: lessonData.minutes,
-          contentSummary: lessonData.content,
+          content: lessonData.content,
           contentBlocks: lessonData.blocks,
-          isPublished: true,
         });
       }
 
@@ -467,8 +466,12 @@ export async function ensureClimateRiskCourse(): Promise<void> {
           question: q.question,
           options: q.options,
           correctOption: q.correct,
-          explanation: q.correctExplanation,
-          incorrectExplanation: q.incorrectExplanation,
+          optionFeedback: [
+            q.incorrectExplanation,
+            q.incorrectExplanation,
+            q.incorrectExplanation,
+            q.correctExplanation
+          ]
         });
       }
 

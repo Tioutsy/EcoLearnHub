@@ -339,6 +339,327 @@ const CATALOGUE_COURSES = [
       "Final assessment and targeted feedback",
       "Commitment, certificate and next pathway recommendation"
     ]
+  },
+  {
+    code: "ELH-31",
+    slug: "social-responsibility-at-work",
+    title: "Social Responsibility at Work",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Develops the Social pillar of ESG by examining how organizational decisions and daily workplace behaviors affect employees, customers, contractors, and local communities.",
+    aim: "Help employees understand stakeholder impact, distinguish company policy responsibility from individual actions, and apply human-centered workplace choices.",
+    learningObjectives: [
+      "Explain the Social pillar of ESG in simple language.",
+      "Identify internal and external stakeholder groups affected by a business.",
+      "Distinguish company responsibility from individual employee actions.",
+      "Apply responsible decision-making to workplace trade-offs and safety risks."
+    ],
+    badgeName: "Social Responsibility Practitioner",
+    badgeDescription: "Awarded for completing the Social Responsibility at Work course.",
+    lessons: [
+      "Hook: who does this decision affect?",
+      "People inside the organisation",
+      "People outside the organisation",
+      "Company responsibility vs employee role",
+      "Scenario: Mauritius workplace decision challenge",
+      "Knowledge check, commitment and completion"
+    ]
+  },
+  {
+    code: "ELH-32",
+    slug: "ethics-governance-and-responsible-business",
+    title: "Ethics, Governance & Responsible Business",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Develops the Governance pillar of ESG by examining how organizations make responsible decisions, set accountabilities, handle conflicts of interest and confidentiality, and enforce workplace controls.",
+    aim: "Help employees understand responsible decision-making, disclose conflicts of interest, protect confidentiality, maintain accurate records, and raise concerns through proper channels.",
+    learningObjectives: [
+      "Explain Governance in simple workplace language.",
+      "Recognise ethical and unethical workplace decisions.",
+      "Identify conflicts of interest and declare them transparently.",
+      "Understand why accurate records, confidentiality, and controls matter."
+    ],
+    badgeName: "Responsible Business Practitioner",
+    badgeDescription: "Awarded for completing the Ethics, Governance & Responsible Business course.",
+    lessons: [
+      "Hook: would you say something?",
+      "Ethics in everyday work",
+      "Conflicts of interest and confidentiality",
+      "Accurate records and company controls",
+      "Scenario: the contractor decision",
+      "Knowledge check, commitment and completion"
+    ]
+  },
+  {
+    code: "ELH-33",
+    slug: "esg-data-measurement-and-reporting-basics",
+    title: "ESG Data, Measurement & Reporting Basics",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Introduces employees to how organizations collect, check, use, and report ESG information, distinguishing actions from measurements and evidence, and reinforcing data quality discipline.",
+    aim: "Help employees understand ESG data scope across E, S, and G pillars, apply the 5-point context rule, distinguish measured from estimated data, and maintain trustworthy workplace records.",
+    learningObjectives: [
+      "Explain what ESG data means in simple language.",
+      "Distinguish action statements from measurements and evidence.",
+      "Apply the 5-point context rule (Value + Unit + Period + Scope + Source).",
+      "Recognise measured vs estimated data and maintain trustworthy records."
+    ],
+    badgeName: "ESG Data Awareness",
+    badgeDescription: "Awarded for completing the ESG Data, Measurement & Reporting Basics course.",
+    lessons: [
+      "Hook: can you trust this number?",
+      "What counts as ESG data?",
+      "From action to evidence and context",
+      "Good data vs misleading data",
+      "Scenario: the monthly ESG snapshot",
+      "Knowledge check, commitment and completion"
+    ]
+  },
+  {
+    code: "ELH-34",
+    slug: "esg-in-my-job-from-policy-to-everyday-action",
+    title: "ESG in My Job: From Policy to Everyday Action",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Serves as the practical capstone course, helping employees translate ESG policies into daily workplace decisions, role-based contributions, and direct action vs escalation.",
+    aim: "Help employees recognise ESG in their daily work, master the 4-action framework (direct action vs escalation), navigate operational pressures, and build lasting responsible habits.",
+    learningObjectives: [
+      "Recognise E, S, and G considerations in ordinary daily work.",
+      "Identify ESG opportunities and responsibilities relevant to your role.",
+      "Apply the 4-action framework (direct action, report, ask, outside authority).",
+      "Make responsible choices under operational pressure and build daily habits."
+    ],
+    badgeName: "ESG Action Practitioner",
+    badgeDescription: "Awarded for completing the ESG in My Job: From Policy to Everyday Action course.",
+    lessons: [
+      "Hook: what does ESG have to do with my job?",
+      "ESG is already in everyday work",
+      "What can I actually influence?",
+      "When work gets busy",
+      "Scenario: one shift, five decisions",
+      "Knowledge check, commitment and completion"
+    ]
+  },
+  {
+    code: "ELH-13",
+    slug: "creating-and-running-effective-green-teams",
+    title: "Creating and Running Effective Green Teams",
+    level: "intermediate",
+    estimatedMinutes: 20,
+    shortDescription: "Practical guide to launching, facilitating, and sustaining workplace green teams.",
+    aim: "Help employee sustainability champions organize and run effective workplace green teams.",
+    learningObjectives: ["Form a green team charter.", "Engage colleagues.", "Track action progress."],
+    badgeName: "Green Team Lead",
+    badgeDescription: "Awarded for completing Green Teams training.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-14",
+    slug: "planning-and-delivering-workplace-sustainability-initiatives",
+    title: "Planning and Delivering Workplace Sustainability Initiatives",
+    level: "intermediate",
+    estimatedMinutes: 20,
+    shortDescription: "Step-by-step framework for designing and executing sustainability projects at work.",
+    aim: "Turn ideas into measurable workplace initiatives.",
+    learningObjectives: ["Project planning", "Stakeholder buy-in", "Measuring outcomes"],
+    badgeName: "Initiative Delivery Specialist",
+    badgeDescription: "Awarded for completing Sustainability Initiatives training.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-15",
+    slug: "setting-departmental-sustainability-goals",
+    title: "Setting Departmental Sustainability Goals",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Aligning team goals with broader environmental targets.",
+    aim: "Establish clear operational sustainability goals across business units.",
+    learningObjectives: ["Goal alignment", "KPI setting", "Progress tracking"],
+    badgeName: "Sustainability Goal Setter",
+    badgeDescription: "Awarded for setting departmental goals.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-16",
+    slug: "tracking-sustainability-actions-and-progress",
+    title: "Tracking Sustainability Actions and Progress",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Monitoring environmental initiatives and reviewing operational metrics.",
+    aim: "Ensure accountability and progress visibility.",
+    learningObjectives: ["Metric tracking", "Status reporting", "Action register maintenance"],
+    badgeName: "Progress Tracking Champion",
+    badgeDescription: "Awarded for tracking sustainability progress.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-17",
+    slug: "communicating-sustainability-at-work",
+    title: "Communicating Sustainability at Work",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Effective internal communication strategies for environmental awareness.",
+    aim: "Engage teams through clear, factual communication.",
+    learningObjectives: ["Message framing", "Avoiding greenwashing", "Employee engagement"],
+    badgeName: "Sustainability Communicator",
+    badgeDescription: "Awarded for completing sustainability communication training.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-18",
+    slug: "building-employee-engagement-in-sustainability",
+    title: "Building Employee Engagement in Sustainability",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Inspiring participation and embedding sustainable habits across teams.",
+    aim: "Increase staff involvement in workplace initiatives.",
+    learningObjectives: ["Engagement techniques", "Overcoming apathy", "Recognition systems"],
+    badgeName: "Engagement Specialist",
+    badgeDescription: "Awarded for building engagement.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-19",
+    slug: "reviewing-sustainability-performance-and-corrective-action",
+    title: "Reviewing Sustainability Performance and Corrective Action",
+    level: "intermediate",
+    estimatedMinutes: 20,
+    shortDescription: "Evaluating results and taking corrective actions when targets are missed.",
+    aim: "Continuous improvement in workplace sustainability performance.",
+    learningObjectives: ["Performance review", "Root cause analysis", "Corrective action planning"],
+    badgeName: "Performance Auditor",
+    badgeDescription: "Awarded for performance review expertise.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-20",
+    slug: "sustainability-data-collection-and-evidence",
+    title: "Sustainability Data Collection and Evidence",
+    level: "intermediate",
+    estimatedMinutes: 20,
+    shortDescription: "Gathering reliable data and maintaining verifiable records.",
+    aim: "Ensure audit-ready data collection practices.",
+    learningObjectives: ["Data gathering", "Evidence verification", "Record retention"],
+    badgeName: "Data Collection Champion",
+    badgeDescription: "Awarded for data collection diligence.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-21",
+    slug: "building-a-workplace-sustainability-team",
+    title: "Building a Workplace Sustainability Team",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Structuring cross-functional committees and sustainability working groups.",
+    aim: "Establish structured teams for long-term impact.",
+    learningObjectives: ["Team structure", "Role assignment", "Meeting cadence"],
+    badgeName: "Team Builder",
+    badgeDescription: "Awarded for team building skills.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-22",
+    slug: "sustainability-roles-responsibilities-and-accountability",
+    title: "Sustainability Roles, Responsibilities and Accountability",
+    level: "intermediate",
+    estimatedMinutes: 18,
+    shortDescription: "Defining clear roles and accountability matrices for environmental performance.",
+    aim: "Clarify individual and collective responsibilities.",
+    learningObjectives: ["Role mapping", "RACI matrix", "Accountability frameworks"],
+    badgeName: "Accountability Practitioner",
+    badgeDescription: "Awarded for defining clear roles.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-23",
+    slug: "workplace-sustainability-leadership",
+    title: "Workplace Sustainability Leadership",
+    level: "advanced",
+    estimatedMinutes: 22,
+    shortDescription: "Leading organizational change and embedding sustainability into business strategy.",
+    aim: "Empower leaders to drive strategic sustainability adoption.",
+    learningObjectives: ["Strategic alignment", "Change leadership", "Organizational culture"],
+    badgeName: "Sustainability Leader",
+    badgeDescription: "Awarded for leadership excellence.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-24",
+    slug: "sustainability-for-hr-teams",
+    title: "Sustainability for HR Teams",
+    level: "applied",
+    estimatedMinutes: 18,
+    shortDescription: "Embedding sustainability into onboarding, training, and employee engagement.",
+    aim: "Equip HR professionals to integrate sustainability into people operations.",
+    learningObjectives: ["Green onboarding", "Employee wellbeing", "Policy integration"],
+    badgeName: "Sustainable HR Practitioner",
+    badgeDescription: "Awarded for completing Sustainability for HR Teams.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-25",
+    slug: "sustainability-for-finance-teams",
+    title: "Sustainability for Finance Teams",
+    level: "applied",
+    estimatedMinutes: 18,
+    shortDescription: "Understanding financial impacts, ROI, and resource efficiency metrics.",
+    aim: "Help finance staff evaluate sustainable investments and cost savings.",
+    learningObjectives: ["Financial ROI", "Resource cost tracking", "Sustainable budgeting"],
+    badgeName: "Sustainable Finance Practitioner",
+    badgeDescription: "Awarded for completing Sustainability for Finance Teams.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-26",
+    slug: "sustainability-for-procurement-and-purchasing-teams",
+    title: "Sustainability for Procurement and Purchasing Teams",
+    level: "applied",
+    estimatedMinutes: 18,
+    shortDescription: "Evaluating vendor sustainability, eco-labels, and responsible supply chains.",
+    aim: "Guide purchasing decisions towards sustainable products and suppliers.",
+    learningObjectives: ["Vendor evaluation", "Eco-label verification", "Sustainable purchasing criteria"],
+    badgeName: "Sustainable Procurement Practitioner",
+    badgeDescription: "Awarded for completing Sustainability for Procurement.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-27",
+    slug: "sustainability-for-operations-and-frontline-teams",
+    title: "Sustainability for Operations and Frontline Teams",
+    level: "applied",
+    estimatedMinutes: 18,
+    shortDescription: "Optimizing frontline workflows, reducing waste, and conserving operational resources.",
+    aim: "Empower frontline workers to implement daily resource efficiencies.",
+    learningObjectives: ["Operational efficiency", "Waste reduction", "Equipment care"],
+    badgeName: "Sustainable Operations Practitioner",
+    badgeDescription: "Awarded for completing Sustainability for Operations.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-28",
+    slug: "sustainability-for-facilities-and-property-teams",
+    title: "Sustainability for Facilities and Property Teams",
+    level: "applied",
+    estimatedMinutes: 18,
+    shortDescription: "Managing energy, water, waste, and building maintenance sustainably.",
+    aim: "Improve facility efficiency and environmental management.",
+    learningObjectives: ["Building energy management", "Water conservation", "Facility maintenance"],
+    badgeName: "Sustainable Facilities Practitioner",
+    badgeDescription: "Awarded for completing Sustainability for Facilities.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
+  },
+  {
+    code: "ELH-29",
+    slug: "sustainability-for-sales-and-marketing-teams",
+    title: "Sustainability for Sales and Marketing Teams",
+    level: "applied",
+    estimatedMinutes: 18,
+    shortDescription: "Communicating genuine sustainability credentials without greenwashing.",
+    aim: "Guide sales and marketing in honest green messaging.",
+    learningObjectives: ["Authentic messaging", "Avoiding greenwashing", "Customer communication"],
+    badgeName: "Sustainable Marketing Practitioner",
+    badgeDescription: "Awarded for completing Sustainability for Sales & Marketing.",
+    lessons: ["Lesson 1", "Lesson 2", "Lesson 3"]
   }
 ];
 
@@ -416,6 +737,16 @@ export async function ensureCatalogueSkeletons(): Promise<void> {
               badgeName: targetCourse.badgeName,
               badgeDescription: targetCourse.badgeDescription,
               thumbnailUrl: (targetCourse as any).thumbnailUrl || null
+            })
+            .onConflictDoUpdate({
+              target: coursesTable.slug,
+              set: {
+                title: targetCourse.title,
+                description: targetCourse.shortDescription,
+                fullDescription: fullDescription,
+                durationMinutes: targetCourse.estimatedMinutes,
+                level: targetCourse.level,
+              },
             })
             .returning({ id: coursesTable.id });
 
