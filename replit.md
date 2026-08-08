@@ -1,5 +1,7 @@
 # EcoLearn Mauritius
 
+**AUTHENTICATION STATUS: DEVELOPMENT-READY / PRODUCTION MIGRATION REQUIRED BEFORE COMMERCIAL LAUNCH**
+
 A professional B2B e-learning platform for environmental training, waste sorting, recycling, and ESG compliance in Mauritius. Companies train employees remotely and generate audit-ready ESG reports.
 
 ## Run & Operate
