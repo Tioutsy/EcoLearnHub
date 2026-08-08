@@ -1,7 +1,7 @@
 import { db, employeesTable, companiesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
-const TARGET_EMAIL = "slennon2206@gmail.com";
+const TARGET_EMAIL = process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com";
 const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 
 async function setAdmin() {
@@ -12,7 +12,7 @@ async function setAdmin() {
   if (!company) {
     [company] = await db.insert(companiesTable).values({
       name: "Elevio Enterprise",
-      subscriptionTier: "complete",
+      slug: "elevio-enterprise",
       maxEmployees: 1000,
     }).returning();
   }
@@ -27,12 +27,12 @@ async function setAdmin() {
     await db
       .update(employeesTable)
       .set({
-        role: "company_admin",
+        role: "admin",
         companyId: company.id,
         updatedAt: new Date(),
       })
       .where(eq(employeesTable.id, existingEmp.id));
-    console.log(`Updated database employee record ID ${existingEmp.id} to role 'company_admin'.`);
+    console.log(`Updated database employee record ID ${existingEmp.id} to role 'admin'.`);
   } else {
     const [newEmp] = await db.insert(employeesTable).values({
       companyId: company.id,
@@ -40,11 +40,10 @@ async function setAdmin() {
       email: TARGET_EMAIL,
       department: "Executive Management",
       jobTitle: "Administrator",
-      role: "company_admin",
+      role: "admin",
       status: "active",
-      invitedAt: new Date(),
     }).returning();
-    console.log(`Created new database employee record ID ${newEmp.id} with role 'company_admin'.`);
+    console.log(`Created new database employee record ID ${newEmp.id} with role 'admin'.`);
   }
 
   // 3. Update Clerk Public Metadata via REST API

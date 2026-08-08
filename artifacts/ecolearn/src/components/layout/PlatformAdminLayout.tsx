@@ -55,6 +55,10 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
 
   const sidebarLinks = [
     { href: "/platform-admin", label: "Overview", icon: LayoutDashboard },
+    { href: "/platform-admin/organisations", label: "Organisations", icon: FolderOpen },
+    { href: "/platform-admin/accounts", label: "Accounts", icon: Target },
+    { href: "/platform-admin/activity", label: "Activity", icon: Route },
+    { href: "/platform-admin/health", label: "Account Health", icon: ShieldAlert },
     { href: "/platform-admin/insights", label: "Mauritius Rules & Resources", icon: Leaf },
     { href: "/platform-admin/sectors", label: "Sectors", icon: FolderOpen },
     { href: "/platform-admin/learning-paths", label: "Learning Paths", icon: Route },

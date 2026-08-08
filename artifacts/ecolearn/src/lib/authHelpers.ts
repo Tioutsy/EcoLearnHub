@@ -4,6 +4,7 @@ export function getRawRole(user: any): string | null {
   return (
     user?.publicMetadata?.role ??
     user?.metadata?.role ??
+    user?.unsafeMetadata?.role ??
     user?.role ??
     null
   );

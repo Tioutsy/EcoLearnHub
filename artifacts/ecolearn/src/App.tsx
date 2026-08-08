@@ -50,6 +50,10 @@ import NotFound from "@/pages/not-found";
 
 // Platform Admin Pages
 import PlatformAdminOverview from "@/pages/platform-admin/overview";
+import PlatformAdminOrganisations from "@/pages/platform-admin/organisations";
+import PlatformAdminAccounts from "@/pages/platform-admin/accounts";
+import PlatformAdminActivity from "@/pages/platform-admin/activity";
+import PlatformAdminHealth from "@/pages/platform-admin/health";
 import PlatformAdminSectors from "@/pages/platform-admin/sectors";
 import PlatformAdminInsights from "@/pages/platform-admin/insights";
 import PlatformAdminLearningPaths from "@/pages/platform-admin/learningPaths";
@@ -269,6 +273,10 @@ function ClerkProviderWithRoutes() {
             <Route path="/admin" component={AdminPanel} />
             <Route path="/admin/recycling" component={AdminRecycling} />
             <Route path="/platform-admin" component={PlatformAdminOverview} />
+            <Route path="/platform-admin/organisations" component={PlatformAdminOrganisations} />
+            <Route path="/platform-admin/accounts" component={PlatformAdminAccounts} />
+            <Route path="/platform-admin/activity" component={PlatformAdminActivity} />
+            <Route path="/platform-admin/health" component={PlatformAdminHealth} />
             <Route path="/platform-admin/insights" component={PlatformAdminInsights} />
             <Route path="/platform-admin/sectors" component={PlatformAdminSectors} />
             <Route path="/platform-admin/learning-paths" component={PlatformAdminLearningPaths} />

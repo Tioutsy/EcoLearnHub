@@ -57,9 +57,14 @@ function employeeStatusLabel(employee: ManagedEmployee): string {
   return "Not invited";
 }
 
+import { useUser } from "@clerk/react";
+import { hasCapability } from "@/lib/authHelpers";
+
 export default function CompanyEmployees() {
   const { t } = useLanguage();
+  const { user } = useUser();
   const queryClient = useQueryClient();
+  const canManageEmployees = hasCapability(user, "employees.create");
   const { data: employeeData, isLoading } = useListEmployees();
   const { data: courses } = useListCourses();
   const addEmployee = useAddEmployee();
@@ -137,33 +142,35 @@ export default function CompanyEmployees() {
               <h1 className="text-3xl font-bold font-serif mb-2">Manage Employees</h1>
               <p className="text-muted-foreground">Invite team members, keep employee details current, and assign training.</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => setAssignOpen(true)}>
-                <ClipboardList className="mr-2 h-4 w-4" /> Assign Training
-              </Button>
-              <EmployeeDialog
-                open={isAddOpen}
-                onOpenChange={setIsAddOpen}
-                title="Add Employee"
-                submitLabel={addEmployee.isPending ? "Adding..." : "Add Employee"}
-                pending={addEmployee.isPending}
-                onSubmit={async (values) => {
-                  try {
-                    await addEmployee.mutateAsync({ data: normaliseForm(values) });
-                    setIsAddOpen(false);
-                    invalidateEmployees();
-                    toast({ title: "Employee added" });
-                  } catch (err: unknown) {
-                    toast({
-                      title: "Failed to add employee",
-                      description: err instanceof Error ? err.message : "Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                trigger={<Button><Plus className="mr-2 h-4 w-4" /> Add Employee</Button>}
-              />
-            </div>
+            {canManageEmployees && (
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => setAssignOpen(true)}>
+                  <ClipboardList className="mr-2 h-4 w-4" /> Assign Training
+                </Button>
+                <EmployeeDialog
+                  open={isAddOpen}
+                  onOpenChange={setIsAddOpen}
+                  title="Add Employee"
+                  submitLabel={addEmployee.isPending ? "Adding..." : "Add Employee"}
+                  pending={addEmployee.isPending}
+                  onSubmit={async (values) => {
+                    try {
+                      await addEmployee.mutateAsync({ data: normaliseForm(values) });
+                      setIsAddOpen(false);
+                      invalidateEmployees();
+                      toast({ title: "Employee added" });
+                    } catch (err: unknown) {
+                      toast({
+                        title: "Failed to add employee",
+                        description: err instanceof Error ? err.message : "Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  trigger={<Button><Plus className="mr-2 h-4 w-4" /> Add Employee</Button>}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

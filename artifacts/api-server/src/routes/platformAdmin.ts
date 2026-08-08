@@ -27,10 +27,12 @@ import {
   coursesTable,
   categoriesTable,
   lessonsTable,
-  quizQuestionsTable
+  quizQuestionsTable,
+  companiesTable,
+  employeesTable
 } from "@workspace/db";
 import { eq, and, or, desc } from "drizzle-orm";
-import { requirePlatformAdmin, sendHttpError } from "../lib/access";
+import { requirePlatformAdmin, getCompanyAccess, sendHttpError } from "../lib/access";
 
 const router = Router();
 
@@ -1574,4 +1576,267 @@ router.get("/insights/review-dashboard", async (req, res): Promise<void> => {
   }
 });
 
+router.get("/me/access", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    const isPlatform = access.role === "platform_admin";
+    const platformRole = isPlatform ? "PLATFORM_ADMIN" : "USER";
+    
+    let organisationRole: string | null = null;
+    let organisationId: number | null = null;
+
+    if (!isPlatform) {
+      organisationId = access.companyId;
+      organisationRole = access.role === "company_admin" ? "COMPANY_ADMIN" : access.role === "manager" ? "MANAGER" : "LEARNER";
+    } else if (access.employee) {
+      organisationId = access.companyId;
+      organisationRole = access.employee.role === "admin" ? "COMPANY_ADMIN" : access.employee.role === "manager" ? "MANAGER" : "LEARNER";
+    }
+
+    res.json({
+      userId: access.userId,
+      email: access.email,
+      platformRole,
+      organisationId,
+      organisationRole,
+      effectiveRole: access.role,
+      permissions: {
+        canViewPlatformAdmin: isPlatform,
+        canViewOrganisations: isPlatform,
+        canViewGlobalAccounts: isPlatform,
+        canAddEmployees: isPlatform || access.role === "company_admin",
+        canManageCompany: isPlatform || access.role === "company_admin",
+        canViewCompanyReports: isPlatform || access.role === "company_admin",
+        canViewTeamReports: isPlatform || access.role === "company_admin" || access.role === "manager"
+      }
+    });
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLATFORM OVERSIGHT, REGISTRY, ACCOUNTS & HEALTH WARNINGS
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.get("/overview-stats", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const companies = await db.select().from(companiesTable);
+    const employees = await db.select().from(employeesTable);
+
+    const totalCompanies = companies.length;
+    const activeCompanies = companies.length; // all registered
+    const totalUsers = employees.length;
+    const companyAdmins = employees.filter((e) => e.role === "admin").length;
+
+    // Orphaned users / warnings calculation
+    const companyIds = new Set(companies.map((c) => c.id));
+    const companyAdminCounts = new Map<number, number>();
+    for (const emp of employees) {
+      if (emp.role === "admin") {
+        companyAdminCounts.set(emp.companyId, (companyAdminCounts.get(emp.companyId) || 0) + 1);
+      }
+    }
+
+    const missingAdmins = companies.filter((c) => !companyAdminCounts.get(c.id)).length;
+    const orphanedUsers = employees.filter((e) => !companyIds.has(e.companyId)).length;
+
+    res.json({
+      totalCompanies,
+      activeCompanies,
+      totalUsers,
+      activeLearners: totalUsers,
+      companyAdmins,
+      requiresAttentionCount: missingAdmins + orphanedUsers
+    });
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.get("/organisations", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
+    const employees = await db.select().from(employeesTable);
+
+    const userCountMap = new Map<number, number>();
+    const adminCountMap = new Map<number, number>();
+    for (const emp of employees) {
+      userCountMap.set(emp.companyId, (userCountMap.get(emp.companyId) || 0) + 1);
+      if (emp.role === "admin") {
+        adminCountMap.set(emp.companyId, (adminCountMap.get(emp.companyId) || 0) + 1);
+      }
+    }
+
+    const registry = companies.map((c) => {
+      const users = userCountMap.get(c.id) || 0;
+      let band = "Up to 25";
+      if (c.maxEmployees) {
+        if (c.maxEmployees <= 25) band = "Up to 25";
+        else if (c.maxEmployees <= 50) band = "26–50";
+        else if (c.maxEmployees <= 80) band = "51–80";
+        else if (c.maxEmployees <= 120) band = "81–120";
+        else band = "Over 120 / Tailored";
+      }
+
+      return {
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        status: "Active",
+        planBand: band,
+        maxEmployees: c.maxEmployees ?? 25,
+        userCount: users,
+        companyAdminCount: adminCountMap.get(c.id) || 0,
+        onboardingComplete: true,
+        createdAt: c.createdAt
+      };
+    });
+
+    res.json(registry);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.get("/organisations/:id", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const orgId = parseInt(req.params.id);
+    const [company] = await db.select().from(companiesTable).where(eq(companiesTable.id, orgId)).limit(1);
+    if (!company) {
+      res.status(404).json({ error: "Organisation not found" });
+      return;
+    }
+
+    const employees = await db.select().from(employeesTable).where(eq(employeesTable.companyId, orgId));
+    const companyAdmins = employees.filter((e) => e.role === "admin");
+    const learners = employees.filter((e) => e.role !== "admin");
+
+    res.json({
+      organisation: company,
+      companyAdmins,
+      users: employees,
+      trainingSummary: {
+        totalLearners: learners.length,
+        totalEnrolled: learners.reduce((sum, e) => sum + (e.enrolledCourses || 0), 0),
+        totalCompleted: learners.reduce((sum, e) => sum + (e.completedCourses || 0), 0),
+        certificatesIssued: company.certificatesIssued || 0
+      }
+    });
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.get("/accounts", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const employees = await db.select().from(employeesTable).orderBy(desc(employeesTable.createdAt));
+    const companies = await db.select().from(companiesTable);
+    const companyMap = new Map(companies.map((c) => [c.id, c.name]));
+
+    const accounts = employees.map((e) => ({
+      id: e.id,
+      clerkUserId: e.clerkUserId,
+      name: e.name,
+      email: e.email,
+      role: e.role === "admin" ? "COMPANY_ADMIN" : e.role === "manager" ? "MANAGER" : "LEARNER",
+      companyId: e.companyId,
+      companyName: companyMap.get(e.companyId) || "Unassigned / Orphaned",
+      status: e.status,
+      createdAt: e.createdAt,
+      lastActiveAt: e.lastActiveAt
+    }));
+
+    res.json(accounts);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.get("/health", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const companies = await db.select().from(companiesTable);
+    const employees = await db.select().from(employeesTable);
+    const companyIds = new Set(companies.map((c) => c.id));
+
+    const warnings: Array<{ id: string; type: string; severity: "HIGH" | "MEDIUM" | "LOW"; title: string; message: string }> = [];
+
+    // 1. Missing Company Administrator
+    const companyAdminCounts = new Map<number, number>();
+    for (const emp of employees) {
+      if (emp.role === "admin") {
+        companyAdminCounts.set(emp.companyId, (companyAdminCounts.get(emp.companyId) || 0) + 1);
+      }
+    }
+    for (const company of companies) {
+      if (!companyAdminCounts.get(company.id)) {
+        warnings.push({
+          id: `missing-admin-${company.id}`,
+          type: "MISSING_COMPANY_ADMIN",
+          severity: "HIGH",
+          title: `No Company Administrator assigned to ${company.name}`,
+          message: `Organisation ID ${company.id} has no registered Company Administrator account.`
+        });
+      }
+    }
+
+    // 2. Orphaned users
+    for (const emp of employees) {
+      if (!companyIds.has(emp.companyId)) {
+        warnings.push({
+          id: `orphaned-user-${emp.id}`,
+          type: "ORPHANED_USER",
+          severity: "MEDIUM",
+          title: `Orphaned User Account: ${emp.email}`,
+          message: `User ${emp.name} (ID ${emp.id}) belongs to non-existent company ID ${emp.companyId}.`
+        });
+      }
+    }
+
+    res.json(warnings);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.get("/activity", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt)).limit(10);
+    const employees = await db.select().from(employeesTable).orderBy(desc(employeesTable.createdAt)).limit(10);
+
+    const logs: Array<{ id: string; eventType: string; timestamp: string; details: string }> = [];
+
+    for (const c of companies) {
+      logs.push({
+        id: `org-created-${c.id}`,
+        eventType: "ORGANISATION_CREATED",
+        timestamp: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+        details: `Client organisation '${c.name}' (ID ${c.id}) was created.`
+      });
+    }
+
+    for (const e of employees) {
+      logs.push({
+        id: `user-created-${e.id}`,
+        eventType: e.role === "admin" ? "COMPANY_ADMIN_ASSIGNED" : "USER_CREATED",
+        timestamp: e.createdAt ? new Date(e.createdAt).toISOString() : new Date().toISOString(),
+        details: `User ${e.name} (${e.email}) registered under company ID ${e.companyId}.`
+      });
+    }
+
+    logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    res.json(logs);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
 export default router;
+

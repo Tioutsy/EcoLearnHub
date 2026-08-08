@@ -185,8 +185,9 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
     (isPlatformRole(claimRole) ? 0 : null);
   if (!companyId) throw new HttpError(404, "No company found");
 
+  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
   let role: AccessRole = "employee";
-  if (isPlatformRole(claimRole)) {
+  if (isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail)) {
     role = "platform_admin";
   } else if (isCompanyAdminRole(claimRole) || employee?.role === "admin") {
     role = "company_admin";

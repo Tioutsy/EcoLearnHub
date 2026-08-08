@@ -477,7 +477,7 @@ export default function Courses() {
                         <img
                           src={((course as any).courseCode === "ELH-30" || course.slug === "climate-risk-and-workplace-resilience")
                             ? "/images/courses/climate-risk-and-workplace-resilience.jpg"
-                            : course.thumbnailUrl}
+                            : (course.thumbnailUrl ?? undefined)}
                           alt={course.title}
                           onError={(e) => {
                             const target = e.currentTarget;

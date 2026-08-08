@@ -8,7 +8,13 @@ router.get("/", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
     if (!access.employee) {
-      res.status(404).json({ error: "Employee record not found" });
+      res.json({
+        totalPoints: 0,
+        earnedAchievementCount: 0,
+        unlockedCount: 0,
+        lockedCount: 0,
+        achievements: []
+      });
       return;
     }
     const progress = await getEmployeeAchievementProgress(access.employee);
