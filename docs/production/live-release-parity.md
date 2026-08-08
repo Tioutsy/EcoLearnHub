@@ -2,10 +2,10 @@
 
 ## 1. Release Parity Status
 
-| Component | Repository | Branch | Local Commit | Live Deployment Target | Status |
+| Component | Repository | Branch | Commit SHA | Live Deployment Target | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Frontend (`ecolearn`)** | `Tioutsy/EcoLearnHub` | `main` | `96010052bb45586ad39fa2979fb6bde216afdd1e` | `https://ecolearnhub.com` | **PARITY PENDING PUSH** |
-| **API Server (`api-server`)** | `Tioutsy/EcoLearnHub` | `main` | `96010052bb45586ad39fa2979fb6bde216afdd1e` | `https://eco-learn-hub-api-server.onrender.com` | **PARITY PENDING PUSH** |
+| **Frontend (`ecolearn`)** | `Tioutsy/EcoLearnHub` | `main` | `2deee6c` | `https://ecolearnhub.com` | **PARITY CONFIRMED** |
+| **API Server (`api-server`)** | `Tioutsy/EcoLearnHub` | `main` | `2deee6c` | `https://eco-learn-hub-api-server.onrender.com` | **PARITY CONFIRMED** |
 
 ---
 
