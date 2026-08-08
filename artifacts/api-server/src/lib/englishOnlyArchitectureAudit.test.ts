@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 describe("Architecture Guard: English-Only Platform Architecture (Sprint 10T)", () => {
-  const rootDir = path.resolve(__dirname, "../../../");
+  const rootDir = path.resolve(process.cwd(), "../../");
 
   test("1. Ensure obsolete translation files remain deleted", () => {
     const forbiddenFiles = [

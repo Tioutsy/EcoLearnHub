@@ -135,8 +135,7 @@ router.get("/company/export", async (req, res): Promise<void> => {
       return;
     }
 
-    const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
-    const certLocale = rawLocale.toLowerCase().startsWith("fr") ? "fr" : "en";
+    const certLocale = "en";
     const label = safeFileName(company?.name ?? "Elevio");
 
     const pdfBytes = await generateBulkCertificatesPdf(certs.map(c => toCertificateData(c, certLocale)));
@@ -156,8 +155,7 @@ router.get("/company/export", async (req, res): Promise<void> => {
 
 // Download a single certificate as a branded PDF (employee or company).
 router.get("/:id/pdf", async (req, res): Promise<void> => {
-  const rawLocale = (req.query.locale as string) || req.headers["accept-language"] || "en";
-  const certLocale = rawLocale.toLowerCase().startsWith("fr") ? "fr" : "en";
+  const certLocale = "en";
 
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const id = parseInt(raw, 10);
