@@ -260,16 +260,29 @@ router.post("/onboard", async (req, res): Promise<void> => {
   });
 });
 
-// 3b. POST /api/subscriptions/confirm-payment (Server-Verified Payment Activation)
+// 3b. POST /api/subscriptions/confirm-payment (Platform Admin / Webhook Verified Activation)
 router.post("/confirm-payment", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
-    if (!access.companyId) {
+    const isPlatformAdmin = access.role === "platform_admin";
+    const webhookSecretHeader = req.headers["x-payment-webhook-secret"];
+    const isValidWebhook = webhookSecretHeader && process.env.PAYMENT_WEBHOOK_SECRET && webhookSecretHeader === process.env.PAYMENT_WEBHOOK_SECRET;
+
+    if (!isPlatformAdmin && !isValidWebhook) {
+      res.status(403).json({
+        error: "Forbidden: Direct payment activation is not permitted. Subscriptions require platform administrator reconciliation or verified payment provider webhooks."
+      });
+      return;
+    }
+
+    const { companyId: reqCompanyId, paymentReference, provider } = req.body;
+    const targetCompanyId = reqCompanyId || access.companyId;
+
+    if (!targetCompanyId) {
       res.status(400).json({ error: "Company association required" });
       return;
     }
 
-    const { paymentReference, provider } = req.body;
     if (!paymentReference || typeof paymentReference !== "string" || paymentReference.trim().length < 4) {
       res.status(400).json({ error: "Valid paymentReference is required for server confirmation" });
       return;
@@ -278,7 +291,7 @@ router.post("/confirm-payment", async (req, res): Promise<void> => {
     const [sub] = await db
       .select()
       .from(companySubscriptionsTable)
-      .where(eq(companySubscriptionsTable.companyId, access.companyId))
+      .where(eq(companySubscriptionsTable.companyId, targetCompanyId))
       .limit(1);
 
     if (!sub) {
@@ -299,10 +312,10 @@ router.post("/confirm-payment", async (req, res): Promise<void> => {
       .then(r => r[0]);
 
     res.json({
-      message: "Payment successfully verified by server. Subscription activated.",
+      message: "Payment successfully verified. Subscription activated.",
       subscription: updated,
       paymentReference: paymentReference.trim(),
-      provider: provider || "MCB_JUICE_B2B_VERIFIED",
+      provider: provider || "VERIFIED_B2B_RECONCILIATION",
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to confirm payment" });
