@@ -73,6 +73,7 @@
   },
   "dependencies": {
     "@clerk/react": "^6.9.1",
+    "@vercel/analytics": "^2.0.1",
     "xlsx": "^0.18.5"
   }
 }

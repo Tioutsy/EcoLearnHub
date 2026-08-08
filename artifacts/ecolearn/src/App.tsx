@@ -3,6 +3,7 @@ import { ClerkProvider, SignIn, SignUp, Show, useAuth, useClerk } from '@clerk/r
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wouter';
 import { QueryClientProvider, useQueryClient, QueryClient } from "@tanstack/react-query";
+import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -293,6 +294,7 @@ function ClerkProviderWithRoutes() {
       </LanguageProvider>
     </ClerkApiTokenBridge>
   </QueryClientProvider>
+  <Analytics />
 </ClerkProvider>
   );
 }
