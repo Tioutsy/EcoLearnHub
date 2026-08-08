@@ -558,6 +558,8 @@ export async function ensureWorkplaceSustainabilityInitiativesCourse(): Promise<
         badgeName: COURSE_META.badgeName,
         badgeDescription: COURSE_META.badgeDescription,
         passingScore: COURSE_META.passingScore,
+        isPublished: true,
+        status: "published",
         updatedAt: new Date(),
       },
     })

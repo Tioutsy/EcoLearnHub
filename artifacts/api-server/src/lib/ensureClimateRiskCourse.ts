@@ -438,6 +438,7 @@ export async function ensureClimateRiskCourse(): Promise<void> {
             badgeName: COURSE_META.badgeName,
             badgeDescription: COURSE_META.badgeDescription,
             isPublished: true,
+            status: "published",
           })
           .where(eq(coursesTable.id, courseId));
       }
