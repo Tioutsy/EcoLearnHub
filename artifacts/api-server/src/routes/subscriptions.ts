@@ -9,8 +9,9 @@ import {
   companySubscriptionsTable,
   companiesTable,
   coursesTable,
+  employeesTable,
 } from "@workspace/db";
-import { eq, and, asc, desc } from "drizzle-orm";
+import { eq, and, or, asc, desc } from "drizzle-orm";
 import { getCompanyAccess, CompanyAccess } from "../lib/access";
 import { resolveBandCodeFromEmployeeCount } from "../lib/ensureHybridSubscriptions";
 
@@ -170,14 +171,16 @@ router.post("/onboard", async (req, res): Promise<void> => {
   let companyId = access?.companyId;
 
   if (!companyId && companyName) {
-    // Create new company record
+    const slug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const [newComp] = await db
       .insert(companiesTable)
       .values({
         name: companyName,
-        slug: companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        slug,
         industry: industry || null,
         employeeCount: parseInt(employeeCount || "25", 10),
+        maxEmployees: band.maximumEmployees || 25,
+        planId: plan.id,
       })
       .returning();
     companyId = newComp.id;
@@ -213,6 +216,36 @@ router.post("/onboard", async (req, res): Promise<void> => {
       },
     })
     .returning();
+
+  // Elevate registering user's role to COMPANY_ADMIN (admin) in employeesTable
+  const clauses = [eq(employeesTable.clerkUserId, access.userId)];
+  if (access.email) {
+    clauses.push(eq(employeesTable.email, access.email));
+  }
+  const [existingEmployee] = await db
+    .select()
+    .from(employeesTable)
+    .where(or(...clauses))
+    .limit(1);
+
+  if (existingEmployee) {
+    await db
+      .update(employeesTable)
+      .set({ role: "admin", companyId })
+      .where(eq(employeesTable.id, existingEmployee.id));
+  } else {
+    await db
+      .insert(employeesTable)
+      .values({
+        clerkUserId: access.userId,
+        email: access.email || `${access.userId}@elevio.mu`,
+        name: access.email ? access.email.split("@")[0] : "Company Administrator",
+        companyId,
+        role: "admin",
+        invitationStatus: "accepted",
+        invitationAcceptedAt: new Date(),
+      });
+  }
 
   res.status(201).json({
     subscription: sub,
