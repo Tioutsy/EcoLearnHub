@@ -470,6 +470,20 @@ router.post("/employees", async (req, res): Promise<void> => {
       return;
     }
 
+    const [company] = await db
+      .select()
+      .from(companiesTable)
+      .where(eq(companiesTable.id, access.companyId))
+      .limit(1);
+
+    const currentEmployees = await getCompanyEmployees(access.companyId);
+    if (company && company.maxEmployees && currentEmployees.length >= company.maxEmployees) {
+      res.status(403).json({
+        error: `Employee seat limit reached (${currentEmployees.length} of ${company.maxEmployees} seats used). Please upgrade your subscription band to add more employees.`
+      });
+      return;
+    }
+
     const [emp] = await db
       .insert(employeesTable)
       .values({
