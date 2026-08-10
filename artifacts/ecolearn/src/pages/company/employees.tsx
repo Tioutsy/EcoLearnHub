@@ -114,14 +114,22 @@ export default function CompanyEmployees() {
     filteredEmployees.every((employee) => selectedIds.includes(employee.id));
 
   const handleInvite = async (employee: ManagedEmployee) => {
-    const result = await inviteEmployee.mutateAsync(employee.id);
-    setInviteLink(result.invitationLink);
-    await navigator.clipboard?.writeText(result.invitationLink).catch(() => undefined);
-    toast({
-      title: "Invitation link created",
-      description: result.emailSent ? "Invitation email sent." : "Link copied where clipboard access is available.",
-    });
-    invalidateEmployees();
+    try {
+      const result = await inviteEmployee.mutateAsync(employee.id);
+      setInviteLink(result.invitationLink);
+      await navigator.clipboard?.writeText(result.invitationLink).catch(() => undefined);
+      toast({
+        title: "Invitation link created",
+        description: result.emailSent ? "Invitation email sent." : "Link copied to clipboard and displayed above.",
+      });
+      invalidateEmployees();
+    } catch (err: unknown) {
+      toast({
+        title: "Failed to generate invitation",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async (employee: ManagedEmployee) => {

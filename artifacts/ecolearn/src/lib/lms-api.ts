@@ -78,21 +78,10 @@ export interface TrainingReportParams {
   status?: AssignmentStatus | "all";
 }
 
+import { customFetch } from "@workspace/api-client-react";
+
 async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
-    credentials: "include",
-    ...init,
-    headers: {
-      ...(init?.body ? { "content-type": "application/json" } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Request failed with ${response.status}`);
-  }
-  if (response.status === 204) return null as T;
-  return response.json() as Promise<T>;
+  return customFetch<T>(path, init);
 }
 
 function reportQuery(params: TrainingReportParams): string {
