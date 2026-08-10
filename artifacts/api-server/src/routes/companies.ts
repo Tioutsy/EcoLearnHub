@@ -1230,4 +1230,56 @@ router.get("/notification-logs", async (req, res): Promise<void> => {
   }
 });
 
+// PATCH /company/priorities — Company-admin update training priorities
+router.patch("/priorities", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { priorities } = req.body;
+    if (!Array.isArray(priorities)) {
+      res.status(400).json({ error: "priorities must be an array of strings" });
+      return;
+    }
+
+    const cleanPriorities = priorities
+      .filter((p) => typeof p === "string" && p.trim())
+      .slice(0, 3);
+
+    const [updated] = await db
+      .update(companiesTable)
+      .set({ trainingPriorities: cleanPriorities })
+      .where(eq(companiesTable.id, access.companyId))
+      .returning();
+
+    res.json({ message: "Training priorities updated", trainingPriorities: updated.trainingPriorities });
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to update training priorities" });
+    }
+  }
+});
+
+// POST /company/employees/:id/recommendations — AI recommendation endpoint
+router.post("/employees/:id/recommendations", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const employeeId = parseInt(rawId, 10);
+
+    if (isNaN(employeeId)) {
+      res.status(400).json({ error: "Invalid employee ID" });
+      return;
+    }
+
+    const { generateEmployeeRecommendations } = await import("../lib/ai/aiLearningPathService");
+    const recommendations = await generateEmployeeRecommendations(employeeId, access);
+
+    res.json(recommendations);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err: err?.message }, "Failed to generate AI recommendations");
+      res.status(500).json({ error: err?.message || "We couldn't generate recommendations right now. You can still assign courses manually from the catalogue." });
+    }
+  }
+});
+
 export default router;

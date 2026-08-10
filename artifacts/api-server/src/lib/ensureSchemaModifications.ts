@@ -736,6 +736,11 @@ export async function ensureSchemaModifications() {
           );
         `);
       }
+    },
+    {
+      name: "Add training_priorities to companies",
+      check: () => columnExists("companies", "training_priorities"),
+      execute: () => db.execute(sql`ALTER TABLE "companies" ADD COLUMN IF NOT EXISTS "training_priorities" text[] NOT NULL DEFAULT '{}';`)
     }
   ];
 

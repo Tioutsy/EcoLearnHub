@@ -23,6 +23,7 @@ export const companiesTable = pgTable("companies", {
   defaultCollectionSiteName: text("default_collection_site_name"),
   recyclingServiceFrequency: text("recycling_service_frequency"),
   recyclingInternalNotes: text("recycling_internal_notes"),
+  trainingPriorities: text("training_priorities").array().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

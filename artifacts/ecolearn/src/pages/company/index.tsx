@@ -118,14 +118,18 @@ function ChartCard({
   );
 }
 
+import { TrainingPrioritiesDialog } from "@/components/TrainingPrioritiesDialog";
+
 export default function CompanyDashboard() {
   const { t } = useLanguage();
-  const { data: company, isLoading: isLoadingCompany } = useGetMyCompany();
+  const { data: company, isLoading: isLoadingCompany, refetch: refetchCompany } = useGetMyCompany();
   const { data: stats, isLoading: isLoadingStats } = useGetDashboardStats();
   const { data: lmsOverview, isLoading: isLoadingLms } = useCompanyLmsOverview();
   const { data: trend, isLoading: isLoadingTrend } = useGetCompletionTrend();
   const { data: departments, isLoading: isLoadingDepts } = useGetDepartmentParticipation();
   const { data: score, isLoading: isLoadingScore } = useGetSustainabilityScore();
+
+  const [prioritiesOpen, setPrioritiesOpen] = useState(false);
 
   const trendData = trend ?? [];
   const deptData = departments ?? [];
@@ -214,6 +218,9 @@ export default function CompanyDashboard() {
                   </div>
                 </Link>
               )}
+              <Button variant="outline" onClick={() => setPrioritiesOpen(true)}>
+                <Target className="mr-2 h-4 w-4 text-emerald-600" /> Training Priorities
+              </Button>
               <Button onClick={downloadEsgReport} disabled={esgDownloading}>
                 <FileText className="mr-2 h-4 w-4" />
                 {esgDownloading ? "Downloading..." : "ESG Training Report"}
@@ -652,6 +659,13 @@ export default function CompanyDashboard() {
           </div>
         </div>
       </div>
+
+      <TrainingPrioritiesDialog
+        open={prioritiesOpen}
+        onOpenChange={setPrioritiesOpen}
+        currentPriorities={(company as any)?.trainingPriorities || []}
+        onSaved={() => refetchCompany()}
+      />
     </Layout>
   );
 }

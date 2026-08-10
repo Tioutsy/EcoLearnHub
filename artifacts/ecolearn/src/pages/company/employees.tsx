@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, UserCircle, ArrowLeft, Pencil, Trash2, Send, ClipboardList, Copy, CheckCircle2 } from "lucide-react";
+import { Plus, Search, UserCircle, ArrowLeft, Pencil, Trash2, Send, ClipboardList, Copy, CheckCircle2, Sparkles } from "lucide-react";
+import { SmartRecommendationDialog } from "@/components/SmartRecommendationDialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -76,6 +77,7 @@ export default function CompanyEmployees() {
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editing, setEditing] = useState<ManagedEmployee | null>(null);
+  const [recommendingEmployee, setRecommendingEmployee] = useState<ManagedEmployee | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -286,6 +288,9 @@ export default function CompanyEmployees() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="icon" title="Smart Recommendation" onClick={() => setRecommendingEmployee(employee)}>
+                            <Sparkles className="h-4 w-4 text-emerald-600" />
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={() => handleInvite(employee)} disabled={inviteEmployee.isPending}>
                             <Send className="h-4 w-4" />
                           </Button>
@@ -354,6 +359,13 @@ export default function CompanyEmployees() {
             description: result.updated ? `${result.updated} existing assignment${result.updated === 1 ? "" : "s"} updated.` : undefined,
           });
         }}
+      />
+
+      <SmartRecommendationDialog
+        open={Boolean(recommendingEmployee)}
+        onOpenChange={(open) => !open && setRecommendingEmployee(null)}
+        employee={recommendingEmployee}
+        onSuccessAssignment={() => invalidateEmployees()}
       />
     </Layout>
   );
