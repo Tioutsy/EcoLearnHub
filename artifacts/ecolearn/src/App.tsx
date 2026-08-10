@@ -116,9 +116,22 @@ const clerkAppearance = {
 };
 
 function SignInPage() {
+  const params = new URLSearchParams(window.location.search);
+  const inviteToken = params.get("invite");
+  // If the employee arrives at sign-in with an invite token, redirect them to
+  // the acceptance page after they authenticate.
+  const postSignInUrl = inviteToken
+    ? `${basePath}/accept-invitation?invite=${encodeURIComponent(inviteToken)}`
+    : params.get("redirect_url") || `${basePath}/dashboard`;
+
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+      <SignIn
+        routing="path"
+        path={`${basePath}/sign-in`}
+        signUpUrl={`${basePath}/sign-up`}
+        forceRedirectUrl={postSignInUrl}
+      />
     </div>
   );
 }
@@ -132,12 +145,18 @@ function SignUpPage() {
     ? `${basePath}/accept-invitation?invite=${encodeURIComponent(inviteToken)}`
     : params.get("redirect_url") || `${basePath}/dashboard`;
 
+  // Pass the invite token forward so clicking "Sign in" inside Clerk's widget
+  // also lands on the invite-aware sign-in page and preserves the token.
+  const signInWithInvite = inviteToken
+    ? `${basePath}/sign-in?invite=${encodeURIComponent(inviteToken)}`
+    : `${basePath}/sign-in`;
+
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
       <SignUp 
         routing="path" 
         path={`${basePath}/sign-up`} 
-        signInUrl={`${basePath}/sign-in`} 
+        signInUrl={signInWithInvite} 
         forceRedirectUrl={postSignUpUrl} 
       />
     </div>
@@ -153,9 +172,10 @@ function AcceptInvitationPage() {
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn) {
-      // Not signed in — redirect to sign-in preserving the invite param
+      // Not signed in — send to the invite-aware sign-in page so forceRedirectUrl
+      // brings them back here after authentication.
       const invite = new URLSearchParams(window.location.search).get("invite") || "";
-      setLocation(`${basePath}/sign-in?redirect_url=${encodeURIComponent(window.location.href)}`);
+      setLocation(`${basePath}/sign-in?invite=${encodeURIComponent(invite)}`);
       return;
     }
 
