@@ -226,6 +226,43 @@ function AcceptInvitationPage() {
   );
 }
 
+/**
+ * RequireCompanyAdmin — fetches /api/company to verify the signed-in user
+ * holds company_admin access server-side.
+ * Employees (learners) receive HTTP 403; they are redirected to /dashboard.
+ * Shows a spinner while the check is in flight.
+ */
+function RequireCompanyAdmin({ children }: { children: ReactNode }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLocation(`${basePath}/sign-in`);
+      return;
+    }
+    customFetch("/api/company")
+      .then(() => setAllowed(true))
+      .catch(() => {
+        // 403 = learner, 404 = no company — redirect to dashboard
+        setAllowed(false);
+        setLocation(`${basePath}/dashboard`);
+      });
+  }, [isLoaded, isSignedIn]);
+
+  if (allowed === null) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center">
+        <div className="h-8 w-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!allowed) return null;
+  return <>{children}</>;
+}
 
 function HomeRedirect() {
   return (
@@ -350,16 +387,16 @@ function ClerkProviderWithRoutes() {
             </Route>
             <Route path="/mauritius-rules-resources" component={MauritiusResourcesList} />
             <Route path="/mauritius-rules-resources/:slug" component={MauritiusResourceDetail} />
-            <Route path="/company" component={CompanyDashboard} />
-            <Route path="/company/subscribe" component={Subscribe} />
-            <Route path="/company/challenges-review" component={ChallengesReview} />
-            <Route path="/company/employees" component={CompanyEmployees} />
-            <Route path="/company/certificates" component={CompanyCertificates} />
-            <Route path="/company/leaderboards" component={CompanyLeaderboards} />
-            <Route path="/company/compliance" component={CompanyCompliance} />
-            <Route path="/company/reports" component={CompanyReports} />
-            <Route path="/company/recycling" component={CompanyRecycling} />
-            <Route path="/company/sustainability" component={SustainabilityImpact} />
+            <Route path="/company">{() => <RequireCompanyAdmin><CompanyDashboard /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/subscribe">{() => <RequireCompanyAdmin><Subscribe /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/challenges-review">{() => <RequireCompanyAdmin><ChallengesReview /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/employees">{() => <RequireCompanyAdmin><CompanyEmployees /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/certificates">{() => <RequireCompanyAdmin><CompanyCertificates /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/leaderboards">{() => <RequireCompanyAdmin><CompanyLeaderboards /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/compliance">{() => <RequireCompanyAdmin><CompanyCompliance /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/reports">{() => <RequireCompanyAdmin><CompanyReports /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/recycling">{() => <RequireCompanyAdmin><CompanyRecycling /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/sustainability">{() => <RequireCompanyAdmin><SustainabilityImpact /></RequireCompanyAdmin>}</Route>
             <Route path="/admin" component={AdminPanel} />
             <Route path="/admin/recycling" component={AdminRecycling} />
             <Route path="/platform-admin" component={PlatformAdminOverview} />
