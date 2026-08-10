@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { customFetch } from "@workspace/api-client-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -64,17 +65,11 @@ export function SmartRecommendationDialog({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/companies/employees/${employee.id}/recommendations`, {
+      const result = await customFetch<RecommendationData>(`/api/company/employees/${employee.id}/recommendations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || "Failed to load recommendations");
-      }
-
-      const result = (await res.json()) as RecommendationData;
       setData(result);
 
       // Auto-select high priority courses by default

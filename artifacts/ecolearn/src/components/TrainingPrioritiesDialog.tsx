@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Target, CheckCircle2 } from "lucide-react";
-import { useGetMyCompany } from "@workspace/api-client-react";
+import { useGetMyCompany, customFetch } from "@workspace/api-client-react";
 
 export const ALLOWED_TRAINING_PRIORITIES = [
   { id: "sustainability_foundations", label: "Sustainability Foundations" },
@@ -61,16 +61,11 @@ export function TrainingPrioritiesDialog({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/companies/priorities", {
+      const res = await customFetch("/api/company/priorities", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priorities: selected }),
       });
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || "Failed to update priorities");
-      }
 
       toast({
         title: "Training Priorities Saved",
