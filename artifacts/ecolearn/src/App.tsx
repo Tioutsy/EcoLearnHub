@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import {
   setBaseUrl,
   setAuthTokenGetter,
+  customFetch,
 } from "@workspace/api-client-react";
 
 if (import.meta.env.VITE_API_URL) {
@@ -124,7 +125,12 @@ function SignInPage() {
 
 function SignUpPage() {
   const params = new URLSearchParams(window.location.search);
-  const redirectUrl = params.get("redirect_url") || `${basePath}/dashboard`;
+  const inviteToken = params.get("invite");
+  // After Clerk completes sign-up, redirect to accept-invitation if an invite token is present,
+  // otherwise go to the dashboard (or an explicit redirect_url).
+  const postSignUpUrl = inviteToken
+    ? `${basePath}/accept-invitation?invite=${encodeURIComponent(inviteToken)}`
+    : params.get("redirect_url") || `${basePath}/dashboard`;
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
@@ -132,11 +138,74 @@ function SignUpPage() {
         routing="path" 
         path={`${basePath}/sign-up`} 
         signInUrl={`${basePath}/sign-in`} 
-        forceRedirectUrl={redirectUrl} 
+        forceRedirectUrl={postSignUpUrl} 
       />
     </div>
   );
 }
+
+function AcceptInvitationPage() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const [status, setStatus] = useState<"pending" | "accepting" | "done" | "error">("pending");
+  const [message, setMessage] = useState("");
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      // Not signed in — redirect to sign-in preserving the invite param
+      const invite = new URLSearchParams(window.location.search).get("invite") || "";
+      setLocation(`${basePath}/sign-in?redirect_url=${encodeURIComponent(window.location.href)}`);
+      return;
+    }
+
+    const invite = new URLSearchParams(window.location.search).get("invite");
+    if (!invite) {
+      setLocation(`${basePath}/dashboard`);
+      return;
+    }
+
+    if (status !== "pending") return;
+    setStatus("accepting");
+
+    customFetch("/api/invitations/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: invite }),
+    } as RequestInit).then(() => {
+      setStatus("done");
+      setMessage("Your account has been linked to your company. Redirecting…");
+      setTimeout(() => setLocation(`${basePath}/dashboard`), 2000);
+    }).catch((err: any) => {
+      setStatus("error");
+      setMessage(err?.message || "Failed to accept invitation. Please contact your company administrator.");
+    });
+  }, [isLoaded, isSignedIn, status]);
+
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
+      <div className="text-center space-y-4 max-w-md">
+        {status === "pending" || status === "accepting" ? (
+          <>
+            <div className="h-10 w-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-sm text-muted-foreground">Linking your account to your company…</p>
+          </>
+        ) : status === "done" ? (
+          <>
+            <div className="h-10 w-10 text-emerald-600 mx-auto">✓</div>
+            <p className="text-sm font-medium text-emerald-700">{message}</p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm font-medium text-destructive">{message}</p>
+            <a href={`${basePath}/dashboard`} className="text-xs text-muted-foreground underline">Go to dashboard</a>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function HomeRedirect() {
   return (
@@ -222,6 +291,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/" component={HomeRedirect} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
+            <Route path="/accept-invitation" component={AcceptInvitationPage} />
             <Route path="/courses" component={Courses} />
             <Route path="/courses/:id" component={CourseDetail} />
             {/* <Route path="/learning-paths" component={LearningPaths} />
