@@ -177,9 +177,15 @@ export async function generateEmployeeRecommendations(
 
   for (const rec of rawResult.recommendedCourses) {
     // 5a. Validate ID / Code against database
-    let matchedCourse = typeof rec.courseId === "number" ? validCoursesMap.get(rec.courseId) : undefined;
+    const numId = typeof rec.courseId === "number" ? rec.courseId : (typeof rec.courseId === "string" && /^\d+$/.test(rec.courseId) ? parseInt(rec.courseId, 10) : undefined);
+    let matchedCourse = numId !== undefined ? validCoursesMap.get(numId) : undefined;
     if (!matchedCourse && rec.courseCode) {
-      matchedCourse = validCodeMap.get((rec.courseCode || "").toUpperCase());
+      const codeClean = (rec.courseCode || "").trim().toUpperCase();
+      matchedCourse = validCodeMap.get(codeClean);
+    }
+    if (!matchedCourse && typeof rec.courseId === "string") {
+      const codeClean = rec.courseId.trim().toUpperCase();
+      matchedCourse = validCodeMap.get(codeClean);
     }
 
     // 5b. Reject hallucinated course
