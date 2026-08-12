@@ -398,7 +398,7 @@ export default function Courses() {
                 const reqPlanName = (course as any).requiredPlanName || "Essential";
                 
                 let isPlanLocked = false;
-                if (companySub) {
+                if (companySub && Array.isArray(companySub.entitledCourseIds)) {
                   isPlanLocked = !companySub.entitledCourseIds.includes(course.id) && !isCompleted;
                 }
 
@@ -684,7 +684,7 @@ export default function Courses() {
           const isInProgress = (enrollment?.status as string) === "active" || (enrollment?.status as string) === "in_progress";
           
           let isPlanLocked = false;
-          if (companySub) {
+          if (companySub && Array.isArray(companySub.entitledCourseIds)) {
             isPlanLocked = !companySub.entitledCourseIds.includes(course.id) && !isCompleted;
           }
 
