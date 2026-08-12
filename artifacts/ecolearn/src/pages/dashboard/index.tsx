@@ -30,6 +30,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 import { useLanguage } from "@/context/LanguageContext";
+import { MyWorkplaceActionsCard } from "@/components/MyWorkplaceActionsCard";
 
 const BADGE_ICONS: Record<string, LucideIcon> = {
   sprout: Sprout,
@@ -359,6 +360,11 @@ export default function Dashboard() {
                       );
                     })}
                 </div>
+              </div>
+
+              {/* Group: My Workplace Actions */}
+              <div className="mb-8">
+                <MyWorkplaceActionsCard />
               </div>
 
               {/* Group 2: Learning Milestones */}

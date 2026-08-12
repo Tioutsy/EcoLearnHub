@@ -400,3 +400,128 @@ export function useFollowUpAuditHistory() {
     queryFn: () => apiJson<{ history: FollowUpAuditRecord[]; count: number }>("/api/company/training-actions/audit-history"),
   });
 }
+
+// Sprint 11D Workplace Actions & Training Impact
+export interface WorkplaceActionRecord {
+  id: number;
+  companyId: number;
+  employeeId: number;
+  courseId: number;
+  courseVersion: number;
+  enrollmentId: number | null;
+  commitmentType: "suggested" | "custom";
+  commitmentText: string;
+  actionCategory: string;
+  status: string;
+  completedAt: string | null;
+  employeeProgressNote: string | null;
+  learnerReflection: string | null;
+  managerResponseNote: string | null;
+  managerConfirmationStatus: string;
+  managerConfirmedByUserId: string | null;
+  managerConfirmedAt: string | null;
+  employeeSubmittedAt: string | null;
+  actionReportedAt: string | null;
+  managerReviewedAt: string | null;
+  reviewedByEmployeeId: number | null;
+  createdAt: string;
+  updatedAt: string;
+  employeeName?: string;
+  department?: string;
+  courseCode?: string;
+  courseTitle?: string;
+}
+
+export interface TrainingImpactSummary {
+  companyId: number;
+  eligibleCompletions: number;
+  commitmentsCreated: number;
+  commitmentRate: number;
+  actionsReported: number;
+  actionFollowThroughRate: number;
+  managerConfirmedActions: number;
+  followUpRequested: number;
+  outstandingManagerReviews: number;
+  categoryDistribution: Record<string, number>;
+  esgBreakdown: {
+    environmental: number;
+    social: number;
+    governance: number;
+  };
+  departmentSummary: Record<string, { employeeCount: number; commitmentCount: number; suppressed: boolean }>;
+  disclaimer: string;
+}
+
+export interface TrainingImpactNarrative {
+  summaryInterpretation: string;
+  keyStrengthsAndGaps: string;
+  suggestedManagementActions: string[];
+  isAiGenerated: boolean;
+  disclaimer: string;
+}
+
+export function useLearnerWorkplaceActions() {
+  return useQuery({
+    queryKey: ["learner-workplace-actions"],
+    queryFn: () => apiJson<WorkplaceActionRecord[]>("/api/learning/workplace-actions"),
+  });
+}
+
+export function useCreateWorkplaceCommitment() {
+  return useMutation({
+    mutationFn: (input: {
+      courseId: number;
+      enrollmentId?: number;
+      commitmentText: string;
+      actionCategory?: string;
+      commitmentType?: "suggested" | "custom";
+    }) =>
+      apiJson<WorkplaceActionRecord>("/api/learning/workplace-actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      }),
+  });
+}
+
+export function useReportWorkplaceAction() {
+  return useMutation({
+    mutationFn: (input: { commitmentId: number; progressNote?: string }) =>
+      apiJson<WorkplaceActionRecord>(`/api/learning/workplace-actions/${input.commitmentId}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ progressNote: input.progressNote }),
+      }),
+  });
+}
+
+export function useCompanyTrainingImpact() {
+  return useQuery({
+    queryKey: ["company-training-impact"],
+    queryFn: () => apiJson<{ summary: TrainingImpactSummary; narrative: TrainingImpactNarrative }>("/api/company/training-impact"),
+  });
+}
+
+export function useCompanyWorkplaceActions(filters?: { status?: string; category?: string; courseId?: number }) {
+  const search = new URLSearchParams();
+  if (filters?.status) search.set("status", filters.status);
+  if (filters?.category) search.set("category", filters.category);
+  if (filters?.courseId) search.set("courseId", String(filters.courseId));
+  const query = search.toString() ? `?${search.toString()}` : "";
+
+  return useQuery({
+    queryKey: ["company-workplace-actions", filters],
+    queryFn: () => apiJson<{ records: WorkplaceActionRecord[]; count: number }>(`/api/company/workplace-actions${query}`),
+  });
+}
+
+export function useReviewWorkplaceAction() {
+  return useMutation({
+    mutationFn: (input: { commitmentId: number; decision: "confirm" | "request_followup" | "close"; managerResponseNote?: string }) =>
+      apiJson<WorkplaceActionRecord>(`/api/company/workplace-actions/${input.commitmentId}/review`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: input.decision, managerResponseNote: input.managerResponseNote }),
+      }),
+  });
+}

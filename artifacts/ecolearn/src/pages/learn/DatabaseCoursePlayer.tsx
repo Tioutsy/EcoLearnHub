@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { WorkplaceCommitmentModal } from "@/components/WorkplaceCommitmentModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -854,6 +855,7 @@ function CompletionScreen({
   enrollment: any;
   onTakeQuiz: () => void;
 }) {
+  const [showCommitmentModal, setShowCommitmentModal] = useState(false);
   const { data: rawSummary, isLoading: isSummaryLoading } = useGetCourseProgressSummary(courseId, {
     query: { enabled: !!courseId && !isPreview, queryKey: ["courseSummary", courseId] },
   });
@@ -1040,6 +1042,13 @@ function CompletionScreen({
           )}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            type="button"
+            onClick={() => setShowCommitmentModal(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+          >
+            Choose Workplace Action
+          </Button>
           {nextCourseId && nextCourse && nextCourse.isPublished ? (
             <Button asChild>
               <Link href={`/courses/${nextCourse.id}`}>
@@ -1054,6 +1063,13 @@ function CompletionScreen({
             </Link>
           </Button>
         </div>
+
+        <WorkplaceCommitmentModal
+          isOpen={showCommitmentModal}
+          onClose={() => setShowCommitmentModal(false)}
+          courseId={enrollment?.course?.id ?? 0}
+          courseTitle={enrollment?.course?.title ?? "Course"}
+        />
       </Card>
     </div>
   );
