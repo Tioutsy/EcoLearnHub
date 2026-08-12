@@ -741,6 +741,19 @@ export async function ensureSchemaModifications() {
       name: "Add training_priorities to companies",
       check: () => columnExists("companies", "training_priorities"),
       execute: () => db.execute(sql`ALTER TABLE "companies" ADD COLUMN IF NOT EXISTS "training_priorities" text[] NOT NULL DEFAULT '{}';`)
+    },
+    {
+      name: "Add Sprint 11D fields to learner_commitments",
+      check: () => columnExists("learner_commitments", "action_category"),
+      execute: () => db.execute(sql`
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "action_category" text NOT NULL DEFAULT 'workplace-practice';
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "employee_progress_note" text;
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "manager_response_note" text;
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "employee_submitted_at" timestamp with time zone DEFAULT now();
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "action_reported_at" timestamp with time zone;
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "manager_reviewed_at" timestamp with time zone;
+        ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "reviewed_by_employee_id" integer;
+      `)
     }
   ];
 

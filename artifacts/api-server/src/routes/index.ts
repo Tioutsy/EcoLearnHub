@@ -34,10 +34,12 @@ import notificationsRouter from "./notifications";
 import analyticsRouter from "./analytics";
 import governanceRouter from "./governance";
 import trainingActionsRouter from "./trainingActions";
+import workplaceActionsRouter from "./workplaceActions";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(workplaceActionsRouter);
 router.use("/company/training-actions", trainingActionsRouter);
 router.use("/governance", governanceRouter);
 router.use("/courses", coursesRouter);
