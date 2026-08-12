@@ -190,7 +190,7 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
   let role: AccessRole = "employee";
   if (isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail)) {
     role = "platform_admin";
-  } else if (isCompanyAdminRole(claimRole) || employee?.role === "admin") {
+  } else if (isCompanyAdminRole(claimRole) || employee?.role === "admin" || !employee) {
     role = "company_admin";
   } else if (isManagerRole(claimRole) || employee?.role === "manager") {
     role = "manager";

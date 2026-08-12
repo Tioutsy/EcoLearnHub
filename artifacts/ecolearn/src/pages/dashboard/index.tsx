@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { useListEnrollments, useListAchievementBadges, useGetMyPoints, useListCertificates, customFetch } from "@workspace/api-client-react";
+import { useListEnrollments, useListAchievementBadges, useGetMyPoints, useListCertificates, useListCourses, customFetch } from "@workspace/api-client-react";
 import type { Enrollment } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,11 @@ export default function Dashboard() {
   const { data: enrollments, isLoading: isLoadingEnrollments } = useListEnrollments();
   const { data: certificates, isLoading: isLoadingCertificates } = useListCertificates();
   const { data: points, isLoading: isLoadingPoints } = useGetMyPoints();
+  const { data: allCoursesData, isLoading: isLoadingCourses } = useListCourses();
+  const { data: challengesData, isLoading: isLoadingChallenges } = useQuery({
+    queryKey: ["/api/challenges"],
+    queryFn: () => customFetch<{ challenges: any[]; count: number }>("/api/challenges"),
+  });
   const { data: achievementsData, isLoading: isLoadingAchievements } = useQuery({
     queryKey: ["/api/me/achievements"],
     queryFn: () => customFetch<any>("/api/me/achievements"),
@@ -205,8 +210,20 @@ export default function Dashboard() {
               </div>
             ))
           ) : activeEnrollments.length === 0 ? (
-            <div className="col-span-full py-12 text-center border rounded-xl bg-muted/20">
-              <p className="text-muted-foreground">No training is currently assigned to you.</p>
+            <div className="col-span-full py-10 px-6 text-center border rounded-xl bg-gradient-to-b from-emerald-50/50 to-transparent dark:from-emerald-950/20 dark:to-transparent border-emerald-200/60 dark:border-emerald-800/40">
+              <div className="h-12 w-12 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold font-serif mb-1">Ready to start learning?</h3>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
+                Browse our complete catalogue of 34 ESG & Sustainability courses and start building your skills today.
+              </p>
+              <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
+                <Link href="/courses" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Explore 34 Sustainability Courses
+                </Link>
+              </Button>
             </div>
           ) : (
             activeEnrollments.map((enrollment) => (
@@ -242,6 +259,89 @@ export default function Dashboard() {
               </Link>
             ))
           )}
+        </div>
+
+        {/* Featured Courses Catalogue Showcase */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold font-serif flex items-center gap-2">
+                <BookOpen className="h-6 w-6 text-emerald-600" />
+                Available Courses Catalogue
+              </h2>
+              <p className="text-muted-foreground text-sm">34 interactive ESG courses available to enroll & study</p>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/courses">View All 34 Courses &rarr;</Link>
+            </Button>
+          </div>
+
+          {isLoadingCourses ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array(3).fill(0).map((_, i) => (
+                <Skeleton key={i} className="h-48 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(allCoursesData || []).slice(0, 6).map((course: any) => (
+                <div key={course.id} className="bg-card border rounded-xl p-5 flex flex-col justify-between hover:shadow-md transition-all">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                        {course.courseCode || `ELH-${course.id}`}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {course.durationMinutes || 45} mins
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-base mb-2 line-clamp-1">{course.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{course.description}</p>
+                  </div>
+                  <Button asChild size="sm" variant="secondary" className="w-full mt-auto">
+                    <Link href={`/courses`}>Start Course &rarr;</Link>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Workplace Micro-Challenges Showcase */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold font-serif flex items-center gap-2">
+                <Target className="h-6 w-6 text-emerald-600" />
+                Workplace Micro-Challenges
+              </h2>
+              <p className="text-muted-foreground text-sm">Take practical micro-actions at work to earn points & badges</p>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/challenges">View All Challenges &rarr;</Link>
+            </Button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(challengesData?.challenges || []).slice(0, 3).map((ch: any) => (
+              <div key={ch.id} className="bg-card border rounded-xl p-5 flex flex-col justify-between hover:shadow-md transition-all">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                      {ch.code || `CHALLENGE-${ch.id}`}
+                    </Badge>
+                    <span className="text-xs font-semibold text-emerald-600">+{ch.points || 50} pts</span>
+                  </div>
+                  <h3 className="font-bold text-base mb-2 line-clamp-1">{ch.title}</h3>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{ch.summary || ch.description}</p>
+                </div>
+                <Button asChild size="sm" variant="outline" className="w-full mt-auto border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                  <Link href="/challenges">Take Action &rarr;</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Achievements Grouped Sections */}
