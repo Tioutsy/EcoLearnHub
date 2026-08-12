@@ -130,3 +130,273 @@ export function useCreateEmployeeInvitation() {
       }),
   });
 }
+
+// ─── Sprint 11A: AI Training Insights ─────────────────────────────────────
+
+export interface TrainingInsightAttentionItem {
+  id: string;
+  priority: "high" | "medium";
+  title: string;
+  explanation: string;
+  recommendedAction: string;
+  actionType: "remind_overdue" | "view_course_performance" | "manage_assignments" | "learner_checkin";
+  targetUrl: string;
+}
+
+export interface TrainingInsightPositiveSignal {
+  id: string;
+  title: string;
+  explanation: string;
+}
+
+export interface TrainingInsightAction {
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionUrl: string;
+}
+
+export interface CoursePerformanceSummary {
+  courseId: number;
+  courseCode: string;
+  title: string;
+  assignedCount: number;
+  startedCount: number;
+  completedCount: number;
+  completionRatePct: number;
+  avgQuizScore: number;
+  failureRatePct: number;
+  avgQuizAttempts: number;
+  overdueAssignmentsCount: number;
+}
+
+export interface DepartmentPerformanceSummary {
+  departmentName: string;
+  employeeCount: number;
+  completionRatePct: number;
+  overdueCount: number;
+  avgQuizScore: number;
+  hasSufficientSample: boolean;
+}
+
+export interface LearnerRiskSummary {
+  overdueCount: number;
+  assignedNotStartedCount: number;
+  inactiveInProgressCount: number;
+  repeatQuizFailuresCount: number;
+  consistentlyLowQuizScoresCount: number;
+}
+
+export interface OrganisationTrainingSummary {
+  totalActiveLearners: number;
+  assignedLearnersCount: number;
+  completedLearnersCount: number;
+  inProgressLearnersCount: number;
+  notStartedLearnersCount: number;
+  overdueLearnersCount: number;
+  overallCompletionPct: number;
+}
+
+export interface CompanyTrainingInsights {
+  companyId: number;
+  companyName: string;
+  generatedAt: string;
+  providerTag: "gemini" | "fallback";
+  isFallback: boolean;
+
+  summary: string;
+  needsAttention: TrainingInsightAttentionItem[];
+  positiveSignals: TrainingInsightPositiveSignal[];
+  recommendedNextAction: TrainingInsightAction;
+
+  organisationSummary: OrganisationTrainingSummary;
+  coursePerformance: CoursePerformanceSummary[];
+  departmentPerformance: DepartmentPerformanceSummary[];
+  learnerRiskSummary: LearnerRiskSummary;
+
+  dataQuality: {
+    warnings: string[];
+    hasSufficientData: boolean;
+  };
+}
+
+export function useCompanyTrainingInsights(forceRefresh: boolean = false) {
+  return useQuery({
+    queryKey: ["company-training-insights", forceRefresh],
+    queryFn: () => apiJson<CompanyTrainingInsights>(`/api/company/training-insights${forceRefresh ? "?refresh=true" : ""}`),
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes("403")) return false;
+      return failureCount < 2;
+    },
+  });
+}
+
+// ─── Sprint 11B: Management Action Hub ────────────────────────────────────
+
+export type TrainingManagementActionType =
+  | "VIEW_OVERDUE"
+  | "VIEW_NOT_STARTED"
+  | "VIEW_STRUGGLING_LEARNERS"
+  | "SEND_REMINDER"
+  | "RECOMMEND_REFRESHER"
+  | "ASSIGN_REFRESHER"
+  | "VIEW_COURSE_PERFORMANCE"
+  | "VIEW_DEPARTMENT_PERFORMANCE";
+
+export interface TrainingManagementAction {
+  actionType: TrainingManagementActionType;
+  targetType: "overdue_assignments" | "unstarted_assignments" | "struggling_learners" | "course" | "department" | "company";
+  targetCount?: number;
+  courseId?: number;
+  courseCode?: string;
+  courseTitle?: string;
+  departmentName?: string;
+  employeeIds?: number[];
+  label: string;
+  description: string;
+  requiresConfirmation: boolean;
+  confirmationPrompt?: string;
+  targetUrl: string;
+}
+
+export interface OverdueLearnerRecord {
+  employeeId: number;
+  employeeName: string;
+  employeeEmail: string;
+  department: string;
+  courseId: number;
+  courseCode: string;
+  courseTitle: string;
+  assignmentDate: string | null;
+  dueDate: string | null;
+  daysOverdue: number;
+  status: "overdue";
+}
+
+export interface NotStartedLearnerRecord {
+  employeeId: number;
+  employeeName: string;
+  employeeEmail: string;
+  department: string;
+  courseId: number;
+  courseCode: string;
+  courseTitle: string;
+  assignmentDate: string | null;
+  dueDate: string | null;
+  status: "not_started";
+}
+
+export interface StrugglingLearnerRecord {
+  employeeId: number;
+  employeeName: string;
+  employeeEmail: string;
+  department: string;
+  courseId: number;
+  courseCode: string;
+  courseTitle: string;
+  totalAttempts: number;
+  maxQuizScore: number;
+  passed: boolean;
+  supportRecommendation: string;
+  status: "needs_support";
+}
+
+export interface SendReminderBatchInput {
+  employeeIds?: number[];
+  courseId?: number;
+  category: "overdue" | "not_started" | "manual";
+  customNote?: string;
+  source?: "training-insight" | "manual" | "AI-copilot";
+}
+
+export interface ReminderDispatchDetail {
+  employeeId: number;
+  employeeName: string;
+  employeeEmail: string;
+  courseTitle: string;
+  status: "delivered" | "skipped" | "failed";
+  reason?: string;
+}
+
+export interface SendReminderBatchResult {
+  attemptedCount: number;
+  deliveredCount: number;
+  skippedCount: number;
+  failedCount: number;
+  details: ReminderDispatchDetail[];
+}
+
+export interface AssignRefresherBatchInput {
+  employeeIds: number[];
+  courseId: number;
+  dueDate?: string;
+  source?: "training-insight" | "manual" | "AI-copilot";
+}
+
+export interface FollowUpAuditRecord {
+  id: number | string;
+  action: string;
+  actorUserId: string;
+  actorRole: string;
+  targetType: string;
+  targetId: string | null;
+  metadata: Record<string, unknown> | null;
+  timestamp: string;
+}
+
+export function useCompanyTrainingActions() {
+  return useQuery({
+    queryKey: ["company-training-actions"],
+    queryFn: () => apiJson<{ companyId: number; resolvedAt: string; actions: TrainingManagementAction[] }>("/api/company/training-actions"),
+  });
+}
+
+export function useOverdueLearners(courseId?: number) {
+  return useQuery({
+    queryKey: ["overdue-learners", courseId],
+    queryFn: () => apiJson<{ learners: OverdueLearnerRecord[]; count: number }>(`/api/company/training-actions/learners/overdue${courseId ? `?courseId=${courseId}` : ""}`),
+  });
+}
+
+export function useNotStartedLearners(courseId?: number) {
+  return useQuery({
+    queryKey: ["not-started-learners", courseId],
+    queryFn: () => apiJson<{ learners: NotStartedLearnerRecord[]; count: number }>(`/api/company/training-actions/learners/not-started${courseId ? `?courseId=${courseId}` : ""}`),
+  });
+}
+
+export function useStrugglingLearners(courseId?: number) {
+  return useQuery({
+    queryKey: ["struggling-learners", courseId],
+    queryFn: () => apiJson<{ learners: StrugglingLearnerRecord[]; count: number }>(`/api/company/training-actions/learners/struggling${courseId ? `?courseId=${courseId}` : ""}`),
+  });
+}
+
+export function useSendTrainingReminders() {
+  return useMutation({
+    mutationFn: (input: SendReminderBatchInput) =>
+      apiJson<SendReminderBatchResult>("/api/company/training-actions/remind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      }),
+  });
+}
+
+export function useAssignRefresherTraining() {
+  return useMutation({
+    mutationFn: (input: AssignRefresherBatchInput) =>
+      apiJson<any>("/api/company/training-actions/assign-refresher", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      }),
+  });
+}
+
+export function useFollowUpAuditHistory() {
+  return useQuery({
+    queryKey: ["follow-up-audit-history"],
+    queryFn: () => apiJson<{ history: FollowUpAuditRecord[]; count: number }>("/api/company/training-actions/audit-history"),
+  });
+}
