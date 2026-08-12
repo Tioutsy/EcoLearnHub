@@ -119,6 +119,7 @@ function ChartCard({
 }
 
 import { TrainingPrioritiesDialog } from "@/components/TrainingPrioritiesDialog";
+import { TrainingInsightsCard } from "@/components/TrainingInsightsCard";
 
 export default function CompanyDashboard() {
   const { t } = useLanguage();
@@ -234,6 +235,9 @@ export default function CompanyDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Sprint 11A: AI Training Insights Card */}
+        <TrainingInsightsCard className="mb-8" />
+
         {/* Your Learning Access Subscription Banner */}
         {subData?.status === "PENDING_PAYMENT" || subData?.status === "PENDING" ? (
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 mb-8 backdrop-blur-md">

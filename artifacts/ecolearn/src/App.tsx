@@ -44,6 +44,7 @@ import CompanyLeaderboards from "@/pages/company/leaderboards";
 import CompanyCompliance from "@/pages/company/compliance";
 import CompanyReports from "@/pages/company/reports";
 import SustainabilityImpact from "@/pages/sustainability";
+import TrainingFollowUpPage from "@/pages/company/training-follow-up";
 import AdminPanel from "@/pages/admin";
 import AdminRecycling from "@/pages/admin/recycling";
 import CompanyRecycling from "@/pages/company/recycling";
@@ -397,6 +398,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/company/reports">{() => <RequireCompanyAdmin><CompanyReports /></RequireCompanyAdmin>}</Route>
             <Route path="/company/recycling">{() => <RequireCompanyAdmin><CompanyRecycling /></RequireCompanyAdmin>}</Route>
             <Route path="/company/sustainability">{() => <RequireCompanyAdmin><SustainabilityImpact /></RequireCompanyAdmin>}</Route>
+            <Route path="/company/training-follow-up">{() => <RequireCompanyAdmin><TrainingFollowUpPage /></RequireCompanyAdmin>}</Route>
             <Route path="/admin" component={AdminPanel} />
             <Route path="/admin/recycling" component={AdminRecycling} />
             <Route path="/platform-admin" component={PlatformAdminOverview} />

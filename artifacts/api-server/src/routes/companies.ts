@@ -1282,4 +1282,29 @@ router.post("/employees/:id/recommendations", async (req, res): Promise<void> =>
   }
 });
 
+// GET /company/training-insights — AI Training Insights & Management Action Engine (Sprint 11A)
+// Returns deterministic training metrics + optional Gemini-enhanced narrative.
+// Accessible by company_admin and manager roles only; employees are denied (403).
+router.get("/training-insights", async (req: any, res: any): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+
+    if (access.role === "employee") {
+      res.status(403).json({ error: "Access denied: Training insights are available to company administrators and managers only." });
+      return;
+    }
+
+    const forceRefresh = req.query.refresh === "true";
+    const { getCompanyTrainingInsights } = await import("../lib/ai/trainingInsightsService");
+    const insights = await getCompanyTrainingInsights(access, forceRefresh);
+
+    res.json(insights);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err: err?.message }, "Failed to generate company training insights");
+      res.status(500).json({ error: err?.message || "We couldn't generate company training insights right now." });
+    }
+  }
+});
+
 export default router;
