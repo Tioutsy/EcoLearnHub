@@ -216,12 +216,12 @@ export default function Dashboard() {
               </div>
               <h3 className="text-lg font-bold font-serif mb-1">Ready to start learning?</h3>
               <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
-                Browse our complete catalogue of 34 ESG & Sustainability courses and start building your skills today.
+                Browse our complete catalogue of {allCoursesData?.length || 34} ESG & Sustainability courses and start building your skills today.
               </p>
               <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
                 <Link href="/courses" className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
-                  Explore 34 Sustainability Courses
+                  Explore {allCoursesData?.length || 34} Sustainability Courses
                 </Link>
               </Button>
             </div>
@@ -269,10 +269,10 @@ export default function Dashboard() {
                 <BookOpen className="h-6 w-6 text-emerald-600" />
                 Available Courses Catalogue
               </h2>
-              <p className="text-muted-foreground text-sm">34 interactive ESG courses available to enroll & study</p>
+              <p className="text-muted-foreground text-sm">{allCoursesData?.length || 34} interactive ESG courses available to enroll & study</p>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link href="/courses">View All 34 Courses &rarr;</Link>
+              <Link href="/courses">View All {allCoursesData?.length || 34} Courses &rarr;</Link>
             </Button>
           </div>
 

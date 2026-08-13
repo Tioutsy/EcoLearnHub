@@ -161,45 +161,55 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
   const userId = auth.userId ?? fallbackAuth?.userId ?? null;
   const claims = auth.sessionClaims ?? {};
 
+  if (!userId) {
+    throw new HttpError(401, "Unauthenticated: Authentication required");
+  }
+
   const claimRole = getClaimRole(claims);
   const claimCompanyId = getClaimCompanyId(claims);
   const email = getClaimEmail(claims);
   const primaryCompany = await getPrimaryCompany();
 
-  if (!userId) {
-    if (!primaryCompany) throw new HttpError(404, "No company found");
+  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
+  const isPlatformAdmin = isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail);
+
+  if (isPlatformAdmin) {
+    const companyId = claimCompanyId ?? primaryCompany?.id ?? 0;
     return {
-      userId: "demo-user",
-      email: null,
-      companyId: primaryCompany.id,
-      role: "company_admin",
+      userId,
+      email,
+      companyId,
+      role: "platform_admin",
       employee: null,
-      isDemo: true,
+      isDemo: false,
     };
   }
 
   const employee = await findEmployeeForUser(userId, email);
-  const companyId =
-    claimCompanyId ??
-    employee?.companyId ??
-    primaryCompany?.id ??
-    (isPlatformRole(claimRole) ? 0 : null);
-  if (!companyId) throw new HttpError(404, "No company found");
 
-  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
+  if (!employee) {
+    throw new HttpError(403, "Access denied: No explicit company membership record found for account");
+  }
+
+  if (employee.status !== "active") {
+    throw new HttpError(403, "Access denied: Company membership is inactive");
+  }
+
+  if (!employee.companyId) {
+    throw new HttpError(403, "Access denied: No company associated with employee record");
+  }
+
   let role: AccessRole = "employee";
-  if (isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail)) {
-    role = "platform_admin";
-  } else if (isCompanyAdminRole(claimRole) || employee?.role === "admin" || !employee) {
+  if (employee.role === "admin") {
     role = "company_admin";
-  } else if (isManagerRole(claimRole) || employee?.role === "manager") {
+  } else if (employee.role === "manager") {
     role = "manager";
   }
 
   return {
     userId,
     email,
-    companyId,
+    companyId: employee.companyId,
     role,
     employee,
     isDemo: false,
