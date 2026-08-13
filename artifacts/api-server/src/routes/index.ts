@@ -35,8 +35,11 @@ import analyticsRouter from "./analytics";
 import governanceRouter from "./governance";
 import trainingActionsRouter from "./trainingActions";
 import workplaceActionsRouter from "./workplaceActions";
+import onboardingRouter from "./onboarding";
 
 const router: IRouter = Router();
+
+router.use("/onboarding", onboardingRouter);
 
 router.use(healthRouter);
 router.use(workplaceActionsRouter);
