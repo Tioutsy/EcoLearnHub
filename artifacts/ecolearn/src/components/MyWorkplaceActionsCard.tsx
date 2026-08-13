@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "wouter";
 import {
   useLearnerWorkplaceActions,
   useReportWorkplaceAction,
@@ -6,7 +7,7 @@ import {
 } from "../lib/lms-api";
 
 export const MyWorkplaceActionsCard: React.FC = () => {
-  const { data: actions, isLoading, isError, refetch } = useLearnerWorkplaceActions();
+  const { data: actions, isLoading, isError, error, refetch } = useLearnerWorkplaceActions();
   const reportAction = useReportWorkplaceAction();
 
   const [reportingId, setReportingId] = useState<number | null>(null);
@@ -16,23 +17,30 @@ export const MyWorkplaceActionsCard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-6 bg-card border border-border rounded-xl shadow-sm text-card-foreground animate-pulse">
-        <div className="h-5 w-48 bg-muted rounded mb-3"></div>
-        <div className="h-4 w-64 bg-muted rounded"></div>
+        <h3 className="text-lg font-semibold mb-1">My Workplace Actions</h3>
+        <p className="text-sm text-muted-foreground">Loading your workplace actions…</p>
       </div>
     );
   }
 
   if (isError) {
+    const isForbidden = (error as any)?.status === 403;
     return (
       <div className="p-6 bg-card border border-border rounded-xl shadow-sm text-card-foreground">
         <h3 className="text-lg font-semibold mb-1">My Workplace Actions</h3>
-        <p className="text-sm text-muted-foreground mb-3">Unable to load your workplace commitments right now.</p>
-        <button
-          onClick={() => refetch()}
-          className="px-3 py-1.5 text-xs font-medium border border-input rounded-lg hover:bg-accent"
-        >
-          Retry
-        </button>
+        <p className="text-sm text-muted-foreground mb-3">
+          {isForbidden
+            ? "Workplace actions are available for active company learners."
+            : "We couldn’t load your workplace actions. Please try again."}
+        </p>
+        {!isForbidden && (
+          <button
+            onClick={() => refetch()}
+            className="px-3 py-1.5 text-xs font-medium border border-input rounded-lg hover:bg-accent"
+          >
+            Retry
+          </button>
+        )}
       </div>
     );
   }
@@ -41,11 +49,19 @@ export const MyWorkplaceActionsCard: React.FC = () => {
 
   if (list.length === 0) {
     return (
-      <div className="p-6 bg-card border border-border rounded-xl shadow-sm text-card-foreground">
-        <h3 className="text-lg font-semibold mb-1">My Workplace Actions</h3>
-        <p className="text-sm text-muted-foreground">
-          You have no active workplace commitments yet. When you complete a course, choose one practical action to apply at work!
-        </p>
+      <div className="p-6 bg-card border border-border rounded-xl shadow-sm text-card-foreground flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-1">My Workplace Actions</h3>
+          <p className="text-sm text-muted-foreground">
+            Complete a course and choose one practical action to apply at work. Your commitments and progress will appear here.
+          </p>
+        </div>
+        <Link
+          href="/courses"
+          className="inline-flex items-center justify-center px-4 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shrink-0"
+        >
+          Explore Courses
+        </Link>
       </div>
     );
   }

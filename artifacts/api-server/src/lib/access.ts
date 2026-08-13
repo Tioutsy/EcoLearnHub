@@ -175,12 +175,13 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
 
   if (isPlatformAdmin) {
     const companyId = claimCompanyId ?? primaryCompany?.id ?? 0;
+    const employee = await findEmployeeForUser(userId, email);
     return {
       userId,
       email,
-      companyId,
+      companyId: employee?.companyId ?? companyId,
       role: "platform_admin",
-      employee: null,
+      employee,
       isDemo: false,
     };
   }
