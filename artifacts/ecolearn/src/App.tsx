@@ -49,6 +49,7 @@ import { TrainingImpactPage } from "@/pages/company/training-impact";
 import AdminPanel from "@/pages/admin";
 import AdminRecycling from "@/pages/admin/recycling";
 import CompanyRecycling from "@/pages/company/recycling";
+import OnboardingPage from "@/pages/onboarding";
 import NotFound from "@/pages/not-found";
 
 // Platform Admin Pages
@@ -389,6 +390,7 @@ function ClerkProviderWithRoutes() {
             </Route>
             <Route path="/mauritius-rules-resources" component={MauritiusResourcesList} />
             <Route path="/mauritius-rules-resources/:slug" component={MauritiusResourceDetail} />
+            <Route path="/onboarding" component={OnboardingPage} />
             <Route path="/company">{() => <RequireCompanyAdmin><CompanyDashboard /></RequireCompanyAdmin>}</Route>
             <Route path="/company/subscribe">{() => <RequireCompanyAdmin><Subscribe /></RequireCompanyAdmin>}</Route>
             <Route path="/company/challenges-review">{() => <RequireCompanyAdmin><ChallengesReview /></RequireCompanyAdmin>}</Route>
