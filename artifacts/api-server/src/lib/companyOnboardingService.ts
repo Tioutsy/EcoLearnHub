@@ -360,57 +360,59 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
     else if (bandCode === "FROM_81_TO_120") monthlyAmountNum = 6250;
   }
 
-  // 6. Transactional Creation: Company -> First Admin Employee -> Subscription
+  // 6. Real Database Transaction: Company -> First Admin Employee -> Subscription
   const slugBase = companyName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const slug = `${slugBase}-${Date.now().toString(36)}`;
 
-  const [company] = await db
-    .insert(companiesTable)
-    .values({
-      name: companyName.trim(),
-      slug,
-      employeeCount: Math.min(employeeCount, band.maximumEmployees || 120),
-      maxEmployees: band.maximumEmployees || 120,
-      planId,
-    })
-    .returning();
+  return await db.transaction(async (tx) => {
+    const [company] = await tx
+      .insert(companiesTable)
+      .values({
+        name: companyName.trim(),
+        slug,
+        employeeCount: Math.min(employeeCount, band.maximumEmployees || 120),
+        maxEmployees: band.maximumEmployees || 120,
+        planId,
+      })
+      .returning();
 
-  const [adminEmployee] = await db
-    .insert(employeesTable)
-    .values({
-      companyId: company.id,
-      clerkUserId: userId,
-      email: email ? email.toLowerCase() : `admin_${company.id}@example.com`,
-      name: adminName || "Company Admin",
-      role: "admin",
-      status: "active",
-      invitationStatus: "accepted",
-      invitationAcceptedAt: new Date(),
-    })
-    .returning();
+    const [adminEmployee] = await tx
+      .insert(employeesTable)
+      .values({
+        companyId: company.id,
+        clerkUserId: userId,
+        email: email ? email.toLowerCase() : `admin_${company.id}@example.com`,
+        name: adminName || "Company Admin",
+        role: "admin",
+        status: "active",
+        invitationStatus: "accepted",
+        invitationAcceptedAt: new Date(),
+      })
+      .returning();
 
-  const [subscription] = await db
-    .insert(companySubscriptionsTable)
-    .values({
-      companyId: company.id,
-      subscriptionPlanId: planId,
-      employeeBandId: band.id,
-      status: "ACTIVE", // Active access initialized upon autonomous activation
-      currency: "MUR",
-      agreedMonthlyAmount: monthlyAmountNum.toFixed(2),
-      pricingSource: "STANDARD",
-      startsAt: new Date(),
-    })
-    .returning();
+    const [subscription] = await tx
+      .insert(companySubscriptionsTable)
+      .values({
+        companyId: company.id,
+        subscriptionPlanId: planId,
+        employeeBandId: band.id,
+        status: "PENDING", // Initialized as PENDING until commercial payment confirmation
+        currency: "MUR",
+        agreedMonthlyAmount: monthlyAmountNum.toFixed(2),
+        pricingSource: "STANDARD",
+        startsAt: new Date(),
+      })
+      .returning();
 
-  return {
-    outcome: "success",
-    company,
-    employee: adminEmployee,
-    subscription,
-    monthlyAmount: monthlyAmountNum,
-    onboardingStage: "onboarding-complete",
-  };
+    return {
+      outcome: "success",
+      company,
+      employee: adminEmployee,
+      subscription,
+      monthlyAmount: monthlyAmountNum,
+      onboardingStage: "onboarding-complete",
+    };
+  });
 }
 
 export async function assignStarterCourse(

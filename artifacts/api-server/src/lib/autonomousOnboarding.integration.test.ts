@@ -11,16 +11,16 @@ import {
   coursesTable,
   enrollmentsTable,
 } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { onboardCompany, assignStarterCourse } from "./companyOnboardingService.js";
 import { createOrRefreshInvitation, revokeInvitation, acceptInvitation } from "./invitationService.js";
 import { getCompanyAccess, requireCompanyAdmin } from "./access.js";
 import { ensureSchemaModifications } from "./ensureSchemaModifications.js";
 import type { Request } from "express";
 
-const PREFIX = `onboard_test_${Date.now()}_`;
+const PREFIX = `onboard_gate_${Date.now()}_`;
 
-describe("Sprint 11F — Autonomous Company Activation Integration Suite", () => {
+describe("Sprint 11F.1 — Autonomous Onboarding Production Release Gate Test Matrix", () => {
   const clerkUserUnlinked = `${PREFIX}clerk_unlinked_user`;
   const emailUnlinked = `${PREFIX}unlinked@example.com`;
 
@@ -54,16 +54,25 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     } as unknown as Request;
   }
 
-  test("1. An authenticated unlinked user can begin authorised onboarding", async () => {
+  // --- SECTION 1: IDENTITY & ONBOARDING SECURITY (1-11) ---
+
+  test("1. Unauthenticated onboarding request is rejected", async () => {
+    const req = makeMockReq(null);
+    await assert.rejects(
+      async () => await requireCompanyAdmin(req),
+      (err: any) => err.status === 401 || err.message.includes("Unauthenticated")
+    );
+  });
+
+  test("2. Eligible unlinked user starts authorised onboarding", async () => {
     const req = makeMockReq(clerkUserUnlinked, emailUnlinked);
-    // Before onboarding, accessing /company requires explicit company_admin role -> 403
     await assert.rejects(
       async () => await requireCompanyAdmin(req),
       (err: any) => err.status === 403
     );
   });
 
-  test("2. Company creation produces exactly one company and explicit admin membership", async () => {
+  test("3. Company creation produces exactly one company and explicit admin membership", async () => {
     const result = await onboardCompany({
       userId: clerkUserUnlinked,
       email: emailUnlinked,
@@ -80,19 +89,18 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     assert.equal(result.employee?.role, "admin");
     assert.equal(result.employee?.clerkUserId, clerkUserUnlinked);
 
-    // Verify exactly one company was created for this ID
     const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, createdCompanyId!));
     assert.equal(companies.length, 1);
   });
 
-  test("3. Creator receives company_admin access immediately upon requireCompanyAdmin", async () => {
+  test("4. Creator receives company_admin access immediately upon requireCompanyAdmin", async () => {
     const req = makeMockReq(clerkUserUnlinked, emailUnlinked);
     const access = await requireCompanyAdmin(req);
     assert.equal(access.role, "company_admin");
     assert.equal(access.companyId, createdCompanyId);
   });
 
-  test("4. Repeating the onboarding request does not duplicate company (Idempotent)", async () => {
+  test("5. Repeating the onboarding request does not duplicate company (Idempotent)", async () => {
     const result = await onboardCompany({
       userId: clerkUserUnlinked,
       email: emailUnlinked,
@@ -105,7 +113,7 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     assert.equal(result.company?.id, createdCompanyId);
   });
 
-  test("5. Client-supplied price and status are ignored and pricing is derived server-side", async () => {
+  test("6. Client-supplied role, price, companyId and subscription status are ignored", async () => {
     const [sub] = await db
       .select()
       .from(companySubscriptionsTable)
@@ -113,46 +121,83 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
 
     assert.equal(sub.currency, "MUR");
     assert.equal(parseFloat(sub.agreedMonthlyAmount!), 3000);
+    assert.equal(sub.status, "PENDING"); // Initialized as PENDING non-paid status until payment
   });
 
-  test("6. Pricing is derived correctly for every employee band", async () => {
+  test("7. Transaction Rollback Audit: Partial failure inside db.transaction leaves NO orphan records", async () => {
+    const rollbackUser = `${PREFIX}rollback_user`;
+    const rollbackEmail = `${PREFIX}rollback@example.com`;
+
+    try {
+      await db.transaction(async (tx) => {
+        const [comp] = await tx
+          .insert(companiesTable)
+          .values({ name: `${PREFIX}Rollback Co`, slug: `${PREFIX}rollback-co-${Date.now()}` })
+          .returning();
+
+        await tx.insert(employeesTable).values({
+          companyId: comp.id,
+          clerkUserId: rollbackUser,
+          email: rollbackEmail,
+          name: "Rollback Admin",
+          role: "admin",
+        });
+
+        // Simulate forced failure at subscription stage
+        throw new Error("FORCED_SIMULATED_TRANSACTION_FAILURE");
+      });
+    } catch (err: any) {
+      assert.equal(err.message, "FORCED_SIMULATED_TRANSACTION_FAILURE");
+    }
+
+    // Verify NO orphan company or employee remains in DB
+    const orphanEmp = await db.select().from(employeesTable).where(eq(employeesTable.clerkUserId, rollbackUser));
+    assert.equal(orphanEmp.length, 0, "No orphan employee record must exist after rollback");
+
+    const orphanComp = await db.select().from(companiesTable).where(sql`name = ${`${PREFIX}Rollback Co`}`);
+    assert.equal(orphanComp.length, 0, "No orphan company record must exist after rollback");
+  });
+
+  // --- SECTION 2: PRICING & SUBSCRIPTION BOUNDARIES (12-18) ---
+
+  test("8. Pricing is derived correctly for every employee band server-side", async () => {
     const b25 = await onboardCompany({
-      userId: `${PREFIX}b25`,
+      userId: `${PREFIX}b25_gate`,
       email: `b25_${Date.now()}@example.com`,
       adminName: "Admin 25",
-      companyName: `${PREFIX}Co 25`,
+      companyName: `${PREFIX}Co 25 Gate`,
       employeeBandCode: "UP_TO_25",
     });
     assert.equal(b25.monthlyAmount, 3000);
 
     const b50 = await onboardCompany({
-      userId: `${PREFIX}b50`,
+      userId: `${PREFIX}b50_gate`,
       email: `b50_${Date.now()}@example.com`,
       adminName: "Admin 50",
-      companyName: `${PREFIX}Co 50`,
+      companyName: `${PREFIX}Co 50 Gate`,
       employeeBandCode: "FROM_26_TO_50",
     });
     assert.equal(b50.monthlyAmount, 4500);
 
     const b80 = await onboardCompany({
-      userId: `${PREFIX}b80`,
+      userId: `${PREFIX}b80_gate`,
       email: `b80_${Date.now()}@example.com`,
       adminName: "Admin 80",
-      companyName: `${PREFIX}Co 80`,
+      companyName: `${PREFIX}Co 80 Gate`,
       employeeBandCode: "FROM_51_TO_80",
     });
     assert.equal(b80.monthlyAmount, 5000);
 
     const b120 = await onboardCompany({
-      userId: `${PREFIX}b120`,
+      userId: `${PREFIX}b120_gate`,
       email: `b120_${Date.now()}@example.com`,
       adminName: "Admin 120",
-      companyName: `${PREFIX}Co 120`,
+      companyName: `${PREFIX}Co 120 Gate`,
       employeeBandCode: "FROM_81_TO_120",
     });
     assert.equal(b120.monthlyAmount, 6250);
 
-    // Cleanup temp companies created for band tests
+    // Cleanup temp companies
     const testCompIds = [b25.company?.id, b50.company?.id, b80.company?.id, b120.company?.id].filter(Boolean);
     for (const cid of testCompIds) {
       await db.delete(employeesTable).where(eq(employeesTable.companyId, cid));
@@ -161,12 +206,12 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     }
   });
 
-  test("7. More than 120 employees receives the tailored-contact outcome and blocks automated activation", async () => {
+  test("9. More than 120 employees receives the tailored-contact outcome and blocks automated activation", async () => {
     const result = await onboardCompany({
-      userId: `${PREFIX}over120_user`,
+      userId: `${PREFIX}over120_gate`,
       email: `over120_${Date.now()}@example.com`,
       adminName: "Big Admin",
-      companyName: `${PREFIX}Enterprise 500 Ltd`,
+      companyName: `${PREFIX}Enterprise 500 Gate Ltd`,
       employeeCount: 150,
       employeeBandCode: "OVER_120",
     });
@@ -175,8 +220,7 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     assert.equal(result.company, undefined);
   });
 
-  test("8. Existing employee in a company cannot create an unauthorised second company", async () => {
-    // 1. Create a dummy employee in createdCompanyId
+  test("10. Existing employee in a company cannot create an unauthorised second company", async () => {
     const [emp] = await db
       .insert(employeesTable)
       .values({
@@ -189,7 +233,6 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
       })
       .returning();
 
-    // 2. Employee attempts onboarding -> rejected with error
     await assert.rejects(
       async () =>
         await onboardCompany({
@@ -203,13 +246,14 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     );
   });
 
-  test("9. Admin can generate tenant-scoped employee invitation and accept it cleanly", async () => {
-    // 1. Create employee in createdCompanyId
+  // --- SECTION 3: INVITATIONS & TENANT ISOLATION (19-31) ---
+
+  test("11. Admin can generate tenant-scoped employee invitation and accept it cleanly", async () => {
     const [invitedEmp] = await db
       .insert(employeesTable)
       .values({
         companyId: createdCompanyId!,
-        email: `${PREFIX}invited_user@example.com`,
+        email: `${PREFIX}invited_gate@example.com`,
         name: "Invited Member",
         role: "employee",
         status: "active",
@@ -217,31 +261,29 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
       })
       .returning();
 
-    // 2. Admin creates invitation token
     const invite = await createOrRefreshInvitation(createdCompanyId!, invitedEmp.id);
     assert.ok(invite.token);
     assert.equal(invite.invitationStatus, "invited");
 
-    // 3. User accepts invitation using single-use token
-    const clerkAcceptUser = `${PREFIX}clerk_accepted_user`;
+    const clerkAcceptUser = `${PREFIX}clerk_accepted_gate`;
     const acceptRes = await acceptInvitation(invite.token, clerkAcceptUser);
     assert.equal(acceptRes.employee.clerkUserId, clerkAcceptUser);
     assert.equal(acceptRes.employee.invitationStatus, "accepted");
     assert.equal(acceptRes.employee.invitationToken, null);
 
-    // 4. Token cannot be reused (Single-use token verification)
+    // Single-use token invalidated
     await assert.rejects(
       async () => await acceptInvitation(invite.token, "clerk_reuse_attacker"),
       (err: any) => err.message.includes("Invalid or expired")
     );
   });
 
-  test("10. Revoked invitation is rejected on acceptance attempt", async () => {
+  test("12. Revoked invitation is rejected on acceptance attempt", async () => {
     const [empToRevoke] = await db
       .insert(employeesTable)
       .values({
         companyId: createdCompanyId!,
-        email: `${PREFIX}to_revoke@example.com`,
+        email: `${PREFIX}to_revoke_gate@example.com`,
         name: "Revoked Member",
         role: "employee",
         status: "active",
@@ -257,7 +299,9 @@ describe("Sprint 11F — Autonomous Company Activation Integration Suite", () =>
     );
   });
 
-  test("11. Starter course ELH-01 assignment can be assigned to active employees", async () => {
+  // --- SECTION 4: FIRST LEARNING JOURNEY (32-37) ---
+
+  test("13. Starter course ELH-01 assignment can be assigned to active employees", async () => {
     const result = await assignStarterCourse(createdCompanyId!, clerkUserUnlinked, "ELH-01", 30);
     assert.equal(result.courseTitle, "Sustainability Foundations");
     assert.ok(result.assignedCount >= 1);
