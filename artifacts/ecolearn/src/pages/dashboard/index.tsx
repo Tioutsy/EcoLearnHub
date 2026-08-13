@@ -261,6 +261,11 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* My Workplace Actions */}
+        <div className="mb-12">
+          <MyWorkplaceActionsCard />
+        </div>
+
         {/* Featured Courses Catalogue Showcase */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
@@ -460,11 +465,6 @@ export default function Dashboard() {
                       );
                     })}
                 </div>
-              </div>
-
-              {/* Group: My Workplace Actions */}
-              <div className="mb-8">
-                <MyWorkplaceActionsCard />
               </div>
 
               {/* Group 2: Learning Milestones */}
