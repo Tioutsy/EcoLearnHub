@@ -754,6 +754,17 @@ export async function ensureSchemaModifications() {
         ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "manager_reviewed_at" timestamp with time zone;
         ALTER TABLE "learner_commitments" ADD COLUMN IF NOT EXISTS "reviewed_by_employee_id" integer;
       `)
+    },
+    {
+      name: "Ensure company_subscriptions table yearly billing columns",
+      check: async () => await columnExists("company_subscriptions", "billing_interval"),
+      execute: async () => {
+        await db.execute(sql`
+          ALTER TABLE "company_subscriptions" ADD COLUMN IF NOT EXISTS "billing_interval" text NOT NULL DEFAULT 'MONTHLY';
+          ALTER TABLE "company_subscriptions" ADD COLUMN IF NOT EXISTS "discount_percentage" numeric(5, 2) NOT NULL DEFAULT '0';
+          ALTER TABLE "company_subscriptions" ADD COLUMN IF NOT EXISTS "agreed_yearly_amount" numeric(10, 2);
+        `);
+      }
     }
   ];
 

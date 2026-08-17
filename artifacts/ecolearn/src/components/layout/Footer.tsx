@@ -38,7 +38,7 @@ export function Footer() {
             <h4 className="font-semibold text-lg text-white">{t("footer.platform")}</h4>
             <ul className="space-y-2 text-sm text-emerald-200/80">
               <li><Link href="/courses" className="hover:text-white transition-colors">{t("footer.course_catalog")}</Link></li>
-              <li><Link href="/impact" className="hover:text-white transition-colors">{t("footer.impact_dashboard")}</Link></li>
+              {/* Impact Dashboard link intentionally removed — preserved for future premium feature. */}
               <li><Link href="/pricing" className="hover:text-white transition-colors">{t("footer.corporate_plans")}</Link></li>
             </ul>
           </div>

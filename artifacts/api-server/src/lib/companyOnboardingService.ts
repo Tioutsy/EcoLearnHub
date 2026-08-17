@@ -12,6 +12,7 @@ import {
 } from "@workspace/db";
 import { eq, and, or, sql } from "drizzle-orm";
 import { assignTrainingToCompanyEmployees } from "./assignmentService.js";
+import { calculateSubscriptionPricing, PricingCalculationResult } from "./subscriptionPricingService";
 
 export type OnboardingStage =
   | "DRAFT"
@@ -235,6 +236,7 @@ export interface OnboardCompanyInput {
   employeeCount?: number;
   employeeBandCode?: string; // 'UP_TO_25' | 'FROM_26_TO_50' | 'FROM_51_TO_80' | 'FROM_81_TO_120' | 'OVER_120'
   planCode?: string; // 'ESSENTIAL' | 'PROFESSIONAL' | 'COMPLETE'
+  billingInterval?: string; // 'MONTHLY' | 'YEARLY'
 }
 
 export interface OnboardCompanyResult {
@@ -244,6 +246,7 @@ export interface OnboardCompanyResult {
   employee?: any;
   subscription?: any;
   monthlyAmount?: number | null;
+  pricingBreakdown?: PricingCalculationResult;
   onboardingStage?: string;
 }
 
@@ -337,7 +340,7 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
 
   const planId = plan?.id ?? 1;
 
-  // 5. Derive Monthly Price Server-Side (IGNORE any client price)
+  // 5. Derive Pricing Server-Side (IGNORE any client price)
   let monthlyAmountNum = 3000;
   const [priceRecord] = await db
     .select()
@@ -359,6 +362,8 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
     else if (bandCode === "FROM_51_TO_80") monthlyAmountNum = 5000;
     else if (bandCode === "FROM_81_TO_120") monthlyAmountNum = 6250;
   }
+
+  const pricingBreakdown = calculateSubscriptionPricing(monthlyAmountNum, input.billingInterval, false);
 
   // 6. Real Database Transaction: Company -> First Admin Employee -> Subscription
   const slugBase = companyName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -398,7 +403,10 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
         employeeBandId: band.id,
         status: "PENDING", // Initialized as PENDING until commercial payment confirmation
         currency: "MUR",
-        agreedMonthlyAmount: monthlyAmountNum.toFixed(2),
+        billingInterval: pricingBreakdown.billingInterval,
+        discountPercentage: String(pricingBreakdown.discountPercentage),
+        agreedMonthlyAmount: pricingBreakdown.monthlyBasePrice ? pricingBreakdown.monthlyBasePrice.toFixed(2) : null,
+        agreedYearlyAmount: pricingBreakdown.finalAmount && pricingBreakdown.billingInterval === "YEARLY" ? pricingBreakdown.finalAmount.toFixed(2) : null,
         pricingSource: "STANDARD",
         startsAt: new Date(),
       })
@@ -410,6 +418,7 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
       employee: adminEmployee,
       subscription,
       monthlyAmount: monthlyAmountNum,
+      pricingBreakdown,
       onboardingStage: "onboarding-complete",
     };
   });

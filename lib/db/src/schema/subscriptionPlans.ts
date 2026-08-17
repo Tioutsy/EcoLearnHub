@@ -73,7 +73,10 @@ export const companySubscriptionsTable = pgTable("company_subscriptions", {
   employeeBandId: integer("employee_band_id").notNull().references(() => employeeBandsTable.id, { onDelete: "cascade" }),
   status: text("status").notNull().default("ACTIVE"), // 'PENDING' | 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED' | 'CANCELLED' | 'EXPIRED'
   currency: text("currency").notNull().default("MUR"),
+  billingInterval: text("billing_interval").notNull().default("MONTHLY"), // 'MONTHLY' | 'YEARLY'
+  discountPercentage: numeric("discount_percentage", { precision: 5, scale: 2 }).notNull().default("0"),
   agreedMonthlyAmount: numeric("agreed_monthly_amount", { precision: 10, scale: 2 }),
+  agreedYearlyAmount: numeric("agreed_yearly_amount", { precision: 10, scale: 2 }),
   pricingSource: text("pricing_source").notNull().default("STANDARD"), // 'STANDARD' | 'TAILORED' | 'LEGACY'
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull().defaultNow(),
   currentPeriodStartsAt: timestamp("current_period_starts_at", { withTimezone: true }),

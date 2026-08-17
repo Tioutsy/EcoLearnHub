@@ -11,7 +11,7 @@ import certificatesRouter from "./certificates";
 import companiesRouter from "./companies";
 import plansRouter from "./plans";
 import dashboardRouter from "./dashboard";
-import impactRouter from "./impact";
+// import impactRouter from "./impact"; // Intentionally disabled — Sprint product simplification. Implementation preserved for future premium feature recovery.
 import esgRouter from "./esg";
 import learningPathsRouter from "./learningPaths";
 import badgesRouter from "./badges";
@@ -62,7 +62,7 @@ router.use("/analytics", analyticsRouter);
 router.use("/plans", plansRouter);
 router.use("/subscriptions", subscriptionsRouter);
 router.use("/dashboard", dashboardRouter);
-router.use("/impact", impactRouter);
+// Impact router intentionally unmounted for product simplification. Preserved in routes/impact.ts.
 router.use("/esg", esgRouter);
 router.use("/learning-paths", learningPathsRouter);
 router.use("/badges", badgesRouter);

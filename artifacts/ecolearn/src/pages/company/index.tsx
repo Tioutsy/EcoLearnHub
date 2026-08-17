@@ -280,7 +280,7 @@ export default function CompanyDashboard() {
                 </div>
                 <h2 className="text-xl font-bold font-serif">Your Commercial Learning Access</h2>
                 <p className="text-sm text-muted-foreground">
-                  Current Contracted Subscription: <strong className="text-foreground">{subData?.planName || "Complete"}</strong> • Agreed Price: <strong className="text-foreground">{subData?.agreedMonthlyAmountMUR ? `MUR ${subData.agreedMonthlyAmountMUR.toLocaleString()}/mo` : "Standard Agreement"}</strong>
+                  Current Contracted Subscription: <strong className="text-foreground">{subData?.planName || "Complete"}</strong> • Billing Interval: <strong className="text-emerald-700 dark:text-emerald-400">{subData?.billingInterval === "YEARLY" ? "Yearly (10% Discount Applied)" : "Monthly"}</strong> • Agreed Price: <strong className="text-foreground">{subData?.billingInterval === "YEARLY" && subData?.agreedYearlyAmountMUR ? `MUR ${subData.agreedYearlyAmountMUR.toLocaleString()}/year` : subData?.agreedMonthlyAmountMUR ? `MUR ${subData.agreedMonthlyAmountMUR.toLocaleString()}/mo` : "Standard Agreement"}</strong>
                 </p>
               </div>
 
@@ -592,8 +592,8 @@ export default function CompanyDashboard() {
                   <div className="h-8 w-8 bg-green-500/10 rounded flex items-center justify-center text-green-600 mb-3">
                     <Leaf className="h-4 w-4" />
                   </div>
-                  <h3 className="font-semibold mb-1">Sustainability Impact</h3>
-                  <p className="text-sm text-muted-foreground flex-1">View your ESG metrics and score.</p>
+                  <h3 className="font-semibold mb-1">ESG Readiness</h3>
+                  <p className="text-sm text-muted-foreground flex-1">View your ESG training score and internal readiness metrics.</p>
                   <ArrowRight className="h-4 w-4 text-green-600 mt-2" />
                 </div>
               </Link>

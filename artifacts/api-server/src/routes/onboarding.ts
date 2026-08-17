@@ -9,7 +9,7 @@ const router = Router();
 // POST /api/onboarding/company
 router.post("/company", async (req, res): Promise<void> => {
   try {
-    const { companyName, adminName, employeeCount, employeeBandCode, planCode } = req.body;
+    const { companyName, adminName, employeeCount, employeeBandCode, planCode, billingInterval } = req.body;
 
     // Must be authenticated via Clerk
     let userId: string | null = null;
@@ -44,6 +44,7 @@ router.post("/company", async (req, res): Promise<void> => {
       employeeCount: employeeCount ? parseInt(employeeCount, 10) : 10,
       employeeBandCode,
       planCode,
+      billingInterval,
     });
 
     if (result.outcome === "tailored_contact_required") {

@@ -26,7 +26,7 @@ import Challenges from "@/pages/challenges";
 import Learn from "@/pages/learn";
 import Quiz from "@/pages/quiz";
 import Dashboard from "@/pages/dashboard";
-import ImpactDashboard from "@/pages/impact";
+// import ImpactDashboard from "@/pages/impact"; // Intentionally disabled — Sprint product simplification. Preserved for future premium feature recovery.
 import Pricing from "@/pages/pricing";
 import InsightsLanding from "@/pages/Insights/index";
 import InsightsArticlesList from "@/pages/Insights/articles";
@@ -45,7 +45,7 @@ import CompanyCompliance from "@/pages/company/compliance";
 import CompanyReports from "@/pages/company/reports";
 import SustainabilityImpact from "@/pages/sustainability";
 import TrainingFollowUpPage from "@/pages/company/training-follow-up";
-import { TrainingImpactPage } from "@/pages/company/training-impact";
+// import { TrainingImpactPage } from "@/pages/company/training-impact"; // Intentionally disabled — Sprint product simplification. Preserved for future premium feature recovery.
 import AdminPanel from "@/pages/admin";
 import AdminRecycling from "@/pages/admin/recycling";
 import CompanyRecycling from "@/pages/company/recycling";
@@ -362,7 +362,8 @@ function ClerkProviderWithRoutes() {
             <Route path="/certificates" component={Certificates} />
             <Route path="/certificates/verify/:code" component={VerifyCertificate} />
             <Route path="/dashboard" component={Dashboard} />
-            <Route path="/impact" component={ImpactDashboard} />
+            {/* /impact — Intentionally disabled. Redirect authenticated users to dashboard. */}
+            <Route path="/impact"><Redirect to="/dashboard" /></Route>
             <Route path="/pricing" component={Pricing} />
             <Route path="/made-for-mauritius">
               <Redirect to="/mauritius-rules-resources" />
@@ -402,7 +403,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/company/recycling">{() => <RequireCompanyAdmin><CompanyRecycling /></RequireCompanyAdmin>}</Route>
             <Route path="/company/sustainability">{() => <RequireCompanyAdmin><SustainabilityImpact /></RequireCompanyAdmin>}</Route>
             <Route path="/company/training-follow-up">{() => <RequireCompanyAdmin><TrainingFollowUpPage /></RequireCompanyAdmin>}</Route>
-            <Route path="/company/training-impact">{() => <RequireCompanyAdmin><TrainingImpactPage /></RequireCompanyAdmin>}</Route>
+            {/* /company/training-impact — Intentionally disabled. Page preserved dormant. */}
             <Route path="/admin" component={AdminPanel} />
             <Route path="/admin/recycling" component={AdminRecycling} />
             <Route path="/platform-admin" component={PlatformAdminOverview} />

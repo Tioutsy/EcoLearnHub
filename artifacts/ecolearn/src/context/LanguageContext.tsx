@@ -5,7 +5,7 @@ const englishTranslations: Record<string, string> = {
   "nav.courses": "Courses",
   "nav.challenges": "Challenges",
   "nav.mauritius_resources": "Mauritius Rules & Resources",
-  "nav.impact": "Impact",
+  // "nav.impact": "Impact", // Intentionally removed — Sprint product simplification.
   "nav.pricing": "Pricing",
   "nav.my_learning": "My Learning",
   "nav.company": "Company",
@@ -43,7 +43,7 @@ const englishTranslations: Record<string, string> = {
   "footer.platform": "Platform",
   "footer.company": "Company",
   "footer.course_catalog": "Course Catalog",
-  "footer.impact_dashboard": "Impact Dashboard",
+  // "footer.impact_dashboard": "Impact Dashboard", // Intentionally removed — Sprint product simplification.
   "footer.corporate_plans": "Corporate Plans",
   "footer.verify_certificate": "Verify Certificate",
   "footer.about_us": "About Us",

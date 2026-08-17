@@ -24,9 +24,11 @@ export default function Subscribe() {
   const urlParams = new URLSearchParams(window.location.search);
   const initialPlanCode = urlParams.get("planCode") || "PROFESSIONAL";
   const initialBandCode = urlParams.get("bandCode") || "UP_TO_25";
+  const initialInterval = (urlParams.get("billingInterval") || "MONTHLY").toUpperCase() === "YEARLY" ? "YEARLY" : "MONTHLY";
 
   const [selectedPlanCode, setSelectedPlanCode] = useState<string>(initialPlanCode);
   const [selectedBandCode, setSelectedBandCode] = useState<string>(initialBandCode);
+  const [billingInterval, setBillingInterval] = useState<"MONTHLY" | "YEARLY">(initialInterval);
   const [companyName, setCompanyName] = useState("");
   const [industry, setIndustry] = useState("");
 
@@ -58,7 +60,12 @@ export default function Subscribe() {
 
   const priceRecord = pricingData?.prices.find(p => p.planCode === selectedPlanCode && p.bandCode === selectedBandCode);
   const isTailored = activeBand.requiresTailoredQuote || (priceRecord?.requiresTailoredQuote ?? selectedBandCode === "OVER_120");
-  const priceMUR = priceRecord?.monthlyAmountMUR;
+  const baseMonthlyMUR = priceRecord?.monthlyAmountMUR || (selectedBandCode === "UP_TO_25" ? 3000 : 4500);
+
+  const yearlyUndiscounted = baseMonthlyMUR * 12;
+  const yearlySavingsMUR = Math.round(yearlyUndiscounted * 0.10);
+  const yearlyFinalMUR = yearlyUndiscounted - yearlySavingsMUR;
+  const yearlyEquivalentMonthlyMUR = Math.round((yearlyFinalMUR / 12) * 100) / 100;
 
   const handleSubscribeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +86,7 @@ export default function Subscribe() {
         body: JSON.stringify({
           planCode: selectedPlanCode,
           employeeBandCode: selectedBandCode,
+          billingInterval: billingInterval,
           companyName: companyName,
           industry: industry,
           employeeCount: activeBand.code === "UP_TO_25" ? 25 : 50,
@@ -91,7 +99,7 @@ export default function Subscribe() {
 
       toast({
         title: "Subscription Request Received",
-        description: "Your selected plan and employee category have been registered.",
+        description: "Your selected plan, employee category, and billing interval have been registered.",
       });
 
       setTimeout(() => {
@@ -183,6 +191,40 @@ export default function Subscribe() {
                         />
                       </div>
 
+                      {/* Billing Interval Selection */}
+                      <div className="space-y-2 pt-2 border-t">
+                        <Label>Billing Frequency</Label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setBillingInterval("MONTHLY")}
+                            className={`p-3 rounded-xl border text-sm font-semibold transition-all flex flex-col items-start ${
+                              billingInterval === "MONTHLY"
+                                ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                                : "border-border text-muted-foreground hover:bg-muted/40"
+                            }`}
+                          >
+                            <span>Monthly Billing</span>
+                            <span className="text-[11px] font-normal opacity-80">Flexible monthly payments</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setBillingInterval("YEARLY")}
+                            className={`p-3 rounded-xl border text-sm font-semibold transition-all flex flex-col items-start relative ${
+                              billingInterval === "YEARLY"
+                                ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                                : "border-border text-muted-foreground hover:bg-muted/40"
+                            }`}
+                          >
+                            <span className="flex items-center gap-1.5">
+                              Yearly Billing
+                              <span className="text-[10px] bg-emerald-600 text-white font-bold px-1.5 py-0.2 rounded-md">Save 10%</span>
+                            </span>
+                            <span className="text-[11px] font-normal opacity-80">Paid once per year</span>
+                          </button>
+                        </div>
+                      </div>
+
                       {/* Selected Plan Summary Bar */}
                       <div className="bg-muted/50 border rounded-xl p-4 space-y-2">
                         <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -192,6 +234,10 @@ export default function Subscribe() {
                         <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           <span>Employee Band</span>
                           <span className="text-foreground">{activeBand.label}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          <span>Billing Interval</span>
+                          <span className="text-emerald-700 dark:text-emerald-400 font-bold">{billingInterval === "YEARLY" ? "Yearly (10% Off)" : "Monthly"}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -213,8 +259,10 @@ export default function Subscribe() {
                           </>
                         ) : isTailored ? (
                           "Request Corporate Proposal"
+                        ) : billingInterval === "YEARLY" ? (
+                          `Confirm Subscription — MUR ${yearlyFinalMUR.toLocaleString()}/year`
                         ) : (
-                          `Confirm Subscription — MUR ${priceMUR?.toLocaleString() || "3,000"}/mo`
+                          `Confirm Subscription — MUR ${baseMonthlyMUR.toLocaleString()}/mo`
                         )}
                       </Button>
                     </CardFooter>
@@ -236,9 +284,23 @@ export default function Subscribe() {
                       <h3 className="font-bold text-lg text-foreground">{activePlan.name} Plan</h3>
                       <p className="text-xs text-muted-foreground mt-0.5">{activeBand.label}</p>
                     </div>
-                    <span className="font-extrabold text-lg text-emerald-700 dark:text-emerald-400">
-                      {!isTailored && priceMUR ? `MUR ${priceMUR.toLocaleString()}/mo` : "Tailored Quote"}
-                    </span>
+                    <div className="text-right">
+                      <span className="font-extrabold text-lg text-emerald-700 dark:text-emerald-400 block">
+                        {!isTailored ? (
+                          billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}/year` : `MUR ${baseMonthlyMUR.toLocaleString()}/mo`
+                        ) : "Tailored Quote"}
+                      </span>
+                      {!isTailored && billingInterval === "YEARLY" && (
+                        <div className="space-y-0.5 text-right mt-1">
+                          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold block">
+                            Save MUR {yearlySavingsMUR.toLocaleString()} per year
+                          </span>
+                          <span className="text-[10px] text-muted-foreground block">
+                            Equivalent to MUR {yearlyEquivalentMonthlyMUR.toLocaleString()}/month
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-3">
@@ -271,9 +333,9 @@ export default function Subscribe() {
 
                   <div className="pt-4 border-t space-y-2 text-xs">
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Monthly Subscription</span>
+                      <span>{billingInterval === "YEARLY" ? "Yearly Subscription" : "Monthly Subscription"}</span>
                       <span className="font-semibold text-foreground">
-                        {!isTailored && priceMUR ? `MUR ${priceMUR.toLocaleString()}` : "Tailored"}
+                        {!isTailored ? (billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}` : `MUR ${baseMonthlyMUR.toLocaleString()}`) : "Tailored"}
                       </span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
@@ -281,9 +343,9 @@ export default function Subscribe() {
                       <span className="font-semibold text-foreground">MUR (Mauritian Rupee)</span>
                     </div>
                     <div className="flex justify-between pt-4 border-t text-base font-bold text-foreground">
-                      <span>Monthly Total</span>
+                      <span>{billingInterval === "YEARLY" ? "Yearly Total" : "Monthly Total"}</span>
                       <span className="text-emerald-700 dark:text-emerald-400">
-                        {!isTailored && priceMUR ? `MUR ${priceMUR.toLocaleString()}/mo` : "Tailored Quote"}
+                        {!isTailored ? (billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}/year` : `MUR ${baseMonthlyMUR.toLocaleString()}/mo`) : "Tailored Quote"}
                       </span>
                     </div>
                   </div>

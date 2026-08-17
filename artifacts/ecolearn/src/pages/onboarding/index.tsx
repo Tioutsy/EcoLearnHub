@@ -34,6 +34,7 @@ export default function OnboardingPage() {
 
   const [adminName, setAdminName] = useState<string>("");
   const [starterCourseCode, setStarterCourseCode] = useState<string>("ELH-01");
+  const [billingInterval, setBillingInterval] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -54,21 +55,54 @@ export default function OnboardingPage() {
     else setSelectedBandCode("OVER_120");
   }, [employeeCount]);
 
-  const getBandPrice = (code: string) => {
+  const getBandPrice = (code: string, interval: "MONTHLY" | "YEARLY" = billingInterval) => {
+    let baseMonthly = 3000;
+    let range = "1–25 employees";
+
     switch (code) {
       case "UP_TO_25":
-        return { price: "MUR 3,000", period: "/ month", range: "1–25 employees" };
+        baseMonthly = 3000;
+        range = "1–25 employees";
+        break;
       case "FROM_26_TO_50":
-        return { price: "MUR 4,500", period: "/ month", range: "26–50 employees" };
+        baseMonthly = 4500;
+        range = "26–50 employees";
+        break;
       case "FROM_51_TO_80":
-        return { price: "MUR 5,000", period: "/ month", range: "51–80 employees" };
+        baseMonthly = 5000;
+        range = "51–80 employees";
+        break;
       case "FROM_81_TO_120":
-        return { price: "MUR 6,250", period: "/ month", range: "81–120 employees" };
+        baseMonthly = 6250;
+        range = "81–120 employees";
+        break;
       case "OVER_120":
-        return { price: "Tailored Quote", period: "", range: "120+ employees" };
+        return { price: "Tailored Quote", period: "", range: "120+ employees", savings: "" };
       default:
-        return { price: "MUR 3,000", period: "/ month", range: "1–25 employees" };
+        baseMonthly = 3000;
+        range = "1–25 employees";
     }
+
+    if (interval === "YEARLY") {
+      const yearlyTotal = baseMonthly * 12;
+      const savings = Math.round(yearlyTotal * 0.10);
+      const finalYearly = yearlyTotal - savings;
+      const eqMonthly = Math.round((finalYearly / 12) * 100) / 100;
+
+      return {
+        price: `MUR ${finalYearly.toLocaleString()}`,
+        period: "/ year (Billed yearly)",
+        range,
+        savings: `Save MUR ${savings.toLocaleString()} per year · Eq. MUR ${eqMonthly.toLocaleString()}/mo`,
+      };
+    }
+
+    return {
+      price: `MUR ${baseMonthly.toLocaleString()}`,
+      period: "/ month",
+      range,
+      savings: "",
+    };
   };
 
   const handleNextStep = () => {
@@ -102,6 +136,7 @@ export default function OnboardingPage() {
           employeeCount,
           employeeBandCode: selectedBandCode,
           planCode: selectedPlanCode,
+          billingInterval,
         }),
       });
 
@@ -248,6 +283,41 @@ export default function OnboardingPage() {
               <p className="text-muted-foreground text-sm">Derived server-side from your organisation size.</p>
             </div>
 
+            {/* Billing Interval Toggle */}
+            <div className="space-y-2">
+              <Label className="font-semibold text-xs uppercase tracking-wider">Billing Interval</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setBillingInterval("MONTHLY")}
+                  className={`p-3 rounded-xl border text-sm font-semibold transition-all text-center ${
+                    billingInterval === "MONTHLY"
+                      ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      : "border-border text-muted-foreground hover:bg-muted/40"
+                  }`}
+                >
+                  Monthly Billing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingInterval("YEARLY")}
+                  className={`p-3 rounded-xl border text-sm font-semibold transition-all text-center flex items-center justify-center gap-1.5 ${
+                    billingInterval === "YEARLY"
+                      ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      : "border-border text-muted-foreground hover:bg-muted/40"
+                  }`}
+                >
+                  <span>Yearly Billing</span>
+                  <span className="text-[10px] bg-emerald-600 text-white font-bold px-1.5 py-0.2 rounded-md">Save 10%</span>
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {billingInterval === "YEARLY"
+                  ? "Pay yearly and save 10% on the equivalent 12-month total. One payment covers 12 months."
+                  : "Choose monthly billing for standard monthly flexibility."}
+              </p>
+            </div>
+
             <div className="border rounded-xl p-5 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20 dark:to-transparent border-emerald-200 dark:border-emerald-800 space-y-3">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-300 font-mono text-xs">
@@ -261,6 +331,11 @@ export default function OnboardingPage() {
                 </span>
                 <span className="text-sm text-muted-foreground">{bandInfo.period}</span>
               </div>
+              {bandInfo.savings && (
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block">
+                  {bandInfo.savings}
+                </span>
+              )}
               <p className="text-xs text-muted-foreground">
                 Includes full access to 34 interactive ESG courses, workplace micro-challenges, core certification, and company compliance tracking.
               </p>
@@ -380,7 +455,7 @@ export default function OnboardingPage() {
             <div className="text-xs text-muted-foreground space-y-1">
               <div>✓ Grants complete access to `/company` management area</div>
               <div>✓ Allows inviting employees and managers</div>
-              <div>✓ Enables assigning training and viewing Training Impact metrics</div>
+              <div>✓ Enables assigning training and reviewing employee workplace action records</div>
             </div>
 
             <div className="pt-4 flex justify-between">

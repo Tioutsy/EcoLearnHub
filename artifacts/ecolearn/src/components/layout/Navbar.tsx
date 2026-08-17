@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth, useUser, UserButton } from "@clerk/react";
-import { Menu, X, Leaf, BookOpen, BarChart3, Building2, UserCircle, Route as RouteIcon, Target, MapPin, ShieldCheck } from "lucide-react";
+import { Menu, X, Leaf, BookOpen, Building2, UserCircle, Route as RouteIcon, Target, MapPin, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isPlatformAdmin, isCompanyAdmin, getUserRoleLabel } from "@/lib/authHelpers";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ export function Navbar() {
     { href: "/courses", label: t("nav.courses"), icon: BookOpen },
     { href: "/challenges", label: t("nav.challenges"), icon: Target },
     { href: "/mauritius-rules-resources", label: t("nav.mauritius_resources"), icon: Leaf },
-    { href: "/impact", label: t("nav.impact"), icon: BarChart3 },
     { href: "/pricing", label: t("nav.pricing"), icon: Building2 },
   ];
 

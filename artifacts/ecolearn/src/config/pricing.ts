@@ -20,6 +20,27 @@ export const PER_EMPLOYEE_COST_MAP: Record<string, string> = {
 export const INDICATIVE_CALCULATION_NOTE =
   "Indicative per-employee amounts are calculated using the maximum number of employees included in each band. Your company subscription remains a fixed monthly fee based on your employee category.";
 
+export function calculateYearlyPricing(monthlyPriceMUR: number | null): {
+  yearlyPriceMUR: number | null;
+  undiscountedTotalMUR: number | null;
+  savingsMUR: number;
+  equivalentMonthlyMUR: number | null;
+} {
+  if (!monthlyPriceMUR || monthlyPriceMUR <= 0) {
+    return { yearlyPriceMUR: null, undiscountedTotalMUR: null, savingsMUR: 0, equivalentMonthlyMUR: null };
+  }
+  const undiscounted = monthlyPriceMUR * 12;
+  const savings = Math.round(undiscounted * 0.10);
+  const yearlyPrice = undiscounted - savings;
+  const equivalentMonthly = Math.round((yearlyPrice / 12) * 100) / 100;
+  return {
+    yearlyPriceMUR: yearlyPrice,
+    undiscountedTotalMUR: undiscounted,
+    savingsMUR: savings,
+    equivalentMonthlyMUR: equivalentMonthly,
+  };
+}
+
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "plan_25",
