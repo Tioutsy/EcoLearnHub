@@ -2,7 +2,19 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth, useUser, UserButton } from "@clerk/react";
-import { Menu, X, Leaf, BookOpen, Building2, UserCircle, Route as RouteIcon, Target, MapPin, ShieldCheck } from "lucide-react";
+import {
+  Menu,
+  X,
+  Leaf,
+  BookOpen,
+  Building2,
+  UserCircle,
+  Route as RouteIcon,
+  Target,
+  MapPin,
+  ShieldCheck,
+  Home as HomeIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isPlatformAdmin, isCompanyAdmin, getUserRoleLabel } from "@/lib/authHelpers";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +22,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export function Navbar() {
   const [location] = useLocation();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const { t } = useLanguage();
   const showSuperAdminLink = user?.publicMetadata?.role === "super_admin";
@@ -26,6 +38,7 @@ export function Navbar() {
 
   const authLinks = isSignedIn
     ? [
+        { href: "/home", label: t("nav.home") || "Home", icon: HomeIcon },
         { href: "/dashboard", label: t("nav.my_learning"), icon: UserCircle },
         { href: "/company", label: t("nav.company"), icon: Building2 },
         ...(showReviewLink
@@ -44,7 +57,11 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link
+            href={isLoaded && isSignedIn ? "/home" : "/"}
+            aria-label="Go to ELEVIO SKILLS Home"
+            className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded-lg p-0.5"
+          >
             {/* Green Leaf Badge Logo */}
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm transition-transform group-hover:scale-105">
               <Leaf className="h-5 w-5" />

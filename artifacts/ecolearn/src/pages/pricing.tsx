@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   CheckCircle2,
-  Building2,
   FileText,
   Sparkles,
   ShieldCheck,
@@ -17,7 +16,6 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@clerk/react";
-import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import { useState, useEffect, useMemo } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
@@ -590,29 +588,6 @@ export default function Pricing() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Corporate Advisory Callout */}
-        <div className="max-w-4xl mx-auto border rounded-3xl p-8 bg-gradient-to-r from-muted/50 to-card shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 max-w-xl">
-            <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider">
-              <Building2 className="h-4 w-4" /> Enterprise & Custom Rollouts
-            </div>
-            <h3 className="text-xl font-bold font-serif">Need a tailored rollout or LMS integration?</h3>
-            <p className="text-sm text-muted-foreground">
-              Our corporate team assists with single-sign-on (SSO), bespoke sustainability modules, and enterprise reporting for multi-site organizations.
-            </p>
-          </div>
-
-          <LeadCaptureDialog
-            interest="proposal"
-            trigger={
-              <Button size="lg" variant="outline" className="shrink-0 font-semibold rounded-xl gap-2">
-                <span>Talk to Corporate Advisory</span>
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            }
-          />
         </div>
       </div>
     </Layout>

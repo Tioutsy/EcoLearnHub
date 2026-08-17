@@ -18,6 +18,7 @@ if (import.meta.env.VITE_API_URL) {
 
 // Pages
 import Home from "@/pages/home";
+import InternalHome from "@/pages/internal-home";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/courses/detail";
 import LearningPaths from "@/pages/learning-paths";
@@ -273,7 +274,7 @@ function HomeRedirect() {
   return (
     <>
       <Show when="signed-in">
-        <Redirect to="/dashboard" />
+        <Redirect to="/home" />
       </Show>
       <Show when="signed-out">
         <Home />
@@ -351,6 +352,14 @@ function ClerkProviderWithRoutes() {
       <TooltipProvider>
         <Switch>
             <Route path="/" component={HomeRedirect} />
+            <Route path="/home">
+              <Show when="signed-in">
+                <InternalHome />
+              </Show>
+              <Show when="signed-out">
+                <Redirect to="/sign-in" />
+              </Show>
+            </Route>
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
             <Route path="/accept-invitation" component={AcceptInvitationPage} />
