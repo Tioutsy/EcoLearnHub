@@ -406,6 +406,9 @@ function ClerkProviderWithRoutes() {
             <Route path="/platform-admin/subscriptions" component={PlatformAdminSubscriptions} />
             <Route path="/platform-admin/preview/:id" component={AdminCoursePreview} />
             <Route path="/platform-admin/sdg-mapping" component={PlatformAdminSdgMapping} />
+            <Route path="/company/assignments"><Redirect to="/company/employees" /></Route>
+            {/* Catch-all fallback */}
+            <Route><Redirect to="/dashboard" /></Route>
           </Switch>
           <Toaster />
         </TooltipProvider>

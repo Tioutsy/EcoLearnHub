@@ -484,7 +484,7 @@ export function prioritiseTrainingInsights(metrics: {
       explanation: `${learnerRiskSummary.assignedNotStartedCount} assigned course enrollment(s) have not been started by learners yet.`,
       recommendedAction: "Issue a welcome broadcast or assign completion deadlines to encourage initial login.",
       actionType: "manage_assignments",
-      targetUrl: "/company/assignments",
+      targetUrl: "/company/employees",
     });
   }
 
@@ -561,14 +561,14 @@ export function prioritiseTrainingInsights(metrics: {
       title: "Kickstart Unstarted Enrollments",
       description: `Encourage the ${learnerRiskSummary.assignedNotStartedCount} unstarted learner enrollment(s) to begin their assigned sustainability paths.`,
       actionLabel: "Manage Course Assignments",
-      actionUrl: "/company/assignments",
+      actionUrl: "/company/employees",
     };
   } else {
     recommendedNextAction = {
       title: "Expand Role-Based Sustainability Paths",
       description: "Learning performance is on track. Consider assigning advanced ESG courses to broaden organizational sustainability capabilities.",
       actionLabel: "Assign Additional Courses",
-      actionUrl: "/company/assignments",
+      actionUrl: "/company/employees",
     };
   }
 
