@@ -118,19 +118,16 @@ function ChartCard({
   );
 }
 
-import { TrainingPrioritiesDialog } from "@/components/TrainingPrioritiesDialog";
 import { TrainingInsightsCard } from "@/components/TrainingInsightsCard";
 
 export default function CompanyDashboard() {
   const { t } = useLanguage();
-  const { data: company, isLoading: isLoadingCompany, refetch: refetchCompany } = useGetMyCompany();
+  const { data: company, isLoading: isLoadingCompany } = useGetMyCompany();
   const { data: stats, isLoading: isLoadingStats } = useGetDashboardStats();
   const { data: lmsOverview, isLoading: isLoadingLms } = useCompanyLmsOverview();
   const { data: trend, isLoading: isLoadingTrend } = useGetCompletionTrend();
   const { data: departments, isLoading: isLoadingDepts } = useGetDepartmentParticipation();
   const { data: score, isLoading: isLoadingScore } = useGetSustainabilityScore();
-
-  const [prioritiesOpen, setPrioritiesOpen] = useState(false);
 
   const trendData = trend ?? [];
   const deptData = departments ?? [];
@@ -162,24 +159,27 @@ export default function CompanyDashboard() {
     if (esgDownloading) return;
     setEsgDownloading(true);
     try {
-      const response = await fetch("/api/esg/report", { credentials: "include" });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Request failed with status ${response.status}`);
-      }
-      const blob = await response.blob();
+      const blob = await customFetch<Blob>("/api/esg/report", {
+        method: "GET",
+        responseType: "blob",
+      });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "ESG_Training_Report.pdf";
+      const safeName = (company?.name || "Elevio").replace(/[^a-z0-9-_]+/gi, "_");
+      link.download = `${safeName}_ESG_Training_Report.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (err) {
+      toast({
+        title: "ESG Report Downloaded",
+        description: "Official ESG Training & Readiness Report PDF has been downloaded.",
+      });
+    } catch (err: any) {
       toast({
         title: "Download failed",
-        description: err instanceof Error ? err.message : "Could not download the ESG report.",
+        description: err?.message || "Could not download the ESG report.",
         variant: "destructive",
       });
     } finally {
@@ -219,9 +219,6 @@ export default function CompanyDashboard() {
                   </div>
                 </Link>
               )}
-              <Button variant="outline" onClick={() => setPrioritiesOpen(true)}>
-                <Target className="mr-2 h-4 w-4 text-emerald-600" /> Training Priorities
-              </Button>
               <Button onClick={downloadEsgReport} disabled={esgDownloading}>
                 <FileText className="mr-2 h-4 w-4" />
                 {esgDownloading ? "Downloading..." : "ESG Training Report"}
@@ -663,13 +660,6 @@ export default function CompanyDashboard() {
           </div>
         </div>
       </div>
-
-      <TrainingPrioritiesDialog
-        open={prioritiesOpen}
-        onOpenChange={setPrioritiesOpen}
-        currentPriorities={(company as any)?.trainingPriorities || []}
-        onSaved={() => refetchCompany()}
-      />
     </Layout>
   );
 }

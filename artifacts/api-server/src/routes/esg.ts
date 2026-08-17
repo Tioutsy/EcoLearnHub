@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { companiesTable, employeesTable } from "@workspace/db";
 import { eq, count, sum, sql } from "drizzle-orm";
 import { generateEsgReportPdf, type EsgReportData } from "../lib/esgReportPdf";
+import { getCompanyAccess } from "../lib/access";
 
 const router = Router();
 
@@ -38,24 +39,43 @@ function levelFor(score: number) {
   return LEVELS.find((l) => score >= l.min && score <= l.max) ?? LEVELS[0];
 }
 
-async function getCompanyAggregates() {
-  const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
-  if (!companies.length) return null;
-  const company = companies[0];
+async function getCompanyAggregates(companyId?: number | null) {
+  let company: any = null;
+  if (companyId) {
+    const [c] = await db.select().from(companiesTable).where(eq(companiesTable.id, companyId)).limit(1);
+    company = c ?? null;
+  }
+  if (!company) {
+    const companies = await db.select().from(companiesTable).orderBy(companiesTable.id).limit(1);
+    company = companies[0] ?? null;
+  }
+  if (!company) {
+    company = {
+      id: 0,
+      name: "Your Organisation",
+      industry: "Corporate Sustainability",
+      maxEmployees: 25,
+      employeeCount: 0,
+    };
+  }
 
-  const [agg] = await db
-    .select({
-      totalEmployees: count(),
-      assigned: sum(employeesTable.enrolledCourses),
-      completed: sum(employeesTable.completedCourses),
-      certificates: sum(employeesTable.certificates),
-      learningMinutes: sum(employeesTable.learningMinutes),
-      active: sql<number>`count(*) filter (where ${employeesTable.completedCourses} > 0)`,
-      adopted: sql<number>`count(*) filter (where ${employeesTable.enrolledCourses} > 0)`,
-      avgScore: sql<number>`coalesce(round(avg(${employeesTable.avgScore}) filter (where ${employeesTable.completedCourses} > 0)), 0)`,
-    })
-    .from(employeesTable)
-    .where(eq(employeesTable.companyId, company.id));
+  let agg: any = null;
+  if (company.id > 0) {
+    const [result] = await db
+      .select({
+        totalEmployees: count(),
+        assigned: sum(employeesTable.enrolledCourses),
+        completed: sum(employeesTable.completedCourses),
+        certificates: sum(employeesTable.certificates),
+        learningMinutes: sum(employeesTable.learningMinutes),
+        active: sql<number>`count(*) filter (where ${employeesTable.completedCourses} > 0)`,
+        adopted: sql<number>`count(*) filter (where ${employeesTable.enrolledCourses} > 0)`,
+        avgScore: sql<number>`coalesce(round(avg(${employeesTable.avgScore}) filter (where ${employeesTable.completedCourses} > 0)), 0)`,
+      })
+      .from(employeesTable)
+      .where(eq(employeesTable.companyId, company.id));
+    agg = result;
+  }
 
   const totalEmployees = Number(agg?.totalEmployees ?? 0);
   const assigned = Number(agg?.assigned ?? 0);
@@ -194,6 +214,16 @@ router.get("/score", async (_req, res): Promise<void> => {
 });
 
 async function getDepartmentBreakdown(companyId: number) {
+  if (companyId <= 0) {
+    return [
+      { department: "Operations & Frontline", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Facilities & Maintenance", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Procurement & Supply Chain", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Human Resources & Administration", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Finance & Accounting", employees: 0, participationRate: 0, completionRate: 0 },
+    ];
+  }
+
   const rows = await db
     .select({
       department: employeesTable.department,
@@ -206,61 +236,81 @@ async function getDepartmentBreakdown(companyId: number) {
     .where(eq(employeesTable.companyId, companyId))
     .groupBy(employeesTable.department);
 
-  return rows
+  const mapped = rows
     .map((r) => {
       const employees = Number(r.employees ?? 0);
       const assigned = Number(r.assigned ?? 0);
       const completed = Number(r.completed ?? 0);
       const participating = Number(r.participating ?? 0);
       return {
-        department: r.department ?? "Unassigned",
+        department: r.department ?? "General",
         employees,
         participationRate: employees > 0 ? Math.round((participating / employees) * 100) : 0,
         completionRate: assigned > 0 ? Math.round((completed / assigned) * 100) : 0,
       };
     })
     .sort((a, b) => b.employees - a.employees);
+
+  if (mapped.length === 0) {
+    return [
+      { department: "Operations & Frontline", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Facilities & Maintenance", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Procurement & Supply Chain", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Human Resources & Administration", employees: 0, participationRate: 0, completionRate: 0 },
+      { department: "Finance & Accounting", employees: 0, participationRate: 0, completionRate: 0 },
+    ];
+  }
+
+  return mapped;
 }
 
 // Generate a professional, shareable ESG training report as a PDF.
 router.get("/report", async (req, res): Promise<void> => {
-  const a = await getCompanyAggregates();
-  if (!a) {
-    res.status(404).json({ error: "No company data available to build a report" });
-    return;
-  }
-
-  const score = computeScore(a);
-  const impact = computeImpact(a);
-  const departments = await getDepartmentBreakdown(a.company.id);
-
-  const reportData: EsgReportData = {
-    company: { name: a.company.name, industry: a.company.industry ?? null },
-    generatedAt: new Date(),
-    participation: {
-      totalEmployees: a.totalEmployees,
-      activeEmployees: a.active,
-      adoptionRate: a.adoptionRate,
-      engagementRate: a.engagementRate,
-      coursesAssigned: a.assigned,
-      coursesCompleted: a.completed,
-      completionRate: a.completionRate,
-      avgScore: a.avgScore,
-      learningHours: a.learningHours,
-      certificatesIssued: a.certificates,
-    },
-    score: {
-      score: score.score,
-      level: score.level,
-      nextLevel: score.nextLevel,
-      pointsToNextLevel: score.pointsToNextLevel,
-      components: score.components,
-    },
-    impact,
-    departments,
-  };
-
   try {
+    let companyId: number | null = null;
+    try {
+      const access = await getCompanyAccess(req);
+      companyId = access.companyId ?? null;
+    } catch {
+      // Allow template download even if unauthenticated
+    }
+
+    const a = await getCompanyAggregates(companyId);
+    if (!a) {
+      res.status(404).json({ error: "No company data available to build a report" });
+      return;
+    }
+
+    const score = computeScore(a);
+    const impact = computeImpact(a);
+    const departments = await getDepartmentBreakdown(a.company.id);
+
+    const reportData: EsgReportData = {
+      company: { name: a.company.name, industry: a.company.industry ?? null },
+      generatedAt: new Date(),
+      participation: {
+        totalEmployees: a.totalEmployees,
+        activeEmployees: a.active,
+        adoptionRate: a.adoptionRate,
+        engagementRate: a.engagementRate,
+        coursesAssigned: a.assigned,
+        coursesCompleted: a.completed,
+        completionRate: a.completionRate,
+        avgScore: a.avgScore,
+        learningHours: a.learningHours,
+        certificatesIssued: a.certificates,
+      },
+      score: {
+        score: score.score,
+        level: score.level,
+        nextLevel: score.nextLevel,
+        pointsToNextLevel: score.pointsToNextLevel,
+        components: score.components,
+      },
+      impact,
+      departments,
+    };
+
     const pdfBytes = await generateEsgReportPdf(reportData);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(

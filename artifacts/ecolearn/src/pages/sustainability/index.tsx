@@ -4,6 +4,7 @@ import {
   useGetMyCompany,
   useGetEsgImpact,
   useGetSustainabilityScore,
+  customFetch,
 } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -73,24 +74,27 @@ export default function SustainabilityImpact() {
     if (esgDownloading) return;
     setEsgDownloading(true);
     try {
-      const response = await fetch("/api/esg/report", { credentials: "include" });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Request failed with status ${response.status}`);
-      }
-      const blob = await response.blob();
+      const blob = await customFetch<Blob>("/api/esg/report", {
+        method: "GET",
+        responseType: "blob",
+      });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "ESG_Training_Report.pdf";
+      const safeName = (company?.name || "Elevio").replace(/[^a-z0-9-_]+/gi, "_");
+      link.download = `${safeName}_ESG_Training_Report.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (err) {
+      toast({
+        title: "ESG Report Downloaded",
+        description: "Your official ESG Training & Readiness Report PDF has been generated.",
+      });
+    } catch (err: any) {
       toast({
         title: "Download failed",
-        description: err instanceof Error ? err.message : "Could not download the ESG report.",
+        description: err?.message || "Could not download the ESG report.",
         variant: "destructive",
       });
     } finally {
@@ -126,14 +130,14 @@ export default function SustainabilityImpact() {
                 <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Leaf className="h-5 w-5" />
                 </div>
-                <h1 className="text-3xl font-bold font-serif">Sustainability Impact</h1>
+                <h1 className="text-3xl font-bold font-serif">Sustainability Score & Capability</h1>
               </div>
               {isLoadingCompany ? (
                 <Skeleton className="h-5 w-56" />
               ) : (
                 <div className="flex items-center gap-2 text-muted-foreground font-medium">
                   <Building2 className="h-4 w-4" />
-                  {company?.name} • estimated ESG impact from training
+                  {company?.name} • Workforce ESG Capability & Learning Progress
                 </div>
               )}
             </div>
@@ -150,7 +154,7 @@ export default function SustainabilityImpact() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 space-y-10">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Sustainability Score */}
         <Card>
           <CardContent className="p-6 md:p-8">
@@ -219,61 +223,27 @@ export default function SustainabilityImpact() {
           </CardContent>
         </Card>
 
-        {/* Estimated impact */}
-        <section>
-          <h2 className="text-2xl font-bold font-serif mb-1">Estimated Environmental Impact</h2>
-          <p className="text-muted-foreground mb-6 text-sm">
-            Estimated from your team's completed training using standardized sustainability assumptions.
-          </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {headlineMetrics.map((kpi, i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${kpi.bg} ${kpi.color}`}>
-                      <kpi.icon className="h-6 w-6" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
-                      {isLoadingImpact ? (
-                        <Skeleton className="h-8 w-24 mt-1" />
-                      ) : (
-                        <h3 className="text-2xl font-bold truncate">{kpi.value}</h3>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Awareness scores */}
-        <section>
-          <h2 className="text-2xl font-bold font-serif mb-6">Awareness Scores</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {awarenessScores.map((kpi, i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
-                    <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
-                  </div>
-                  {isLoadingImpact ? (
-                    <Skeleton className="h-8 w-16" />
-                  ) : (
-                    <>
-                      <h3 className="text-2xl font-bold mb-2">{kpi.value}<span className="text-sm text-muted-foreground"> / 100</span></h3>
-                      <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                        <div className="bg-primary h-full rounded-full" style={{ width: `${kpi.value}%` }} />
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        {/* Quick Next Steps */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Link href="/courses">
+            <div className="border rounded-xl p-5 hover:bg-muted/40 transition-colors cursor-pointer bg-card flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold mb-1">Assign Tailored Learning Paths</h3>
+                <p className="text-sm text-muted-foreground">Browse catalog and recommend role-specific courses to employees.</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-primary shrink-0 ml-4" />
+            </div>
+          </Link>
+          <Link href="/company/reports">
+            <div className="border rounded-xl p-5 hover:bg-muted/40 transition-colors cursor-pointer bg-card flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold mb-1">View ESG Training Reports</h3>
+                <p className="text-sm text-muted-foreground">Export audit-ready CSV data and multi-page ESG disclosures.</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-primary shrink-0 ml-4" />
+            </div>
+          </Link>
+        </div>
       </div>
     </Layout>
   );

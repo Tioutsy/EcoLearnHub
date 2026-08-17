@@ -2,11 +2,14 @@ import { Layout } from "@/components/layout/Layout";
 import {
   useListCourses,
   useListEmployees,
+  useGetMyCompany,
+  customFetch,
 } from "@workspace/api-client-react";
 import { useTrainingReport, type TrainingReportParams } from "@/lib/lms-api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Select,
@@ -27,6 +30,7 @@ import {
   ArrowLeft,
   Download,
   FileSpreadsheet,
+  FileText,
   Filter,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -52,6 +56,8 @@ function csvValue(value: unknown): string {
 
 export default function CompanyReports() {
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const { data: company } = useGetMyCompany();
 
   const STATUS_META: Record<string, { label: string; className: string }> = {
     not_started: {
@@ -75,6 +81,7 @@ export default function CompanyReports() {
   const [department, setDepartment] = useState(ALL);
   const [courseId, setCourseId] = useState(ALL);
   const [status, setStatus] = useState(ALL);
+  const [pdfDownloading, setPdfDownloading] = useState(false);
 
   const { data: employees } = useListEmployees();
   const { data: courses } = useListCourses();
@@ -94,6 +101,38 @@ export default function CompanyReports() {
     return Array.from(set).sort();
   }, [employees]);
 
+  const downloadPdf = async () => {
+    if (pdfDownloading) return;
+    setPdfDownloading(true);
+    try {
+      const blob = await customFetch<Blob>("/api/esg/report", {
+        method: "GET",
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const safeName = (company?.name || "Elevio").replace(/[^a-z0-9-_]+/gi, "_");
+      link.download = `${safeName}_ESG_Training_Report.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({
+        title: "ESG Report Downloaded",
+        description: "Official ESG Training & Readiness Report PDF has been downloaded.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Download failed",
+        description: err?.message || "Could not download the ESG report.",
+        variant: "destructive",
+      });
+    } finally {
+      setPdfDownloading(false);
+    }
+  };
+
   const exportCsv = () => {
     const data = rows ?? [];
     const header = [
@@ -101,6 +140,7 @@ export default function CompanyReports() {
       "Email",
       "Department",
       "Job title",
+      "Course Code",
       "Course",
       "Assigned",
       "Due date",
@@ -108,20 +148,44 @@ export default function CompanyReports() {
       "Progress %",
       "Status",
       "Certificate reference",
+      "ESG Alignment (GRI 404-1)",
     ];
-    const body = data.map((row) => [
-      row.employeeName,
-      row.email,
-      row.department ?? "",
-      row.jobTitle ?? "",
-      row.courseTitle,
-      fmtDate(row.assignedAt),
-      fmtDate(row.dueDate),
-      fmtDate(row.completedAt),
-      row.progressPct,
-      STATUS_META[row.status]?.label ?? row.status,
-      row.certificateCode ?? "",
-    ]);
+    
+    // If no training rows exist yet, generate an official ESG template with sample structure
+    const body = data.length > 0
+      ? data.map((row) => [
+          row.employeeName,
+          row.email,
+          row.department ?? "",
+          row.jobTitle ?? "",
+          (row as any).courseCode ?? "ELH-01",
+          row.courseTitle,
+          fmtDate(row.assignedAt),
+          fmtDate(row.dueDate),
+          fmtDate(row.completedAt),
+          row.progressPct,
+          STATUS_META[row.status]?.label ?? row.status,
+          row.certificateCode ?? "",
+          "GRI 404-1 / SDG 12 & 13",
+        ])
+      : [
+          [
+            "[Sample Learner]",
+            "sample.learner@company.mu",
+            "Operations & Frontline",
+            "Operations Executive",
+            "ELH-01",
+            "Sustainability Foundations",
+            fmtDate(new Date().toISOString()),
+            fmtDate(new Date(Date.now() + 30 * 86400000).toISOString()),
+            "-",
+            0,
+            "Assigned",
+            "-",
+            "GRI 404-1 / SDG 12 & 13",
+          ],
+        ];
+
     const csv = [header, ...body]
       .map((line) => line.map(csvValue).join(","))
       .join("\n");
@@ -129,9 +193,16 @@ export default function CompanyReports() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `elevio-training-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    const safeName = (company?.name || "Elevio").replace(/[^a-z0-9-_]+/gi, "_");
+    link.download = `${safeName}_ESG_Training_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    toast({
+      title: "CSV Exported",
+      description: data.length > 0 ? "Training data exported to CSV." : "Official ESG Training Template CSV exported.",
+    });
   };
 
   return (
@@ -145,16 +216,22 @@ export default function CompanyReports() {
             <div>
               <div className="flex items-center gap-2 text-sm font-medium text-primary mb-2">
                 <FileSpreadsheet className="h-4 w-4" />
-                ESG-ready training data
+                ESG-ready training data (GRI 404 & UN SDG Aligned)
               </div>
               <h1 className="text-3xl font-bold font-serif mb-2">Training Reports</h1>
               <p className="text-muted-foreground max-w-2xl">
-                Filter assignment progress by employee, department, course, and status.
+                Filter assignment progress by employee, department, course, and status for internal audits and ESG disclosures.
               </p>
             </div>
-            <Button onClick={exportCsv} disabled={!rows?.length}>
-              <Download className="mr-2 h-4 w-4" /> Export CSV
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={downloadPdf} disabled={pdfDownloading} variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+                <FileText className="mr-2 h-4 w-4" />
+                {pdfDownloading ? "Generating..." : "ESG Report (PDF)"}
+              </Button>
+              <Button onClick={exportCsv}>
+                <Download className="mr-2 h-4 w-4" /> Export CSV
+              </Button>
+            </div>
           </div>
         </div>
       </div>

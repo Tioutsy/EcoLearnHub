@@ -244,7 +244,7 @@ router.get("/:id", async (req, res): Promise<void> => {
       return;
     }
 
-    const [enrollment] = await db
+    let [enrollment] = await db
       .select({
         id: enrollmentsTable.id,
         userId: enrollmentsTable.userId,
@@ -264,19 +264,133 @@ router.get("/:id", async (req, res): Promise<void> => {
       .leftJoin(coursesTable, eq(enrollmentsTable.courseId, coursesTable.id))
       .where(eq(enrollmentsTable.id, id));
 
+    // Fallback: If not found by enrollment ID, check if :id is a courseId for which the user is enrolled or assigned
+    if (!enrollment) {
+      const userClauses = [eq(enrollmentsTable.userId, access.userId)];
+      if (access.email) {
+        userClauses.push(sql`lower(${enrollmentsTable.userId}) = ${access.email.toLowerCase()}`);
+      }
+      if (access.employee) {
+        userClauses.push(eq(enrollmentsTable.employeeId, access.employee.id));
+        if (access.employee.email) {
+          userClauses.push(sql`lower(${enrollmentsTable.userId}) = ${access.employee.email.toLowerCase()}`);
+        }
+      }
+
+      const [courseEnrollment] = await db
+        .select({
+          id: enrollmentsTable.id,
+          userId: enrollmentsTable.userId,
+          companyId: enrollmentsTable.companyId,
+          employeeId: enrollmentsTable.employeeId,
+          courseId: enrollmentsTable.courseId,
+          courseName: coursesTable.title,
+          courseThumbnail: coursesTable.thumbnailUrl,
+          status: enrollmentsTable.status,
+          progressPct: enrollmentsTable.progressPct,
+          dueDate: enrollmentsTable.dueDate,
+          lastAccessedAt: enrollmentsTable.lastAccessedAt,
+          completedAt: enrollmentsTable.completedAt,
+          createdAt: enrollmentsTable.createdAt,
+        })
+        .from(enrollmentsTable)
+        .leftJoin(coursesTable, eq(enrollmentsTable.courseId, coursesTable.id))
+        .where(
+          and(
+            eq(enrollmentsTable.courseId, id),
+            or(...userClauses),
+          ),
+        )
+        .limit(1);
+
+      if (courseEnrollment) {
+        enrollment = courseEnrollment;
+      } else if (access.employee) {
+        // Auto-hydrate from course_assignments if assigned to this employee
+        const [assignment] = await db
+          .select()
+          .from(courseAssignmentsTable)
+          .where(
+            and(
+              eq(courseAssignmentsTable.employeeId, access.employee.id),
+              eq(courseAssignmentsTable.courseId, id),
+            ),
+          )
+          .limit(1);
+
+        if (assignment) {
+          const [created] = await db
+            .insert(enrollmentsTable)
+            .values({
+              userId: access.userId,
+              companyId: access.employee.companyId,
+              employeeId: access.employee.id,
+              courseId: assignment.courseId,
+              assignmentSource: "company",
+              dueDate: assignment.dueDate,
+              status: assignment.completedAt ? "completed" : "active",
+              completedAt: assignment.completedAt,
+              progressPct: assignment.completedAt ? 100 : 0,
+            })
+            .returning();
+
+          const [hydrated] = await db
+            .select({
+              id: enrollmentsTable.id,
+              userId: enrollmentsTable.userId,
+              companyId: enrollmentsTable.companyId,
+              employeeId: enrollmentsTable.employeeId,
+              courseId: enrollmentsTable.courseId,
+              courseName: coursesTable.title,
+              courseThumbnail: coursesTable.thumbnailUrl,
+              status: enrollmentsTable.status,
+              progressPct: enrollmentsTable.progressPct,
+              dueDate: enrollmentsTable.dueDate,
+              lastAccessedAt: enrollmentsTable.lastAccessedAt,
+              completedAt: enrollmentsTable.completedAt,
+              createdAt: enrollmentsTable.createdAt,
+            })
+            .from(enrollmentsTable)
+            .leftJoin(coursesTable, eq(enrollmentsTable.courseId, coursesTable.id))
+            .where(eq(enrollmentsTable.id, created.id));
+
+          enrollment = hydrated;
+        }
+      }
+    }
+
     if (!enrollment) {
       res.status(404).json({ error: "Enrollment not found" });
       return;
     }
 
-    const canAccess =
-      access.role !== "employee" ||
+    const isOwner =
       enrollment.userId === access.userId ||
-      enrollment.employeeId === access.employee?.id ||
-      Boolean(access.email && enrollment.userId === access.email);
+      (access.email && enrollment.userId && enrollment.userId.toLowerCase() === access.email.toLowerCase()) ||
+      (access.employee && (enrollment.employeeId === access.employee.id || (enrollment.userId && enrollment.userId.toLowerCase() === access.employee.email.toLowerCase())));
+
+    const isCompanyStaff =
+      access.role === "platform_admin" ||
+      access.role === "company_admin" ||
+      access.role === "manager" ||
+      (access.companyId && enrollment.companyId === access.companyId);
+
+    const canAccess = isOwner || isCompanyStaff;
     if (!canAccess) {
       res.status(403).json({ error: "You can only view your assigned training" });
       return;
+    }
+
+    // Auto-link enrollment to current session userId if needed
+    if (enrollment.userId !== access.userId) {
+      await db
+        .update(enrollmentsTable)
+        .set({
+          userId: access.userId,
+          employeeId: access.employee?.id ?? enrollment.employeeId,
+          companyId: access.employee?.companyId ?? access.companyId ?? enrollment.companyId,
+        })
+        .where(eq(enrollmentsTable.id, enrollment.id));
     }
 
     const [course] = await db
