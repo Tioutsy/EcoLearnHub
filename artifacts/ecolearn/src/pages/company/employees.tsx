@@ -116,16 +116,15 @@ export default function CompanyEmployees() {
   const handleInvite = async (employee: ManagedEmployee) => {
     try {
       const result = await inviteEmployee.mutateAsync(employee.id);
-      setInviteLink(result.invitationLink);
-      await navigator.clipboard?.writeText(result.invitationLink).catch(() => undefined);
+      setInviteLink(null);
       toast({
-        title: "Invitation link created",
-        description: result.emailSent ? "Invitation email sent." : "Link copied to clipboard and displayed above.",
+        title: "Invitation Email Sent",
+        description: `Activation invitation has been sent directly to ${employee.email}.`,
       });
       invalidateEmployees();
     } catch (err: unknown) {
       toast({
-        title: "Failed to generate invitation",
+        title: "Failed to send invitation email",
         description: err instanceof Error ? err.message : "Please try again.",
         variant: "destructive",
       });
@@ -309,8 +308,8 @@ export default function CompanyEmployees() {
                           <Button variant="ghost" size="icon" title="Smart Recommendation" onClick={() => setRecommendingEmployee(employee)}>
                             <Sparkles className="h-4 w-4 text-emerald-600" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleInvite(employee)} disabled={inviteEmployee.isPending}>
-                            <Send className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" title={`Send invitation email to ${employee.email}`} onClick={() => handleInvite(employee)} disabled={inviteEmployee.isPending}>
+                            <Send className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => setEditing(employee)}>
                             <Pencil className="h-4 w-4" />

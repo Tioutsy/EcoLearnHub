@@ -26,6 +26,7 @@ import {
   sendHttpError,
   getCompanyAccess,
 } from "../lib/access";
+import { dispatchNotificationDelivery } from "../lib/notificationDeliveryService";
 
 const router = Router();
 
@@ -605,12 +606,40 @@ router.post("/employees/:id/invite", async (req, res): Promise<void> => {
       return;
     }
 
+    const inviteLink = buildInviteLink(req, token);
+    const [company] = await db
+      .select({ name: companiesTable.name })
+      .from(companiesTable)
+      .where(eq(companiesTable.id, access.companyId))
+      .limit(1);
+
+    let emailDispatched = false;
+    try {
+      const delivery = await dispatchNotificationDelivery({
+        companyId: access.companyId,
+        recipientEmployeeId: updated.id,
+        recipientEmail: updated.email,
+        recipientName: updated.name,
+        notificationType: "invitation",
+        deduplicationKey: `invitation_${updated.id}_${token}`,
+        templateData: {
+          companyName: company?.name || "Elevio Skills",
+          recipientName: updated.name,
+          actionUrl: inviteLink,
+        },
+        isOperational: true,
+      });
+      emailDispatched = delivery.delivered || delivery.status === "delivered";
+    } catch (deliveryErr) {
+      req.log?.warn?.({ err: deliveryErr }, "Notification dispatch error for employee invite");
+    }
+
     res.status(201).json({
       employeeId: updated.id,
       email: updated.email,
-      invitationLink: buildInviteLink(req, token),
-      emailSent: false,
-      message: "Email delivery is not configured yet. Share the invitation link directly.",
+      invitationLink: inviteLink,
+      emailSent: emailDispatched,
+      message: `Invitation email sent to ${updated.email}`,
     });
   } catch (err) {
     if (!sendHttpError(res, err)) {
@@ -763,11 +792,46 @@ router.post("/employees/:id/resend", async (req, res): Promise<void> => {
 
     const { createOrRefreshInvitation } = await import("../lib/invitationService");
     const result = await createOrRefreshInvitation(access.companyId, id);
+    const inviteLink = buildInviteLink(req, result.token);
+
+    const [company] = await db
+      .select({ name: companiesTable.name })
+      .from(companiesTable)
+      .where(eq(companiesTable.id, access.companyId))
+      .limit(1);
+
+    const [emp] = await db
+      .select({ name: employeesTable.name, email: employeesTable.email })
+      .from(employeesTable)
+      .where(eq(employeesTable.id, id))
+      .limit(1);
+
+    let emailDispatched = false;
+    try {
+      const delivery = await dispatchNotificationDelivery({
+        companyId: access.companyId,
+        recipientEmployeeId: id,
+        recipientEmail: result.email,
+        recipientName: emp?.name || "Team Member",
+        notificationType: "invitation_reminder",
+        deduplicationKey: `resend_invitation_${id}_${result.token}`,
+        templateData: {
+          companyName: company?.name || "Elevio Skills",
+          recipientName: emp?.name || "Team Member",
+          actionUrl: inviteLink,
+        },
+        isOperational: true,
+      });
+      emailDispatched = delivery.delivered || delivery.status === "delivered";
+    } catch (deliveryErr) {
+      req.log?.warn?.({ err: deliveryErr }, "Notification dispatch error on resend invite");
+    }
 
     res.json({
-      message: "Invitation refreshed successfully",
+      message: `Invitation email sent to ${result.email}`,
       ...result,
-      invitationLink: buildInviteLink(req, result.token),
+      invitationLink: inviteLink,
+      emailSent: emailDispatched,
     });
   } catch (err: any) {
     if (!sendHttpError(res, err)) {
