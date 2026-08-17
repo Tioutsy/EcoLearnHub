@@ -305,32 +305,39 @@ router.get("/:id", async (req, res): Promise<void> => {
 
       if (courseEnrollment) {
         enrollment = courseEnrollment;
-      } else if (access.employee) {
-        // Auto-hydrate from course_assignments if assigned to this employee
-        const [assignment] = await db
-          .select()
-          .from(courseAssignmentsTable)
-          .where(
-            and(
-              eq(courseAssignmentsTable.employeeId, access.employee.id),
-              eq(courseAssignmentsTable.courseId, id),
-            ),
-          )
-          .limit(1);
+      } else {
+        // Auto-hydrate: check if assigned or if id is a valid course in the catalogue
+        let assignment: any = null;
+        if (access.employee) {
+          const [foundAssignment] = await db
+            .select()
+            .from(courseAssignmentsTable)
+            .where(
+              and(
+                eq(courseAssignmentsTable.employeeId, access.employee.id),
+                eq(courseAssignmentsTable.courseId, id),
+              ),
+            )
+            .limit(1);
+          assignment = foundAssignment ?? null;
+        }
 
-        if (assignment) {
+        const [courseRecord] = await db.select().from(coursesTable).where(eq(coursesTable.id, id)).limit(1);
+
+        if (assignment || courseRecord) {
+          const targetCourseId = assignment ? assignment.courseId : courseRecord.id;
           const [created] = await db
             .insert(enrollmentsTable)
             .values({
               userId: access.userId,
-              companyId: access.employee.companyId,
-              employeeId: access.employee.id,
-              courseId: assignment.courseId,
-              assignmentSource: "company",
-              dueDate: assignment.dueDate,
-              status: assignment.completedAt ? "completed" : "active",
-              completedAt: assignment.completedAt,
-              progressPct: assignment.completedAt ? 100 : 0,
+              companyId: access.employee?.companyId ?? (access.companyId ?? null),
+              employeeId: access.employee?.id ?? null,
+              courseId: targetCourseId,
+              assignmentSource: assignment ? "company" : "self",
+              dueDate: assignment?.dueDate ?? null,
+              status: assignment?.completedAt ? "completed" : "active",
+              completedAt: assignment?.completedAt ?? null,
+              progressPct: assignment?.completedAt ? 100 : 0,
             })
             .returning();
 

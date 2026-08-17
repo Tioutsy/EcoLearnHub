@@ -50,6 +50,8 @@ import AdminPanel from "@/pages/admin";
 import AdminRecycling from "@/pages/admin/recycling";
 import CompanyRecycling from "@/pages/company/recycling";
 import OnboardingPage from "@/pages/onboarding";
+import PrivacyPolicy from "@/pages/Privacy";
+import TermsOfService from "@/pages/Terms";
 import NotFound from "@/pages/not-found";
 
 // Platform Admin Pages
@@ -365,6 +367,11 @@ function ClerkProviderWithRoutes() {
             {/* /impact — Intentionally disabled. Redirect authenticated users to dashboard. */}
             <Route path="/impact"><Redirect to="/dashboard" /></Route>
             <Route path="/pricing" component={Pricing} />
+            <Route path="/privacy" component={PrivacyPolicy} />
+            <Route path="/privacy-policy" component={PrivacyPolicy} />
+            <Route path="/terms" component={TermsOfService} />
+            <Route path="/terms-of-service" component={TermsOfService} />
+            <Route path="/terms-and-conditions" component={TermsOfService} />
             {/* /mauritius-rules-resources & legacy content routes — Intentionally disabled. Redirect to /courses */}
             <Route path="/made-for-mauritius"><Redirect to="/courses" /></Route>
             <Route path="/blog"><Redirect to="/courses" /></Route>

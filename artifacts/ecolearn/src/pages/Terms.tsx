@@ -1,102 +1,107 @@
-import React, { useState } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { FileText, ShieldCheck, CheckCircle2, Building2, Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
-export function TermsPage() {
-  const [locale, setLocale] = useState<"en" | "fr">("en");
+export default function TermsOfService() {
+  const lastUpdated = "17 August 2026";
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-        <div className="flex justify-between items-center pb-6 mb-6 border-b border-slate-200">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              {locale === "fr" ? "Conditions d'Utilisation du Pilote" : "Pilot Terms of Service"}
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Elevio Skills by Recyclean Ltd. — Version 1.0 (Pilot Controlled Release)
-            </p>
+    <Layout>
+      {/* Header */}
+      <div className="bg-primary/5 border-b py-12">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+            <FileText className="h-4 w-4" /> Legal & Terms
           </div>
-          <button
-            onClick={() => setLocale(locale === "en" ? "fr" : "en")}
-            className="px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
-          >
-            {locale === "en" ? "Français" : "English"}
-          </button>
-        </div>
-
-        <div className="space-y-6 text-slate-700 leading-relaxed text-sm">
-          {locale === "en" ? (
-            <>
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">1. Controlled External Pilot Scope</h2>
-                <p>
-                  These Terms govern participation in the controlled external pilot of Elevio Skills by Recyclean Ltd. Access is granted to authorized pilot companies and their enrolled employees for evaluation purposes.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">2. Organization & Enrolment Responsibility</h2>
-                <p>
-                  Pilot company administrators are responsible for ensuring that enrolled employees are authorized roster members and that company contact information remains accurate.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">3. Acceptable Use & Content Submission</h2>
-                <p>
-                  Users must not submit confidential medical, financial, customer, or unnecessary personal data in workplace action free-text submissions or evidence file uploads.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">4. Disclaimers & Limitations</h2>
-                <p>
-                  Elevio Skills provides workplace sustainability training materials. The platform does not guarantee statutory ESG compliance, carbon refund eligibility, or HRDC accreditation during the pilot phase.
-                </p>
-              </section>
-
-              <section className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-900">
-                <strong>Legal Notice:</strong> Final contractual terms require legal review by a qualified Mauritian legal professional. Contact: <em>support@recyclean.mu</em>.
-              </section>
-            </>
-          ) : (
-            <>
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">1. Portée du Pilote Externe Contrôlé</h2>
-                <p>
-                  Ces conditions régissent la participation au pilote externe contrôlé d'Elevio Skills par Recyclean Ltd. L'accès est accordé aux entreprises pilotes autorisées et à leurs employés.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">2. Responsabilité de l'Organisation</h2>
-                <p>
-                  Les administrateurs des entreprises pilotes doivent s'assurer que les employés inscrits sont membres autorisés du personnel.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">3. Utilisation Acceptable et Soumission de Contenu</h2>
-                <p>
-                  Les utilisateurs ne doivent pas soumettre de données médicales, financières ou confidentielles inutiles dans les commentaires ou fichiers de preuve.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">4. Avertissements et Limitations</h2>
-                <p>
-                  Elevio Skills fournit des contenus de formation sur le développement durable. La plateforme ne garantit pas la conformité ESG statutaire ou le remboursement HRDC durant la phase pilote.
-                </p>
-              </section>
-
-              <section className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-900">
-                <strong>Avis Légal :</strong> Les conditions contractuelles finales nécessitent l'examen par un professionnel du droit mauricien qualifié. Contact : <em>support@recyclean.mu</em>.
-              </section>
-            </>
-          )}
+          <h1 className="text-3xl md:text-5xl font-bold font-serif mb-3 text-foreground">
+            Terms of Service
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base">
+            Last Updated: {lastUpdated} • Elevio Skills (Operated by Recyclean Ltd)
+          </p>
         </div>
       </div>
-    </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="prose prose-emerald dark:prose-invert max-w-none space-y-10">
+          
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              1. Acceptance of Terms
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              By accessing or using the Elevio Skills Learning Management System ("the Platform"), operated by <strong>Recyclean Ltd</strong>, you agree to be bound by these Terms of Service. If you are registering an account on behalf of an enterprise or organisation, you represent and warrant that you have full authority to bind that organisation.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              2. Corporate Subscriptions & User Licenses
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Elevio Skills offers tiered corporate subscription plans based on organisation employee categories. Client organisations are responsible for managing employee seat allocations, invitations, and ensuring active users comply with corporate conduct and LMS rules.
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li>User accounts are strictly personal and may not be shared across multiple individuals.</li>
+              <li>Subscription fees are billed on a recurring monthly or annual basis as specified in your agreement.</li>
+              <li>Organizations may upgrade plans or request additional seat capacity at any time.</li>
+            </ul>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              3. Intellectual Property & Course Materials
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              All training curricula, text, graphics, video simulations, assessment questions, decision scenarios, and instructional designs on Elevio Skills are the exclusive intellectual property of Recyclean Ltd or its licensors. Learners and client companies are granted a non-exclusive, non-transferable license to access training materials for internal capability building only.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              4. Certification & Audit Assurance
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Certificates issued upon successful course completion represent verifiable records of training compliance. Attempts to circumvent assessment controls, falsify answers, or tamper with digital verification records constitute a breach of terms and will result in immediate certificate revocation and account suspension.
+            </p>
+          </section>
+
+          <section className="space-y-4 bg-muted/40 p-6 rounded-2xl border">
+            <h2 className="text-xl font-bold font-serif text-foreground">
+              5. Contact Information & Governing Law
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              These Terms are governed by the laws of the Republic of Mauritius. For legal inquiries or support:
+            </p>
+            <div className="space-y-2 text-sm text-foreground pt-2">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" />
+                <span><strong>Recyclean Ltd</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>Black River, Mauritius</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" />
+                <a href="mailto:support@elevio.mu" className="text-primary hover:underline">support@elevio.mu</a>
+              </div>
+            </div>
+          </section>
+
+          <div className="pt-6 flex gap-4">
+            <Button asChild variant="outline">
+              <Link href="/">Back to Home</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/privacy">View Privacy Policy</Link>
+            </Button>
+          </div>
+
+        </div>
+      </div>
+    </Layout>
   );
 }
-
-export default TermsPage;

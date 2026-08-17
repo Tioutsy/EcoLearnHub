@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className="bg-emerald-950 text-emerald-100">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           
           {/* Brand */}
           <div className="space-y-4 md:col-span-1">
@@ -38,18 +38,7 @@ export function Footer() {
             <h4 className="font-semibold text-lg text-white">{t("footer.platform")}</h4>
             <ul className="space-y-2 text-sm text-emerald-200/80">
               <li><Link href="/courses" className="hover:text-white transition-colors">{t("footer.course_catalog")}</Link></li>
-              {/* Impact Dashboard link intentionally removed — preserved for future premium feature. */}
               <li><Link href="/pricing" className="hover:text-white transition-colors">{t("footer.corporate_plans")}</Link></li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg text-white">{t("footer.company")}</h4>
-            <ul className="space-y-2 text-sm text-emerald-200/80">
-              <li><Link href="/about" className="hover:text-white transition-colors">{t("footer.about_us")}</Link></li>
-              <li><Link href="/blog" className="hover:text-white transition-colors">{t("footer.blog")}</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">{t("footer.contact_support")}</Link></li>
             </ul>
           </div>
 

@@ -1,9 +1,10 @@
-import { useGetEnrollment, useUpdateProgress, useGetProgress } from "@workspace/api-client-react";
-import { useParams, Link } from "wouter";
+import { useGetEnrollment, useUpdateProgress, useGetProgress, useGetCourse, useCreateEnrollment } from "@workspace/api-client-react";
+import { useParams, Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, PlayCircle, FileText, CheckCircle2, ChevronRight, Award, GraduationCap } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, PlayCircle, FileText, CheckCircle2, ChevronRight, Award, GraduationCap, BookOpen, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import DatabaseCoursePlayer from "./DatabaseCoursePlayer";
@@ -12,25 +13,57 @@ export default function Learn() {
   const { enrollmentId } = useParams();
   const id = parseInt(enrollmentId || "0", 10);
   const queryClient = useQueryClient();
-  const { data: enrollment, isLoading } = useGetEnrollment(id, { query: { enabled: !!id, queryKey: ['enrollment', id] } });
-  const { data: progressRows } = useGetProgress(id, { query: { enabled: !!id, queryKey: ['progress', id] } });
+  const [, setLocation] = useLocation();
+  const { data: enrollment, isLoading: isEnrollmentLoading } = useGetEnrollment(id, {
+    query: { enabled: !!id, queryKey: ["enrollment", id], retry: 1 },
+  });
+  const { data: fallbackCourse, isLoading: isCourseLoading } = useGetCourse(id, {
+    query: { enabled: !enrollment && !!id, queryKey: ["course", id], retry: 1 },
+  });
+  const { data: progressRows } = useGetProgress(id, { query: { enabled: !!id, queryKey: ["progress", id] } });
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
   const updateProgress = useUpdateProgress();
+  const enrollMutation = useCreateEnrollment();
   const { toast } = useToast();
 
-  const completedIds = new Set((progressRows || []).filter(p => p.completed).map(p => p.lessonId));
+  const completedIds = new Set((progressRows || []).filter((p) => p.completed).map((p) => p.lessonId));
 
   useEffect(() => {
     if (enrollment && enrollment.course && enrollment.course.lessons && activeLessonId === null) {
       const lessons = enrollment.course.lessons;
       // Resume at the first lesson that isn't completed yet, else the first lesson
-      const firstUncompleted = lessons.find(l => !completedIds.has(l.id));
+      const firstUncompleted = lessons.find((l) => !completedIds.has(l.id));
       const target = firstUncompleted || lessons[0];
       if (target) setActiveLessonId(target.id);
     }
   }, [enrollment, activeLessonId, progressRows]);
 
-  if (isLoading) {
+  const handleEnrollAndStart = () => {
+    if (!id) return;
+    enrollMutation.mutate(
+      { data: { courseId: id } },
+      {
+        onSuccess: (newEnrollment) => {
+          queryClient.invalidateQueries({ queryKey: ["enrollment", newEnrollment.id] });
+          queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+          toast({
+            title: "Course Enrolled",
+            description: "Opening course player...",
+          });
+          setLocation(`/learn/${newEnrollment.id}`);
+        },
+        onError: (err: any) => {
+          toast({
+            title: "Enrollment Error",
+            description: err?.message || "Could not enroll in course. Please try again.",
+            variant: "destructive",
+          });
+        },
+      },
+    );
+  };
+
+  if (isEnrollmentLoading || (isCourseLoading && !enrollment)) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <header className="h-16 border-b flex items-center px-4 shrink-0">
@@ -54,11 +87,76 @@ export default function Learn() {
   }
 
   if (!enrollment || !enrollment.course) {
+    if (fallbackCourse) {
+      return (
+        <div className="min-h-screen bg-muted/20 flex flex-col items-center justify-center p-4">
+          <Card className="max-w-xl w-full shadow-lg border-primary/20 overflow-hidden">
+            {fallbackCourse.thumbnailUrl && (
+              <div className="h-48 w-full overflow-hidden bg-muted relative">
+                <img
+                  src={fallbackCourse.thumbnailUrl}
+                  alt={fallbackCourse.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span className="text-xs font-semibold px-3 py-1 bg-primary text-white rounded-full">
+                    {fallbackCourse.level || "Foundation"}
+                  </span>
+                </div>
+              </div>
+            )}
+            <CardContent className="p-6 md:p-8 space-y-5">
+              <div>
+                <h2 className="text-2xl font-bold font-serif mb-2">{fallbackCourse.title}</h2>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {fallbackCourse.description || "Start this practical workplace sustainability course to develop your skills."}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground border-y py-3">
+                <span className="flex items-center gap-1">
+                  <BookOpen className="h-4 w-4 text-primary" /> {fallbackCourse.lessons?.length || 4} Lessons
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Award className="h-4 w-4 text-primary" /> Certificate Included
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button
+                  size="lg"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold"
+                  onClick={handleEnrollAndStart}
+                  disabled={enrollMutation.isPending}
+                >
+                  <PlayCircle className="mr-2 h-5 w-5" />
+                  {enrollMutation.isPending ? "Enrolling..." : "Enroll & Start Course"}
+                </Button>
+                <Button variant="outline" asChild size="lg">
+                  <Link href={`/courses/${id}`}>View Details</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">Enrollment not found</h2>
-          <Button asChild><Link href="/dashboard">Back to Dashboard</Link></Button>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <h2 className="text-xl font-bold mb-2 font-serif">Course Ready to Start</h2>
+          <p className="text-sm text-muted-foreground mb-5">
+            You can browse the course catalog to enroll or return to your learning dashboard.
+          </p>
+          <div className="flex justify-center gap-3">
+            <Button asChild><Link href="/courses">Browse Courses</Link></Button>
+            <Button variant="outline" asChild><Link href="/dashboard">My Dashboard</Link></Button>
+          </div>
         </div>
       </div>
     );
@@ -68,10 +166,10 @@ export default function Learn() {
   // If so, load our generic DatabaseCoursePlayer.
   const lessonsList = enrollment.course?.lessons || [];
   const hasStructuredBlocks = lessonsList.some(
-    (l) => l.contentBlocks && Array.isArray(l.contentBlocks) && l.contentBlocks.length > 0
+    (l) => l.contentBlocks && Array.isArray(l.contentBlocks) && l.contentBlocks.length > 0,
   );
   if (hasStructuredBlocks) {
-    return <DatabaseCoursePlayer enrollmentId={id} />;
+    return <DatabaseCoursePlayer enrollmentId={enrollment.id} />;
   }
 
   const course = enrollment.course;

@@ -231,54 +231,105 @@ class ReportBuilder {
   }
 
   table(headers: string[], rows: string[][], widths: number[]) {
-    const rowH = 22;
-    this.ensure(rowH * 2);
-    // header
+    const fontSize = 8;
+    const headerFontSize = 8.5;
+    const paddingX = 6;
+
+    // Measure and draw header
+    const headerLinesPerCol = headers.map((h, i) => this.wrapText(h, widths[i] - paddingX * 2, headerFontSize, this.fonts.bold));
+    const maxHeaderLines = Math.max(1, ...headerLinesPerCol.map((l) => l.length));
+    const headerHeight = Math.max(22, maxHeaderLines * 10 + 10);
+
+    this.ensure(headerHeight + 24);
+    const headerTop = this.y;
+
     this.page.drawRectangle({
       x: MARGIN,
-      y: this.y - rowH + 14,
+      y: headerTop - headerHeight,
       width: CONTENT_W,
-      height: rowH,
+      height: headerHeight,
       color: GREEN,
     });
-    let x = MARGIN + 8;
-    headers.forEach((h, idx) => {
-      this.page.drawText(h, {
-        x,
-        y: this.y,
-        size: 9,
-        font: this.fonts.bold,
-        color: WHITE,
-      });
-      x += widths[idx];
-    });
-    this.y -= rowH;
 
+    let hx = MARGIN;
+    headers.forEach((_, idx) => {
+      const colWidth = widths[idx];
+      const lines = headerLinesPerCol[idx];
+      let ly = headerTop - 11;
+      for (const line of lines) {
+        this.page.drawText(line, {
+          x: hx + paddingX,
+          y: ly,
+          size: headerFontSize,
+          font: this.fonts.bold,
+          color: WHITE,
+        });
+        ly -= 10;
+      }
+      hx += colWidth;
+    });
+    this.y = headerTop - headerHeight;
+
+    // Rows
     rows.forEach((row, ri) => {
-      this.ensure(rowH);
+      const cellLinesPerCol = row.map((cell, idx) =>
+        this.wrapText(cell, widths[idx] - paddingX * 2, fontSize, this.fonts.regular),
+      );
+      const maxLines = Math.max(1, ...cellLinesPerCol.map((l) => l.length));
+      const rowHeight = Math.max(20, maxLines * 10 + 8);
+
+      this.ensure(rowHeight + 2);
+      const rowTop = this.y;
+
       if (ri % 2 === 1) {
         this.page.drawRectangle({
           x: MARGIN,
-          y: this.y - rowH + 14,
+          y: rowTop - rowHeight,
           width: CONTENT_W,
-          height: rowH,
+          height: rowHeight,
           color: LIGHT,
         });
       }
-      let cx = MARGIN + 8;
-      row.forEach((cell, idx) => {
-        this.page.drawText(cell, {
-          x: cx,
-          y: this.y,
-          size: 9,
-          font: this.fonts.regular,
-          color: DARK,
-        });
-        cx += widths[idx];
+
+      let cx = MARGIN;
+      row.forEach((_, idx) => {
+        const colWidth = widths[idx];
+        const lines = cellLinesPerCol[idx];
+        let cy = rowTop - 11;
+        for (const line of lines) {
+          this.page.drawText(line, {
+            x: cx + paddingX,
+            y: cy,
+            size: fontSize,
+            font: this.fonts.regular,
+            color: DARK,
+          });
+          cy -= 10;
+        }
+        cx += colWidth;
       });
-      this.y -= rowH;
+
+      this.y = rowTop - rowHeight;
     });
-    this.y -= 6;
+    this.y -= 8;
+  }
+
+  wrapText(text: string, maxWidth: number, size: number, font: PDFFont): string[] {
+    if (!text) return [""];
+    const words = text.split(" ");
+    let line = "";
+    const lines: string[] = [];
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (font.widthOfTextAtSize(test, size) > maxWidth) {
+        if (line) lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines.length > 0 ? lines : [""];
   }
 
   glossaryTable(items: { term: string; category: string; definition: string }[]) {
@@ -494,28 +545,32 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
       color: MUTED,
     });
     const levelLabel = `${data.score.level} Level`;
+    const badgeW = 100;
+    const badgeH = 22;
+    const badgeX = MARGIN + CONTENT_W - badgeW - 16;
     b.page.drawRectangle({
-      x: MARGIN + 150,
-      y: top - 44,
-      width: 86,
-      height: 22,
+      x: badgeX,
+      y: top - 40,
+      width: badgeW,
+      height: badgeH,
       color: GOLD,
     });
     const llw = fonts.bold.widthOfTextAtSize(levelLabel, 9);
     b.page.drawText(levelLabel, {
-      x: MARGIN + 150 + (86 - llw) / 2,
-      y: top - 38,
+      x: badgeX + (badgeW - llw) / 2,
+      y: top - 34,
       size: 9,
       font: fonts.bold,
       color: WHITE,
     });
     const nextText = data.score.nextLevel
-      ? `${data.score.pointsToNextLevel} points to reach ${data.score.nextLevel} level`
-      : "Highest capability level achieved";
+      ? `${data.score.pointsToNextLevel} pts to ${data.score.nextLevel}`
+      : "Top tier achieved";
+    const ntw = fonts.regular.widthOfTextAtSize(nextText, 8.5);
     b.page.drawText(nextText, {
-      x: MARGIN + 150,
-      y: top - 60,
-      size: 9,
+      x: badgeX + (badgeW - ntw) / 2,
+      y: top - 56,
+      size: 8.5,
       font: fonts.regular,
       color: MUTED,
     });
@@ -538,6 +593,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
   ]);
 
   // Score components
+  b.ensure(120);
   b.sectionHeading("3. Sustainability Score Breakdown");
   b.paragraph(
     "The Sustainability Score is a weighted composite measuring verified capability building across four material dimensions:",
@@ -558,7 +614,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
         `${d.participationRate}%`,
         `${d.completionRate}%`,
       ]),
-      [CONTENT_W - 280, 80, 100, 100],
+      [189, 90, 110, 110],
     );
   }
 
@@ -569,7 +625,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
     9,
   );
   b.table(
-    ["ESG Pillar", "Material Topic", "LMS Competency Focus", "Framework Alignment"],
+    ["ESG Pillar", "Material Topic", "LMS Competency Focus", "Standards & SDGs"],
     [
       ["Environmental (E)", "Energy & Climate", "Scope 1, 2, 3 awareness, workplace energy efficiency, renewables", "GRI 302, SDG 7 & 13"],
       ["Environmental (E)", "Waste & Circularity", "Waste hierarchy (prevention, reuse, recycling), plastic reduction", "GRI 306, SDG 12"],
@@ -577,7 +633,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
       ["Social (S)", "Human Capital", "Training completion rates, DEI, health and safety, employee engagement", "GRI 404, SDG 4 & 8"],
       ["Governance (G)", "Ethics & Anti-Greenwashing", "Code of conduct, compliance, verifiable claims, risk management", "GRI 205, CSRD ESRS G1"],
     ],
-    [100, 110, 190, 99],
+    [95, 105, 195, 104],
   );
 
   // ESG Glossary Reference

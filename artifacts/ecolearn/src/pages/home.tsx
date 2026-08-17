@@ -1,7 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowRight, Leaf, ShieldCheck, TrendingUp, PlayCircle, BookOpen, Award, BarChart3, MapPin, Recycle } from "lucide-react";
+import { ArrowRight, Leaf, ShieldCheck, TrendingUp, PlayCircle, BookOpen, Award, BarChart3 } from "lucide-react";
 import { useGetFeaturedCourses } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -174,69 +174,6 @@ export default function Home() {
             <Button variant="outline" asChild className="w-full">
               <Link href="/courses">View All Catalog</Link>
             </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Made for Mauritius */}
-      <section className="py-20 bg-muted/30 border-y">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 text-primary font-medium text-sm mb-4">
-                <MapPin className="h-4 w-4" />
-                Made for Mauritius
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold font-serif mb-4">
-                Not a generic LMS. Built for the island.
-              </h2>
-              <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                Every module is grounded in the Mauritian waste sorting system,
-                local recyclers like Mission Verte, our own regulations, and case
-                studies from the island's industries. That local relevance is what
-                makes the training stick.
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Mauritian waste sorting and recycling ecosystem",
-                  "Local regulations and compliance context",
-                  "Case studies and success stories from Mauritian companies",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <Recycle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button asChild size="lg" className="h-12 px-8 text-base">
-                <Link href="/courses">
-                  Explore Course Catalog <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { color: "bg-green-600", label: "Green", text: "Organic waste" },
-                { color: "bg-blue-600", label: "Blue", text: "Paper and card" },
-                { color: "bg-amber-500", label: "Yellow", text: "Plastics and cans" },
-                { color: "bg-slate-700", label: "Black", text: "General waste" },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-card border rounded-2xl p-6 shadow-sm"
-                >
-                  <div
-                    className={`h-10 w-10 rounded-lg ${s.color} mb-4 flex items-center justify-center text-white`}
-                  >
-                    <Recycle className="h-5 w-5" />
-                  </div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                    {s.label} stream
-                  </p>
-                  <p className="font-medium text-sm">{s.text}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>

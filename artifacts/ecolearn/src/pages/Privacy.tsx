@@ -1,122 +1,158 @@
-import React, { useState } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { ShieldCheck, Lock, Eye, FileText, CheckCircle2, Building2, Mail, Phone, MapPin } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
-export function PrivacyPage() {
-  const [locale, setLocale] = useState<"en" | "fr">("en");
+export default function PrivacyPolicy() {
+  const lastUpdated = "17 August 2026";
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-        <div className="flex justify-between items-center pb-6 mb-6 border-b border-slate-200">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              {locale === "fr" ? "Politique de Confidentialité" : "Privacy Policy"}
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Elevio Skills by Recyclean Ltd. — Version 1.0 (Pilot Release)
-            </p>
+    <Layout>
+      {/* Header */}
+      <div className="bg-primary/5 border-b py-12">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+            <ShieldCheck className="h-4 w-4" /> Data Protection & Privacy
           </div>
-          <button
-            onClick={() => setLocale(locale === "en" ? "fr" : "en")}
-            className="px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
-          >
-            {locale === "en" ? "Français" : "English"}
-          </button>
-        </div>
-
-        <div className="space-y-6 text-slate-700 leading-relaxed text-sm">
-          {locale === "en" ? (
-            <>
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">1. Overview & Platform Operator</h2>
-                <p>
-                  Elevio Skills is operated by <strong>Recyclean Ltd.</strong> ("we", "us", "our"). This Privacy Notice explains how personal data, learning records, and evidence submissions are processed during our controlled company pilot.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">2. Information We Collect</h2>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>Account & Roster Data:</strong> Full name, corporate email address, department, job title, and assigned role.</li>
-                  <li><strong>Learning Progress & Assessment Data:</strong> Course enrolments, lesson completion status, quiz scores, attempt counts, and earned certificates.</li>
-                  <li><strong>Workplace Action Submissions:</strong> Selected commitments, free-text implementation comments, and manager review notes.</li>
-                  <li><strong>Technical & Access Metadata:</strong> Timestamped login events, language preferences, and server-side notice acknowledgements.</li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">3. How Your Information Is Used</h2>
-                <p>
-                  Your information is processed to deliver workplace sustainability training, verify course completion, generate certificates, and provide authorized company administrators with training progress reports.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">4. Data Access & Tenant Isolation</h2>
-                <p>
-                  Elevio Skills enforces strict multi-tenant data isolation. Authorized company administrators and department managers can only view training records for employees within their own organization.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">5. Data Retention & Employee Departure</h2>
-                <p>
-                  When an employee account is deactivated, login access is revoked immediately, while historical course completions and certificate records are retained for audit and compliance reporting.
-                </p>
-              </section>
-
-              <section className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-900">
-                <strong>Mauritian Legal Disclaimer:</strong> While Elevio Skills follows standard data privacy guidelines, final formal contractual and regulatory compliance requires review by a qualified Mauritian legal professional. Registered office details: <em>[Insert registered office address before public launch]</em>.
-              </section>
-            </>
-          ) : (
-            <>
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">1. Aperçu et Opérateur de la Plateforme</h2>
-                <p>
-                  Elevio Skills est exploité par <strong>Recyclean Ltd.</strong> (« nous »). Cette politique de confidentialité explique comment les données personnelles, les dossiers d'apprentissage et les éléments justificatifs sont traités pendant notre projet pilote d'entreprise.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">2. Informations Collectées</h2>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>Données de Compte et Roster :</strong> Nom complet, adresse e-mail professionnelle, département, titre de poste et rôle attribué.</li>
-                  <li><strong>Données de Progrès et d'Évaluation :</strong> Inscriptions aux cours, statut de complétion, scores aux quiz, nombre de tentatives et certificats obtenus.</li>
-                  <li><strong>Soumissions d'Actions en Entreprise :</strong> Engagements sélectionnés, commentaires d'application et remarques des responsables.</li>
-                  <li><strong>Métadonnées Techniques :</strong> Événements de connexion horodatés, préférences linguistiques et confirmations de notices.</li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">3. Utilisation de Vos Informations</h2>
-                <p>
-                  Vos informations sont traitées pour dispenser les formations sur le développement durable, vérifier la réussite des cours, générer des certificats et fournir aux administrateurs autorisés des rapports de formation.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">4. Accès aux Données et Isolation des Entreprises</h2>
-                <p>
-                  Elevio Skills applique une isolation stricte des données entre les entreprises. Les administrateurs et responsables autorisés ne peuvent consulter que les dossiers des employés de leur propre organisation.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-lg font-semibold text-slate-900 mb-2">5. Conservation des Données et Départ d'un Employé</h2>
-                <p>
-                  Lorsqu'un compte employé est désactivé, l'accès à la connexion est immédiatement révoqué, tandis que l'historique des cours suivis et des certificats est conservé à des fins d'audit et de conformité.
-                </p>
-              </section>
-
-              <section className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-900">
-                <strong>Avertissement Légal Mauricien :</strong> Bien qu'Elevio Skills suive les normes de confidentialité des données, la conformité réglementaire finale nécessite l'examen par un professionnel du droit mauricien qualifié. Adresse du siège social : <em>[Insert registered office address before public launch]</em>.
-              </section>
-            </>
-          )}
+          <h1 className="text-3xl md:text-5xl font-bold font-serif mb-3 text-foreground">
+            Privacy Policy
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base">
+            Last Updated: {lastUpdated} • Elevio Skills (Operated by Recyclean Ltd)
+          </p>
         </div>
       </div>
-    </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="prose prose-emerald dark:prose-invert max-w-none space-y-10">
+          
+          {/* Section 1 */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              <Eye className="h-5 w-5 text-primary" /> 1. Introduction & Overview
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Elevio Skills ("we", "our", or "us"), operated by <strong>Recyclean Ltd</strong>, is committed to safeguarding the privacy of our corporate clients, administrators, managers, and employee learners. This Privacy Policy explains how we collect, use, process, and protect your personal information when you access and use the Elevio Skills Learning Management System (LMS) and related services.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              We process personal data in compliance with applicable data protection laws, including the <strong>Mauritius Data Protection Act 2017 (DPA 2017)</strong> and international data privacy best practices (including GDPR principles).
+            </p>
+          </section>
+
+          {/* Section 2 */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              <FileText className="h-5 w-5 text-primary" /> 2. Information We Collect
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              We collect information necessary to administer workplace training, track educational progress, issue verifiable credentials, and generate corporate ESG reporting:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li>
+                <strong>Account & Profile Information:</strong> Full name, corporate email address, job title, department, role within the organisation (Employee, Manager, or Admin), and password/authentication tokens.
+              </li>
+              <li>
+                <strong>Organisation Data:</strong> Company name, sector/industry, corporate billing address, employee counts, and subscription package details.
+              </li>
+              <li>
+                <strong>Learning Activity & Performance Records:</strong> Course enrollments, module completion status, quiz and assessment scores, time spent per lesson, commitment inputs, certificate issuance timestamps, and verification reference codes.
+              </li>
+              <li>
+                <strong>Technical & Device Data:</strong> IP address, browser type, operating system, login timestamps, session identifiers, and diagnostic logs for security and audit assurance.
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 3 */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              <CheckCircle2 className="h-5 w-5 text-primary" /> 3. How We Use Your Information
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              We use collected information strictly for legitimate operational, educational, and reporting purposes:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li>To provide, personalize, and maintain access to our sustainability and ESG training catalog.</li>
+              <li>To track individual and departmental progress against assigned learning pathways.</li>
+              <li>To generate aggregated, audit-ready ESG training reports (e.g., GRI 404-1 disclosures) for corporate administrators and sustainability managers.</li>
+              <li>To generate and validate tamper-evident digital certificates of completion with unique QR verification codes.</li>
+              <li>To send essential transactional notifications, including invitation emails, assignment alerts, and course completion confirmations.</li>
+              <li>To maintain system integrity, prevent fraud, and ensure tenant data isolation.</li>
+            </ul>
+          </section>
+
+          {/* Section 4 */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              <Lock className="h-5 w-5 text-primary" /> 4. Data Protection & Security Controls
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              We implement industry-standard technical and organizational security measures to protect your personal and organizational data:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li><strong>Encryption:</strong> All data transmitted between your browser and our servers is encrypted using HTTPS/TLS 1.3. Stored databases and sensitive tokens are encrypted at rest.</li>
+              <li><strong>Tenant Isolation:</strong> Company data and employee progress records are isolated by tenant boundaries, ensuring one organization cannot view another's confidential learner data.</li>
+              <li><strong>Role-Based Access:</strong> Access to employee records is strictly restricted to designated company administrators, authorized managers, and authenticated learners themselves.</li>
+              <li><strong>No Data Monetization:</strong> We never sell, rent, or trade your personal or organizational learning data to advertisers or third parties.</li>
+            </ul>
+          </section>
+
+          {/* Section 5 */}
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2 border-b pb-2">
+              <Building2 className="h-5 w-5 text-primary" /> 5. Data Retention & Your Rights
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              We retain learning records for as long as your organization maintains an active subscription with Elevio Skills, or as required to support verifiable certificate validation and audit compliance. Under the Mauritius Data Protection Act 2017, you have the right to:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li>Request access to the personal data we hold about you.</li>
+              <li>Request the correction of inaccurate or incomplete information.</li>
+              <li>Request the erasure of your personal data upon account termination (subject to statutory audit requirements).</li>
+              <li>Withdraw consent or object to specific processing where applicable.</li>
+            </ul>
+          </section>
+
+          {/* Section 6 */}
+          <section className="space-y-4 bg-muted/40 p-6 rounded-2xl border">
+            <h2 className="text-xl font-bold font-serif text-foreground">
+              6. Contact Our Data Protection Officer
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              If you have any questions, requests, or concerns regarding this Privacy Policy or how your data is handled, please reach out to our team:
+            </p>
+            <div className="space-y-2 text-sm text-foreground pt-2">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" />
+                <span><strong>Recyclean Ltd</strong> (Operating Elevio Skills)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>Black River, Mauritius</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" />
+                <a href="mailto:support@elevio.mu" className="text-primary hover:underline">support@elevio.mu</a>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" />
+                <span>+230 5743 4349</span>
+              </div>
+            </div>
+          </section>
+
+          <div className="pt-6 flex gap-4">
+            <Button asChild variant="outline">
+              <Link href="/">Back to Home</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/courses">Explore Courses</Link>
+            </Button>
+          </div>
+
+        </div>
+      </div>
+    </Layout>
   );
 }
-
-export default PrivacyPage;
