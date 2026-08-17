@@ -70,7 +70,7 @@ function getClaimCompanyId(claims: Record<string, unknown>): number | null {
   );
 }
 
-function getClaimEmail(claims: Record<string, unknown>): string | null {
+export function getClaimEmail(claims: Record<string, unknown>): string | null {
   return (
     readString(claims["email"]) ??
     readString(claims["email_address"]) ??
@@ -159,7 +159,7 @@ function parseJwtPayload(token: string): Record<string, unknown> | null {
   }
 }
 
-function getAuthContext(req: Request): { userId?: string | null; sessionClaims?: Record<string, unknown> } {
+export function getAuthContext(req: Request): { userId?: string | null; sessionClaims?: Record<string, unknown> } {
   try {
     const clerkAuth = getAuth(req) as any;
     if (clerkAuth && clerkAuth.userId) {

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCompanyAccess, sendHttpError } from "../lib/access";
+import { getCompanyAccess, sendHttpError, getAuthContext, getClaimEmail } from "../lib/access";
 import {
   onboardCompany,
   assignStarterCourse,
@@ -12,14 +12,12 @@ import {
 const router = Router();
 
 function extractAuthUser(req: any): { userId: string | null; email: string | null } {
-  const reqAuth = req.auth;
-  if (reqAuth && reqAuth.userId) {
-    return {
-      userId: reqAuth.userId,
-      email: reqAuth.sessionClaims?.email || null,
-    };
-  }
-  return { userId: null, email: null };
+  const auth = getAuthContext(req);
+  const fallbackAuth = req.auth;
+  const userId = auth.userId ?? fallbackAuth?.userId ?? null;
+  const claims = (auth.sessionClaims ?? fallbackAuth?.sessionClaims ?? {}) as Record<string, unknown>;
+  const email = getClaimEmail(claims) ?? (claims["email"] as string | undefined) ?? null;
+  return { userId, email };
 }
 
 // GET /api/onboarding/status — Authoritative server state resolver
