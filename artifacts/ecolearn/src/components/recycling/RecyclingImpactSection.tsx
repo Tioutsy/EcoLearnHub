@@ -68,25 +68,7 @@ export function RecyclingImpactSection() {
   }
 
   if (isError) {
-    return (
-      <div className="bg-card border rounded-xl p-6 shadow-sm mb-10">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
-            <Recycle className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold font-serif">
-              Recycling Impact unavailable
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {error instanceof Error
-                ? error.message
-                : "We could not load collection data right now."}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!isActive) {
