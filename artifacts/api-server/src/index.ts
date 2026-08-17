@@ -45,31 +45,34 @@ import { ensureAchievementDefinitions } from "./lib/achievementsService";
 import { ensureInsightsMigrated } from "./lib/ensureInsightsMigrated";
 import { ensureCategoriesAndAssignments } from "./lib/ensureCategoriesAndAssignments";
 import { ensureHybridSubscriptions } from "./lib/ensureHybridSubscriptions";
-
 import { syncSequences } from "./lib/syncSequences";
-
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-
 import { ensureSchemaModifications } from "./lib/ensureSchemaModifications";
 import { verifyDatabaseIntegrity } from "./lib/verifyDatabaseIntegrity";
 
+const defaultPort = 8086;
+const rawPort = process.env["PORT"];
+let port = defaultPort;
+
+if (rawPort !== undefined && rawPort !== null && String(rawPort).trim() !== "") {
+  const parsed = Number(rawPort);
+  if (!Number.isNaN(parsed) && parsed > 0) {
+    port = parsed;
+  } else {
+    logger.warn({ rawPort }, `Invalid PORT value "${rawPort}". Using default ${defaultPort}.`);
+  }
+}
+
+const host = process.env["HOST"] ?? "0.0.0.0";
+
 async function start(): Promise<void> {
-  // Start HTTP listener immediately so Render health checks pass during startup database tasks
-  const server = app.listen(port, "0.0.0.0", () => {
-    logger.info({ port }, "Server listening on 0.0.0.0");
+  // Start HTTP listener immediately on 0.0.0.0 so Render health checks pass during startup database tasks
+  const server = app.listen(port, host, () => {
+    logger.info({ port, host }, `Server listening on ${host}:${port}`);
+  });
+
+  server.on("error", (err: any) => {
+    logger.error({ err, port, host }, "HTTP server encountered an error while listening");
+    process.exit(1);
   });
 
   try {
@@ -150,12 +153,6 @@ async function start(): Promise<void> {
   } catch (err) {
     logger.error({ err }, "Error during background database seeding sequence");
   }
-
-  server.on("error", (err) => {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  });
 }
 
 void start();
-

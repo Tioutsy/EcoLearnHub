@@ -11,6 +11,8 @@ import {
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { authBypassMiddleware } from "./middlewares/authBypass";
+import { db } from "@workspace/db";
+import { sql } from "drizzle-orm";
 
 const app: Express = express();
 
@@ -34,6 +36,24 @@ app.use(
   }),
 );
 
+// Lightweight unauthenticated health checks for Render and external monitors
+app.get(["/healthz", "/api/healthz", "/health", "/api/health"], (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get(["/ready", "/api/ready"], async (_req, res) => {
+  try {
+    await db.execute(sql`SELECT 1`);
+    res.status(200).json({ status: "ready", database: "connected", timestamp: new Date().toISOString() });
+  } catch (err: any) {
+    res.status(503).json({ status: "not_ready", database: "disconnected", error: err.message });
+  }
+});
+
+app.get("/", (_req, res) => {
+  res.json({ status: "ok", service: "Elevio API", timestamp: new Date().toISOString() });
+});
+
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
 app.use(cors({ credentials: true, origin: true }));
@@ -52,9 +72,5 @@ app.use(
 app.use(authBypassMiddleware);
 
 app.use("/api", router);
-
-app.get("/", (req, res) => {
-  res.json({ status: "ok", service: "Elevio API", timestamp: new Date().toISOString() });
-});
 
 export default app;
