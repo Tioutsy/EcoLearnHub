@@ -206,7 +206,7 @@ describe("Sprint 11F.1 — Autonomous Onboarding Production Release Gate Test Ma
     }
   });
 
-  test("9. More than 120 employees receives the tailored-contact outcome and blocks automated activation", async () => {
+  test("9. More than 120 employees completes autonomous onboarding with transparent enterprise pricing", async () => {
     const result = await onboardCompany({
       userId: `${PREFIX}over120_gate`,
       email: `over120_${Date.now()}@example.com`,
@@ -214,10 +214,21 @@ describe("Sprint 11F.1 — Autonomous Onboarding Production Release Gate Test Ma
       companyName: `${PREFIX}Enterprise 500 Gate Ltd`,
       employeeCount: 150,
       employeeBandCode: "OVER_120",
+      planCode: "ESSENTIAL",
+      billingInterval: "MONTHLY",
     });
 
-    assert.equal(result.outcome, "tailored_contact_required");
-    assert.equal(result.company, undefined);
+    assert.equal(result.outcome, "success");
+    assert.ok(result.company);
+    assert.equal(result.company.maxEmployees, 250);
+    assert.equal(result.monthlyAmount, 7500);
+
+    // Cleanup
+    if (result.company?.id) {
+      await db.delete(employeesTable).where(eq(employeesTable.companyId, result.company.id));
+      await db.delete(companySubscriptionsTable).where(eq(companySubscriptionsTable.companyId, result.company.id));
+      await db.delete(companiesTable).where(eq(companiesTable.id, result.company.id));
+    }
   });
 
   test("10. Existing employee in a company cannot create an unauthorised second company", async () => {

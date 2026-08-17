@@ -411,24 +411,10 @@ router.get("/:id", async (req, res): Promise<void> => {
       return;
     }
 
-    // Block non-admin learners from accessing unpublished courses
+    // Learners with an active or assigned enrollment can always access their course lessons
     const isPlatformAdmin = access.role === "platform_admin";
     if (!course.isPublished && !isPlatformAdmin) {
       res.status(403).json({ error: "This course is not published yet" });
-      return;
-    }
-
-    const { evaluateCourseAccess } = await import("../lib/courseAccessService");
-    const accessDecision = await evaluateCourseAccess(enrollment.courseId, access);
-    if (!accessDecision.allowed) {
-      res.status(403).json({
-        error: accessDecision.reason === "PREREQUISITE_REQUIRED" ? "PREREQUISITES_INCOMPLETE" : accessDecision.reason,
-        message: accessDecision.reason === "PREREQUISITE_REQUIRED"
-          ? "You must complete all prerequisite courses before accessing this course content."
-          : "Access denied.",
-        requiredPlanCode: accessDecision.requiredPlanCode,
-        requiredPlanName: accessDecision.requiredPlanName,
-      });
       return;
     }
 

@@ -11,6 +11,7 @@ import {
   useGetCourseQuiz,
   useSubmitQuiz,
   useGetCourse,
+  useCreateEnrollment,
   usePlatformAdminListQuizQuestions,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -60,8 +61,14 @@ export default function DatabaseCoursePlayer({
 
   // 1. Queries and Mutations (Conditional on preview mode)
   const { data: rawEnrollment, isLoading: isEnrollmentLoading } = useGetEnrollment(enrollmentId || 0, {
-    query: { enabled: !!enrollmentId && !isPreview, queryKey: ["enrollment", enrollmentId] },
+    query: { enabled: !!enrollmentId && !isPreview, queryKey: ["enrollment", enrollmentId], retry: 1 },
   });
+
+  const { data: fallbackCourse, isLoading: isFallbackCourseLoading } = useGetCourse(enrollmentId || 0, {
+    query: { enabled: !isPreview && !rawEnrollment && !!enrollmentId, queryKey: ["course", enrollmentId], retry: 1 },
+  });
+
+  const autoEnrollMutation = useCreateEnrollment();
 
   const { data: rawProgressRows } = useGetProgress(enrollmentId || 0, {
     query: { enabled: !!enrollmentId && !isPreview, queryKey: ["progress", enrollmentId] },
@@ -71,7 +78,25 @@ export default function DatabaseCoursePlayer({
     query: { enabled: isPreview && !!previewCourseId, queryKey: ["course", previewCourseId] },
   });
 
-  const courseId = isPreview ? (previewCourseId ?? 0) : (rawEnrollment?.course?.id ?? 0);
+  const courseId = isPreview
+    ? (previewCourseId ?? 0)
+    : (rawEnrollment?.course?.id ?? fallbackCourse?.id ?? 0);
+
+  // If user opened player via course ID and enrollment wasn't found, auto-enroll in background
+  useEffect(() => {
+    if (!isPreview && !rawEnrollment && fallbackCourse && !autoEnrollMutation.isPending && !autoEnrollMutation.isSuccess) {
+      autoEnrollMutation.mutate(
+        { data: { courseId: fallbackCourse.id } },
+        {
+          onSuccess: (created) => {
+            queryClient.invalidateQueries({ queryKey: ["enrollment", created.id] });
+            queryClient.invalidateQueries({ queryKey: ["enrollment", enrollmentId] });
+            queryClient.invalidateQueries({ queryKey: ["/api/enrollments"] });
+          },
+        }
+      );
+    }
+  }, [isPreview, rawEnrollment, fallbackCourse]);
 
   const { data: rawExistingCommitments } = useGetCommitments(courseId, {
     query: { enabled: !!courseId && !isPreview, queryKey: ["commitments", courseId] },
@@ -95,8 +120,20 @@ export default function DatabaseCoursePlayer({
         status: "active",
       };
     }
-    return rawEnrollment;
-  }, [isPreview, previewCourse, rawEnrollment]);
+    if (rawEnrollment) {
+      return rawEnrollment;
+    }
+    if (fallbackCourse) {
+      return {
+        id: enrollmentId || 0,
+        courseId: fallbackCourse.id,
+        course: fallbackCourse,
+        progressPct: 0,
+        status: "active",
+      };
+    }
+    return null;
+  }, [isPreview, previewCourse, rawEnrollment, fallbackCourse, enrollmentId]);
 
   const lessons = useMemo(
     () => (enrollment?.course?.lessons ? [...enrollment.course.lessons].sort((a, b) => a.orderIndex - b.orderIndex) : []),
@@ -177,7 +214,9 @@ export default function DatabaseCoursePlayer({
     setResolved(new Set());
   }, [moduleIndex]);
 
-  const isLoading = isPreview ? isPreviewCourseLoading : (isEnrollmentLoading || !initialised);
+  const isLoading = isPreview
+    ? isPreviewCourseLoading
+    : !enrollment && (isEnrollmentLoading || isFallbackCourseLoading);
 
   if (isLoading || (isPreview && !previewCourse) || (!isPreview && !enrollment)) {
     return (

@@ -5,10 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Building2, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, Sparkles, Award } from "lucide-react";
+import { Building2, ShieldCheck, CheckCircle2, ArrowLeft, Loader2, Sparkles, Award, Users } from "lucide-react";
 import { customFetch } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  calculateDynamicPricing,
+  calculateYearlyPricing,
+  PlanCode,
+  BillingInterval,
+} from "@/config/pricing";
 
 interface PublicPlansResponse {
   plans: Array<{ id: number; code: string; name: string; description: string; tagline: string | null }>;
@@ -17,18 +23,21 @@ interface PublicPlansResponse {
 }
 
 export default function Subscribe() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const urlParams = new URLSearchParams(window.location.search);
-  const initialPlanCode = urlParams.get("planCode") || "PROFESSIONAL";
+  const initialPlanCode = (urlParams.get("planCode") || "PROFESSIONAL").toUpperCase() as PlanCode;
   const initialBandCode = urlParams.get("bandCode") || "UP_TO_25";
   const initialInterval = (urlParams.get("billingInterval") || "MONTHLY").toUpperCase() === "YEARLY" ? "YEARLY" : "MONTHLY";
+  const initialCountParam = urlParams.get("employeeCount");
+  const initialCount = initialCountParam ? parseInt(initialCountParam, 10) : initialBandCode === "OVER_120" ? 150 : 25;
 
-  const [selectedPlanCode, setSelectedPlanCode] = useState<string>(initialPlanCode);
+  const [selectedPlanCode, setSelectedPlanCode] = useState<PlanCode>(initialPlanCode);
   const [selectedBandCode, setSelectedBandCode] = useState<string>(initialBandCode);
-  const [billingInterval, setBillingInterval] = useState<"MONTHLY" | "YEARLY">(initialInterval);
+  const [employeeCount, setEmployeeCount] = useState<number>(initialCount);
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(initialInterval);
   const [companyName, setCompanyName] = useState("");
   const [industry, setIndustry] = useState("");
 
@@ -54,18 +63,23 @@ export default function Subscribe() {
 
   const activeBand = pricingData?.employeeBands.find(b => b.code === selectedBandCode) || {
     code: selectedBandCode,
-    label: selectedBandCode === "UP_TO_25" ? "Up to 25 employees" : "Corporate team",
-    requiresTailoredQuote: selectedBandCode === "OVER_120",
+    label: selectedBandCode === "UP_TO_25" ? "Up to 25 employees" : selectedBandCode === "OVER_120" ? "121+ employees" : "Corporate team",
+    requiresTailoredQuote: false,
   };
 
   const priceRecord = pricingData?.prices.find(p => p.planCode === selectedPlanCode && p.bandCode === selectedBandCode);
-  const isTailored = activeBand.requiresTailoredQuote || (priceRecord?.requiresTailoredQuote ?? selectedBandCode === "OVER_120");
-  const baseMonthlyMUR = priceRecord?.monthlyAmountMUR || (selectedBandCode === "UP_TO_25" ? 3000 : 4500);
+  const fallbackBase = selectedBandCode === "UP_TO_25" ? 3000 : selectedBandCode === "FROM_26_TO_50" ? 4500 : selectedBandCode === "FROM_51_TO_80" ? 5000 : selectedBandCode === "FROM_81_TO_120" ? 6250 : 7500;
+  const standardBaseMonthly = priceRecord?.monthlyAmountMUR || fallbackBase;
 
-  const yearlyUndiscounted = baseMonthlyMUR * 12;
-  const yearlySavingsMUR = Math.round(yearlyUndiscounted * 0.10);
-  const yearlyFinalMUR = yearlyUndiscounted - yearlySavingsMUR;
-  const yearlyEquivalentMonthlyMUR = Math.round((yearlyFinalMUR / 12) * 100) / 100;
+  // Dynamic price calculation
+  const dynamicPricing = calculateDynamicPricing(selectedPlanCode, employeeCount, selectedBandCode !== "OVER_120" ? standardBaseMonthly : undefined);
+
+  const baseMonthlyMUR = dynamicPricing.finalMonthly;
+  const yearlyUndiscounted = dynamicPricing.undiscountedYearly;
+  const yearlySavingsMUR = dynamicPricing.yearlyDiscount;
+  const yearlyFinalMUR = dynamicPricing.finalYearly;
+  const yearlyEquivalentMonthlyMUR = dynamicPricing.equivalentMonthlyYearly;
+  const isOver120 = selectedBandCode === "OVER_120" || employeeCount > 120;
 
   const handleSubscribeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +103,7 @@ export default function Subscribe() {
           billingInterval: billingInterval,
           companyName: companyName,
           industry: industry,
-          employeeCount: activeBand.code === "UP_TO_25" ? 25 : 50,
+          employeeCount: employeeCount,
         }),
       });
 
@@ -98,13 +112,13 @@ export default function Subscribe() {
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/company"] });
 
       toast({
-        title: "Subscription Request Received",
-        description: "Your selected plan, employee category, and billing interval have been registered.",
+        title: "Subscription Request Confirmed",
+        description: "Your selected plan and transparent subscription price have been registered.",
       });
 
       setTimeout(() => {
         setLocation("/company");
-      }, 3500);
+      }, 3000);
     } catch (err: any) {
       toast({
         title: "Subscription Request Failed",
@@ -130,7 +144,7 @@ export default function Subscribe() {
               Confirm Your Company Subscription
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Select your organization details to activate corporate sustainability learning access.
+              Complete your organization setup with transparent, self-service commercial billing.
             </p>
           </div>
 
@@ -191,6 +205,40 @@ export default function Subscribe() {
                         />
                       </div>
 
+                      {/* Headcount Input (especially for >120 organizations) */}
+                      <div className="space-y-2 pt-2 border-t">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="employeeCount" className="flex items-center gap-1.5">
+                            <Users className="h-4 w-4 text-emerald-600" />
+                            Total Employees to Train
+                          </Label>
+                          <span className="text-xs text-muted-foreground">
+                            Included seats: <strong className="text-foreground">{dynamicPricing.includedCapacity}</strong>
+                          </span>
+                        </div>
+                        <Input
+                          id="employeeCount"
+                          type="number"
+                          min={1}
+                          max={10000}
+                          value={employeeCount}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val)) {
+                              setEmployeeCount(Math.max(1, val));
+                              if (val > 120 && selectedBandCode !== "OVER_120") {
+                                setSelectedBandCode("OVER_120");
+                              }
+                            }
+                          }}
+                        />
+                        {isOver120 && employeeCount > 250 && (
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                            Base tier (250 seats) + {dynamicPricing.additionalBlocks} supplementary 50-employee block{dynamicPricing.additionalBlocks > 1 ? "s" : ""}.
+                          </p>
+                        )}
+                      </div>
+
                       {/* Billing Interval Selection */}
                       <div className="space-y-2 pt-2 border-t">
                         <Label>Billing Frequency</Label>
@@ -232,8 +280,8 @@ export default function Subscribe() {
                           <span className="text-primary">{activePlan.name}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          <span>Employee Band</span>
-                          <span className="text-foreground">{activeBand.label}</span>
+                          <span>Employee Band / Headcount</span>
+                          <span className="text-foreground">{isOver120 ? `${employeeCount} employees (${dynamicPricing.includedCapacity} max seats)` : activeBand.label}</span>
                         </div>
                         <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           <span>Billing Interval</span>
@@ -245,7 +293,7 @@ export default function Subscribe() {
                     <CardFooter className="flex-col gap-4 border-t pt-6 bg-muted/30">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground w-full">
                         <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-                        <span>Corporate training records and company compliance metrics included.</span>
+                        <span>Corporate training records, learner certificates, and compliance exports included.</span>
                       </div>
                       <Button
                         type="submit"
@@ -257,8 +305,6 @@ export default function Subscribe() {
                             <Loader2 className="h-5 w-5 animate-spin" />
                             Submitting subscription request...
                           </>
-                        ) : isTailored ? (
-                          "Request Corporate Proposal"
                         ) : billingInterval === "YEARLY" ? (
                           `Confirm Subscription — MUR ${yearlyFinalMUR.toLocaleString()}/year`
                         ) : (
@@ -276,21 +322,21 @@ export default function Subscribe() {
               <Card className="border-emerald-500/20 bg-emerald-500/5">
                 <CardHeader>
                   <CardTitle className="text-xl font-serif">Subscription Summary</CardTitle>
-                  <CardDescription>Review your selected access and pricing level.</CardDescription>
+                  <CardDescription>Review your selected access and transparent pricing.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex justify-between items-start pb-4 border-b">
                     <div>
                       <h3 className="font-bold text-lg text-foreground">{activePlan.name} Plan</h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">{activeBand.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {isOver120 ? `${employeeCount} employees (Up to ${dynamicPricing.includedCapacity} seats)` : activeBand.label}
+                      </p>
                     </div>
                     <div className="text-right">
                       <span className="font-extrabold text-lg text-emerald-700 dark:text-emerald-400 block">
-                        {!isTailored ? (
-                          billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}/year` : `MUR ${baseMonthlyMUR.toLocaleString()}/mo`
-                        ) : "Tailored Quote"}
+                        {billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}/year` : `MUR ${baseMonthlyMUR.toLocaleString()}/mo`}
                       </span>
-                      {!isTailored && billingInterval === "YEARLY" && (
+                      {billingInterval === "YEARLY" && (
                         <div className="space-y-0.5 text-right mt-1">
                           <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold block">
                             Save MUR {yearlySavingsMUR.toLocaleString()} per year
@@ -335,9 +381,17 @@ export default function Subscribe() {
                     <div className="flex justify-between text-muted-foreground">
                       <span>{billingInterval === "YEARLY" ? "Yearly Subscription" : "Monthly Subscription"}</span>
                       <span className="font-semibold text-foreground">
-                        {!isTailored ? (billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}` : `MUR ${baseMonthlyMUR.toLocaleString()}`) : "Tailored"}
+                        {billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}` : `MUR ${baseMonthlyMUR.toLocaleString()}`}
                       </span>
                     </div>
+                    {isOver120 && employeeCount > 250 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Supplementary Capacity</span>
+                        <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                          +{dynamicPricing.additionalBlocks * 50} extra seats
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-muted-foreground">
                       <span>Currency</span>
                       <span className="font-semibold text-foreground">MUR (Mauritian Rupee)</span>
@@ -345,7 +399,7 @@ export default function Subscribe() {
                     <div className="flex justify-between pt-4 border-t text-base font-bold text-foreground">
                       <span>{billingInterval === "YEARLY" ? "Yearly Total" : "Monthly Total"}</span>
                       <span className="text-emerald-700 dark:text-emerald-400">
-                        {!isTailored ? (billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}/year` : `MUR ${baseMonthlyMUR.toLocaleString()}/mo`) : "Tailored Quote"}
+                        {billingInterval === "YEARLY" ? `MUR ${yearlyFinalMUR.toLocaleString()}/year` : `MUR ${baseMonthlyMUR.toLocaleString()}/mo`}
                       </span>
                     </div>
                   </div>

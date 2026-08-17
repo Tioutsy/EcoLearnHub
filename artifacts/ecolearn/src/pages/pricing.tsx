@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   CheckCircle2,
   Building2,
@@ -12,6 +13,7 @@ import {
   ArrowRight,
   Layers,
   Award,
+  Users,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@clerk/react";
@@ -19,7 +21,14 @@ import { LeadCaptureDialog } from "@/components/lead-capture-dialog";
 import { useState, useEffect, useMemo } from "react";
 import { customFetch } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
-import { PER_EMPLOYEE_COST_MAP, INDICATIVE_CALCULATION_NOTE, calculateYearlyPricing } from "@/config/pricing";
+import {
+  PER_EMPLOYEE_COST_MAP,
+  INDICATIVE_CALCULATION_NOTE,
+  calculateYearlyPricing,
+  calculateDynamicPricing,
+  BASE_PRICING_121_250,
+  ADDITIONAL_BLOCK_PRICE_MONTHLY,
+} from "@/config/pricing";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface PlanData {
@@ -58,6 +67,7 @@ export default function Pricing() {
   const { t } = useLanguage();
   const { isSignedIn } = useAuth();
   const [selectedBandCode, setSelectedBandCode] = useState<string>("UP_TO_25");
+  const [largeCompanyHeadcount, setLargeCompanyHeadcount] = useState<number>(150);
   const [billingInterval, setBillingInterval] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
   const [plans, setPlans] = useState<PlanData[]>([]);
   const [bands, setBands] = useState<EmployeeBandData[]>([]);
@@ -106,7 +116,47 @@ export default function Pricing() {
   }, [prices]);
 
   const activeBand = bands.find(b => b.code === selectedBandCode);
-  const isOver120 = selectedBandCode === "OVER_120" || activeBand?.requiresTailoredQuote;
+  const isOver120 = selectedBandCode === "OVER_120";
+
+  // Compute pricing for plan card
+  const getCardPricing = (planCode: "ESSENTIAL" | "PROFESSIONAL" | "COMPLETE", fallbackMonthly: number) => {
+    if (!isOver120) {
+      const pData = priceMap.get(`${planCode}_${selectedBandCode}`);
+      const baseMonthly = pData?.monthlyAmountMUR || fallbackMonthly;
+      const yearlyCalc = calculateYearlyPricing(baseMonthly);
+
+      return {
+        isLargeCompany: false,
+        monthlyAmount: baseMonthly,
+        yearlyAmount: yearlyCalc.yearlyPriceMUR || baseMonthly * 12,
+        annualSavings: yearlyCalc.savingsMUR,
+        equivalentMonthly: yearlyCalc.equivalentMonthlyMUR || baseMonthly,
+        additionalBlocks: 0,
+        includedCapacity: selectedBandCode === "UP_TO_25" ? 25 : selectedBandCode === "FROM_26_TO_50" ? 50 : selectedBandCode === "FROM_51_TO_80" ? 80 : 120,
+      };
+    }
+
+    const dynamic = calculateDynamicPricing(planCode, largeCompanyHeadcount, fallbackMonthly);
+    return {
+      isLargeCompany: true,
+      monthlyAmount: dynamic.finalMonthly,
+      yearlyAmount: dynamic.finalYearly,
+      annualSavings: dynamic.yearlyDiscount,
+      equivalentMonthly: dynamic.equivalentMonthlyYearly,
+      additionalBlocks: dynamic.additionalBlocks,
+      includedCapacity: dynamic.includedCapacity,
+    };
+  };
+
+  const essentialPricing = getCardPricing("ESSENTIAL", 3000);
+  const professionalPricing = getCardPricing("PROFESSIONAL", 4500);
+  const completePricing = getCardPricing("COMPLETE", 6000);
+
+  const getCheckoutUrl = (planCode: string) => {
+    const countParam = isOver120 ? `&employeeCount=${largeCompanyHeadcount}` : "";
+    const targetUrl = `/company/subscribe?planCode=${planCode}&bandCode=${selectedBandCode}&billingInterval=${billingInterval}${countParam}`;
+    return isSignedIn ? targetUrl : `/sign-up?redirect_url=${encodeURIComponent(targetUrl)}`;
+  };
 
   return (
     <Layout>
@@ -114,7 +164,7 @@ export default function Pricing() {
       <div className="bg-gradient-to-b from-emerald-900/10 via-background to-background pt-16 md:pt-24 pb-12 border-b">
         <div className="container mx-auto px-4 text-center max-w-4xl">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full mb-4">
-            <Sparkles className="h-3.5 w-3.5" /> Elevio Hybrid Commercial Plans
+            <Sparkles className="h-3.5 w-3.5" /> Elevio Commercial Plans
           </span>
           <h1 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-foreground tracking-tight">
             {t("pricing.title")}
@@ -123,7 +173,7 @@ export default function Pricing() {
             {t("pricing.subtitle")}
           </p>
           <p className="text-xs text-muted-foreground mt-3 font-medium">
-            All prices are shown in Mauritian Rupees (MUR). Higher plans include all lower-plan course content.
+            All prices are shown in Mauritian Rupees (MUR). Transparent self-service pricing for teams of 1 to 10,000+ employees.
           </p>
         </div>
       </div>
@@ -169,13 +219,13 @@ export default function Pricing() {
               Choose monthly billing for flexibility, or pay yearly and save 10% on the equivalent 12-month price.
               {billingInterval === "YEARLY" && (
                 <span className="block text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
-                  One payment covers 12 months of access.
+                  One annual payment covers 12 full months of access.
                 </span>
               )}
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-bold text-foreground uppercase tracking-wider block">
               {t("pricing.step1")}
             </label>
@@ -186,7 +236,7 @@ export default function Pricing() {
                 { code: "FROM_26_TO_50", label: "26–50" },
                 { code: "FROM_51_TO_80", label: "51–80" },
                 { code: "FROM_81_TO_120", label: "81–120" },
-                { code: "OVER_120", label: "Over 120" },
+                { code: "OVER_120", label: "121+ employees" },
               ]).map((b) => {
                 const isSelected = selectedBandCode === b.code;
                 return (
@@ -202,12 +252,64 @@ export default function Pricing() {
                   >
                     <span>{b.label}</span>
                     <span className={cn("text-[10px] font-mono opacity-80", isSelected ? "text-primary-foreground" : "text-muted-foreground")}>
-                      {b.code === "OVER_120" ? "Tailored quote" : "employees"}
+                      {b.code === "OVER_120" ? "Enterprise" : "employees"}
                     </span>
                   </button>
                 );
               })}
             </div>
+
+            {/* Dynamic Headcount Slider/Input for >120 employees */}
+            {isOver120 && (
+              <div className="bg-card border-2 border-emerald-600/30 rounded-2xl p-5 mt-4 space-y-4 text-left shadow-sm animate-in fade-in slide-in-from-top-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-400 tracking-wider flex items-center gap-1.5">
+                      <Users className="h-4 w-4" /> Specify Your Exact Headcount
+                    </span>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Base rate includes up to 250 seats. Additional seats scale in blocks of 50.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={121}
+                      max={10000}
+                      step={1}
+                      value={largeCompanyHeadcount}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (!isNaN(val)) setLargeCompanyHeadcount(Math.max(121, val));
+                      }}
+                      className="w-28 text-center font-bold text-base h-10 border-emerald-500/50"
+                    />
+                    <span className="text-xs font-semibold text-muted-foreground">employees</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min={121}
+                    max={1000}
+                    step={10}
+                    value={largeCompanyHeadcount > 1000 ? 1000 : largeCompanyHeadcount}
+                    onChange={(e) => setLargeCompanyHeadcount(parseInt(e.target.value, 10))}
+                    className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                  />
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border/50">
+                  <span>Included Capacity: <strong className="text-foreground">{largeCompanyHeadcount <= 250 ? "Up to 250 employees" : `Up to ${250 + Math.ceil((largeCompanyHeadcount - 250) / 50) * 50} employees`}</strong></span>
+                  {largeCompanyHeadcount > 250 && (
+                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
+                      +{Math.ceil((largeCompanyHeadcount - 250) / 50)} additional 50-employee block{Math.ceil((largeCompanyHeadcount - 250) / 50) > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -223,42 +325,36 @@ export default function Pricing() {
               </div>
 
               <div className="pt-2 border-t border-b py-4">
-                {!isOver120 ? (() => {
-                  const pData = priceMap.get(`ESSENTIAL_${selectedBandCode}`);
-                  const baseMonthly = pData?.monthlyAmountMUR || 3000;
-                  const yearlyCalc = calculateYearlyPricing(baseMonthly);
-                  return billingInterval === "YEARLY" ? (
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold font-serif">
-                          MUR {yearlyCalc.yearlyPriceMUR?.toLocaleString()}/year
-                        </span>
-                      </div>
-                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Billed yearly</span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1">
-                        Save MUR {yearlyCalc.savingsMUR.toLocaleString()} per year
-                      </span>
-                      <span className="text-xs text-muted-foreground block mt-0.5">
-                        Equivalent to MUR {yearlyCalc.equivalentMonthlyMUR?.toLocaleString()}/month
-                      </span>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold font-serif">
-                          MUR {baseMonthly.toLocaleString()}
-                        </span>
-                      </div>
-                      <span className="text-xs text-muted-foreground block">per month · billed for {activeBand?.label || "your team"}</span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
-                        {PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 120 per employee/month"}
-                      </span>
-                    </div>
-                  );
-                })() : (
+                {billingInterval === "YEARLY" ? (
                   <div>
-                    <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
-                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium block mt-1">Per-employee cost calculated with your quote</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif">
+                        MUR {essentialPricing.yearlyAmount.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/ year</span>
+                    </div>
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Billed yearly</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1">
+                      Save MUR {essentialPricing.annualSavings.toLocaleString()} per year
+                    </span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      Equivalent to MUR {essentialPricing.equivalentMonthly.toLocaleString()}/month
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif">
+                        MUR {essentialPricing.monthlyAmount.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/ month</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      {isOver120 ? `Fixed monthly for up to ${essentialPricing.includedCapacity} employees` : `Billed monthly for ${activeBand?.label || "your team"}`}
+                    </span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
+                      {isOver120 ? `MUR ${(essentialPricing.monthlyAmount / (isOver120 ? largeCompanyHeadcount : 25)).toFixed(2)} per employee/month` : (PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 120 per employee/month")}
+                    </span>
                   </div>
                 )}
               </div>
@@ -287,18 +383,11 @@ export default function Pricing() {
             </div>
 
             <div className="pt-8">
-              {!isOver120 ? (
-                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
-                  <Link href={isSignedIn ? `/company/subscribe?planCode=ESSENTIAL&bandCode=${selectedBandCode}&billingInterval=${billingInterval}` : `/sign-up?redirect_url=/company/subscribe?planCode=ESSENTIAL&bandCode=${selectedBandCode}&billingInterval=${billingInterval}`}>
-                    Get Started — Essential
-                  </Link>
-                </Button>
-              ) : (
-                <LeadCaptureDialog
-                  interest="proposal"
-                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us for an organisation plan</Button>}
-                />
-              )}
+              <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
+                <Link href={getCheckoutUrl("ESSENTIAL")}>
+                  Get Started — Essential
+                </Link>
+              </Button>
             </div>
           </div>
 
@@ -316,42 +405,36 @@ export default function Pricing() {
               </div>
 
               <div className="pt-2 border-t border-b py-4">
-                {!isOver120 ? (() => {
-                  const pData = priceMap.get(`PROFESSIONAL_${selectedBandCode}`);
-                  const baseMonthly = pData?.monthlyAmountMUR || 4500;
-                  const yearlyCalc = calculateYearlyPricing(baseMonthly);
-                  return billingInterval === "YEARLY" ? (
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold font-serif text-emerald-700 dark:text-emerald-400">
-                          MUR {yearlyCalc.yearlyPriceMUR?.toLocaleString()}/year
-                        </span>
-                      </div>
-                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Billed yearly</span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1">
-                        Save MUR {yearlyCalc.savingsMUR.toLocaleString()} per year
-                      </span>
-                      <span className="text-xs text-muted-foreground block mt-0.5">
-                        Equivalent to MUR {yearlyCalc.equivalentMonthlyMUR?.toLocaleString()}/month
-                      </span>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold font-serif text-emerald-700 dark:text-emerald-400">
-                          MUR {baseMonthly.toLocaleString()}
-                        </span>
-                      </div>
-                      <span className="text-xs text-muted-foreground block">per month · billed for {activeBand?.label || "your team"}</span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
-                        {PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 90 per employee/month"}
-                      </span>
-                    </div>
-                  );
-                })() : (
+                {billingInterval === "YEARLY" ? (
                   <div>
-                    <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
-                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium block mt-1">Per-employee cost calculated with your quote</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif text-emerald-700 dark:text-emerald-400">
+                        MUR {professionalPricing.yearlyAmount.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/ year</span>
+                    </div>
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Billed yearly</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1">
+                      Save MUR {professionalPricing.annualSavings.toLocaleString()} per year
+                    </span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      Equivalent to MUR {professionalPricing.equivalentMonthly.toLocaleString()}/month
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif text-emerald-700 dark:text-emerald-400">
+                        MUR {professionalPricing.monthlyAmount.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/ month</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      {isOver120 ? `Fixed monthly for up to ${professionalPricing.includedCapacity} employees` : `Billed monthly for ${activeBand?.label || "your team"}`}
+                    </span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
+                      {isOver120 ? `MUR ${(professionalPricing.monthlyAmount / (isOver120 ? largeCompanyHeadcount : 50)).toFixed(2)} per employee/month` : (PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 90 per employee/month")}
+                    </span>
                   </div>
                 )}
               </div>
@@ -380,18 +463,11 @@ export default function Pricing() {
             </div>
 
             <div className="pt-8">
-              {!isOver120 ? (
-                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
-                  <Link href={isSignedIn ? `/company/subscribe?planCode=PROFESSIONAL&bandCode=${selectedBandCode}&billingInterval=${billingInterval}` : `/sign-up?redirect_url=/company/subscribe?planCode=PROFESSIONAL&bandCode=${selectedBandCode}&billingInterval=${billingInterval}`}>
-                    Get Started — Professional
-                  </Link>
-                </Button>
-              ) : (
-                <LeadCaptureDialog
-                  interest="proposal"
-                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us for an organisation plan</Button>}
-                />
-              )}
+              <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md">
+                <Link href={getCheckoutUrl("PROFESSIONAL")}>
+                  Get Started — Professional
+                </Link>
+              </Button>
             </div>
           </div>
 
@@ -405,42 +481,36 @@ export default function Pricing() {
               </div>
 
               <div className="pt-2 border-t border-b py-4">
-                {!isOver120 ? (() => {
-                  const pData = priceMap.get(`COMPLETE_${selectedBandCode}`);
-                  const baseMonthly = pData?.monthlyAmountMUR || 6000;
-                  const yearlyCalc = calculateYearlyPricing(baseMonthly);
-                  return billingInterval === "YEARLY" ? (
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold font-serif">
-                          MUR {yearlyCalc.yearlyPriceMUR?.toLocaleString()}/year
-                        </span>
-                      </div>
-                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Billed yearly</span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1">
-                        Save MUR {yearlyCalc.savingsMUR.toLocaleString()} per year
-                      </span>
-                      <span className="text-xs text-muted-foreground block mt-0.5">
-                        Equivalent to MUR {yearlyCalc.equivalentMonthlyMUR?.toLocaleString()}/month
-                      </span>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold font-serif">
-                          MUR {baseMonthly.toLocaleString()}
-                        </span>
-                      </div>
-                      <span className="text-xs text-muted-foreground block">per month · billed for {activeBand?.label || "your team"}</span>
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
-                        {PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 62.50 per employee/month"}
-                      </span>
-                    </div>
-                  );
-                })() : (
+                {billingInterval === "YEARLY" ? (
                   <div>
-                    <span className="text-xl font-bold text-foreground">Contact us for a quote</span>
-                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium block mt-1">Per-employee cost calculated with your quote</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif">
+                        MUR {completePricing.yearlyAmount.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/ year</span>
+                    </div>
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">Billed yearly</span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1">
+                      Save MUR {completePricing.annualSavings.toLocaleString()} per year
+                    </span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      Equivalent to MUR {completePricing.equivalentMonthly.toLocaleString()}/month
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold font-serif">
+                        MUR {completePricing.monthlyAmount.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/ month</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground block mt-0.5">
+                      {isOver120 ? `Fixed monthly for up to ${completePricing.includedCapacity} employees` : `Billed monthly for ${activeBand?.label || "your team"}`}
+                    </span>
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block mt-1.5">
+                      {isOver120 ? `MUR ${(completePricing.monthlyAmount / (isOver120 ? largeCompanyHeadcount : 80)).toFixed(2)} per employee/month` : (PER_EMPLOYEE_COST_MAP[selectedBandCode] || "From MUR 62.50 per employee/month")}
+                    </span>
                   </div>
                 )}
               </div>
@@ -469,18 +539,11 @@ export default function Pricing() {
             </div>
 
             <div className="pt-8">
-              {!isOver120 ? (
-                <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
-                  <Link href={isSignedIn ? `/company/subscribe?planCode=COMPLETE&bandCode=${selectedBandCode}&billingInterval=${billingInterval}` : `/sign-up?redirect_url=/company/subscribe?planCode=COMPLETE&bandCode=${selectedBandCode}&billingInterval=${billingInterval}`}>
-                    Get Started — Complete
-                  </Link>
-                </Button>
-              ) : (
-                <LeadCaptureDialog
-                  interest="proposal"
-                  trigger={<Button variant="outline" size="lg" className="w-full font-semibold rounded-xl">Contact us for an organisation plan</Button>}
-                />
-              )}
+              <Button asChild size="lg" className="w-full font-semibold rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white shadow-md">
+                <Link href={getCheckoutUrl("COMPLETE")}>
+                  Get Started — Complete
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -529,15 +592,15 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* Corporate Proposal Callout for >120 employees */}
+        {/* Corporate Advisory Callout */}
         <div className="max-w-4xl mx-auto border rounded-3xl p-8 bg-gradient-to-r from-muted/50 to-card shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">
             <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider">
-              <Building2 className="h-4 w-4" /> Enterprise & Large Organisations
+              <Building2 className="h-4 w-4" /> Enterprise & Custom Rollouts
             </div>
-            <h3 className="text-xl font-bold font-serif">More than 120 employees?</h3>
+            <h3 className="text-xl font-bold font-serif">Need a tailored rollout or LMS integration?</h3>
             <p className="text-sm text-muted-foreground">
-              We offer tailored corporate agreements, custom departmental rollouts, and volume pricing for large workforces across Mauritius.
+              Our corporate team assists with single-sign-on (SSO), bespoke sustainability modules, and enterprise reporting for multi-site organizations.
             </p>
           </div>
 
@@ -545,7 +608,7 @@ export default function Pricing() {
             interest="proposal"
             trigger={
               <Button size="lg" variant="outline" className="shrink-0 font-semibold rounded-xl gap-2">
-                <span>Request Corporate Proposal</span>
+                <span>Talk to Corporate Advisory</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             }

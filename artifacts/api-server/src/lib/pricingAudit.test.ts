@@ -79,10 +79,10 @@ describe("Sprint 9S — Pricing Band Mapping & Per-Employee Calculation Tests", 
       assert.equal(rounded, "118.42");
     });
 
-    test("More than 120 employees shows tailored quote per-employee copy", () => {
+    test("More than 120 employees shows transparent per-employee copy", () => {
       assert.equal(
         PER_EMPLOYEE_COST_MAP["OVER_120"],
-        "Per-employee cost calculated with your quote"
+        "From MUR 30 per employee/month"
       );
     });
   });

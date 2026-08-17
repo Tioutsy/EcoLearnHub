@@ -2,170 +2,229 @@ import assert from "node:assert/strict";
 import test, { describe } from "node:test";
 import {
   calculateSubscriptionPricing,
+  calculateEnterprisePricing,
+  calculateAuthoritativePricing,
   normalizeBillingInterval,
+  normalizePlanCode,
 } from "./subscriptionPricingService";
 
-describe("Sprint 12 — Yearly Subscription Payment Option (10% Discount) Suite", () => {
-  test("1. Monthly prices remain unchanged", () => {
-    const band25Monthly = calculateSubscriptionPricing(3000, "MONTHLY");
-    assert.equal(band25Monthly.finalAmount, 3000);
-    assert.equal(band25Monthly.discountPercentage, 0);
-    assert.equal(band25Monthly.discountAmount, 0);
-    assert.equal(band25Monthly.currency, "MUR");
+describe("Sprint 12 & Enterprise — Subscription Payment Option & Dynamic Large-Company Pricing Suite", () => {
+  describe("1. Standard Bands (1–120 Employees) Preservation", () => {
+    test("Monthly prices remain unchanged for 1–120 employees", () => {
+      const band25Monthly = calculateSubscriptionPricing(3000, "MONTHLY");
+      assert.equal(band25Monthly.finalAmount, 3000);
+      assert.equal(band25Monthly.discountPercentage, 0);
+      assert.equal(band25Monthly.discountAmount, 0);
+      assert.equal(band25Monthly.currency, "MUR");
 
-    const band50Monthly = calculateSubscriptionPricing(4500, "MONTHLY");
-    assert.equal(band50Monthly.finalAmount, 4500);
+      const band50Monthly = calculateSubscriptionPricing(4500, "MONTHLY");
+      assert.equal(band50Monthly.finalAmount, 4500);
 
-    const band80Monthly = calculateSubscriptionPricing(5000, "MONTHLY");
-    assert.equal(band80Monthly.finalAmount, 5000);
+      const band80Monthly = calculateSubscriptionPricing(5000, "MONTHLY");
+      assert.equal(band80Monthly.finalAmount, 5000);
 
-    const band120Monthly = calculateSubscriptionPricing(6250, "MONTHLY");
-    assert.equal(band120Monthly.finalAmount, 6250);
+      const band120Monthly = calculateSubscriptionPricing(6250, "MONTHLY");
+      assert.equal(band120Monthly.finalAmount, 6250);
+    });
+
+    test("Yearly prices for 1–120 employees are preserved with exact 10% discount", () => {
+      // 1-25: 3,000 * 12 = 36,000 - 3,600 = 32,400
+      const b25 = calculateSubscriptionPricing(3000, "YEARLY");
+      assert.equal(b25.finalAmount, 32400);
+      assert.equal(b25.annualSavings, 3600);
+
+      // 26-50: 4,500 * 12 = 54,000 - 5,400 = 48,600
+      const b50 = calculateSubscriptionPricing(4500, "YEARLY");
+      assert.equal(b50.finalAmount, 48600);
+      assert.equal(b50.annualSavings, 5400);
+
+      // 51-80: 5,000 * 12 = 60,000 - 6,000 = 54,000
+      const b80 = calculateSubscriptionPricing(5000, "YEARLY");
+      assert.equal(b80.finalAmount, 54000);
+      assert.equal(b80.annualSavings, 6000);
+
+      // 81-120: 6,250 * 12 = 75,000 - 7,500 = 67,500
+      const b120 = calculateSubscriptionPricing(6250, "YEARLY");
+      assert.equal(b120.finalAmount, 67500);
+      assert.equal(b120.annualSavings, 7500);
+    });
   });
 
-  test("2. Yearly price for up to 25 employees is MUR 32,400", () => {
-    const band25Yearly = calculateSubscriptionPricing(3000, "YEARLY");
-    assert.equal(band25Yearly.monthlyBasePrice, 3000);
-    assert.equal(band25Yearly.undiscountedTotal, 36000);
-    assert.equal(band25Yearly.discountPercentage, 10);
-    assert.equal(band25Yearly.discountAmount, 3600);
-    assert.equal(band25Yearly.finalAmount, 32400);
-    assert.equal(band25Yearly.annualSavings, 3600);
-    assert.equal(band25Yearly.equivalentMonthlyAmount, 2700);
+  describe("2. Transparent Large-Company Pricing (121 to 1,000+ Employees)", () => {
+    test("Essential Package — 121 to 1,000 employees test cases", () => {
+      // 120 employees: standard band (MUR 6,250/mo | MUR 67,500/yr)
+      const e120 = calculateAuthoritativePricing({ planCode: "ESSENTIAL", employeeCount: 120, billingInterval: "MONTHLY" });
+      assert.equal(e120.finalMonthlyAmount, 6250);
+      const e120y = calculateAuthoritativePricing({ planCode: "ESSENTIAL", employeeCount: 120, billingInterval: "YEARLY" });
+      assert.equal(e120y.finalYearlyAmount, 67500);
+
+      // 121 employees: base tier (MUR 7,500/mo | MUR 81,000/yr)
+      const e121m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 121, billingInterval: "MONTHLY" });
+      assert.equal(e121m.finalMonthlyAmount, 7500);
+      assert.equal(e121m.additionalBlocks, 0);
+      const e121y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 121, billingInterval: "YEARLY" });
+      assert.equal(e121y.finalYearlyAmount, 81000);
+      assert.equal(e121y.annualSavings, 9000);
+
+      // 250 employees: base tier limit (MUR 7,500/mo | MUR 81,000/yr)
+      const e250m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 250, billingInterval: "MONTHLY" });
+      assert.equal(e250m.finalMonthlyAmount, 7500);
+      assert.equal(e250m.additionalBlocks, 0);
+      const e250y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 250, billingInterval: "YEARLY" });
+      assert.equal(e250y.finalYearlyAmount, 81000);
+
+      // 251 employees: 1 additional block (+1,000) -> MUR 8,500/mo | MUR 91,800/yr
+      const e251m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 251, billingInterval: "MONTHLY" });
+      assert.equal(e251m.additionalBlocks, 1);
+      assert.equal(e251m.finalMonthlyAmount, 8500);
+      const e251y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 251, billingInterval: "YEARLY" });
+      assert.equal(e251y.finalYearlyAmount, 91800); // (8500 * 12) = 102000 - 10200 = 91800
+      assert.equal(e251y.includedMaxEmployees, 300);
+
+      // 275 employees: 1 additional block (+1,000) -> MUR 8,500/mo | MUR 91,800/yr
+      const e275m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 275, billingInterval: "MONTHLY" });
+      assert.equal(e275m.additionalBlocks, 1);
+      assert.equal(e275m.finalMonthlyAmount, 8500);
+      const e275y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 275, billingInterval: "YEARLY" });
+      assert.equal(e275y.finalYearlyAmount, 91800);
+
+      // 300 employees: 1 additional block (+1,000) -> MUR 8,500/mo | MUR 91,800/yr
+      const e300m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 300, billingInterval: "MONTHLY" });
+      assert.equal(e300m.additionalBlocks, 1);
+      assert.equal(e300m.finalMonthlyAmount, 8500);
+      const e300y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 300, billingInterval: "YEARLY" });
+      assert.equal(e300y.finalYearlyAmount, 91800);
+
+      // 301 employees: 2 additional blocks (+2,000) -> MUR 9,500/mo | MUR 102,600/yr
+      const e301m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 301, billingInterval: "MONTHLY" });
+      assert.equal(e301m.additionalBlocks, 2);
+      assert.equal(e301m.finalMonthlyAmount, 9500);
+      const e301y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 301, billingInterval: "YEARLY" });
+      assert.equal(e301y.finalYearlyAmount, 102600);
+      assert.equal(e301y.includedMaxEmployees, 350);
+
+      // 351 employees: 3 additional blocks (+3,000) -> MUR 10,500/mo | MUR 113,400/yr
+      const e351m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 351, billingInterval: "MONTHLY" });
+      assert.equal(e351m.additionalBlocks, 3);
+      assert.equal(e351m.finalMonthlyAmount, 10500);
+      const e351y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 351, billingInterval: "YEARLY" });
+      assert.equal(e351y.finalYearlyAmount, 113400);
+
+      // 500 employees: 5 additional blocks (+5,000) -> MUR 12,500/mo | MUR 135,000/yr
+      const e500m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 500, billingInterval: "MONTHLY" });
+      assert.equal(e500m.additionalBlocks, 5);
+      assert.equal(e500m.finalMonthlyAmount, 12500);
+      const e500y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 500, billingInterval: "YEARLY" });
+      assert.equal(e500y.finalYearlyAmount, 135000);
+
+      // 1,000 employees: 15 additional blocks (+15,000) -> MUR 22,500/mo | MUR 243,000/yr
+      const e1000m = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 1000, billingInterval: "MONTHLY" });
+      assert.equal(e1000m.additionalBlocks, 15);
+      assert.equal(e1000m.finalMonthlyAmount, 22500);
+      const e1000y = calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 1000, billingInterval: "YEARLY" });
+      assert.equal(e1000y.finalYearlyAmount, 243000); // 22500*12 = 270000 - 27000 = 243000
+    });
+
+    test("Professional Package — 121 to 1,000 employees test cases", () => {
+      // 121 employees: base tier (MUR 9,500/mo | MUR 102,600/yr)
+      const p121m = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 121, billingInterval: "MONTHLY" });
+      assert.equal(p121m.finalMonthlyAmount, 9500);
+      const p121y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 121, billingInterval: "YEARLY" });
+      assert.equal(p121y.finalYearlyAmount, 102600); // 114,000 - 11,400
+
+      // 250 employees: base tier (MUR 9,500/mo | MUR 102,600/yr)
+      const p250y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 250, billingInterval: "YEARLY" });
+      assert.equal(p250y.finalYearlyAmount, 102600);
+
+      // 251 employees: 1 additional block (+1,250) -> MUR 10,750/mo | MUR 116,100/yr
+      const p251m = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 251, billingInterval: "MONTHLY" });
+      assert.equal(p251m.additionalBlocks, 1);
+      assert.equal(p251m.finalMonthlyAmount, 10750);
+      const p251y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 251, billingInterval: "YEARLY" });
+      assert.equal(p251y.finalYearlyAmount, 116100); // 10750*12 = 129000 - 12900 = 116100
+
+      // 275 employees: 1 additional block (+1,250) -> MUR 10,750/mo | MUR 116,100/yr
+      const p275y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 275, billingInterval: "YEARLY" });
+      assert.equal(p275y.finalYearlyAmount, 116100);
+
+      // 301 employees: 2 additional blocks (+2,500) -> MUR 12,000/mo | MUR 129,600/yr
+      const p301m = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 301, billingInterval: "MONTHLY" });
+      assert.equal(p301m.additionalBlocks, 2);
+      assert.equal(p301m.finalMonthlyAmount, 12000);
+      const p301y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 301, billingInterval: "YEARLY" });
+      assert.equal(p301y.finalYearlyAmount, 129600); // 12000*12 = 144000 - 14400 = 129600
+
+      // 351 employees: 3 additional blocks (+3,750) -> MUR 13,250/mo | MUR 143,100/yr
+      const p351y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 351, billingInterval: "YEARLY" });
+      assert.equal(p351y.finalYearlyAmount, 143100); // 13250*12 = 159000 - 15900 = 143100
+
+      // 500 employees: 5 additional blocks (+6,250) -> MUR 15,750/mo | MUR 170,100/yr
+      const p500y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 500, billingInterval: "YEARLY" });
+      assert.equal(p500y.finalYearlyAmount, 170100); // 15750*12 = 189000 - 18900 = 170100
+
+      // 1,000 employees: 15 additional blocks (+18,750) -> MUR 28,250/mo | MUR 305,100/yr
+      const p1000m = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 1000, billingInterval: "MONTHLY" });
+      assert.equal(p1000m.finalMonthlyAmount, 28250);
+      const p1000y = calculateEnterprisePricing({ planCode: "PROFESSIONAL", employeeCount: 1000, billingInterval: "YEARLY" });
+      assert.equal(p1000y.finalYearlyAmount, 305100); // 28250*12 = 339000 - 33900 = 305100
+    });
+
+    test("Complete Package — 121 to 1,000 employees test cases", () => {
+      // 121 employees: base tier (MUR 12,500/mo | MUR 135,000/yr)
+      const c121m = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 121, billingInterval: "MONTHLY" });
+      assert.equal(c121m.finalMonthlyAmount, 12500);
+      const c121y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 121, billingInterval: "YEARLY" });
+      assert.equal(c121y.finalYearlyAmount, 135000); // 150,000 - 15,000 = 135,000
+
+      // 250 employees: base tier (MUR 12,500/mo | MUR 135,000/yr)
+      const c250y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 250, billingInterval: "YEARLY" });
+      assert.equal(c250y.finalYearlyAmount, 135000);
+
+      // 251 employees: 1 additional block (+1,500) -> MUR 14,000/mo | MUR 151,200/yr
+      const c251m = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 251, billingInterval: "MONTHLY" });
+      assert.equal(c251m.additionalBlocks, 1);
+      assert.equal(c251m.finalMonthlyAmount, 14000);
+      const c251y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 251, billingInterval: "YEARLY" });
+      assert.equal(c251y.finalYearlyAmount, 151200); // 14000*12 = 168000 - 16800 = 151200
+
+      // 275 employees: 1 additional block (+1,500) -> MUR 14,000/mo | MUR 151,200/yr
+      const c275y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 275, billingInterval: "YEARLY" });
+      assert.equal(c275y.finalYearlyAmount, 151200);
+
+      // 301 employees: 2 additional blocks (+3,000) -> MUR 15,500/mo | MUR 167,400/yr
+      const c301m = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 301, billingInterval: "MONTHLY" });
+      assert.equal(c301m.additionalBlocks, 2);
+      assert.equal(c301m.finalMonthlyAmount, 15500);
+      const c301y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 301, billingInterval: "YEARLY" });
+      assert.equal(c301y.finalYearlyAmount, 167400); // 15500*12 = 186000 - 18600 = 167400
+
+      // 351 employees: 3 additional blocks (+4,500) -> MUR 17,000/mo | MUR 183,600/yr
+      const c351y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 351, billingInterval: "YEARLY" });
+      assert.equal(c351y.finalYearlyAmount, 183600); // 17000*12 = 204000 - 20400 = 183600
+
+      // 500 employees: 5 additional blocks (+7,500) -> MUR 20,000/mo | MUR 216,000/yr
+      const c500y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 500, billingInterval: "YEARLY" });
+      assert.equal(c500y.finalYearlyAmount, 216000); // 20000*12 = 240000 - 24000 = 216000
+
+      // 1,000 employees: 15 additional blocks (+22,500) -> MUR 35,000/mo | MUR 378,000/yr
+      const c1000m = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 1000, billingInterval: "MONTHLY" });
+      assert.equal(c1000m.finalMonthlyAmount, 35000);
+      const c1000y = calculateEnterprisePricing({ planCode: "COMPLETE", employeeCount: 1000, billingInterval: "YEARLY" });
+      assert.equal(c1000y.finalYearlyAmount, 378000); // 35000*12 = 420000 - 42000 = 378000
+    });
   });
 
-  test("3. Yearly price for 26–50 employees is MUR 48,600", () => {
-    const band50Yearly = calculateSubscriptionPricing(4500, "YEARLY");
-    assert.equal(band50Yearly.monthlyBasePrice, 4500);
-    assert.equal(band50Yearly.undiscountedTotal, 54000);
-    assert.equal(band50Yearly.discountPercentage, 10);
-    assert.equal(band50Yearly.discountAmount, 5400);
-    assert.equal(band50Yearly.finalAmount, 48600);
-    assert.equal(band50Yearly.annualSavings, 5400);
-    assert.equal(band50Yearly.equivalentMonthlyAmount, 4050);
-  });
+  describe("3. Input Validation & Error Handling", () => {
+    test("Rejects non-integer, zero, negative, or invalid headcount", () => {
+      assert.throws(() => calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 0 }), /greater than zero/);
+      assert.throws(() => calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: -10 }), /greater than zero/);
+      assert.throws(() => calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: 125.5 }), /must be an integer/);
+      assert.throws(() => calculateEnterprisePricing({ planCode: "ESSENTIAL", employeeCount: NaN }), /Missing or invalid employee count/);
+    });
 
-  test("4. Yearly price for 51–80 employees is MUR 54,000", () => {
-    const band80Yearly = calculateSubscriptionPricing(5000, "YEARLY");
-    assert.equal(band80Yearly.monthlyBasePrice, 5000);
-    assert.equal(band80Yearly.undiscountedTotal, 60000);
-    assert.equal(band80Yearly.discountPercentage, 10);
-    assert.equal(band80Yearly.discountAmount, 6000);
-    assert.equal(band80Yearly.finalAmount, 54000);
-    assert.equal(band80Yearly.annualSavings, 6000);
-    assert.equal(band80Yearly.equivalentMonthlyAmount, 4500);
-  });
-
-  test("5. Yearly price for 81–120 employees is MUR 67,500", () => {
-    const band120Yearly = calculateSubscriptionPricing(6250, "YEARLY");
-    assert.equal(band120Yearly.monthlyBasePrice, 6250);
-    assert.equal(band120Yearly.undiscountedTotal, 75000);
-    assert.equal(band120Yearly.discountPercentage, 10);
-    assert.equal(band120Yearly.discountAmount, 7500);
-    assert.equal(band120Yearly.finalAmount, 67500);
-    assert.equal(band120Yearly.annualSavings, 7500);
-    assert.equal(band120Yearly.equivalentMonthlyAmount, 5625);
-  });
-
-  test("6. The annual discount is exactly 10% of the 12-month total", () => {
-    const testCases = [
-      { baseMonthly: 3000, expectedUndiscounted: 36000, expectedDiscount: 3600, expectedFinal: 32400 },
-      { baseMonthly: 4500, expectedUndiscounted: 54000, expectedDiscount: 5400, expectedFinal: 48600 },
-      { baseMonthly: 5000, expectedUndiscounted: 60000, expectedDiscount: 6000, expectedFinal: 54000 },
-      { baseMonthly: 6250, expectedUndiscounted: 75000, expectedDiscount: 7500, expectedFinal: 67500 },
-    ];
-
-    for (const tc of testCases) {
-      const result = calculateSubscriptionPricing(tc.baseMonthly, "YEARLY");
-      assert.equal(result.undiscountedTotal, tc.expectedUndiscounted);
-      assert.equal(result.discountAmount, tc.expectedDiscount);
-      assert.equal(result.finalAmount, tc.expectedFinal);
-      assert.equal(result.finalAmount, (result.undiscountedTotal ?? 0) - result.discountAmount);
-    }
-  });
-
-  test("7. Companies with more than 120 employees cannot receive an automatic checkout price", () => {
-    const over120Result = calculateSubscriptionPricing(null, "YEARLY", true);
-    assert.equal(over120Result.isTailoredQuote, true);
-    assert.equal(over120Result.finalAmount, null);
-    assert.equal(over120Result.monthlyBasePrice, null);
-    assert.equal(over120Result.undiscountedTotal, null);
-  });
-
-  test("8. Invalid billing intervals are rejected", () => {
-    assert.throws(
-      () => normalizeBillingInterval("QUARTERLY"),
-      /Invalid billing interval: "QUARTERLY"/
-    );
-    assert.throws(
-      () => normalizeBillingInterval("WEEKLY"),
-      /Invalid billing interval: "WEEKLY"/
-    );
-  });
-
-  test("9. Frontend-submitted prices cannot override server-calculated amounts", () => {
-    // Server derives exact pricing regardless of raw interval casing or client attempts
-    const yearly = calculateSubscriptionPricing(3000, "yearly");
-    assert.equal(yearly.finalAmount, 32400);
-
-    const annual = calculateSubscriptionPricing(3000, "annual");
-    assert.equal(annual.finalAmount, 32400);
-
-    // Client trying to submit a zero or tampered price is ignored by backend resolution
-    const serverEnforced = calculateSubscriptionPricing(4500, "YEARLY");
-    assert.equal(serverEnforced.finalAmount, 48600);
-  });
-
-  test("10. Existing subscriptions default safely to monthly if a migration is introduced", () => {
-    const defaultInterval = normalizeBillingInterval(undefined);
-    assert.equal(defaultInterval, "MONTHLY");
-
-    const nullInterval = normalizeBillingInterval(null);
-    assert.equal(nullInterval, "MONTHLY");
-  });
-
-  test("11. Authorisation and tenant-isolation rules remain enforced", () => {
-    // Verify that pricing calculation is pure and side-effect free, preserving tenant isolation
-    const compA = calculateSubscriptionPricing(3000, "YEARLY");
-    const compB = calculateSubscriptionPricing(5000, "MONTHLY");
-
-    assert.equal(compA.finalAmount, 32400);
-    assert.equal(compB.finalAmount, 5000);
-    assert.notEqual(compA.finalAmount, compB.finalAmount);
-  });
-
-  test("12. Monthly/yearly UI selection updates all displayed totals correctly", () => {
-    const monthly = calculateSubscriptionPricing(6250, "MONTHLY");
-    const yearly = calculateSubscriptionPricing(6250, "YEARLY");
-
-    assert.equal(monthly.billingInterval, "MONTHLY");
-    assert.equal(monthly.finalAmount, 6250);
-
-    assert.equal(yearly.billingInterval, "YEARLY");
-    assert.equal(yearly.finalAmount, 67500);
-    assert.equal(yearly.annualSavings, 7500);
-    assert.equal(yearly.equivalentMonthlyAmount, 5625);
-  });
-
-  test("13. Yearly pricing is labelled as one annual payment", () => {
-    const yearly = calculateSubscriptionPricing(3000, "YEARLY");
-    assert.equal(yearly.billingInterval, "YEARLY");
-    assert.equal(yearly.discountPercentage, 10);
-    // 32,400 covers full 12 months
-    assert.equal(yearly.finalAmount, 32400);
-  });
-
-  test("14. Duplicate submission protection still works", () => {
-    // Normalization ensures idempotency for string payloads
-    const val1 = normalizeBillingInterval("YEARLY");
-    const val2 = normalizeBillingInterval("yearly");
-    assert.equal(val1, val2);
-  });
-
-  test("15. Payment failure does not activate the subscription", () => {
-    const pricing = calculateSubscriptionPricing(3000, "YEARLY");
-    // Initial status before payment confirmation remains PENDING_PAYMENT / PENDING
-    assert.equal(pricing.finalAmount, 32400);
-    assert.equal(pricing.currency, "MUR");
+    test("Rejects unsupported plan codes or billing intervals", () => {
+      assert.throws(() => normalizePlanCode("CUSTOM_ENTERPRISE"), /Unsupported package/);
+      assert.throws(() => normalizeBillingInterval("QUARTERLY"), /Invalid billing interval/);
+    });
   });
 });

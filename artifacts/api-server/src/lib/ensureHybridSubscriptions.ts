@@ -72,11 +72,11 @@ export const BANDS_CONFIG = [
   },
   {
     code: "OVER_120",
-    label: "Over 120 employees",
+    label: "121+ employees",
     minimumEmployees: 121,
-    maximumEmployees: null,
+    maximumEmployees: 250,
     displayOrder: 5,
-    requiresTailoredQuote: true,
+    requiresTailoredQuote: false,
   },
 ];
 
@@ -86,21 +86,21 @@ export const PRICING_MATRIX: Record<string, Record<string, number | null>> = {
     FROM_26_TO_50: 4500,
     FROM_51_TO_80: 5000,
     FROM_81_TO_120: 6250,
-    OVER_120: null,
+    OVER_120: 7500,
   },
   PROFESSIONAL: {
     UP_TO_25: 4500,
     FROM_26_TO_50: 6500,
     FROM_51_TO_80: 7500,
     FROM_81_TO_120: 9000,
-    OVER_120: null,
+    OVER_120: 9500,
   },
   COMPLETE: {
     UP_TO_25: 6000,
     FROM_26_TO_50: 9000,
     FROM_51_TO_80: 11000,
     FROM_81_TO_120: 13500,
-    OVER_120: null,
+    OVER_120: 12500,
   },
 };
 

@@ -12,7 +12,12 @@ import {
 } from "@workspace/db";
 import { eq, and, or, sql } from "drizzle-orm";
 import { assignTrainingToCompanyEmployees } from "./assignmentService.js";
-import { calculateSubscriptionPricing, PricingCalculationResult } from "./subscriptionPricingService";
+import {
+  calculateSubscriptionPricing,
+  calculateAuthoritativePricing,
+  PricingCalculationResult,
+  EnterprisePricingBreakdown,
+} from "./subscriptionPricingService";
 
 export type OnboardingStage =
   | "DRAFT"
@@ -246,12 +251,12 @@ export interface OnboardCompanyResult {
   employee?: any;
   subscription?: any;
   monthlyAmount?: number | null;
-  pricingBreakdown?: PricingCalculationResult;
+  pricingBreakdown?: PricingCalculationResult | EnterprisePricingBreakdown;
   onboardingStage?: string;
 }
 
 export async function onboardCompany(input: OnboardCompanyInput): Promise<OnboardCompanyResult> {
-  const { userId, email, adminName, companyName, employeeCount = 10, employeeBandCode, planCode = "ESSENTIAL" } = input;
+  const { userId, email, adminName, companyName, employeeCount: rawCount, employeeBandCode, planCode = "ESSENTIAL" } = input;
 
   if (!userId) {
     throw new Error("Authentication required");
@@ -294,26 +299,28 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
     }
   }
 
-  // 2. Resolve Employee Band
+  // 2. Resolve Employee Band & Headcount
   let bandCode = employeeBandCode;
+  let employeeCount = rawCount;
+
   if (!bandCode) {
-    if (employeeCount <= 25) bandCode = "UP_TO_25";
-    else if (employeeCount <= 50) bandCode = "FROM_26_TO_50";
-    else if (employeeCount <= 80) bandCode = "FROM_51_TO_80";
-    else if (employeeCount <= 120) bandCode = "FROM_81_TO_120";
+    const countToCheck = employeeCount || 10;
+    if (countToCheck <= 25) bandCode = "UP_TO_25";
+    else if (countToCheck <= 50) bandCode = "FROM_26_TO_50";
+    else if (countToCheck <= 80) bandCode = "FROM_51_TO_80";
+    else if (countToCheck <= 120) bandCode = "FROM_81_TO_120";
     else bandCode = "OVER_120";
   }
 
-  // 3. Handle >120 Tailored Contact Path
-  if (bandCode === "OVER_120" || (employeeCount && employeeCount > 120)) {
-    return {
-      outcome: "tailored_contact_required",
-      message: "Companies with more than 120 employees require a tailored enterprise agreement. Please contact our sales team.",
-      onboardingStage: "tailored-contact-required",
-    };
+  if (employeeCount === undefined) {
+    if (bandCode === "UP_TO_25") employeeCount = 25;
+    else if (bandCode === "FROM_26_TO_50") employeeCount = 50;
+    else if (bandCode === "FROM_51_TO_80") employeeCount = 80;
+    else if (bandCode === "FROM_81_TO_120") employeeCount = 120;
+    else employeeCount = 150;
   }
 
-  // 4. Resolve Employee Band Record & Subscription Plan Record from DB
+  // 3. Resolve Employee Band Record & Subscription Plan Record from DB
   const [band] = await db
     .select()
     .from(employeeBandsTable)
@@ -324,14 +331,6 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
     throw new Error(`Invalid employee band code: ${bandCode}`);
   }
 
-  if (band.requiresTailoredQuote) {
-    return {
-      outcome: "tailored_contact_required",
-      message: "Selected employee band requires a tailored enterprise quote.",
-      onboardingStage: "tailored-contact-required",
-    };
-  }
-
   const [plan] = await db
     .select()
     .from(subscriptionPlansTable)
@@ -340,32 +339,17 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
 
   const planId = plan?.id ?? 1;
 
-  // 5. Derive Pricing Server-Side (IGNORE any client price)
-  let monthlyAmountNum = 3000;
-  const [priceRecord] = await db
-    .select()
-    .from(planPricesTable)
-    .where(
-      and(
-        eq(planPricesTable.subscriptionPlanId, planId),
-        eq(planPricesTable.employeeBandId, band.id)
-      )
-    )
-    .limit(1);
+  // 4. Derive Authoritative Pricing Server-Side
+  const pricingBreakdown = calculateAuthoritativePricing({
+    planCode: plan?.code ?? "ESSENTIAL",
+    employeeCount,
+    bandCode: band.code,
+    billingInterval: input.billingInterval,
+  });
 
-  if (priceRecord && priceRecord.monthlyAmount) {
-    monthlyAmountNum = parseFloat(priceRecord.monthlyAmount);
-  } else {
-    // Fallback band mapping defaults for Essential
-    if (bandCode === "UP_TO_25") monthlyAmountNum = 3000;
-    else if (bandCode === "FROM_26_TO_50") monthlyAmountNum = 4500;
-    else if (bandCode === "FROM_51_TO_80") monthlyAmountNum = 5000;
-    else if (bandCode === "FROM_81_TO_120") monthlyAmountNum = 6250;
-  }
+  const includedCapacity = pricingBreakdown.includedMaxEmployees;
 
-  const pricingBreakdown = calculateSubscriptionPricing(monthlyAmountNum, input.billingInterval, false);
-
-  // 6. Real Database Transaction: Company -> First Admin Employee -> Subscription
+  // 5. Real Database Transaction: Company -> First Admin Employee -> Subscription
   const slugBase = companyName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
   const slug = `${slugBase}-${Date.now().toString(36)}`;
 
@@ -375,8 +359,8 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
       .values({
         name: companyName.trim(),
         slug,
-        employeeCount: Math.min(employeeCount, band.maximumEmployees || 120),
-        maxEmployees: band.maximumEmployees || 120,
+        employeeCount: employeeCount,
+        maxEmployees: includedCapacity,
         planId,
       })
       .returning();
@@ -405,8 +389,8 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
         currency: "MUR",
         billingInterval: pricingBreakdown.billingInterval,
         discountPercentage: String(pricingBreakdown.discountPercentage),
-        agreedMonthlyAmount: pricingBreakdown.monthlyBasePrice ? pricingBreakdown.monthlyBasePrice.toFixed(2) : null,
-        agreedYearlyAmount: pricingBreakdown.finalAmount && pricingBreakdown.billingInterval === "YEARLY" ? pricingBreakdown.finalAmount.toFixed(2) : null,
+        agreedMonthlyAmount: pricingBreakdown.finalMonthlyAmount.toFixed(2),
+        agreedYearlyAmount: pricingBreakdown.finalYearlyAmount.toFixed(2),
         pricingSource: "STANDARD",
         startsAt: new Date(),
       })
@@ -417,7 +401,7 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
       company,
       employee: adminEmployee,
       subscription,
-      monthlyAmount: monthlyAmountNum,
+      monthlyAmount: pricingBreakdown.finalMonthlyAmount,
       pricingBreakdown,
       onboardingStage: "onboarding-complete",
     };

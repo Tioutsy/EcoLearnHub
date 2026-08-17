@@ -20,6 +20,7 @@ import {
   HelpCircle,
   Clock,
 } from "lucide-react";
+import { calculateDynamicPricing, PlanCode, BillingInterval } from "@/config/pricing";
 
 export default function OnboardingPage() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -30,11 +31,11 @@ export default function OnboardingPage() {
   const [companyName, setCompanyName] = useState<string>("");
   const [employeeCount, setEmployeeCount] = useState<number>(15);
   const [selectedBandCode, setSelectedBandCode] = useState<string>("UP_TO_25");
-  const [selectedPlanCode, setSelectedPlanCode] = useState<string>("ESSENTIAL");
+  const [selectedPlanCode, setSelectedPlanCode] = useState<PlanCode>("ESSENTIAL");
 
   const [adminName, setAdminName] = useState<string>("");
   const [starterCourseCode, setStarterCourseCode] = useState<string>("ELH-01");
-  const [billingInterval, setBillingInterval] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>("MONTHLY");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -55,52 +56,22 @@ export default function OnboardingPage() {
     else setSelectedBandCode("OVER_120");
   }, [employeeCount]);
 
-  const getBandPrice = (code: string, interval: "MONTHLY" | "YEARLY" = billingInterval) => {
-    let baseMonthly = 3000;
-    let range = "1–25 employees";
-
-    switch (code) {
-      case "UP_TO_25":
-        baseMonthly = 3000;
-        range = "1–25 employees";
-        break;
-      case "FROM_26_TO_50":
-        baseMonthly = 4500;
-        range = "26–50 employees";
-        break;
-      case "FROM_51_TO_80":
-        baseMonthly = 5000;
-        range = "51–80 employees";
-        break;
-      case "FROM_81_TO_120":
-        baseMonthly = 6250;
-        range = "81–120 employees";
-        break;
-      case "OVER_120":
-        return { price: "Tailored Quote", period: "", range: "120+ employees", savings: "" };
-      default:
-        baseMonthly = 3000;
-        range = "1–25 employees";
-    }
+  const getBandPrice = (code: string, count: number, interval: BillingInterval = billingInterval) => {
+    const dynamic = calculateDynamicPricing(selectedPlanCode, count);
 
     if (interval === "YEARLY") {
-      const yearlyTotal = baseMonthly * 12;
-      const savings = Math.round(yearlyTotal * 0.10);
-      const finalYearly = yearlyTotal - savings;
-      const eqMonthly = Math.round((finalYearly / 12) * 100) / 100;
-
       return {
-        price: `MUR ${finalYearly.toLocaleString()}`,
+        price: `MUR ${dynamic.finalYearly.toLocaleString()}`,
         period: "/ year (Billed yearly)",
-        range,
-        savings: `Save MUR ${savings.toLocaleString()} per year · Eq. MUR ${eqMonthly.toLocaleString()}/mo`,
+        range: count <= 120 ? (code === "UP_TO_25" ? "1–25 employees" : code === "FROM_26_TO_50" ? "26–50 employees" : code === "FROM_51_TO_80" ? "51–80 employees" : "81–120 employees") : `${count} employees (Up to ${dynamic.includedCapacity} seats)`,
+        savings: `Save MUR ${dynamic.yearlyDiscount.toLocaleString()} per year · Eq. MUR ${dynamic.equivalentMonthlyYearly.toLocaleString()}/mo`,
       };
     }
 
     return {
-      price: `MUR ${baseMonthly.toLocaleString()}`,
+      price: `MUR ${dynamic.finalMonthly.toLocaleString()}`,
       period: "/ month",
-      range,
+      range: count <= 120 ? (code === "UP_TO_25" ? "1–25 employees" : code === "FROM_26_TO_50" ? "26–50 employees" : code === "FROM_51_TO_80" ? "51–80 employees" : "81–120 employees") : `${count} employees (Up to ${dynamic.includedCapacity} seats)`,
       savings: "",
     };
   };
@@ -114,10 +85,6 @@ export default function OnboardingPage() {
       }
       setStep(2);
     } else if (step === 2) {
-      if (selectedBandCode === "OVER_120" || employeeCount > 120) {
-        setStep(2.5); // Tailored contact step
-        return;
-      }
       setStep(3);
     } else if (step === 3) {
       handleCompleteCompanyOnboarding();
@@ -141,11 +108,7 @@ export default function OnboardingPage() {
       });
 
       setResult(res);
-      if (res.outcome === "tailored_contact_required") {
-        setStep(2.5);
-      } else {
-        setStep(4);
-      }
+      setStep(4);
     } catch (err: any) {
       setErrorMessage(err.message || "Failed to create company workspace. Please try again.");
     } finally {
@@ -165,7 +128,6 @@ export default function OnboardingPage() {
       });
       setStep(5);
     } catch (err: any) {
-      // Proceed to step 5 even if training assignment skipped or already present
       setStep(5);
     } finally {
       setIsLoading(false);
@@ -179,61 +141,64 @@ export default function OnboardingPage() {
           <Building2 className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold font-serif mb-2">Sign in to Onboard Your Company</h2>
           <p className="text-muted-foreground text-sm mb-6">
-            Please sign in to your ELEVIO account to set up your corporate workspace.
+            You must be signed in to create and administer a corporate training workspace.
           </p>
           <Button asChild size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700">
-            <Link href="/sign-in">Sign In to Continue</Link>
+            <Link href={`/sign-in?redirect_url=${encodeURIComponent("/onboarding")}`}>
+              Sign In to Continue
+            </Link>
           </Button>
         </div>
       </Layout>
     );
   }
 
-  const bandInfo = getBandPrice(selectedBandCode);
+  const bandInfo = getBandPrice(selectedBandCode, employeeCount);
 
   return (
     <Layout>
-      <div className="bg-gradient-to-r from-emerald-950/10 via-teal-900/5 to-background py-8 border-b">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
-            <Sparkles className="h-4 w-4" /> Autonomous Company Activation
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold font-serif tracking-tight">
-            Activate Your ELEVIO SKILLS Workspace
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Empower your workforce with Mauritius-tailored ESG & Sustainability training in under 2 minutes.
+      <div className="container mx-auto px-4 py-12 max-w-2xl">
+        {/* Step Progress Header */}
+        <div className="mb-8 text-center space-y-2">
+          <Badge variant="outline" className="text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 border-emerald-200">
+            Corporate Self-Service Onboarding
+          </Badge>
+          <h1 className="text-3xl font-bold font-serif">Setup Your Organisation Workspace</h1>
+          <p className="text-muted-foreground text-sm">
+            Configure tenant security, select your subscription tier, and enable sustainability learning.
           </p>
 
-          {/* Step Progress Bar */}
-          <div className="flex items-center gap-2 mt-6">
-            {[1, 2, 3, 4, 5].map((i) => (
+          {/* Progress Indicators */}
+          <div className="flex justify-center items-center gap-2 pt-4">
+            {[1, 2, 3, 4, 5].map((s) => (
               <div
-                key={i}
-                className={`h-2 flex-1 rounded-full transition-all ${
-                  step >= i ? "bg-emerald-600" : "bg-muted"
+                key={s}
+                className={`h-2 rounded-full transition-all ${
+                  step === s
+                    ? "w-8 bg-emerald-600"
+                    : step > s
+                    ? "w-4 bg-emerald-300 dark:bg-emerald-800"
+                    : "w-4 bg-muted"
                 }`}
               />
             ))}
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
         {errorMessage && (
-          <div className="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 flex items-center gap-3 text-sm">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl text-sm flex items-center gap-3">
             <AlertCircle className="h-5 w-5 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* STEP 1: Your Organisation */}
+        {/* STEP 1: Company Details */}
         {step === 1 && (
           <div className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
             <div>
               <span className="text-xs uppercase tracking-wider font-semibold text-emerald-600">Step 1 of 5</span>
-              <h2 className="text-xl font-bold font-serif mt-1">Tell us about your organisation</h2>
-              <p className="text-muted-foreground text-sm">Set up your company profile for workspace training access.</p>
+              <h2 className="text-xl font-bold font-serif mt-1">Company Profile</h2>
+              <p className="text-muted-foreground text-sm">Enter your registered business details.</p>
             </div>
 
             <div className="space-y-4">
@@ -241,7 +206,7 @@ export default function OnboardingPage() {
                 <Label htmlFor="companyName" className="font-semibold">Company / Organisation Name *</Label>
                 <Input
                   id="companyName"
-                  placeholder="e.g. Elevio Skills Ltd"
+                  placeholder="e.g. LUX Resorts & Hotels, Phoenix Beverages"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   className="rounded-xl h-11"
@@ -254,13 +219,13 @@ export default function OnboardingPage() {
                   id="employeeCount"
                   type="number"
                   min={1}
-                  max={500}
+                  max={10000}
                   value={employeeCount}
                   onChange={(e) => setEmployeeCount(parseInt(e.target.value, 10) || 1)}
                   className="rounded-xl h-11"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Used to automatically select your transparent pricing tier.
+                  Used to automatically determine your transparent pricing tier.
                 </p>
               </div>
             </div>
@@ -280,7 +245,7 @@ export default function OnboardingPage() {
             <div>
               <span className="text-xs uppercase tracking-wider font-semibold text-emerald-600">Step 2 of 5</span>
               <h2 className="text-xl font-bold font-serif mt-1">Review transparent subscription pricing</h2>
-              <p className="text-muted-foreground text-sm">Derived server-side from your organisation size.</p>
+              <p className="text-muted-foreground text-sm">Transparent pricing calculated for your organisation size.</p>
             </div>
 
             {/* Billing Interval Toggle */}
@@ -321,7 +286,7 @@ export default function OnboardingPage() {
             <div className="border rounded-xl p-5 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20 dark:to-transparent border-emerald-200 dark:border-emerald-800 space-y-3">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-300 font-mono text-xs">
-                  {selectedBandCode}
+                  {selectedPlanCode} · {selectedBandCode}
                 </Badge>
                 <span className="text-xs font-medium text-muted-foreground">{bandInfo.range}</span>
               </div>
@@ -337,7 +302,7 @@ export default function OnboardingPage() {
                 </span>
               )}
               <p className="text-xs text-muted-foreground">
-                Includes full access to 34 interactive ESG courses, workplace micro-challenges, core certification, and company compliance tracking.
+                Includes full access to interactive ESG courses, workplace micro-challenges, core certification, and company compliance tracking.
               </p>
             </div>
 
@@ -345,36 +310,35 @@ export default function OnboardingPage() {
               <Label className="font-semibold">Select Employee Band</Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { code: "UP_TO_25", label: "Up to 25 employees", price: "MUR 3,000/mo" },
-                  { code: "FROM_26_TO_50", label: "26–50 employees", price: "MUR 4,500/mo" },
-                  { code: "FROM_51_TO_80", label: "51–80 employees", price: "MUR 5,000/mo" },
-                  { code: "FROM_81_TO_120", label: "81–120 employees", price: "MUR 6,250/mo" },
-                  { code: "OVER_120", label: "120+ employees", price: "Tailored Quote" },
-                ].map((b) => (
-                  <button
-                    key={b.code}
-                    type="button"
-                    onClick={() => {
-                      setSelectedBandCode(b.code);
-                      if (b.code === "UP_TO_25") setEmployeeCount(15);
-                      else if (b.code === "FROM_26_TO_50") setEmployeeCount(35);
-                      else if (b.code === "FROM_51_TO_80") setEmployeeCount(65);
-                      else if (b.code === "FROM_81_TO_120") setEmployeeCount(100);
-                      else setEmployeeCount(150);
-                    }}
-                    className={`p-3.5 rounded-xl border text-left text-sm transition-all flex justify-between items-center ${
-                      selectedBandCode === b.code
-                        ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 font-semibold"
-                        : "hover:bg-muted/50 border-border"
-                    }`}
-                  >
-                    <div>
-                      <div className="font-medium">{b.label}</div>
-                      <div className="text-xs text-muted-foreground">{b.price}</div>
-                    </div>
-                    {selectedBandCode === b.code && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
-                  </button>
-                ))}
+                  { code: "UP_TO_25", label: "Up to 25 employees", defaultCount: 15 },
+                  { code: "FROM_26_TO_50", label: "26–50 employees", defaultCount: 35 },
+                  { code: "FROM_51_TO_80", label: "51–80 employees", defaultCount: 65 },
+                  { code: "FROM_81_TO_120", label: "81–120 employees", defaultCount: 100 },
+                  { code: "OVER_120", label: "121+ employees", defaultCount: 150 },
+                ].map((b) => {
+                  const pricing = getBandPrice(b.code, b.defaultCount, "MONTHLY");
+                  return (
+                    <button
+                      key={b.code}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBandCode(b.code);
+                        setEmployeeCount(b.defaultCount);
+                      }}
+                      className={`p-3.5 rounded-xl border text-left text-sm transition-all flex justify-between items-center ${
+                        selectedBandCode === b.code
+                          ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 font-semibold"
+                          : "hover:bg-muted/50 border-border"
+                      }`}
+                    >
+                      <div>
+                        <div className="font-medium">{b.label}</div>
+                        <div className="text-xs text-muted-foreground">{pricing.price}/mo</div>
+                      </div>
+                      {selectedBandCode === b.code && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -385,35 +349,6 @@ export default function OnboardingPage() {
               <Button onClick={handleNextStep} size="lg" className="bg-emerald-600 hover:bg-emerald-700 gap-2">
                 <span>Continue to Administrator Setup</span>
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2.5: Tailored Contact Path (>120 employees) */}
-        {step === 2.5 && (
-          <div className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm space-y-6 text-center">
-            <div className="h-12 w-12 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-2">
-              <HelpCircle className="h-6 w-6" />
-            </div>
-            <h2 className="text-2xl font-bold font-serif">Tailored Enterprise Quote Required</h2>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Organisations with more than 120 employees receive custom multi-department deployment, dedicated account management, and tailored ESG reporting integrations.
-            </p>
-            <div className="p-4 bg-muted/40 rounded-xl text-xs text-left max-w-md mx-auto space-y-2 border">
-              <div className="font-semibold text-foreground">Included in Enterprise Plans:</div>
-              <div>• Custom SSO & HRIS integration</div>
-              <div>• Custom sector-specific course modules</div>
-              <div>• Dedicated Mauritius ESG Advisor</div>
-            </div>
-            <div className="pt-4 flex flex-col sm:flex-row justify-center gap-3">
-              <Button onClick={() => setStep(2)} variant="outline">
-                Back to Band Selection
-              </Button>
-              <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700">
-                <a href="mailto:contact@recyclean.life?subject=ELEVIO%20Enterprise%20Quote%20Request">
-                  Contact Sales for Enterprise Quote
-                </a>
               </Button>
             </div>
           </div>

@@ -3,7 +3,7 @@ export const PER_EMPLOYEE_COST_MAP: Record<string, string> = {
   FROM_26_TO_50: "From MUR 90 per employee/month",
   FROM_51_TO_80: "From MUR 62.50 per employee/month",
   FROM_81_TO_120: "From MUR 52.08 per employee/month",
-  OVER_120: "Per-employee cost calculated with your quote",
+  OVER_120: "From MUR 30 per employee/month",
 };
 
 export const INDICATIVE_CALCULATION_NOTE =

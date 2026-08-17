@@ -14,7 +14,13 @@ import {
 import { eq, and, or, asc, desc } from "drizzle-orm";
 import { getCompanyAccess, CompanyAccess } from "../lib/access";
 import { resolveBandCodeFromEmployeeCount } from "../lib/ensureHybridSubscriptions";
-import { calculateSubscriptionPricing } from "../lib/subscriptionPricingService";
+import {
+  calculateSubscriptionPricing,
+  calculateEnterprisePricing,
+  calculateAuthoritativePricing,
+  BASE_PRICING_121_250,
+  ADDITIONAL_BLOCK_PRICE_MONTHLY,
+} from "../lib/subscriptionPricingService";
 
 const router = Router();
 
@@ -62,6 +68,13 @@ router.get("/public-plans", async (_req, res): Promise<void> => {
       features: features.filter(f => f.subscriptionPlanId === p.id && f.isEnabled).map(f => f.featureCode),
     })),
     employeeBands: bands,
+    enterprisePricingRules: {
+      baseCapacity: 250,
+      blockSize: 50,
+      baseMonthlyPrices: BASE_PRICING_121_250,
+      additionalBlockMonthlyPrices: ADDITIONAL_BLOCK_PRICE_MONTHLY,
+      annualDiscountPercentage: 10,
+    },
     prices: prices.map(pr => {
       const monthlyAmountNum = pr.monthlyAmount ? parseFloat(pr.monthlyAmount) : null;
       const yearlyCalc = calculateSubscriptionPricing(monthlyAmountNum, "YEARLY", pr.requiresTailoredQuote);
@@ -77,6 +90,29 @@ router.get("/public-plans", async (_req, res): Promise<void> => {
       };
     }),
   });
+});
+
+// 1b. POST /api/subscriptions/calculate (Authoritative real-time pricing calculator)
+router.post("/calculate", async (req, res): Promise<void> => {
+  try {
+    const { planCode, employeeCount, billingInterval, bandCode } = req.body;
+    if (!planCode) {
+      res.status(400).json({ error: "planCode is required" });
+      return;
+    }
+
+    const count = employeeCount !== undefined && employeeCount !== null ? parseInt(String(employeeCount), 10) : undefined;
+    const breakdown = calculateAuthoritativePricing({
+      planCode,
+      employeeCount: count,
+      bandCode,
+      billingInterval,
+    });
+
+    res.json(breakdown);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || "Failed to calculate pricing" });
+  }
 });
 
 // 2. GET /api/subscriptions/company (for company dashboard)
@@ -164,45 +200,48 @@ router.post("/onboard", async (req, res): Promise<void> => {
 
   const { planCode, employeeBandCode, companyName, industry, employeeCount, billingInterval } = req.body;
 
-  if (!planCode || !employeeBandCode) {
-    res.status(400).json({ error: "planCode and employeeBandCode are required" });
+  if (!planCode) {
+    res.status(400).json({ error: "planCode is required" });
     return;
   }
 
   // Server-side price resolution - NEVER trust browser submitted price
   const plan = await db.select().from(subscriptionPlansTable).where(eq(subscriptionPlansTable.code, planCode)).then(r => r[0]);
-  const band = await db.select().from(employeeBandsTable).where(eq(employeeBandsTable.code, employeeBandCode)).then(r => r[0]);
+  let band = employeeBandCode
+    ? await db.select().from(employeeBandsTable).where(eq(employeeBandsTable.code, employeeBandCode)).then(r => r[0])
+    : null;
 
-  if (!plan || !band) {
-    res.status(400).json({ error: "Invalid planCode or employeeBandCode" });
+  if (!plan) {
+    res.status(400).json({ error: "Invalid planCode" });
     return;
   }
 
-  const isTailored = band.requiresTailoredQuote || band.code === "OVER_120";
+  const rawCount = employeeCount !== undefined && employeeCount !== null ? parseInt(String(employeeCount), 10) : undefined;
+  const resolvedBandCode = employeeBandCode || (rawCount ? resolveBandCodeFromEmployeeCount(rawCount) : "UP_TO_25");
+  if (!band) {
+    band = await db.select().from(employeeBandsTable).where(eq(employeeBandsTable.code, resolvedBandCode)).then(r => r[0]);
+  }
 
-  const priceRecord = await db
-    .select()
-    .from(planPricesTable)
-    .where(
-      and(
-        eq(planPricesTable.subscriptionPlanId, plan.id),
-        eq(planPricesTable.employeeBandId, band.id),
-        eq(planPricesTable.isActive, true)
-      )
-    )
-    .limit(1)
-    .then(r => r[0]);
+  if (!band) {
+    res.status(400).json({ error: "Invalid employee band" });
+    return;
+  }
 
   let pricingBreakdown;
   try {
-    const monthlyBase = priceRecord?.monthlyAmount ? parseFloat(priceRecord.monthlyAmount) : null;
-    pricingBreakdown = calculateSubscriptionPricing(monthlyBase, billingInterval, isTailored || priceRecord?.requiresTailoredQuote || false);
+    pricingBreakdown = calculateAuthoritativePricing({
+      planCode: plan.code,
+      employeeCount: rawCount,
+      bandCode: band.code,
+      billingInterval,
+    });
   } catch (err: any) {
-    res.status(400).json({ error: err.message || "Invalid billing interval" });
+    res.status(400).json({ error: err.message || "Invalid pricing parameters" });
     return;
   }
 
   let companyId = access?.companyId;
+  const includedMaxSeats = pricingBreakdown.includedMaxEmployees;
 
   if (!companyId && companyName) {
     const slug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -212,12 +251,21 @@ router.post("/onboard", async (req, res): Promise<void> => {
         name: companyName,
         slug,
         industry: industry || null,
-        employeeCount: parseInt(employeeCount || "25", 10),
-        maxEmployees: band.maximumEmployees || 25,
+        employeeCount: rawCount || 25,
+        maxEmployees: includedMaxSeats,
         planId: plan.id,
       })
       .returning();
     companyId = newComp.id;
+  } else if (companyId) {
+    await db
+      .update(companiesTable)
+      .set({
+        maxEmployees: includedMaxSeats,
+        planId: plan.id,
+        employeeCount: rawCount || undefined,
+      })
+      .where(eq(companiesTable.id, companyId));
   }
 
   if (!companyId) {
@@ -225,7 +273,7 @@ router.post("/onboard", async (req, res): Promise<void> => {
     return;
   }
 
-  const initialStatus = isTailored ? "PENDING" : "PENDING_PAYMENT";
+  const initialStatus = "PENDING_PAYMENT";
 
   const [sub] = await db
     .insert(companySubscriptionsTable)
@@ -237,9 +285,9 @@ router.post("/onboard", async (req, res): Promise<void> => {
       currency: "MUR",
       billingInterval: pricingBreakdown.billingInterval,
       discountPercentage: String(pricingBreakdown.discountPercentage),
-      agreedMonthlyAmount: pricingBreakdown.monthlyBasePrice ? pricingBreakdown.monthlyBasePrice.toFixed(2) : null,
-      agreedYearlyAmount: pricingBreakdown.finalAmount && pricingBreakdown.billingInterval === "YEARLY" ? pricingBreakdown.finalAmount.toFixed(2) : null,
-      pricingSource: isTailored ? "TAILORED" : "STANDARD",
+      agreedMonthlyAmount: pricingBreakdown.finalMonthlyAmount.toFixed(2),
+      agreedYearlyAmount: pricingBreakdown.finalYearlyAmount.toFixed(2),
+      pricingSource: "STANDARD",
     })
     .onConflictDoUpdate({
       target: [companySubscriptionsTable.companyId],
@@ -249,9 +297,9 @@ router.post("/onboard", async (req, res): Promise<void> => {
         status: initialStatus,
         billingInterval: pricingBreakdown.billingInterval,
         discountPercentage: String(pricingBreakdown.discountPercentage),
-        agreedMonthlyAmount: pricingBreakdown.monthlyBasePrice ? pricingBreakdown.monthlyBasePrice.toFixed(2) : null,
-        agreedYearlyAmount: pricingBreakdown.finalAmount && pricingBreakdown.billingInterval === "YEARLY" ? pricingBreakdown.finalAmount.toFixed(2) : null,
-        pricingSource: isTailored ? "TAILORED" : "STANDARD",
+        agreedMonthlyAmount: pricingBreakdown.finalMonthlyAmount.toFixed(2),
+        agreedYearlyAmount: pricingBreakdown.finalYearlyAmount.toFixed(2),
+        pricingSource: "STANDARD",
         updatedAt: new Date(),
       },
     })
@@ -292,12 +340,10 @@ router.post("/onboard", async (req, res): Promise<void> => {
     plan,
     employeeBand: band,
     pricingBreakdown,
-    resolvedMonthlyAmountMUR: pricingBreakdown.monthlyBasePrice,
-    resolvedFinalAmountMUR: pricingBreakdown.finalAmount,
-    isTailoredQuote: isTailored,
-    message: isTailored 
-      ? "Your Elevio subscription request has been received. Our corporate team will contact you with a tailored proposal."
-      : "Subscription request received. Please complete payment to activate full access.",
+    resolvedMonthlyAmountMUR: pricingBreakdown.finalMonthlyAmount,
+    resolvedFinalAmountMUR: pricingBreakdown.finalAmountDue,
+    isTailoredQuote: false,
+    message: "Subscription request received. Please complete payment to activate full access.",
   });
 });
 
