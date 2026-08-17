@@ -281,9 +281,19 @@ export default function CompanyEmployees() {
                       <TableCell>{employee.department || "-"}</TableCell>
                       <TableCell>{employee.jobTitle || "-"}</TableCell>
                       <TableCell>
-                        <Badge variant={employee.role === "admin" ? "default" : "secondary"} className="capitalize">
-                          {employee.role}
-                        </Badge>
+                        {employee.role === "admin" ? (
+                          <Badge className="bg-emerald-800 hover:bg-emerald-900 text-white font-medium capitalize">
+                            Admin
+                          </Badge>
+                        ) : employee.role === "manager" ? (
+                          <Badge className="bg-purple-700 hover:bg-purple-800 text-white font-medium capitalize shadow-sm">
+                            Manager
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-medium capitalize">
+                            Employee
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={employee.invitationStatus === "accepted" ? "border-green-500/30 text-green-700" : ""}>
@@ -379,6 +389,100 @@ export default function CompanyEmployees() {
   );
 }
 
+export const PRESET_DEPARTMENTS: {
+  name: string;
+  jobTitles: string[];
+}[] = [
+  {
+    name: "Operations & Frontline",
+    jobTitles: [
+      "Operations Manager",
+      "Site Supervisor",
+      "Field Technician",
+      "Line Operator",
+      "Logistics & Stores Officer",
+      "Frontline Team Member",
+    ],
+  },
+  {
+    name: "Facilities & Maintenance",
+    jobTitles: [
+      "Facilities Manager",
+      "Maintenance Supervisor",
+      "Building Engineer",
+      "Health, Safety & Environment (HSE) Officer",
+      "Property Officer",
+    ],
+  },
+  {
+    name: "Procurement & Supply Chain",
+    jobTitles: [
+      "Procurement Manager",
+      "Purchasing Officer",
+      "Buyer / Sourcing Specialist",
+      "Supply Chain Coordinator",
+      "Inventory Controller",
+    ],
+  },
+  {
+    name: "Human Resources & Administration",
+    jobTitles: [
+      "HR Manager",
+      "HR Executive",
+      "Training & Development Coordinator",
+      "Office Administrator",
+      "People & Culture Lead",
+    ],
+  },
+  {
+    name: "Finance & Accounting",
+    jobTitles: [
+      "CFO / Finance Director",
+      "Finance Manager",
+      "Senior Accountant",
+      "Financial Analyst",
+      "Accounts & Audit Officer",
+    ],
+  },
+  {
+    name: "Sales & Marketing",
+    jobTitles: [
+      "Sales Manager",
+      "Marketing Executive",
+      "Business Development Manager",
+      "Brand & Communications Officer",
+      "Client Relationship Specialist",
+    ],
+  },
+  {
+    name: "Executive & Management",
+    jobTitles: [
+      "Managing Director / CEO",
+      "General Manager / COO",
+      "Department Head",
+      "Executive Director",
+    ],
+  },
+  {
+    name: "Sustainability & Green Team",
+    jobTitles: [
+      "Sustainability Champion",
+      "Green Team Lead",
+      "ESG Coordinator",
+      "Environmental Officer",
+    ],
+  },
+  {
+    name: "General",
+    jobTitles: [
+      "Team Member",
+      "Executive",
+      "Associate",
+      "Specialist",
+    ],
+  },
+];
+
 function EmployeeDialog({
   open,
   onOpenChange,
@@ -400,14 +504,59 @@ function EmployeeDialog({
 }) {
   const { toast } = useToast();
   const [values, setValues] = useState<EmployeeFormState>(initial);
+  const [isCustomDept, setIsCustomDept] = useState(false);
+  const [isCustomJobTitle, setIsCustomJobTitle] = useState(false);
 
   useEffect(() => {
-    if (open) setValues(initial);
-  }, [open]);
+    if (open) {
+      setValues(initial);
+      const isPresetDept = PRESET_DEPARTMENTS.some((d) => d.name === initial.department);
+      setIsCustomDept(Boolean(initial.department && !isPresetDept));
+      
+      const currentDeptObj = PRESET_DEPARTMENTS.find((d) => d.name === initial.department);
+      const isPresetJob = currentDeptObj?.jobTitles.includes(initial.jobTitle);
+      setIsCustomJobTitle(Boolean(initial.jobTitle && !isPresetJob));
+    }
+  }, [open, initial]);
 
   const setField = (field: keyof EmployeeFormState, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
   };
+
+  const handleDeptSelect = (dept: string) => {
+    if (dept === "__custom__") {
+      setIsCustomDept(true);
+      setField("department", "");
+    } else {
+      setIsCustomDept(false);
+      setField("department", dept);
+      // Auto-select first recommended title if job title was empty
+      const matched = PRESET_DEPARTMENTS.find((d) => d.name === dept);
+      if (matched && matched.jobTitles.length > 0 && (!values.jobTitle || isCustomJobTitle)) {
+        setIsCustomJobTitle(false);
+      }
+    }
+  };
+
+  const handleJobTitleSelect = (titleVal: string) => {
+    if (titleVal === "__custom__") {
+      setIsCustomJobTitle(true);
+      setField("jobTitle", "");
+    } else {
+      setIsCustomJobTitle(false);
+      setField("jobTitle", titleVal);
+      // Auto-suggest role if manager/director title is selected
+      const lower = titleVal.toLowerCase();
+      if ((lower.includes("manager") || lower.includes("lead") || lower.includes("head") || lower.includes("director") || lower.includes("cfo") || lower.includes("coo") || lower.includes("ceo")) && values.role === "employee") {
+        setField("role", "manager");
+      }
+    }
+  };
+
+  const currentDeptConfig = PRESET_DEPARTMENTS.find((d) => d.name === values.department);
+  const availableJobTitles = currentDeptConfig
+    ? currentDeptConfig.jobTitles
+    : Array.from(new Set(PRESET_DEPARTMENTS.flatMap((d) => d.jobTitles)));
 
   const submit = async () => {
     if (!values.name.trim() || !values.email.trim()) {
@@ -431,28 +580,102 @@ function EmployeeDialog({
       }}
     >
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-2">
-          <Input placeholder="Full name" value={values.name} onChange={(event) => setField("name", event.target.value)} />
-          <Input placeholder="Email address" value={values.email} onChange={(event) => setField("email", event.target.value)} />
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Input placeholder="Department" value={values.department} onChange={(event) => setField("department", event.target.value)} />
-            <Input placeholder="Job title" value={values.jobTitle} onChange={(event) => setField("jobTitle", event.target.value)} />
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Employee Details
+            </label>
+            <Input placeholder="Full name (e.g. Jean Dupont)" value={values.name} onChange={(event) => setField("name", event.target.value)} />
           </div>
-          <Select value={values.role} onValueChange={(value) => setField("role", value)}>
-            <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="employee">Employee</SelectItem>
-              <SelectItem value="manager">Manager</SelectItem>
-              <SelectItem value="admin">Company Admin</SelectItem>
-            </SelectContent>
-          </Select>
+
+          <div className="space-y-1">
+            <Input placeholder="Corporate email (e.g. j.dupont@company.mu)" value={values.email} onChange={(event) => setField("email", event.target.value)} />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            {/* Department Preset / Custom */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground">Department</label>
+              {!isCustomDept ? (
+                <Select value={values.department || undefined} onValueChange={handleDeptSelect}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRESET_DEPARTMENTS.map((dept) => (
+                      <SelectItem key={dept.name} value={dept.name}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__custom__">✏️ Custom Department...</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex gap-1">
+                  <Input
+                    placeholder="Enter Department"
+                    value={values.department}
+                    onChange={(e) => setField("department", e.target.value)}
+                    autoFocus
+                  />
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setIsCustomDept(false)} className="text-xs shrink-0">
+                    Presets
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Job Title Preset / Custom */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground">Job Title</label>
+              {!isCustomJobTitle ? (
+                <Select value={values.jobTitle || undefined} onValueChange={handleJobTitleSelect}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Job Title" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableJobTitles.map((titleItem) => (
+                      <SelectItem key={titleItem} value={titleItem}>
+                        {titleItem}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__custom__">✏️ Custom Job Title...</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex gap-1">
+                  <Input
+                    placeholder="Enter Job Title"
+                    value={values.jobTitle}
+                    onChange={(e) => setField("jobTitle", e.target.value)}
+                    autoFocus
+                  />
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setIsCustomJobTitle(false)} className="text-xs shrink-0">
+                    Presets
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground">Account Role</label>
+            <Select value={values.role} onValueChange={(value) => setField("role", value)}>
+              <SelectTrigger><SelectValue placeholder="Select Role" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="employee">Employee (Learner)</SelectItem>
+                <SelectItem value="manager">Manager (Team Progress & Recommendations)</SelectItem>
+                <SelectItem value="admin">Company Admin (Full LMS Access)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <DialogFooter>
-          <Button onClick={submit} disabled={pending}>
+          <Button onClick={submit} disabled={pending} className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium">
             {submitLabel}
           </Button>
         </DialogFooter>
