@@ -44,9 +44,13 @@ describe("Sprint 12F — Authenticated Internal Home Page & Navigation Closure A
       assert.equal(navbarContent.includes('focus-visible:ring-2'), true, "Logo must have visible focus state");
     });
 
-    test("Authenticated navigation includes Home as the first navigation item", () => {
+    test("Authenticated navigation includes Home as the very first navigation item in the top bar", () => {
       const navbarContent = fs.readFileSync(path.join(ecolearnDir, "components/layout/Navbar.tsx"), "utf-8");
-      assert.equal(navbarContent.includes('{ href: "/home", label: t("nav.home") || "Home", icon: HomeIcon }'), true, "Home nav link must be present in authLinks");
+      assert.equal(navbarContent.includes('{ href: "/home", label: t("nav.home") || "Home", icon: HomeIcon }'), true, "Home nav link must be present in displayedLinks");
+      const displayedLinksIdx = navbarContent.indexOf("const displayedLinks = isSignedIn");
+      const homeLinkIdx = navbarContent.indexOf('{ href: "/home"', displayedLinksIdx);
+      const coursesLinkIdx = navbarContent.indexOf('{ href: "/courses"', displayedLinksIdx);
+      assert.equal(homeLinkIdx < coursesLinkIdx, true, "Home link must come before Courses link for authenticated users");
     });
 
     test("Translation dictionaries contain nav.home", () => {

@@ -30,16 +30,12 @@ export function Navbar() {
   const showReviewLink = isCompanyAdmin(user) || isPlatformAdmin(user);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navLinks = [
-    { href: "/courses", label: t("nav.courses"), icon: BookOpen },
-    { href: "/challenges", label: t("nav.challenges"), icon: Target },
-    { href: "/pricing", label: t("nav.pricing"), icon: Building2 },
-  ];
-
-  const authLinks = isSignedIn
+  const displayedLinks = isSignedIn
     ? [
         { href: "/home", label: t("nav.home") || "Home", icon: HomeIcon },
         { href: "/dashboard", label: t("nav.my_learning"), icon: UserCircle },
+        { href: "/courses", label: t("nav.courses"), icon: BookOpen },
+        { href: "/challenges", label: t("nav.challenges"), icon: Target },
         { href: "/company", label: t("nav.company"), icon: Building2 },
         ...(showReviewLink
           ? [{ href: "/company/challenges-review", label: t("nav.employee_reviews"), icon: ShieldCheck }]
@@ -51,7 +47,11 @@ export function Navbar() {
           ? [{ href: "/platform-admin", label: t("nav.platform_admin"), icon: ShieldCheck }]
           : []),
       ]
-    : [];
+    : [
+        { href: "/courses", label: t("nav.courses"), icon: BookOpen },
+        { href: "/challenges", label: t("nav.challenges"), icon: Target },
+        { href: "/pricing", label: t("nav.pricing"), icon: Building2 },
+      ];
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -80,26 +80,13 @@ export function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex md:items-center md:gap-4 lg:gap-6">
           <div className="flex items-center gap-4 lg:gap-6 text-sm font-medium">
-            {navLinks.map((link) => (
+            {displayedLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
                   "transition-colors hover:text-primary flex items-center gap-1.5",
-                  location === link.href ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-            
-            {authLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "transition-colors hover:text-primary flex items-center gap-1.5",
-                  location === link.href ? "text-primary" : "text-muted-foreground"
+                  location === link.href ? "text-primary font-semibold" : "text-muted-foreground"
                 )}
               >
                 {link.label}
@@ -141,28 +128,13 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background px-4 py-4">
           <div className="flex flex-col space-y-4">
-            {navLinks.map((link) => (
+            {displayedLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
                   "flex items-center gap-2 text-sm font-medium p-2 rounded-md",
-                  location === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground"
-                )}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Link>
-            ))}
-            
-            {authLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "flex items-center gap-2 text-sm font-medium p-2 rounded-md",
-                  location === link.href ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                  location === link.href ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground"
                 )}
                 onClick={() => setMobileMenuOpen(false)}
               >
