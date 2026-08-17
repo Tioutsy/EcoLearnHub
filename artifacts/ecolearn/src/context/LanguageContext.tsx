@@ -4,7 +4,7 @@ const englishTranslations: Record<string, string> = {
   // Navigation
   "nav.courses": "Courses",
   "nav.challenges": "Challenges",
-  "nav.mauritius_resources": "Mauritius Rules & Resources",
+  // "nav.mauritius_resources": "Mauritius Rules & Resources", // Intentionally removed — product simplification.
   // "nav.impact": "Impact", // Intentionally removed — Sprint product simplification.
   "nav.pricing": "Pricing",
   "nav.my_learning": "My Learning",

@@ -21,7 +21,7 @@ import challengesRouter from "./challenges";
 import complianceRouter from "./compliance";
 import leadsRouter from "./leads";
 import adminRouter from "./admin";
-import blogRouter from "./blog";
+// import blogRouter from "./blog"; // Intentionally disabled — Mauritius Rules & Resources unmounted for product simplification.
 import recyclingRouter from "./recycling";
 import platformAdminRouter from "./platformAdmin";
 import platformAdminHealthRouter from "./platformAdminHealth";
@@ -78,6 +78,6 @@ router.use("/platform-admin", platformAdminHealthRouter);
 router.use("/platform-admin/pilots", pilotsRouter);
 router.use("/pilots", pilotsRouter);
 router.use("/manager/training", managerTrainingRouter);
-router.use(blogRouter);
+// blogRouter intentionally unmounted for product simplification. Preserved in routes/blog.ts.
 
 export default router;

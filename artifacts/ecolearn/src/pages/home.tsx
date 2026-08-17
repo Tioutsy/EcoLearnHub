@@ -209,8 +209,8 @@ export default function Home() {
                 ))}
               </ul>
               <Button asChild size="lg" className="h-12 px-8 text-base">
-                <Link href="/mauritius-rules-resources">
-                  See what makes us local <ArrowRight className="ml-2 h-4 w-4" />
+                <Link href="/courses">
+                  Explore Course Catalog <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>

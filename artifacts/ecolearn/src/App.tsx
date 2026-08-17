@@ -28,11 +28,11 @@ import Quiz from "@/pages/quiz";
 import Dashboard from "@/pages/dashboard";
 // import ImpactDashboard from "@/pages/impact"; // Intentionally disabled — Sprint product simplification. Preserved for future premium feature recovery.
 import Pricing from "@/pages/pricing";
-import InsightsLanding from "@/pages/Insights/index";
-import InsightsArticlesList from "@/pages/Insights/articles";
-import InsightsArticleDetail from "@/pages/Insights/article-detail";
-import MauritiusResourcesList from "@/pages/Insights/mauritius-resources";
-import MauritiusResourceDetail from "@/pages/Insights/mauritius-resource-detail";
+// import InsightsLanding from "@/pages/Insights/index";
+// import InsightsArticlesList from "@/pages/Insights/articles";
+// import InsightsArticleDetail from "@/pages/Insights/article-detail";
+// import MauritiusResourcesList from "@/pages/Insights/mauritius-resources";
+// import MauritiusResourceDetail from "@/pages/Insights/mauritius-resource-detail";
 import Certificates from "@/pages/certificates";
 import VerifyCertificate from "@/pages/certificates/verify";
 import CompanyDashboard from "@/pages/company";
@@ -365,32 +365,17 @@ function ClerkProviderWithRoutes() {
             {/* /impact — Intentionally disabled. Redirect authenticated users to dashboard. */}
             <Route path="/impact"><Redirect to="/dashboard" /></Route>
             <Route path="/pricing" component={Pricing} />
-            <Route path="/made-for-mauritius">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/blog">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/blog/:slug">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/insights">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/insights/articles">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/insights/articles/:slug">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/insights/mauritius-resources">
-              <Redirect to="/mauritius-rules-resources" />
-            </Route>
-            <Route path="/insights/mauritius-resources/:slug">
-              {(params) => <Redirect to={`/mauritius-rules-resources/${params.slug}`} />}
-            </Route>
-            <Route path="/mauritius-rules-resources" component={MauritiusResourcesList} />
-            <Route path="/mauritius-rules-resources/:slug" component={MauritiusResourceDetail} />
+            {/* /mauritius-rules-resources & legacy content routes — Intentionally disabled. Redirect to /courses */}
+            <Route path="/made-for-mauritius"><Redirect to="/courses" /></Route>
+            <Route path="/blog"><Redirect to="/courses" /></Route>
+            <Route path="/blog/:slug"><Redirect to="/courses" /></Route>
+            <Route path="/insights"><Redirect to="/courses" /></Route>
+            <Route path="/insights/articles"><Redirect to="/courses" /></Route>
+            <Route path="/insights/articles/:slug"><Redirect to="/courses" /></Route>
+            <Route path="/insights/mauritius-resources"><Redirect to="/courses" /></Route>
+            <Route path="/insights/mauritius-resources/:slug"><Redirect to="/courses" /></Route>
+            <Route path="/mauritius-rules-resources"><Redirect to="/courses" /></Route>
+            <Route path="/mauritius-rules-resources/:slug"><Redirect to="/courses" /></Route>
             <Route path="/onboarding" component={OnboardingPage} />
             <Route path="/company">{() => <RequireCompanyAdmin><CompanyDashboard /></RequireCompanyAdmin>}</Route>
             <Route path="/company/subscribe">{() => <RequireCompanyAdmin><Subscribe /></RequireCompanyAdmin>}</Route>

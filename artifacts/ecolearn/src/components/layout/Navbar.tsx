@@ -21,7 +21,6 @@ export function Navbar() {
   const navLinks = [
     { href: "/courses", label: t("nav.courses"), icon: BookOpen },
     { href: "/challenges", label: t("nav.challenges"), icon: Target },
-    { href: "/mauritius-rules-resources", label: t("nav.mauritius_resources"), icon: Leaf },
     { href: "/pricing", label: t("nav.pricing"), icon: Building2 },
   ];
 
