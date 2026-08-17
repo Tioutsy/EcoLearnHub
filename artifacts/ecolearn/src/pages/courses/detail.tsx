@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { useGetCourse, useCreateEnrollment } from "@workspace/api-client-react";
+import { useGetCourse, useCreateEnrollment, useListEnrollments } from "@workspace/api-client-react";
 import { useParams, useLocation } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -17,17 +17,24 @@ export default function CourseDetail() {
   
   const courseId = parseInt(id || "0", 10);
   const { data: course, isLoading } = useGetCourse(courseId, { query: { enabled: !!courseId, queryKey: ['course', courseId] } });
+  const { data: enrollments } = useListEnrollments();
   
+  const existingEnrollment = enrollments?.find((e: any) => e.courseId === courseId);
   const enrollMutation = useCreateEnrollment();
 
   const hasPrerequisites = course?.prerequisites && course.prerequisites.length > 0;
   const prereqsCompleted = course?.prerequisites?.filter((p: any) => p.completed).length || 0;
   const prereqsTotal = course?.prerequisites?.length || 0;
-  const isLocked = hasPrerequisites && prereqsCompleted < prereqsTotal;
+  const isLocked = !existingEnrollment && hasPrerequisites && prereqsCompleted < prereqsTotal;
 
   const handleEnroll = () => {
     if (!isSignedIn) {
       setLocation("/sign-in");
+      return;
+    }
+
+    if (existingEnrollment) {
+      setLocation(`/learn/${existingEnrollment.id}`);
       return;
     }
 
@@ -36,16 +43,15 @@ export default function CourseDetail() {
       {
         onSuccess: (enrollment) => {
           toast({
-            title: "Successfully enrolled",
-            description: "Welcome to the course! Redirecting to player...",
+            title: "Course Ready",
+            description: "Opening course player...",
           });
           setLocation(`/learn/${enrollment.id}`);
         },
-        onError: () => {
+        onError: (err: any) => {
           toast({
-            title: "Enrollment failed",
-            description: "You might already be enrolled in this course.",
-            variant: "destructive",
+            title: "Course Access",
+            description: err?.message || "Opening your dashboard...",
           });
           setLocation("/dashboard");
         }
@@ -187,6 +193,28 @@ export default function CourseDetail() {
                   >
                     <Link href="/courses">Continue Prerequisites</Link>
                   </Button>
+                </div>
+              ) : existingEnrollment ? (
+                <div className="p-6 space-y-3">
+                  <Button 
+                    size="lg" 
+                    className="w-full h-12 text-base font-semibold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                    asChild
+                  >
+                    <Link href={`/learn/${existingEnrollment.id}`}>
+                      <PlayCircle className="h-5 w-5" />
+                      {existingEnrollment.status === "completed"
+                        ? "Review Course"
+                        : (existingEnrollment.progressPct ?? 0) > 0
+                        ? "Continue Course"
+                        : "Start Course"}
+                    </Link>
+                  </Button>
+                  <p className="text-center text-xs text-muted-foreground">
+                    {existingEnrollment.status === "completed"
+                      ? "✓ Course Completed"
+                      : `${existingEnrollment.progressPct ?? 0}% completed`}
+                  </p>
                 </div>
               ) : (
                 <div className="p-6">

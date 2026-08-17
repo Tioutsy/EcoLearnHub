@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { enrollmentsTable, coursesTable, lessonsTable } from "@workspace/db";
-import { eq, and, or, inArray } from "drizzle-orm";
+import { enrollmentsTable, coursesTable, lessonsTable, courseAssignmentsTable } from "@workspace/db";
+import { eq, and, or, inArray, sql } from "drizzle-orm";
 import { CreateEnrollmentBody } from "@workspace/api-zod";
 import { getCompanyAccess, sendHttpError } from "../lib/access";
 import { getAssignmentStatus } from "../lib/lms";
@@ -12,11 +12,58 @@ router.get("/", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
     const clauses = [eq(enrollmentsTable.userId, access.userId)];
+
+    if (access.email) {
+      clauses.push(sql`lower(${enrollmentsTable.userId}) = ${access.email.toLowerCase()}`);
+    }
+
     if (access.employee) {
       clauses.push(eq(enrollmentsTable.employeeId, access.employee.id));
-      clauses.push(inArray(enrollmentsTable.userId, [access.employee.email]));
-    } else if (access.email) {
-      clauses.push(eq(enrollmentsTable.userId, access.email));
+      if (access.employee.email) {
+        clauses.push(sql`lower(${enrollmentsTable.userId}) = ${access.employee.email.toLowerCase()}`);
+      }
+
+      // Sync any active course_assignments into enrollmentsTable idempotently
+      try {
+        const assignments = await db
+          .select()
+          .from(courseAssignmentsTable)
+          .where(eq(courseAssignmentsTable.employeeId, access.employee.id));
+
+        for (const assignment of assignments) {
+          const [existing] = await db
+            .select({ id: enrollmentsTable.id })
+            .from(enrollmentsTable)
+            .where(
+              and(
+                eq(enrollmentsTable.courseId, assignment.courseId),
+                or(
+                  eq(enrollmentsTable.userId, access.userId),
+                  eq(enrollmentsTable.employeeId, access.employee.id),
+                )
+              )
+            )
+            .limit(1);
+
+          if (!existing) {
+            await db
+              .insert(enrollmentsTable)
+              .values({
+                userId: access.userId,
+                companyId: access.employee.companyId,
+                employeeId: access.employee.id,
+                courseId: assignment.courseId,
+                assignmentSource: "company",
+                dueDate: assignment.dueDate,
+                status: assignment.completedAt ? "completed" : "active",
+                completedAt: assignment.completedAt,
+                progressPct: assignment.completedAt ? 100 : 0,
+              });
+          }
+        }
+      } catch (syncErr) {
+        req.log?.warn({ err: syncErr }, "Non-fatal: Failed to sync course_assignments to enrollments");
+      }
     }
 
     const enrollments = await db
@@ -64,9 +111,14 @@ router.post("/", async (req, res): Promise<void> => {
     }
 
     const existingClauses = [eq(enrollmentsTable.userId, access.userId)];
+    if (access.email) {
+      existingClauses.push(sql`lower(${enrollmentsTable.userId}) = ${access.email.toLowerCase()}`);
+    }
     if (access.employee) {
       existingClauses.push(eq(enrollmentsTable.employeeId, access.employee.id));
-      existingClauses.push(eq(enrollmentsTable.userId, access.employee.email));
+      if (access.employee.email) {
+        existingClauses.push(sql`lower(${enrollmentsTable.userId}) = ${access.employee.email.toLowerCase()}`);
+      }
     }
 
     const [course] = await db
@@ -119,7 +171,19 @@ router.post("/", async (req, res): Promise<void> => {
     }
 
     const existing = await db
-      .select()
+      .select({
+        id: enrollmentsTable.id,
+        userId: enrollmentsTable.userId,
+        companyId: enrollmentsTable.companyId,
+        employeeId: enrollmentsTable.employeeId,
+        courseId: enrollmentsTable.courseId,
+        status: enrollmentsTable.status,
+        progressPct: enrollmentsTable.progressPct,
+        dueDate: enrollmentsTable.dueDate,
+        lastAccessedAt: enrollmentsTable.lastAccessedAt,
+        completedAt: enrollmentsTable.completedAt,
+        createdAt: enrollmentsTable.createdAt,
+      })
       .from(enrollmentsTable)
       .where(
         and(
@@ -129,7 +193,23 @@ router.post("/", async (req, res): Promise<void> => {
       );
 
     if (existing.length > 0) {
-      res.status(400).json({ error: "Already enrolled in this course" });
+      const existingEnrollment = existing[0]!;
+      // Link to current session credentials if not already linked
+      if (existingEnrollment.userId !== access.userId || (access.employee && !existingEnrollment.employeeId)) {
+        await db
+          .update(enrollmentsTable)
+          .set({
+            userId: access.userId,
+            employeeId: access.employee?.id ?? existingEnrollment.employeeId,
+            companyId: access.employee?.companyId ?? access.companyId ?? existingEnrollment.companyId,
+          })
+          .where(eq(enrollmentsTable.id, existingEnrollment.id));
+      }
+
+      res.status(200).json({
+        ...existingEnrollment,
+        assignmentStatus: getAssignmentStatus(existingEnrollment),
+      });
       return;
     }
 
