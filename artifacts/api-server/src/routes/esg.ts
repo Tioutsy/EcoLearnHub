@@ -282,7 +282,6 @@ router.get("/report", async (req, res): Promise<void> => {
     }
 
     const score = computeScore(a);
-    const impact = computeImpact(a);
     const departments = await getDepartmentBreakdown(a.company.id);
 
     const reportData: EsgReportData = {
@@ -307,7 +306,6 @@ router.get("/report", async (req, res): Promise<void> => {
         pointsToNextLevel: score.pointsToNextLevel,
         components: score.components,
       },
-      impact,
       departments,
     };
 

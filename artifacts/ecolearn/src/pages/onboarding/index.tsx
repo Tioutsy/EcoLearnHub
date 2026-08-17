@@ -241,7 +241,7 @@ export default function OnboardingPage() {
                 <Label htmlFor="companyName" className="font-semibold">Company / Organisation Name *</Label>
                 <Input
                   id="companyName"
-                  placeholder="e.g. EcoLearn Mauritius Ltd"
+                  placeholder="e.g. Elevio Skills Ltd"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   className="rounded-xl h-11"

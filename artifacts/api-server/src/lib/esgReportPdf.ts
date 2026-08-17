@@ -25,16 +25,6 @@ export interface EsgReportData {
     pointsToNextLevel: number;
     components: { label: string; value: number }[];
   };
-  impact: {
-    co2EquivalentKg: number;
-    treesEquivalent: number;
-    wasteDivertedKg: number;
-    recyclingParticipation: number;
-    plasticReductionScore: number;
-    waterSavingsScore: number;
-    carbonAwarenessScore: number;
-    sustainabilityEngagementScore: number;
-  };
   departments: {
     department: string;
     employees: number;
@@ -97,7 +87,7 @@ class ReportBuilder {
   }
 
   drawFooter() {
-    const text = "Elevio  |  Learn. Apply. Improve.";
+    const text = "Elevio Skills  |  Learn. Apply. Improve.";
     this.page.drawLine({
       start: { x: MARGIN, y: MARGIN + 24 },
       end: { x: PAGE_W - MARGIN, y: MARGIN + 24 },
@@ -291,6 +281,97 @@ class ReportBuilder {
     this.y -= 6;
   }
 
+  glossaryTable(items: { term: string; category: string; definition: string }[]) {
+    const termW = 150;
+    const defW = CONTENT_W - termW - 16;
+    
+    // Table Header
+    this.ensure(28);
+    this.page.drawRectangle({
+      x: MARGIN,
+      y: this.y - 14,
+      width: CONTENT_W,
+      height: 22,
+      color: GREEN,
+    });
+    this.page.drawText("TERM & PILLAR", {
+      x: MARGIN + 8,
+      y: this.y - 8,
+      size: 9,
+      font: this.fonts.bold,
+      color: WHITE,
+    });
+    this.page.drawText("DEFINITION & REPORTING APPLICATION", {
+      x: MARGIN + termW + 8,
+      y: this.y - 8,
+      size: 9,
+      font: this.fonts.bold,
+      color: WHITE,
+    });
+    this.y -= 26;
+
+    for (let idx = 0; idx < items.length; idx++) {
+      const item = items[idx];
+      const words = item.definition.split(" ");
+      let line = "";
+      const lines: string[] = [];
+      for (const word of words) {
+        const test = line ? `${line} ${word}` : word;
+        if (this.fonts.regular.widthOfTextAtSize(test, 8) > defW) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+
+      const rowHeight = Math.max(26, lines.length * 10 + 14);
+      this.ensure(rowHeight + 2);
+
+      const yTop = this.y;
+      if (idx % 2 === 1) {
+        this.page.drawRectangle({
+          x: MARGIN,
+          y: yTop - rowHeight + 14,
+          width: CONTENT_W,
+          height: rowHeight,
+          color: LIGHT,
+        });
+      }
+
+      this.page.drawText(item.term, {
+        x: MARGIN + 8,
+        y: yTop,
+        size: 8.5,
+        font: this.fonts.bold,
+        color: DARK,
+      });
+      this.page.drawText(item.category, {
+        x: MARGIN + 8,
+        y: yTop - 11,
+        size: 7,
+        font: this.fonts.regular,
+        color: MUTED,
+      });
+
+      let lineY = yTop;
+      for (const l of lines) {
+        this.page.drawText(l, {
+          x: MARGIN + termW + 8,
+          y: lineY,
+          size: 8,
+          font: this.fonts.regular,
+          color: DARK,
+        });
+        lineY -= 10;
+      }
+
+      this.y = yTop - rowHeight;
+    }
+    this.y -= 6;
+  }
+
   drawCoverHeader(data: EsgReportData) {
     const bandH = 96;
     const top = PAGE_H - MARGIN;
@@ -309,24 +390,24 @@ class ReportBuilder {
       font: this.fonts.bold,
       color: GREEN,
     });
-    this.page.drawText("Elevio", {
+    this.page.drawText("Elevio Skills", {
       x: MARGIN + 60,
       y: top - 34,
       size: 16,
       font: this.fonts.bold,
       color: WHITE,
     });
-    this.page.drawText("Corporate Sustainability & ESG Training", {
+    this.page.drawText("Corporate Sustainability & ESG Workforce Capability", {
       x: MARGIN + 60,
       y: top - 50,
       size: 9,
       font: this.fonts.regular,
       color: GREEN_SOFT,
     });
-    this.page.drawText("ESG TRAINING REPORT", {
+    this.page.drawText("ESG TRAINING & HUMAN CAPITAL REPORT", {
       x: MARGIN + 16,
       y: top - 80,
-      size: 18,
+      size: 17,
       font: this.fonts.bold,
       color: WHITE,
     });
@@ -341,13 +422,13 @@ class ReportBuilder {
       color: DARK,
     });
     this.y -= 18;
-    const meta = `${data.company.industry ?? "Industry not specified"}  -  Report generated ${formatDate(
+    const meta = `${data.company.industry ?? "Corporate Sustainability"}  •  Report Generated: ${formatDate(
       data.generatedAt,
-    )}`;
+    )}  •  Reporting Boundary: Active Workforce`;
     this.page.drawText(meta, {
       x: MARGIN,
       y: this.y,
-      size: 10,
+      size: 9.5,
       font: this.fonts.regular,
       color: MUTED,
     });
@@ -368,13 +449,13 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
   b.drawCoverHeader(data);
 
   // Executive summary
-  b.sectionHeading("Executive Summary");
+  b.sectionHeading("1. Executive Summary & Reporting Scope");
   b.paragraph(
-    `This report summarises ${data.company.name}'s environmental and sustainability training performance, ` +
-      `measured through the Elevio platform. It covers workforce participation, course completion, assessment ` +
-      `outcomes, certifications earned and the estimated environmental impact of staff training. It is intended ` +
-      `to be shared with auditors, clients, investors, ESG consultants and certification bodies as supporting ` +
-      `evidence of the organisation's commitment to sustainability capability building.`,
+    `This report provides a structured account of ${data.company.name}'s sustainability training performance, ` +
+      `competency development, and workforce engagement on the Elevio Skills platform. Aligned with global ESG reporting ` +
+      `standards (GRI 404-1 Human Capital, UN Sustainable Development Goals, and CSRD/ESRS S1), this document provides ` +
+      `verifiable evidence of capability building across all departments, supporting internal audits, investor disclosures, ` +
+      `and corporate sustainability reporting.`,
   );
 
   // Sustainability score highlight
@@ -391,7 +472,7 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
       borderColor: GREEN,
       borderWidth: 1,
     });
-    b.page.drawText("Sustainability Score", {
+    b.page.drawText("Elevio Sustainability Score", {
       x: MARGIN + 18,
       y: top - 26,
       size: 11,
@@ -429,8 +510,8 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
       color: WHITE,
     });
     const nextText = data.score.nextLevel
-      ? `${data.score.pointsToNextLevel} points to ${data.score.nextLevel}`
-      : "Highest level achieved";
+      ? `${data.score.pointsToNextLevel} points to reach ${data.score.nextLevel} level`
+      : "Highest capability level achieved";
     b.page.drawText(nextText, {
       x: MARGIN + 150,
       y: top - 60,
@@ -442,70 +523,125 @@ export async function generateEsgReportPdf(data: EsgReportData): Promise<Uint8Ar
   }
 
   // Participation & completion
-  b.sectionHeading("Workforce Participation & Completion");
+  b.sectionHeading("2. Workforce Participation & Social Metrics (GRI 404-1)");
   const p = data.participation;
   b.statGrid([
-    { label: "Total employees", value: formatNumber(p.totalEmployees) },
+    { label: "Total employees", value: formatNumber(p.totalEmployees), sub: "Reporting boundary" },
     { label: "Active learners", value: formatNumber(p.activeEmployees), sub: `${p.engagementRate}% engaged` },
     { label: "Training adoption", value: `${p.adoptionRate}%` },
     { label: "Courses assigned", value: formatNumber(p.coursesAssigned) },
     { label: "Courses completed", value: formatNumber(p.coursesCompleted) },
-    { label: "Completion rate", value: `${p.completionRate}%` },
-    { label: "Avg assessment", value: `${p.avgScore}%` },
-    { label: "Learning hours", value: formatNumber(p.learningHours) },
+    { label: "Training completion rate", value: `${p.completionRate}%` },
+    { label: "Avg assessment mark", value: `${p.avgScore}%` },
+    { label: "Total learning hours", value: formatNumber(p.learningHours) },
     { label: "Certificates earned", value: formatNumber(p.certificatesIssued) },
   ]);
 
-  // ESG environmental impact
-  b.sectionHeading("Estimated Environmental Impact");
+  // Score components
+  b.sectionHeading("3. Sustainability Score Breakdown");
   b.paragraph(
-    "Environmental impact is estimated from completed training using transparent, conservative factors " +
-      "(30 kg CO2 avoided and 15 kg waste diverted per completed course per year). Figures are indicative of " +
-      "behaviour change enabled by training, not direct measured emissions.",
+    "The Sustainability Score is a weighted composite measuring verified capability building across four material dimensions:",
     9,
   );
-  const im = data.impact;
-  b.statGrid([
-    { label: "CO2 avoided / year", value: `${formatNumber(im.co2EquivalentKg)} kg` },
-    { label: "Equivalent trees", value: formatNumber(im.treesEquivalent) },
-    { label: "Waste diverted / year", value: `${formatNumber(im.wasteDivertedKg)} kg` },
-  ]);
-  b.y -= 4;
-  b.barRow("Carbon awareness", im.carbonAwarenessScore);
-  b.barRow("Plastic reduction", im.plasticReductionScore);
-  b.barRow("Water savings", im.waterSavingsScore);
-  b.barRow("Recycling participation", im.recyclingParticipation);
-  b.barRow("Sustainability engagement", im.sustainabilityEngagementScore);
-
-  // Score components
-  b.sectionHeading("Sustainability Score Breakdown");
   for (const c of data.score.components) {
     b.barRow(c.label, c.value);
   }
 
   // Department breakdown
   if (data.departments.length > 0) {
-    b.sectionHeading("Department Breakdown");
+    b.sectionHeading("4. Departmental Participation & Value Chain Matrix");
     b.table(
-      ["Department", "Employees", "Participation", "Completion"],
+      ["Department", "Headcount", "Participation Rate", "Completion Rate"],
       data.departments.map((d) => [
         d.department,
         formatNumber(d.employees),
         `${d.participationRate}%`,
         `${d.completionRate}%`,
       ]),
-      [CONTENT_W - 270, 90, 100, 80],
+      [CONTENT_W - 280, 80, 100, 100],
     );
   }
 
-  // Methodology footer note
-  b.sectionHeading("Methodology & Assurance");
+  // Material Topics Covered
+  b.sectionHeading("5. Material ESG Topics & Competency Coverage");
   b.paragraph(
-    "All metrics are derived from real training activity recorded on the Elevio platform for the organisation " +
-      "named above. Completion, adoption, assessment and engagement rates are calculated from employee records. " +
-      "The Sustainability Score is a weighted composite (completion 30%, adoption 25%, assessment 25%, engagement 20%). " +
-      "Issued certificates can be independently verified via the QR code printed on each certificate.",
+    "Workforce training curricula on Elevio map directly to the organisation's material sustainability topics:",
     9,
+  );
+  b.table(
+    ["ESG Pillar", "Material Topic", "LMS Competency Focus", "Framework Alignment"],
+    [
+      ["Environmental (E)", "Energy & Climate", "Scope 1, 2, 3 awareness, workplace energy efficiency, renewables", "GRI 302, SDG 7 & 13"],
+      ["Environmental (E)", "Waste & Circularity", "Waste hierarchy (prevention, reuse, recycling), plastic reduction", "GRI 306, SDG 12"],
+      ["Environmental (E)", "Water Stewardship", "Water withdrawal, conservation practices, facility monitoring", "GRI 303, SDG 6"],
+      ["Social (S)", "Human Capital", "Training completion rates, DEI, health and safety, employee engagement", "GRI 404, SDG 4 & 8"],
+      ["Governance (G)", "Ethics & Anti-Greenwashing", "Code of conduct, compliance, verifiable claims, risk management", "GRI 205, CSRD ESRS G1"],
+    ],
+    [100, 110, 190, 99],
+  );
+
+  // ESG Glossary Reference
+  b.sectionHeading("6. ESG Reporting Glossary & Definitions");
+  b.paragraph(
+    "Reference glossary of core ESG terms, boundaries, and definitions applicable to this training report and corporate disclosures:",
+    8.5,
+  );
+  b.glossaryTable([
+    {
+      term: "ESG",
+      category: "Core ESG",
+      definition: "Environmental, Social and Governance: a framework used to understand how an organisation manages sustainability-related risks, opportunities, responsibilities and performance.",
+    },
+    {
+      term: "Double Materiality",
+      category: "Reporting Standard",
+      definition: "An approach that considers both how sustainability matters affect the organisation (financial materiality) and how the organisation affects people and the environment (impact materiality).",
+    },
+    {
+      term: "Material Topic",
+      category: "Materiality",
+      definition: "An ESG issue considered sufficiently important to influence stakeholder decisions or the organisation's impacts, risks, opportunities or long-term performance.",
+    },
+    {
+      term: "Training Completion Rate",
+      category: "Social (GRI 404-1)",
+      definition: "The percentage of assigned learners who successfully completed a specified training course or certified programme within the defined reporting period.",
+    },
+    {
+      term: "Scope 1, 2 & 3 Emissions",
+      category: "Environmental (GHG)",
+      definition: "Scope 1 (direct emissions), Scope 2 (purchased electricity/energy), and Scope 3 (indirect value chain emissions across supply chain and products).",
+    },
+    {
+      term: "Waste Hierarchy",
+      category: "Circular Economy",
+      definition: "A prioritisation approach that favours prevention first, followed by reuse, recycling, recovery and, lastly, disposal.",
+    },
+    {
+      term: "Audit Trail",
+      category: "Governance",
+      definition: "A traceable, tamper-evident record showing the source, assessment scores, completion timestamps, and approval of reported training data.",
+    },
+    {
+      term: "Greenwashing Prevention",
+      category: "Governance & Ethics",
+      definition: "Ensuring all sustainability credentials, workforce claims, and environmental achievements are grounded in verifiable, assessed learning data.",
+    },
+    {
+      term: "Assurance",
+      category: "Governance",
+      definition: "Independent review processes or verifiable credentials intended to increase confidence in reported ESG training information and controls.",
+    },
+  ]);
+
+  // Methodology & Assurance Note
+  b.sectionHeading("7. Methodology & Assurance Statement");
+  b.paragraph(
+    "All training participation, completion, assessment scores, and certification records in this report are " +
+      "derived from authenticated learner sessions on the Elevio Skills platform. The Sustainability Score is calculated " +
+      "using fixed, transparent weighting (Completion 30%, Adoption 25%, Assessment Average 25%, Engagement 20%). " +
+      "All issued certificates contain a unique digital verification reference for third-party auditor validation.",
+    8.5,
   );
 
   return pdf.save();
