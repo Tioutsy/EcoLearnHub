@@ -99,8 +99,17 @@ export async function evaluateCourseAccess(
   }
 
   const subscription = matchingSubs[0];
-  const subStatus = subscription?.status ? subscription.status.toUpperCase() : null;
-  const isAllowedStatus = !subscription || subStatus === "ACTIVE" || subStatus === "PENDING" || subStatus === "TRIAL" || accessContext.role === "company_admin";
+  if (!subscription) {
+    return {
+      allowed: false,
+      reason: "SUBSCRIPTION_INACTIVE",
+      requiredPlanCode,
+      requiredPlanName,
+    };
+  }
+
+  const subStatus = subscription.status ? subscription.status.toUpperCase() : null;
+  const isAllowedStatus = subStatus === "ACTIVE" || subStatus === "TRIAL";
 
   if (!isAllowedStatus) {
     return {
@@ -111,10 +120,10 @@ export async function evaluateCourseAccess(
     };
   }
 
-  const companyPlanCode = subscription?.planCode || "COMPLETE";
+  const companyPlanCode = subscription.planCode;
 
   // 4. Commercial Plan Entitlement Check
-  const hasCommercialEntitlement = entitlements.some(e => e.planCode === companyPlanCode) || companyPlanCode === "COMPLETE" || accessContext.role === "company_admin";
+  const hasCommercialEntitlement = entitlements.some(e => e.planCode === companyPlanCode) || companyPlanCode === "COMPLETE";
 
   if (!hasCommercialEntitlement) {
     return {
