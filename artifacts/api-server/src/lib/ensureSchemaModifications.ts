@@ -768,8 +768,6 @@ export async function ensureSchemaModifications() {
     }
   ];
 
-  await detectAndResolveDuplicateCompanySubscriptions();
-
   const summary = {
     checked: 0,
     applied: 0,
@@ -800,4 +798,7 @@ export async function ensureSchemaModifications() {
   if (summary.failed > 0) {
     throw new Error("One or more schema modifications failed to execute.");
   }
+
+  // Run diagnostics after all columns and tables are guaranteed to exist
+  await detectAndResolveDuplicateCompanySubscriptions();
 }
