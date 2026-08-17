@@ -11,22 +11,22 @@ describe("Strict Confirmed Subscription & Payment Gating Audit", () => {
   const courseAccessServicePath = path.resolve(__dirname, "courseAccessService.ts");
   const courseAccessContent = fs.readFileSync(courseAccessServicePath, "utf-8");
 
-  test("1. courseAccessService fails closed when no subscription exists (SUBSCRIPTION_INACTIVE)", () => {
+  test("1. courseAccessService fails closed when no active subscription exists (SUBSCRIPTION_INACTIVE)", () => {
     assert.equal(
-      courseAccessContent.includes("if (!subscription) {\n    return {\n      allowed: false,\n      reason: \"SUBSCRIPTION_INACTIVE\""),
+      courseAccessContent.includes("if (!activeSub) {\n    return {\n      allowed: false,\n      reason: \"SUBSCRIPTION_INACTIVE\""),
       true,
-      "Access must be denied with SUBSCRIPTION_INACTIVE when company has no subscription"
+      "Access must be denied with SUBSCRIPTION_INACTIVE when company has no active subscription"
     );
   });
 
   test("2. courseAccessService denies access if subscription status is PENDING or unconfirmed", () => {
     assert.equal(
-      courseAccessContent.includes("const isAllowedStatus = subStatus === \"ACTIVE\" || subStatus === \"TRIAL\";"),
+      courseAccessContent.includes('s.status.toUpperCase() === "ACTIVE" || s.status.toUpperCase() === "TRIAL"'),
       true,
       "Only explicitly ACTIVE or TRIAL subscriptions can be granted access"
     );
     assert.equal(
-      courseAccessContent.includes("subStatus === \"PENDING\""),
+      courseAccessContent.includes('s.status.toUpperCase() === "PENDING"'),
       false,
       "PENDING status must NOT be allowed to access courses"
     );
