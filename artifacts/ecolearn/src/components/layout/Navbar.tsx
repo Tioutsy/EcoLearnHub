@@ -16,18 +16,19 @@ import {
   Home as HomeIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { isPlatformAdmin, isCompanyAdmin, getUserRoleLabel } from "@/lib/authHelpers";
+import { useAuthRole } from "@/lib/authHelpers";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/context/LanguageContext";
 
 export function Navbar() {
   const [location] = useLocation();
   const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
   const { t } = useLanguage();
-  const showSuperAdminLink = user?.publicMetadata?.role === "super_admin";
-  const showPlatformAdminLink = isPlatformAdmin(user);
-  const showReviewLink = isCompanyAdmin(user) || isPlatformAdmin(user);
+  const authRole = useAuthRole();
+
+  const showCompanyLink = authRole.isCompanyAdmin || authRole.isPlatformAdmin;
+  const showReviewLink = authRole.isCompanyAdmin || authRole.isPlatformAdmin;
+  const showPlatformAdminLink = authRole.isPlatformAdmin;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const displayedLinks = isSignedIn
@@ -36,12 +37,11 @@ export function Navbar() {
         { href: "/dashboard", label: t("nav.my_learning"), icon: UserCircle },
         { href: "/courses", label: t("nav.courses"), icon: BookOpen },
         { href: "/challenges", label: t("nav.challenges"), icon: Target },
-        { href: "/company", label: t("nav.company"), icon: Building2 },
+        ...(showCompanyLink
+          ? [{ href: "/company", label: t("nav.company"), icon: Building2 }]
+          : []),
         ...(showReviewLink
           ? [{ href: "/company/challenges-review", label: t("nav.employee_reviews"), icon: ShieldCheck }]
-          : []),
-        ...(showSuperAdminLink
-          ? [{ href: "/admin", label: t("nav.admin"), icon: ShieldCheck }]
           : []),
         ...(showPlatformAdminLink
           ? [{ href: "/platform-admin", label: t("nav.platform_admin"), icon: ShieldCheck }]
@@ -98,7 +98,7 @@ export function Navbar() {
             {isSignedIn ? (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="hidden sm:inline-flex text-xs bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
-                  {getUserRoleLabel(user)}
+                  {authRole.roleLabel}
                 </Badge>
                 <UserButton userProfileMode="modal" />
               </div>

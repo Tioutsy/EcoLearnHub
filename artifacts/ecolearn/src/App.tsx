@@ -13,6 +13,9 @@ import {
   customFetch,
 } from "@workspace/api-client-react";
 
+import { Button } from "@/components/ui/button";
+import { ShieldAlert } from "lucide-react";
+
 if (import.meta.env.VITE_API_URL) {
   setBaseUrl(import.meta.env.VITE_API_URL);
 }
@@ -167,10 +170,10 @@ function SignUpPage() {
   const params = new URLSearchParams(window.location.search);
   const inviteToken = params.get("invite");
   // After Clerk completes sign-up, redirect to accept-invitation if an invite token is present,
-  // otherwise go to the dashboard (or an explicit redirect_url).
+  // otherwise begin guided company administrator onboarding.
   const postSignUpUrl = inviteToken
     ? `${basePath}/accept-invitation?invite=${encodeURIComponent(inviteToken)}`
-    : params.get("redirect_url") || `${basePath}/dashboard`;
+    : params.get("redirect_url") || `${basePath}/onboarding`;
 
   // Pass the invite token forward so clicking "Sign in" inside Clerk's widget
   // also lands on the invite-aware sign-in page and preserves the token.
@@ -179,7 +182,18 @@ function SignUpPage() {
     : `${basePath}/sign-in`;
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-muted/30 px-4 py-8">
+      {!inviteToken && (
+        <div className="mb-6 max-w-md text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
+            Company Administrator Registration
+          </div>
+          <h1 className="text-2xl font-bold font-serif text-foreground">Get Started with ELEVIO SKILLS</h1>
+          <p className="text-sm text-muted-foreground">
+            Create your administrator account to set up your company, choose your plan and invite your team.
+          </p>
+        </div>
+      )}
       <SignUp 
         routing="path" 
         path={`${basePath}/sign-up`} 
@@ -253,15 +267,10 @@ function AcceptInvitationPage() {
   );
 }
 
-/**
- * RequireCompanyAdmin — fetches /api/company to verify the signed-in user
- * holds company_admin access server-side.
- * Employees (learners) receive HTTP 403; they are redirected to /dashboard.
- * Shows a spinner while the check is in flight.
- */
 function RequireCompanyAdmin({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -271,19 +280,44 @@ function RequireCompanyAdmin({ children }: { children: ReactNode }) {
       return;
     }
     customFetch("/api/company")
-      .then(() => setAllowed(true))
-      .catch(() => {
-        // 403 = learner, 404 = no company — redirect to dashboard
+      .then(() => {
+        setAllowed(true);
+        setIsForbidden(false);
+      })
+      .catch((err: any) => {
         setAllowed(false);
-        setLocation(`${basePath}/dashboard`);
+        if (err.status === 403) {
+          setIsForbidden(true);
+        } else {
+          setLocation(`${basePath}/home`);
+        }
       });
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, setLocation]);
 
   if (allowed === null) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center">
         <div className="h-8 w-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  if (isForbidden) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 max-w-md text-center space-y-4">
+          <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-950 text-red-600 flex items-center justify-center mx-auto">
+            <ShieldAlert className="h-6 w-6" />
+          </div>
+          <h2 className="text-xl font-bold font-serif">Access Denied</h2>
+          <p className="text-sm text-muted-foreground">
+            Company Administrator access required. You do not have permission to manage this organisation.
+          </p>
+          <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+            <a href={`${basePath}/home`}>Return to Home</a>
+          </Button>
+        </div>
+      </Layout>
     );
   }
 

@@ -2,13 +2,7 @@ import React, { useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { useAuth, useUser } from "@clerk/react";
 import { Link } from "wouter";
-import {
-  isPlatformAdmin,
-  isCompanyAdmin,
-  isManager,
-  isLearner,
-  getUserRoleLabel,
-} from "@/lib/authHelpers";
+import { useAuthRole } from "@/lib/authHelpers";
 import {
   useListEnrollments,
   useListCertificates,
@@ -52,12 +46,13 @@ type LmsEnrollment = Enrollment & {
 export default function InternalHome() {
   const { isLoaded: isAuthLoaded } = useAuth();
   const { user } = useUser();
+  const authRole = useAuthRole();
 
-  // Role checks
-  const isAdmin = isCompanyAdmin(user);
-  const isMgr = isManager(user);
-  const isSuper = isPlatformAdmin(user);
-  const isLearnerOnly = isLearner(user) && !isAdmin && !isMgr && !isSuper;
+  // Authoritative server-resolved role checks
+  const isAdmin = authRole.isCompanyAdmin;
+  const isMgr = authRole.isManager;
+  const isSuper = authRole.isPlatformAdmin;
+  const isLearnerOnly = authRole.isLearner;
 
   // Learner Queries
   const {
@@ -319,7 +314,7 @@ export default function InternalHome() {
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 px-3 py-1">
-                {getUserRoleLabel(user)}
+                {authRole.roleLabel}
               </Badge>
               {companyName && (
                 <span className="text-xs text-muted-foreground hidden sm:inline-flex items-center gap-1">

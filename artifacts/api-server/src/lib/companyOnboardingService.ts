@@ -408,6 +408,421 @@ export async function onboardCompany(input: OnboardCompanyInput): Promise<Onboar
   });
 }
 
+export async function getResumableOnboardingStatus(userId: string): Promise<{
+  stage: "NO_COMPANY" | "PLAN_REQUIRED" | "PAYMENT_PENDING" | "CUSTOM_QUOTE_REQUIRED" | "COMPLETED";
+  hasCompany: boolean;
+  role?: string;
+  company?: any;
+  subscription?: any;
+  pricingBreakdown?: any;
+  nextStepUrl: string;
+  completedSteps: string[];
+  incompleteSteps: string[];
+}> {
+  if (!userId) {
+    return {
+      stage: "NO_COMPANY",
+      hasCompany: false,
+      nextStepUrl: "/onboarding",
+      completedSteps: [],
+      incompleteSteps: ["account_creation", "company_details", "plan_selection", "payment"],
+    };
+  }
+
+  const [emp] = await db
+    .select()
+    .from(employeesTable)
+    .where(eq(employeesTable.clerkUserId, userId))
+    .limit(1);
+
+  if (!emp) {
+    return {
+      stage: "NO_COMPANY",
+      hasCompany: false,
+      nextStepUrl: "/onboarding",
+      completedSteps: ["account_creation"],
+      incompleteSteps: ["company_details", "plan_selection", "payment"],
+    };
+  }
+
+  const [company] = await db
+    .select()
+    .from(companiesTable)
+    .where(eq(companiesTable.id, emp.companyId))
+    .limit(1);
+
+  if (!company) {
+    return {
+      stage: "NO_COMPANY",
+      hasCompany: false,
+      nextStepUrl: "/onboarding",
+      completedSteps: ["account_creation"],
+      incompleteSteps: ["company_details", "plan_selection", "payment"],
+    };
+  }
+
+  // Non-admin employee with existing company
+  if (emp.role !== "admin") {
+    return {
+      stage: "COMPLETED",
+      hasCompany: true,
+      role: emp.role,
+      company,
+      nextStepUrl: "/home",
+      completedSteps: ["account_creation", "company_details", "plan_selection", "payment", "onboarding_completed"],
+      incompleteSteps: [],
+    };
+  }
+
+  // Admin: Check subscription
+  const matchingSubs = await db
+    .select({
+      id: companySubscriptionsTable.id,
+      companyId: companySubscriptionsTable.companyId,
+      status: companySubscriptionsTable.status,
+      currency: companySubscriptionsTable.currency,
+      billingInterval: companySubscriptionsTable.billingInterval,
+      agreedMonthlyAmount: companySubscriptionsTable.agreedMonthlyAmount,
+      agreedYearlyAmount: companySubscriptionsTable.agreedYearlyAmount,
+      planCode: subscriptionPlansTable.code,
+      planName: subscriptionPlansTable.name,
+      planDescription: subscriptionPlansTable.description,
+      bandCode: employeeBandsTable.code,
+      bandLabel: employeeBandsTable.label,
+      minEmployees: employeeBandsTable.minimumEmployees,
+      maxEmployees: employeeBandsTable.maximumEmployees,
+    })
+    .from(companySubscriptionsTable)
+    .leftJoin(subscriptionPlansTable, eq(companySubscriptionsTable.subscriptionPlanId, subscriptionPlansTable.id))
+    .leftJoin(employeeBandsTable, eq(companySubscriptionsTable.employeeBandId, employeeBandsTable.id))
+    .where(eq(companySubscriptionsTable.companyId, company.id))
+    .orderBy(sql`CASE WHEN ${companySubscriptionsTable.status} = 'ACTIVE' THEN 1 WHEN ${companySubscriptionsTable.status} = 'PENDING' THEN 2 ELSE 3 END`, companySubscriptionsTable.id);
+
+  const subscription = matchingSubs[0];
+
+  if (!subscription) {
+    return {
+      stage: "PLAN_REQUIRED",
+      hasCompany: true,
+      role: "admin",
+      company,
+      nextStepUrl: "/onboarding",
+      completedSteps: ["account_creation", "company_details"],
+      incompleteSteps: ["plan_selection", "payment"],
+    };
+  }
+
+  const subStatus = (subscription.status || "").toUpperCase();
+
+  if (subStatus === "ACTIVE") {
+    return {
+      stage: "COMPLETED",
+      hasCompany: true,
+      role: "admin",
+      company,
+      subscription,
+      nextStepUrl: "/home",
+      completedSteps: ["account_creation", "company_details", "plan_selection", "payment", "onboarding_completed"],
+      incompleteSteps: [],
+    };
+  }
+
+  if (subStatus === "CUSTOM_QUOTE_REQUIRED" || subscription.bandCode === "OVER_120") {
+    return {
+      stage: "CUSTOM_QUOTE_REQUIRED",
+      hasCompany: true,
+      role: "admin",
+      company,
+      subscription,
+      nextStepUrl: "/onboarding",
+      completedSteps: ["account_creation", "company_details", "plan_selection"],
+      incompleteSteps: ["quote_confirmation"],
+    };
+  }
+
+  // PENDING or PENDING_PAYMENT
+  return {
+    stage: "PAYMENT_PENDING",
+    hasCompany: true,
+    role: "admin",
+    company,
+    subscription,
+    nextStepUrl: "/onboarding",
+    completedSteps: ["account_creation", "company_details", "plan_selection"],
+    incompleteSteps: ["payment"],
+  };
+}
+
+export async function saveCompanyDetails(input: {
+  userId: string;
+  email: string | null;
+  adminName: string;
+  companyName: string;
+  industry?: string;
+  employeeCount?: number;
+}): Promise<{ company: any; employee: any; stage: "PLAN_REQUIRED" }> {
+  const { userId, email, adminName, companyName, industry, employeeCount = 15 } = input;
+
+  if (!userId) throw new Error("Authentication required");
+  if (!companyName || !companyName.trim()) throw new Error("Company name is required");
+
+  // Check if admin already exists
+  const [existingEmp] = await db
+    .select()
+    .from(employeesTable)
+    .where(eq(employeesTable.clerkUserId, userId))
+    .limit(1);
+
+  if (existingEmp) {
+    if (existingEmp.role !== "admin") {
+      throw new Error("Existing employee account found. Contact your company administrator.");
+    }
+
+    // Update existing company
+    const [updatedCompany] = await db
+      .update(companiesTable)
+      .set({
+        name: companyName.trim(),
+        industry: industry?.trim() || null,
+        employeeCount: employeeCount,
+        updatedAt: new Date(),
+      })
+      .where(eq(companiesTable.id, existingEmp.companyId))
+      .returning();
+
+    return {
+      company: updatedCompany,
+      employee: existingEmp,
+      stage: "PLAN_REQUIRED",
+    };
+  }
+
+  // Create new company and first admin employee in a transaction
+  const slugBase = companyName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const slug = `${slugBase}-${Date.now().toString(36)}`;
+
+  return await db.transaction(async (tx) => {
+    const [company] = await tx
+      .insert(companiesTable)
+      .values({
+        name: companyName.trim(),
+        slug,
+        industry: industry?.trim() || null,
+        employeeCount: employeeCount,
+        maxEmployees: 25,
+      })
+      .returning();
+
+    const [adminEmployee] = await tx
+      .insert(employeesTable)
+      .values({
+        companyId: company.id,
+        clerkUserId: userId,
+        email: email ? email.toLowerCase() : `admin_${company.id}@example.com`,
+        name: adminName || "Company Administrator",
+        role: "admin",
+        status: "active",
+        invitationStatus: "accepted",
+        invitationAcceptedAt: new Date(),
+      })
+      .returning();
+
+    return {
+      company,
+      employee: adminEmployee,
+      stage: "PLAN_REQUIRED",
+    };
+  });
+}
+
+export async function savePlanSelection(input: {
+  userId: string;
+  planCode: string;
+  employeeBandCode?: string;
+  employeeCount?: number;
+  billingInterval?: string;
+}): Promise<{
+  outcome: "success" | "tailored_quote_required";
+  stage: "PAYMENT_PENDING" | "CUSTOM_QUOTE_REQUIRED";
+  subscription?: any;
+  pricingBreakdown?: any;
+}> {
+  const { userId, planCode = "ESSENTIAL", employeeBandCode, employeeCount: rawCount, billingInterval } = input;
+
+  if (!userId) throw new Error("Authentication required");
+
+  const [emp] = await db
+    .select()
+    .from(employeesTable)
+    .where(eq(employeesTable.clerkUserId, userId))
+    .limit(1);
+
+  if (!emp || emp.role !== "admin") {
+    throw new Error("Company administrator account required to select a plan");
+  }
+
+  let bandCode = employeeBandCode;
+  let employeeCount = rawCount;
+
+  if (!bandCode) {
+    const countToCheck = employeeCount || 15;
+    if (countToCheck <= 25) bandCode = "UP_TO_25";
+    else if (countToCheck <= 50) bandCode = "FROM_26_TO_50";
+    else if (countToCheck <= 80) bandCode = "FROM_51_TO_80";
+    else if (countToCheck <= 120) bandCode = "FROM_81_TO_120";
+    else bandCode = "OVER_120";
+  }
+
+  if (employeeCount === undefined) {
+    if (bandCode === "UP_TO_25") employeeCount = 25;
+    else if (bandCode === "FROM_26_TO_50") employeeCount = 50;
+    else if (bandCode === "FROM_51_TO_80") employeeCount = 80;
+    else if (bandCode === "FROM_81_TO_120") employeeCount = 120;
+    else employeeCount = 150;
+  }
+
+  const [band] = await db
+    .select()
+    .from(employeeBandsTable)
+    .where(eq(employeeBandsTable.code, bandCode))
+    .limit(1);
+
+  if (!band) throw new Error(`Invalid employee band code: ${bandCode}`);
+
+  const [plan] = await db
+    .select()
+    .from(subscriptionPlansTable)
+    .where(eq(subscriptionPlansTable.code, planCode))
+    .limit(1);
+
+  const planId = plan?.id ?? 1;
+
+  if (bandCode === "OVER_120" || employeeCount > 120) {
+    // Tailored quote enquiry flow
+    const [sub] = await db
+      .insert(companySubscriptionsTable)
+      .values({
+        companyId: emp.companyId,
+        subscriptionPlanId: planId,
+        employeeBandId: band.id,
+        status: "CUSTOM_QUOTE_REQUIRED",
+        currency: "MUR",
+        billingInterval: "MONTHLY",
+        pricingSource: "TAILORED",
+        startsAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: companySubscriptionsTable.companyId,
+        set: {
+          subscriptionPlanId: planId,
+          employeeBandId: band.id,
+          status: "CUSTOM_QUOTE_REQUIRED",
+          pricingSource: "TAILORED",
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return {
+      outcome: "tailored_quote_required",
+      stage: "CUSTOM_QUOTE_REQUIRED",
+      subscription: sub,
+    };
+  }
+
+  // Standard server-authoritative calculation
+  const pricingBreakdown = calculateAuthoritativePricing({
+    planCode: plan?.code ?? "ESSENTIAL",
+    employeeCount,
+    bandCode: band.code,
+    billingInterval,
+  });
+
+  const [subscription] = await db
+    .insert(companySubscriptionsTable)
+    .values({
+      companyId: emp.companyId,
+      subscriptionPlanId: planId,
+      employeeBandId: band.id,
+      status: "PENDING",
+      currency: "MUR",
+      billingInterval: pricingBreakdown.billingInterval,
+      discountPercentage: String(pricingBreakdown.discountPercentage),
+      agreedMonthlyAmount: pricingBreakdown.finalMonthlyAmount.toFixed(2),
+      agreedYearlyAmount: pricingBreakdown.finalYearlyAmount.toFixed(2),
+      pricingSource: "STANDARD",
+      startsAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: companySubscriptionsTable.companyId,
+      set: {
+        subscriptionPlanId: planId,
+        employeeBandId: band.id,
+        status: "PENDING",
+        currency: "MUR",
+        billingInterval: pricingBreakdown.billingInterval,
+        discountPercentage: String(pricingBreakdown.discountPercentage),
+        agreedMonthlyAmount: pricingBreakdown.finalMonthlyAmount.toFixed(2),
+        agreedYearlyAmount: pricingBreakdown.finalYearlyAmount.toFixed(2),
+        pricingSource: "STANDARD",
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
+
+  await db
+    .update(companiesTable)
+    .set({
+      planId,
+      employeeCount,
+      maxEmployees: band.maximumEmployees ?? 25,
+      updatedAt: new Date(),
+    })
+    .where(eq(companiesTable.id, emp.companyId));
+
+  return {
+    outcome: "success",
+    stage: "PAYMENT_PENDING",
+    subscription,
+    pricingBreakdown,
+  };
+}
+
+export async function confirmOrderReview(input: {
+  userId: string;
+  agreedToTerms: boolean;
+}): Promise<{
+  outcome: "payment_pending" | "payment_ready";
+  message: string;
+  subscription: any;
+}> {
+  const { userId, agreedToTerms } = input;
+  if (!userId) throw new Error("Authentication required");
+  if (!agreedToTerms) throw new Error("You must agree to the Terms of Service and Privacy Policy to proceed");
+
+  const [emp] = await db
+    .select()
+    .from(employeesTable)
+    .where(eq(employeesTable.clerkUserId, userId))
+    .limit(1);
+
+  if (!emp || emp.role !== "admin") throw new Error("Company administrator account required");
+
+  const [sub] = await db
+    .select()
+    .from(companySubscriptionsTable)
+    .where(eq(companySubscriptionsTable.companyId, emp.companyId))
+    .limit(1);
+
+  if (!sub) throw new Error("No subscription plan selected");
+
+  return {
+    outcome: "payment_pending",
+    message: "Your subscription order has been recorded. Online payment gateway is being finalised.",
+    subscription: sub,
+  };
+}
+
 export async function assignStarterCourse(
   companyId: number,
   adminUserId: string,

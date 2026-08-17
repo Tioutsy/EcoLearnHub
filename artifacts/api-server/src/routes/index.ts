@@ -36,9 +36,12 @@ import governanceRouter from "./governance";
 import trainingActionsRouter from "./trainingActions";
 import workplaceActionsRouter from "./workplaceActions";
 import onboardingRouter from "./onboarding";
+import authMeRouter from "./authMe";
 
 const router: IRouter = Router();
 
+router.use("/auth", authMeRouter);
+router.use("/me", authMeRouter);
 router.use("/onboarding", onboardingRouter);
 
 router.use(healthRouter);

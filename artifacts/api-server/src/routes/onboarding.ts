@@ -1,17 +1,132 @@
 import { Router } from "express";
 import { getCompanyAccess, sendHttpError } from "../lib/access";
-import { onboardCompany, assignStarterCourse } from "../lib/companyOnboardingService";
-import { db, companiesTable, employeesTable, companySubscriptionsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import {
+  onboardCompany,
+  assignStarterCourse,
+  getResumableOnboardingStatus,
+  saveCompanyDetails,
+  savePlanSelection,
+  confirmOrderReview,
+} from "../lib/companyOnboardingService";
 
 const router = Router();
 
-// POST /api/onboarding/company
+function extractAuthUser(req: any): { userId: string | null; email: string | null } {
+  const reqAuth = req.auth;
+  if (reqAuth && reqAuth.userId) {
+    return {
+      userId: reqAuth.userId,
+      email: reqAuth.sessionClaims?.email || null,
+    };
+  }
+  return { userId: null, email: null };
+}
+
+// GET /api/onboarding/status — Authoritative server state resolver
+router.get("/status", async (req, res): Promise<void> => {
+  try {
+    const { userId } = extractAuthUser(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    const status = await getResumableOnboardingStatus(userId);
+    res.json(status);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to retrieve onboarding status" });
+    }
+  }
+});
+
+// POST /api/onboarding/company-details — Step 1: Save Company Information
+router.post("/company-details", async (req, res): Promise<void> => {
+  try {
+    const { userId, email } = extractAuthUser(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required to set up company" });
+      return;
+    }
+
+    const { companyName, adminName, industry, employeeCount } = req.body;
+    if (!companyName || !companyName.trim()) {
+      res.status(400).json({ error: "Company name is required" });
+      return;
+    }
+
+    const result = await saveCompanyDetails({
+      userId,
+      email,
+      adminName: adminName || "Company Administrator",
+      companyName,
+      industry,
+      employeeCount: employeeCount ? parseInt(employeeCount, 10) : 15,
+    });
+
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to save company details" });
+    }
+  }
+});
+
+// POST /api/onboarding/select-plan — Step 2: Select Subscription Plan & Band
+router.post("/select-plan", async (req, res): Promise<void> => {
+  try {
+    const { userId } = extractAuthUser(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required to select plan" });
+      return;
+    }
+
+    const { planCode, employeeBandCode, employeeCount, billingInterval } = req.body;
+
+    const result = await savePlanSelection({
+      userId,
+      planCode,
+      employeeBandCode,
+      employeeCount: employeeCount !== undefined ? parseInt(employeeCount, 10) : undefined,
+      billingInterval,
+    });
+
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to select subscription plan" });
+    }
+  }
+});
+
+// POST /api/onboarding/confirm-order — Step 3: Review Confirmation
+router.post("/confirm-order", async (req, res): Promise<void> => {
+  try {
+    const { userId } = extractAuthUser(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required to confirm order" });
+      return;
+    }
+
+    const { agreedToTerms = true } = req.body;
+
+    const result = await confirmOrderReview({
+      userId,
+      agreedToTerms,
+    });
+
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to confirm order" });
+    }
+  }
+});
+
+// POST /api/onboarding/company — Legacy / Composite Onboarding Endpoint
 router.post("/company", async (req, res): Promise<void> => {
   try {
     const { companyName, adminName, employeeCount, employeeBandCode, planCode, billingInterval } = req.body;
-
-    // Must be authenticated via Clerk
     let userId: string | null = null;
     let email: string | null = null;
 
@@ -20,15 +135,9 @@ router.post("/company", async (req, res): Promise<void> => {
       userId = access.userId;
       email = access.email;
     } catch (err: any) {
-      // If 403 because unlinked user, extract userId from req.auth
-      const reqAuth = (req as any).auth;
-      if (reqAuth && reqAuth.userId) {
-        userId = reqAuth.userId;
-        email = reqAuth.sessionClaims?.email || null;
-      } else {
-        res.status(401).json({ error: "Authentication required to onboard a company" });
-        return;
-      }
+      const authUser = extractAuthUser(req);
+      userId = authUser.userId;
+      email = authUser.email;
     }
 
     if (!userId) {
@@ -56,56 +165,6 @@ router.post("/company", async (req, res): Promise<void> => {
   } catch (err: any) {
     if (!sendHttpError(res, err)) {
       res.status(400).json({ error: err.message || "Failed to complete company onboarding" });
-    }
-  }
-});
-
-// GET /api/onboarding/status
-router.get("/status", async (req, res): Promise<void> => {
-  try {
-    const reqAuth = (req as any).auth;
-    const userId = reqAuth?.userId;
-    if (!userId) {
-      res.status(401).json({ error: "Authentication required" });
-      return;
-    }
-
-    const [emp] = await db
-      .select()
-      .from(employeesTable)
-      .where(eq(employeesTable.clerkUserId, userId))
-      .limit(1);
-
-    if (!emp) {
-      res.json({
-        hasCompany: false,
-        onboardingStage: "account-created",
-      });
-      return;
-    }
-
-    const [company] = await db
-      .select()
-      .from(companiesTable)
-      .where(eq(companiesTable.id, emp.companyId))
-      .limit(1);
-
-    const [subscription] = await db
-      .select()
-      .from(companySubscriptionsTable)
-      .where(eq(companySubscriptionsTable.companyId, emp.companyId))
-      .limit(1);
-
-    res.json({
-      hasCompany: true,
-      role: emp.role,
-      company,
-      subscription,
-      onboardingStage: "onboarding-complete",
-    });
-  } catch (err: any) {
-    if (!sendHttpError(res, err)) {
-      res.status(500).json({ error: "Failed to retrieve onboarding status" });
     }
   }
 });
