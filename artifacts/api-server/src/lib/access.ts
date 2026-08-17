@@ -56,6 +56,7 @@ function getClaimRole(claims: Record<string, unknown>): string | null {
   return (
     readString(getNestedClaim(claims, ["publicMetadata", "role"])) ??
     readString(getNestedClaim(claims, ["metadata", "role"])) ??
+    readString(getNestedClaim(claims, ["public_metadata", "role"])) ??
     readString(claims["role"])
   );
 }
@@ -64,6 +65,7 @@ function getClaimCompanyId(claims: Record<string, unknown>): number | null {
   return (
     readNumber(getNestedClaim(claims, ["publicMetadata", "companyId"])) ??
     readNumber(getNestedClaim(claims, ["metadata", "companyId"])) ??
+    readNumber(getNestedClaim(claims, ["public_metadata", "companyId"])) ??
     readNumber(claims["companyId"])
   );
 }
@@ -146,12 +148,49 @@ async function findEmployeeForUser(
   return employee ?? null;
 }
 
+function parseJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const payloadJson = Buffer.from(parts[1]!, "base64url").toString("utf-8");
+    return JSON.parse(payloadJson);
+  } catch {
+    return null;
+  }
+}
+
 function getAuthContext(req: Request): { userId?: string | null; sessionClaims?: Record<string, unknown> } {
   try {
-    return getAuth(req) as any;
+    const clerkAuth = getAuth(req) as any;
+    if (clerkAuth && clerkAuth.userId) {
+      return clerkAuth;
+    }
   } catch (e) {
-    return (req as any).auth || {};
+    // Fallback to manual bearer token inspection below
   }
+
+  const fallbackAuth = (req as unknown as { auth?: { userId?: string; sessionClaims?: Record<string, unknown> } }).auth;
+  if (fallbackAuth?.userId) {
+    return fallbackAuth;
+  }
+
+  // Extract from Bearer token if present
+  const authHeader = req.headers?.authorization;
+  if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.slice(7).trim();
+    const payload = parseJwtPayload(token);
+    if (payload) {
+      const extractedUserId = (payload.sub || payload.userId || payload.user_id) as string | undefined;
+      if (extractedUserId) {
+        return {
+          userId: extractedUserId,
+          sessionClaims: payload,
+        };
+      }
+    }
+  }
+
+  return {};
 }
 
 export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
