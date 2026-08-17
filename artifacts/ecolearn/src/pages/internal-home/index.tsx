@@ -12,7 +12,9 @@ import {
 import {
   useListEnrollments,
   useListCertificates,
+  useListCourses,
   type Enrollment,
+  type Course,
 } from "@workspace/api-client-react";
 import {
   useCompanyLmsOverview,
@@ -44,6 +46,7 @@ type LmsEnrollment = Enrollment & {
   assignmentStatus?: "not_started" | "in_progress" | "completed" | "overdue";
   courseCode?: string;
   courseTitle?: string;
+  courseThumbnail?: string;
 };
 
 export default function InternalHome() {
@@ -69,6 +72,10 @@ export default function InternalHome() {
   } = useListCertificates();
 
   const {
+    data: courses,
+  } = useListCourses();
+
+  const {
     data: workplaceActions,
   } = useLearnerWorkplaceActions();
 
@@ -80,6 +87,13 @@ export default function InternalHome() {
   const {
     data: trainingInsights,
   } = useCompanyTrainingInsights();
+
+  // Map courses by ID for quick thumbnail lookup
+  const coursesMap = useMemo(() => {
+    const map = new Map<number, Course>();
+    (courses || []).forEach((c) => map.set(c.id, c));
+    return map;
+  }, [courses]);
 
   // Greeting resolution
   const greeting = useMemo(() => {
@@ -121,6 +135,8 @@ export default function InternalHome() {
     const overdue = activeEnrollments.find((e) => e.assignmentStatus === "overdue");
     if (overdue) {
       const courseTitle = overdue.courseName || overdue.courseTitle || `Course #${overdue.courseId}`;
+      const courseObj = coursesMap.get(overdue.courseId);
+      const thumbnail = overdue.courseThumbnail || courseObj?.thumbnailUrl || null;
       return {
         type: "overdue_course" as const,
         title: `Resume ${courseTitle}`,
@@ -128,12 +144,15 @@ export default function InternalHome() {
         progress: overdue.progressPct || 0,
         buttonText: "Resume course",
         link: `/learn/${overdue.id}`,
+        thumbnail,
       };
     }
 
     if (inProgressList.length > 0) {
       const topInProgress = inProgressList[0];
       const courseTitle = topInProgress.courseName || topInProgress.courseTitle || `Course #${topInProgress.courseId}`;
+      const courseObj = coursesMap.get(topInProgress.courseId);
+      const thumbnail = topInProgress.courseThumbnail || courseObj?.thumbnailUrl || null;
       return {
         type: "in_progress_course" as const,
         title: `Continue ${courseTitle}`,
@@ -141,12 +160,15 @@ export default function InternalHome() {
         progress: topInProgress.progressPct || 0,
         buttonText: "Continue learning",
         link: `/learn/${topInProgress.id}`,
+        thumbnail,
       };
     }
 
     if (notStartedList.length > 0) {
       const nextAssigned = notStartedList[0];
       const courseTitle = nextAssigned.courseName || nextAssigned.courseTitle || `Course #${nextAssigned.courseId}`;
+      const courseObj = coursesMap.get(nextAssigned.courseId);
+      const thumbnail = nextAssigned.courseThumbnail || courseObj?.thumbnailUrl || null;
       return {
         type: "not_started_course" as const,
         title: `Start ${courseTitle}`,
@@ -154,6 +176,7 @@ export default function InternalHome() {
         progress: 0,
         buttonText: "Start course",
         link: `/learn/${nextAssigned.id}`,
+        thumbnail,
       };
     }
 
@@ -166,6 +189,7 @@ export default function InternalHome() {
         progress: 50,
         buttonText: "View commitment",
         link: "/dashboard",
+        thumbnail: null,
       };
     }
 
@@ -176,8 +200,9 @@ export default function InternalHome() {
       progress: 100,
       buttonText: "Browse courses",
       link: "/courses",
+      thumbnail: null,
     };
-  }, [activeEnrollments, inProgressList, notStartedList, workplaceActions]);
+  }, [activeEnrollments, inProgressList, notStartedList, workplaceActions, coursesMap]);
 
   // Priority next action for manager/admin:
   const adminPrimaryAction = useMemo(() => {
@@ -190,6 +215,7 @@ export default function InternalHome() {
         subtitle: `${overdueCount} employee ${overdueCount === 1 ? "assignment is" : "assignments are"} past due date.`,
         buttonText: "Review overdue training",
         link: "/company/training-follow-up",
+        thumbnail: null,
       };
     }
 
@@ -199,6 +225,7 @@ export default function InternalHome() {
         subtitle: `${notStartedCount} enrolled ${notStartedCount === 1 ? "learner hasn't" : "learners haven't"} started their courses.`,
         buttonText: "View learner status",
         link: "/company/training-follow-up",
+        thumbnail: null,
       };
     }
 
@@ -209,6 +236,7 @@ export default function InternalHome() {
         subtitle: attentionItem.explanation,
         buttonText: attentionItem.recommendedAction,
         link: attentionItem.targetUrl || "/company/reports",
+        thumbnail: null,
       };
     }
 
@@ -217,6 +245,7 @@ export default function InternalHome() {
       subtitle: "Assign new learning pathways or review departmental sustainability reports.",
       buttonText: "Manage assignments",
       link: "/company/employees",
+      thumbnail: null,
     };
   }, [companyOverview, trainingInsights]);
 
@@ -266,6 +295,8 @@ export default function InternalHome() {
     );
   }
 
+  const activeBgImage = (isAdmin || isMgr) ? adminPrimaryAction.thumbnail : learnerPrimaryAction.thumbnail;
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
@@ -302,58 +333,76 @@ export default function InternalHome() {
         {/* SECTION 2 & 3 — PRIMARY NEXT ACTION + PROGRESS SNAPSHOT */}
         <div className="grid lg:grid-cols-3 gap-6 items-stretch">
           {/* PRIMARY NEXT ACTION (2/3 width on desktop) */}
-          <div className="lg:col-span-2 bg-card border rounded-2xl p-6 sm:p-7 shadow-sm flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-card via-card to-emerald-50/30 dark:to-emerald-950/20">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">
-                <Sparkles className="h-4 w-4" /> Next Recommended Action
+          <div className="lg:col-span-2 bg-card border rounded-2xl p-6 sm:p-7 shadow-sm flex flex-col justify-between relative overflow-hidden group min-h-[220px]">
+            {/* Dynamic Course Background Image with refined gradient readability overlay */}
+            {activeBgImage ? (
+              <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+                <img
+                  src={activeBgImage}
+                  alt=""
+                  className="w-full h-full object-cover object-center scale-105 transition-transform duration-700 group-hover:scale-110"
+                />
+                {/* Refined gradient overlay: high contrast on left for typography, subtle image preview on right */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/90 to-background/50 dark:from-background/95 dark:via-background/90 dark:to-background/60" />
+                <div className="absolute inset-0 bg-emerald-950/10 dark:bg-emerald-950/30 mix-blend-multiply" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-card via-card to-emerald-50/30 dark:to-emerald-950/20 pointer-events-none rounded-2xl" />
+            )}
+
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">
+                  <Sparkles className="h-4 w-4" /> Next Recommended Action
+                </div>
+
+                {isSuper ? (
+                  <div className="space-y-2">
+                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
+                      Platform Management & Overview
+                    </h2>
+                    <p className="text-sm text-muted-foreground max-w-xl">
+                      Inspect tenant health, manage corporate subscriptions, courses, and platform operations.
+                    </p>
+                  </div>
+                ) : isAdmin || isMgr ? (
+                  <div className="space-y-2">
+                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
+                      {adminPrimaryAction.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground max-w-xl">
+                      {adminPrimaryAction.subtitle}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <h2 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
+                      {learnerPrimaryAction.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground max-w-xl">
+                      {learnerPrimaryAction.subtitle}
+                    </p>
+                    {learnerPrimaryAction.progress > 0 && learnerPrimaryAction.progress < 100 && (
+                      <div className="pt-2 max-w-md space-y-1.5">
+                        <div className="flex justify-between text-xs font-medium text-muted-foreground">
+                          <span>Course Progress</span>
+                          <span>{Math.round(learnerPrimaryAction.progress)}%</span>
+                        </div>
+                        <Progress value={learnerPrimaryAction.progress} className="h-2" />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {isSuper ? (
-                <div className="space-y-2">
-                  <h2 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
-                    Platform Management & Overview
-                  </h2>
-                  <p className="text-sm text-muted-foreground max-w-xl">
-                    Inspect tenant health, manage corporate subscriptions, courses, and platform operations.
-                  </p>
-                </div>
-              ) : isAdmin || isMgr ? (
-                <div className="space-y-2">
-                  <h2 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
-                    {adminPrimaryAction.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground max-w-xl">
-                    {adminPrimaryAction.subtitle}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <h2 className="text-xl sm:text-2xl font-bold font-serif text-foreground">
-                    {learnerPrimaryAction.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground max-w-xl">
-                    {learnerPrimaryAction.subtitle}
-                  </p>
-                  {learnerPrimaryAction.progress > 0 && learnerPrimaryAction.progress < 100 && (
-                    <div className="pt-2 max-w-md space-y-1.5">
-                      <div className="flex justify-between text-xs font-medium text-muted-foreground">
-                        <span>Course Progress</span>
-                        <span>{Math.round(learnerPrimaryAction.progress)}%</span>
-                      </div>
-                      <Progress value={learnerPrimaryAction.progress} className="h-2" />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="pt-6 flex items-center gap-4">
-              <Button asChild size="lg" className="rounded-xl font-semibold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm gap-2">
-                <Link href={isSuper ? "/platform-admin" : (isAdmin || isMgr) ? adminPrimaryAction.link : learnerPrimaryAction.link}>
-                  <span>{isSuper ? "Open Platform Admin" : (isAdmin || isMgr) ? adminPrimaryAction.buttonText : learnerPrimaryAction.buttonText}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="pt-6 flex items-center gap-4">
+                <Button asChild size="lg" className="rounded-xl font-semibold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm gap-2">
+                  <Link href={isSuper ? "/platform-admin" : (isAdmin || isMgr) ? adminPrimaryAction.link : learnerPrimaryAction.link}>
+                    <span>{isSuper ? "Open Platform Admin" : (isAdmin || isMgr) ? adminPrimaryAction.buttonText : learnerPrimaryAction.buttonText}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
 
