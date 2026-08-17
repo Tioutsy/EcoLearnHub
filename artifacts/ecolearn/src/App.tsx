@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ClerkProvider, SignIn, SignUp, Show, useAuth, useClerk } from '@clerk/react';
+import { ClerkProvider, SignIn, SignUp, UserProfile, Show, useAuth, useClerk } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
+import { Layout } from '@/components/layout/Layout';
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wouter';
 import { QueryClientProvider, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -98,7 +99,15 @@ const clerkAppearance = {
   },
   elements: {
     rootBox: "w-full flex justify-center",
-    cardBox: "bg-white rounded-2xl w-[440px] max-w-full overflow-hidden shadow-xl border",
+    cardBox: "bg-white rounded-2xl max-w-full shadow-xl border",
+    signInRootBox: "w-full max-w-[440px]",
+    signUpRootBox: "w-full max-w-[440px]",
+    signInCardBox: "w-[440px] max-w-full overflow-hidden",
+    signUpCardBox: "w-[440px] max-w-full overflow-hidden",
+    userProfileRootBox: "w-full max-w-4xl",
+    userProfileCardBox: "w-full max-w-4xl shadow-xl rounded-2xl bg-white",
+    modalContent: "!max-w-4xl !w-full",
+    modalCard: "!max-w-4xl !w-full",
     card: "!shadow-none !border-0 !bg-transparent !rounded-none",
     footer: "!shadow-none !border-0 !bg-transparent !rounded-none",
     headerTitle: "text-2xl font-bold font-serif text-foreground",
@@ -118,8 +127,20 @@ const clerkAppearance = {
     userButtonPopoverFooter: "!bg-white",
     userPreviewMainIdentifier: "!text-gray-900",
     userPreviewSecondaryIdentifier: "!text-gray-500",
+    profileSection__emailAddresses: "!w-full",
+    profileSectionContent__emailAddresses: "!w-full",
   },
 };
+
+function AccountProfilePage() {
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-10 max-w-4xl flex justify-center">
+        <UserProfile routing="path" path="/profile" />
+      </div>
+    </Layout>
+  );
+}
 
 function SignInPage() {
   const params = new URLSearchParams(window.location.search);
@@ -362,6 +383,8 @@ function ClerkProviderWithRoutes() {
             </Route>
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
+            <Route path="/profile/*?" component={AccountProfilePage} />
+            <Route path="/account/*?" component={AccountProfilePage} />
             <Route path="/accept-invitation" component={AcceptInvitationPage} />
             <Route path="/courses" component={Courses} />
             <Route path="/courses/:id" component={CourseDetail} />

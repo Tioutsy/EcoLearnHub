@@ -100,7 +100,7 @@ export function Navbar() {
                 <Badge variant="outline" className="hidden sm:inline-flex text-xs bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
                   {getUserRoleLabel(user)}
                 </Badge>
-                <UserButton />
+                <UserButton userProfileMode="modal" />
               </div>
             ) : (
               <>
@@ -145,9 +145,17 @@ export function Navbar() {
 
             <div className="pt-4 border-t flex flex-col gap-3">
               {isSignedIn ? (
-                <div className="flex items-center gap-2 p-2">
-                  <UserButton />
-                  <span className="text-sm font-medium">Account Settings</span>
+                <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border">
+                  <div className="flex items-center gap-2.5">
+                    <UserButton userProfileMode="modal" />
+                    <Link
+                      href="/profile"
+                      className="text-sm font-medium hover:text-primary transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Account Settings
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <>
