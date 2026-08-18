@@ -55,6 +55,7 @@ import AdminPanel from "@/pages/admin";
 import AdminRecycling from "@/pages/admin/recycling";
 import CompanyRecycling from "@/pages/company/recycling";
 import OnboardingPage from "@/pages/onboarding";
+import JoinCompanyPage from "@/pages/join";
 import PrivacyPolicy from "@/pages/Privacy";
 import TermsOfService from "@/pages/Terms";
 import NotFound from "@/pages/not-found";
@@ -147,15 +148,20 @@ function AccountProfilePage() {
 
 function SignInPage() {
   const params = new URLSearchParams(window.location.search);
-  const inviteToken = params.get("invite");
+  const inviteToken = params.get("invite") || params.get("token");
   // If the employee arrives at sign-in with an invite token, redirect them to
   // the acceptance page after they authenticate.
   const postSignInUrl = inviteToken
-    ? `${basePath}/accept-invitation?invite=${encodeURIComponent(inviteToken)}`
+    ? `${basePath}/join?token=${encodeURIComponent(inviteToken)}`
     : params.get("redirect_url") || `${basePath}/dashboard`;
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 px-4">
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-muted/30 px-4 py-8">
+      <div className="mb-4 text-center">
+        <Link href="/join" className="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
+          Have an invitation link or access code? Join your company →
+        </Link>
+      </div>
       <SignIn
         routing="path"
         path={`${basePath}/sign-in`}
@@ -168,11 +174,11 @@ function SignInPage() {
 
 function SignUpPage() {
   const params = new URLSearchParams(window.location.search);
-  const inviteToken = params.get("invite");
+  const inviteToken = params.get("invite") || params.get("token");
   // After Clerk completes sign-up, redirect to accept-invitation if an invite token is present,
   // otherwise begin guided company administrator onboarding.
   const postSignUpUrl = inviteToken
-    ? `${basePath}/accept-invitation?invite=${encodeURIComponent(inviteToken)}`
+    ? `${basePath}/join?token=${encodeURIComponent(inviteToken)}`
     : params.get("redirect_url") || `${basePath}/onboarding`;
 
   // Pass the invite token forward so clicking "Sign in" inside Clerk's widget
@@ -192,6 +198,11 @@ function SignUpPage() {
           <p className="text-sm text-muted-foreground">
             Create your administrator account to set up your company, choose your plan and invite your team.
           </p>
+          <div className="pt-1">
+            <Link href="/join" className="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
+              Invited by your employer? Click here to join your company with an access code →
+            </Link>
+          </div>
         </div>
       )}
       <SignUp 
@@ -418,8 +429,8 @@ function ClerkProviderWithRoutes() {
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
             <Route path="/profile/*?" component={AccountProfilePage} />
-            <Route path="/account/*?" component={AccountProfilePage} />
-            <Route path="/accept-invitation" component={AcceptInvitationPage} />
+            <Route path="/join" component={JoinCompanyPage} />
+            <Route path="/accept-invitation" component={JoinCompanyPage} />
             <Route path="/courses" component={Courses} />
             <Route path="/courses/:id" component={CourseDetail} />
             {/* <Route path="/learning-paths" component={LearningPaths} />

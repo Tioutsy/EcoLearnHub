@@ -22,6 +22,7 @@ export interface AssignTrainingOptions {
   department?: string;
   dueDate?: Date | null;
   assignmentSource?: string; // "required" | "recommended"
+  skipEntitlementCheck?: boolean;
 }
 
 export interface AssignmentRowResult {
@@ -141,18 +142,20 @@ export async function assignTrainingToCompanyEmployees(
       };
 
       // 1. Entitlement check
-      const entitlement = await evaluateCourseAccess(crs.id, empAccess);
-      if (!entitlement.allowed) {
-        rowResults.push({
-          employeeId: emp.id,
-          employeeName: emp.name,
-          courseId: crs.id,
-          courseTitle: crs.title,
-          status: "not_entitled",
-          reason: entitlement.reason || "Course is not included in company subscription plan",
-        });
-        skippedCount++;
-        continue;
+      if (!options.skipEntitlementCheck) {
+        const entitlement = await evaluateCourseAccess(crs.id, empAccess);
+        if (!entitlement.allowed) {
+          rowResults.push({
+            employeeId: emp.id,
+            employeeName: emp.name,
+            courseId: crs.id,
+            courseTitle: crs.title,
+            status: "not_entitled",
+            reason: entitlement.reason || "Course is not included in company subscription plan",
+          });
+          skippedCount++;
+          continue;
+        }
       }
 
       // 2. Prerequisite check

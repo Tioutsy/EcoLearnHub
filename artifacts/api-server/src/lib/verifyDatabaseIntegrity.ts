@@ -54,7 +54,7 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
   };
 
   // 1. Verify Expected Tables
-  const requiredTables = ["learning_paths", "challenges", "challenge_participants", "badge_definitions", "employee_badges"];
+  const requiredTables = ["learning_paths", "challenges", "challenge_participants", "badge_definitions", "employee_badges", "employee_invitations"];
   for (const table of requiredTables) {
     const exists = await checkTableExists(table);
     if (!exists) {
@@ -76,7 +76,8 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
     challenges: ["linked_course_id", "code"],
     challenge_participants: ["company_id", "status", "points_awarded"],
     badge_definitions: ["code"],
-    employee_badges: ["employee_id", "company_id", "badge_id"]
+    employee_badges: ["employee_id", "company_id", "badge_id"],
+    employee_invitations: ["company_id", "email", "token_hash", "display_code_hash", "display_code_last_four", "status", "expires_at"]
   };
 
   for (const [table, cols] of Object.entries(requiredColumns)) {

@@ -29,4 +29,5 @@ export * from "./pilotCompanies";
 export * from "./pilotLearningPlans";
 export * from "./pilotFeedback";
 export * from "./pilotIssues";
+export * from "./employeeInvitations";
 

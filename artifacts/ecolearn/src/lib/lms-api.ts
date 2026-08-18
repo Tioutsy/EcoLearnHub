@@ -122,6 +122,111 @@ export function useAssignCompanyCourses() {
   });
 }
 
+// ─── Sprint 12: Seat Usage & Employee Invitations ───────────────────────────
+
+export interface SeatUsageData {
+  companyId: number;
+  companyName: string;
+  activeEmployees: number;
+  pendingInvitations: number;
+  reservedSeats: number;
+  maxSeats: number;
+  remainingSeats: number;
+  subscriptionStatus: string;
+  subscriptionPlanCode: string | null;
+  subscriptionPlanName: string | null;
+  bandCode: string | null;
+  bandLabel: string | null;
+  canInvite: boolean;
+  reason: string | null;
+}
+
+export interface CompanyInvitation {
+  id: number;
+  companyId: number;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  department: string | null;
+  intendedRole: string;
+  displayCode: string;
+  status: "pending" | "accepted" | "expired" | "revoked";
+  expiresAt: string;
+  invitationLink?: string;
+  rawToken?: string;
+  emailSent?: boolean;
+  message?: string;
+  createdAt: string;
+  acceptedAt?: string | null;
+}
+
+export function useCompanySeatUsage() {
+  return useQuery({
+    queryKey: ["company-seat-usage"],
+    queryFn: () => apiJson<SeatUsageData>("/api/company/employees/seat-usage"),
+  });
+}
+
+export function useCompanyEmployeeInvitations() {
+  return useQuery({
+    queryKey: ["company-employee-invitations"],
+    queryFn: () => apiJson<CompanyInvitation[]>("/api/company/employee-invitations"),
+  });
+}
+
+export function useInviteEmployee() {
+  return useMutation({
+    mutationFn: (data: {
+      email: string;
+      firstName?: string;
+      lastName?: string;
+      department?: string;
+      intendedRole?: "employee" | "manager" | "admin";
+    }) =>
+      apiJson<CompanyInvitation>("/api/company/employee-invitations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }),
+  });
+}
+
+export function useResendEmployeeInvitation() {
+  return useMutation({
+    mutationFn: (invitationId: number) =>
+      apiJson<CompanyInvitation>(`/api/company/employee-invitations/${invitationId}/resend`, {
+        method: "POST",
+      }),
+  });
+}
+
+export function useRevokeEmployeeInvitation() {
+  return useMutation({
+    mutationFn: (invitationId: number) =>
+      apiJson<{ id: number; status: string; message: string }>(`/api/company/employee-invitations/${invitationId}/revoke`, {
+        method: "POST",
+      }),
+  });
+}
+
+export function useDeactivateEmployee() {
+  return useMutation({
+    mutationFn: (employeeId: number) =>
+      apiJson<{ message: string; employee: any }>(`/api/company/employees/${employeeId}/deactivate`, {
+        method: "POST",
+      }),
+  });
+}
+
+export function useReactivateEmployee() {
+  return useMutation({
+    mutationFn: (employeeId: number) =>
+      apiJson<{ message: string; employee: any }>(`/api/company/employees/${employeeId}/reactivate`, {
+        method: "POST",
+      }),
+  });
+}
+
 export function useCreateEmployeeInvitation() {
   return useMutation({
     mutationFn: (id: number) =>

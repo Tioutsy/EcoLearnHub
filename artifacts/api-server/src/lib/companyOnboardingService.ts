@@ -870,6 +870,7 @@ export async function assignStarterCourse(
     employeeIds: activeEmployees.map((e) => e.id),
     dueDate: dueDate,
     assignmentSource: "required",
+    skipEntitlementCheck: true,
   });
 
   return {

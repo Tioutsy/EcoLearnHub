@@ -27,6 +27,16 @@ import {
   getCompanyAccess,
 } from "../lib/access";
 import { dispatchNotificationDelivery } from "../lib/notificationDeliveryService";
+import {
+  getCompanySeatUsage,
+  verifyCanInvite,
+} from "../lib/seatEnforcementService";
+import {
+  createEmployeeInvitation,
+  resendEmployeeInvitation,
+  revokeEmployeeInvitation,
+  listCompanyInvitations,
+} from "../lib/invitationService";
 
 const router = Router();
 
@@ -432,6 +442,110 @@ router.post("/assignments", async (req, res): Promise<void> => {
   }
 });
 
+// GET /company/employees/seat-usage — Authoritative seat capacity & subscription status
+router.get("/employees/seat-usage", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const seatUsage = await getCompanySeatUsage(access.companyId);
+    res.json(seatUsage);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err }, "Failed to get seat usage");
+      res.status(500).json({ error: "Failed to get seat usage" });
+    }
+  }
+});
+
+// GET /company/employee-invitations — List all invitations for company
+router.get("/employee-invitations", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const invitations = await listCompanyInvitations(access.companyId);
+    res.json(invitations);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err }, "Failed to list employee invitations");
+      res.status(500).json({ error: "Failed to list employee invitations" });
+    }
+  }
+});
+
+// POST /company/employee-invitations — Create employee invitation
+router.post("/employee-invitations", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const origin =
+      typeof req.headers.origin === "string"
+        ? req.headers.origin
+        : process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ?? "http://localhost:5173";
+
+    const result = await createEmployeeInvitation(
+      access.companyId,
+      access.userId,
+      {
+        email: req.body.email,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        department: req.body.department,
+        intendedRole: req.body.intendedRole || req.body.role,
+      },
+      origin
+    );
+
+    res.status(201).json(result);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err }, "Failed to create employee invitation");
+      res.status(500).json({ error: "Failed to create employee invitation" });
+    }
+  }
+});
+
+// POST /company/employee-invitations/:id/resend — Resend employee invitation
+router.post("/employee-invitations/:id/resend", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid invitation id" });
+      return;
+    }
+
+    const origin =
+      typeof req.headers.origin === "string"
+        ? req.headers.origin
+        : process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ?? "http://localhost:5173";
+
+    const result = await resendEmployeeInvitation(access.companyId, id, origin);
+    res.json(result);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err }, "Failed to resend employee invitation");
+      res.status(500).json({ error: "Failed to resend employee invitation" });
+    }
+  }
+});
+
+// POST /company/employee-invitations/:id/revoke — Revoke employee invitation
+router.post("/employee-invitations/:id/revoke", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: "Invalid invitation id" });
+      return;
+    }
+
+    const result = await revokeEmployeeInvitation(access.companyId, id);
+    res.json(result);
+  } catch (err) {
+    if (!sendHttpError(res, err)) {
+      req.log?.error({ err }, "Failed to revoke employee invitation");
+      res.status(500).json({ error: "Failed to revoke employee invitation" });
+    }
+  }
+});
+
 router.get("/employees", async (req, res): Promise<void> => {
   try {
     const access = await requireCompanyAdmin(req);
@@ -454,7 +568,10 @@ router.post("/employees", async (req, res): Promise<void> => {
     }
     const employeeData = parsed.data;
     const employeeName = employeeData.name!;
-    const employeeEmail = employeeData.email!;
+    const employeeEmail = employeeData.email!.toLowerCase();
+
+    // Check authoritative seat capacity and active subscription
+    await verifyCanInvite(access.companyId);
 
     const existing = await db
       .select()
@@ -462,26 +579,12 @@ router.post("/employees", async (req, res): Promise<void> => {
       .where(
         and(
           eq(employeesTable.companyId, access.companyId),
-          eq(employeesTable.email, employeeEmail),
+          sql`lower(${employeesTable.email}) = ${employeeEmail}`,
         ),
       )
       .limit(1);
     if (existing.length > 0) {
-      res.status(409).json({ error: "An employee with this email already exists" });
-      return;
-    }
-
-    const [company] = await db
-      .select()
-      .from(companiesTable)
-      .where(eq(companiesTable.id, access.companyId))
-      .limit(1);
-
-    const currentEmployees = await getCompanyEmployees(access.companyId);
-    if (company && company.maxEmployees && currentEmployees.length >= company.maxEmployees) {
-      res.status(403).json({
-        error: `Employee seat limit reached (${currentEmployees.length} of ${company.maxEmployees} seats used). Please upgrade your subscription band to add more employees.`
-      });
+      res.status(409).json({ error: "An employee with this email already exists", code: "MEMBERSHIP_ALREADY_EXISTS" });
       return;
     }
 
@@ -494,6 +597,7 @@ router.post("/employees", async (req, res): Promise<void> => {
         department: employeeData.department ?? null,
         jobTitle: employeeData.jobTitle ?? null,
         role: employeeData.role ?? "employee",
+        status: "active",
       })
       .returning();
 
@@ -560,6 +664,25 @@ router.patch("/employees/:id", async (req, res): Promise<void> => {
           });
           return;
         }
+      }
+    }
+
+    // If reactivating an inactive/deactivated employee, enforce subscription and seat capacity
+    if (parsed.data.status === "active" && existing.status !== "active") {
+      const usage = await getCompanySeatUsage(access.companyId);
+      if (usage.subscriptionStatus !== "ACTIVE") {
+        res.status(402).json({
+          error: "An active paid subscription is required to reactivate employees.",
+          code: "SUBSCRIPTION_INACTIVE",
+        });
+        return;
+      }
+      if (usage.activeEmployees >= usage.maxSeats) {
+        res.status(409).json({
+          error: `Cannot reactivate employee: seat capacity reached (${usage.activeEmployees} of ${usage.maxSeats} active seats occupied). Upgrade your subscription band first.`,
+          code: "SEAT_LIMIT_REACHED",
+        });
+        return;
       }
     }
 
@@ -928,10 +1051,13 @@ router.post("/employees/:id/reactivate", async (req, res): Promise<void> => {
       return;
     }
 
-    const { getCompanyOnboardingStatus } = await import("../lib/companyOnboardingService");
-    const status = await getCompanyOnboardingStatus(access.companyId);
-    if (status.employeeCapacity.remaining <= 0) {
-      res.status(422).json({ error: "Cannot reactivate employee: Company employee band limit reached." });
+    const seatUsage = await getCompanySeatUsage(access.companyId);
+    if (seatUsage.subscriptionStatus !== "ACTIVE") {
+      res.status(402).json({ error: "Active company subscription is required to reactivate employees.", code: "SUBSCRIPTION_INACTIVE" });
+      return;
+    }
+    if (seatUsage.reservedSeats >= seatUsage.maxSeats) {
+      res.status(403).json({ error: `Cannot reactivate employee: Company seat limit reached (${seatUsage.reservedSeats} of ${seatUsage.maxSeats} seats reserved).`, code: "SEAT_LIMIT_REACHED" });
       return;
     }
 

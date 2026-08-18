@@ -765,6 +765,62 @@ export async function ensureSchemaModifications() {
           ALTER TABLE "company_subscriptions" ADD COLUMN IF NOT EXISTS "agreed_yearly_amount" numeric(10, 2);
         `);
       }
+    },
+    {
+      name: "Ensure employee_invitations table and indexes",
+      check: async () => await tableExists("employee_invitations"),
+      execute: async () => {
+        await db.execute(sql`
+          CREATE TABLE IF NOT EXISTS "employee_invitations" (
+            "id" serial PRIMARY KEY,
+            "company_id" integer NOT NULL REFERENCES "companies"("id") ON DELETE CASCADE,
+            "email" text NOT NULL,
+            "first_name" text,
+            "last_name" text,
+            "department" text,
+            "intended_role" text NOT NULL DEFAULT 'employee',
+            "token_hash" text NOT NULL,
+            "display_code_hash" text,
+            "display_code_last_four" varchar(4),
+            "status" text NOT NULL DEFAULT 'pending',
+            "expires_at" timestamp with time zone NOT NULL,
+            "invited_by" text,
+            "accepted_by" text,
+            "accepted_at" timestamp with time zone,
+            "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+            "updated_at" timestamp with time zone NOT NULL DEFAULT now()
+          );
+          CREATE UNIQUE INDEX IF NOT EXISTS "employee_invitations_token_hash_idx" ON "employee_invitations" ("token_hash");
+          CREATE INDEX IF NOT EXISTS "employee_invitations_company_email_idx" ON "employee_invitations" ("company_id", "email");
+          CREATE INDEX IF NOT EXISTS "employee_invitations_company_status_idx" ON "employee_invitations" ("company_id", "status");
+        `);
+      }
+    },
+    {
+      name: "Ensure secure access code hashing columns in employee_invitations",
+      check: async () => (await columnExists("employee_invitations", "display_code_hash")) && (await columnExists("employee_invitations", "display_code_last_four")),
+      execute: async () => {
+        await db.execute(sql`ALTER TABLE "employee_invitations" ADD COLUMN IF NOT EXISTS "display_code_hash" text;`);
+        await db.execute(sql`ALTER TABLE "employee_invitations" ADD COLUMN IF NOT EXISTS "display_code_last_four" varchar(4);`);
+
+        const oldColExists = await columnExists("employee_invitations", "display_code");
+        if (oldColExists) {
+          const { normalizeDisplayCode, hashDisplayCode } = await import("./invitationService");
+          const result: any = await db.execute(sql`SELECT id, display_code FROM "employee_invitations" WHERE "display_code" IS NOT NULL`);
+          const rowsToUpdate = Array.isArray(result) ? result : result.rows || [];
+          for (const r of rowsToUpdate) {
+            if (r.display_code) {
+              const { canonicalCode, lastFour } = normalizeDisplayCode(r.display_code);
+              const hash = hashDisplayCode(canonicalCode);
+              await db.execute(sql`UPDATE "employee_invitations" SET "display_code_hash" = ${hash}, "display_code_last_four" = ${lastFour} WHERE id = ${r.id}`);
+            }
+          }
+          await db.execute(sql`ALTER TABLE "employee_invitations" DROP COLUMN IF EXISTS "display_code";`);
+        }
+
+        await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS "uidx_employee_invitations_display_code_hash" ON "employee_invitations" ("display_code_hash");`);
+        await db.execute(sql`CREATE INDEX IF NOT EXISTS "idx_employee_invitations_company_status" ON "employee_invitations" ("company_id", "status");`);
+      }
     }
   ];
 

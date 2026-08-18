@@ -59,6 +59,7 @@ router.use("/certificates", certificatesRouter);
 router.use("/company", companiesRouter);
 router.use("/companies", companiesRouter);
 router.use("/invitations", invitationsRouter);
+router.use("/employee-invitations", invitationsRouter);
 router.use("/reminders", remindersRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/analytics", analyticsRouter);

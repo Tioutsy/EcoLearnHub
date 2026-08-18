@@ -331,8 +331,18 @@ export async function requireSameCompanyEmployee(
 
 export function sendHttpError(res: Response, err: unknown): boolean {
   if (err instanceof HttpError) {
-    res.status(err.status).json({ error: err.message });
-    return true;
+    try {
+      const parsed = JSON.parse(err.message);
+      res.status(err.status).json({
+        error: parsed.message || parsed.error || "An error occurred",
+        code: parsed.code,
+        ...parsed,
+      });
+      return true;
+    } catch {
+      res.status(err.status).json({ error: err.message });
+      return true;
+    }
   }
   return false;
 }

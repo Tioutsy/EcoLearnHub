@@ -290,7 +290,10 @@ export default function InternalHome() {
     );
   }
 
-  const activeBgImage = (isAdmin || isMgr) ? adminPrimaryAction.thumbnail : learnerPrimaryAction.thumbnail;
+  const esgDefaultIllustration = "/images/esg-sustainability-campus.jpg";
+  const activeBgImage =
+    ((isAdmin || isMgr) ? adminPrimaryAction.thumbnail : learnerPrimaryAction.thumbnail) ||
+    esgDefaultIllustration;
 
   return (
     <Layout>
@@ -329,21 +332,17 @@ export default function InternalHome() {
         <div className="grid lg:grid-cols-3 gap-6 items-stretch">
           {/* PRIMARY NEXT ACTION (2/3 width on desktop) */}
           <div className="lg:col-span-2 bg-card border rounded-2xl p-6 sm:p-7 shadow-sm flex flex-col justify-between relative overflow-hidden group min-h-[220px]">
-            {/* Dynamic Course Background Image with refined gradient readability overlay */}
-            {activeBgImage ? (
-              <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
-                <img
-                  src={activeBgImage}
-                  alt=""
-                  className="w-full h-full object-cover object-center scale-105 transition-transform duration-700 group-hover:scale-110"
-                />
-                {/* Refined gradient overlay: high contrast on left for typography, subtle image preview on right */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/90 to-background/50 dark:from-background/95 dark:via-background/90 dark:to-background/60" />
-                <div className="absolute inset-0 bg-emerald-950/10 dark:bg-emerald-950/30 mix-blend-multiply" />
-              </div>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-card via-card to-emerald-50/30 dark:to-emerald-950/20 pointer-events-none rounded-2xl" />
-            )}
+            {/* Dynamic Course / ESG Background Image with refined gradient readability overlay */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+              <img
+                src={activeBgImage}
+                alt="ESG Sustainability"
+                className="w-full h-full object-cover object-right sm:object-center scale-105 transition-transform duration-700 group-hover:scale-110"
+              />
+              {/* Refined gradient overlay: high contrast on left for typography, subtle ESG illustration on right */}
+              <div className="absolute inset-0 bg-gradient-to-r from-card via-card/95 sm:via-card/85 to-card/20 dark:from-card dark:via-card/95 sm:dark:via-card/85 dark:to-card/25" />
+              <div className="absolute inset-0 bg-emerald-950/10 dark:bg-emerald-950/30 mix-blend-multiply" />
+            </div>
 
             <div className="relative z-10 flex flex-col justify-between h-full">
               <div>
