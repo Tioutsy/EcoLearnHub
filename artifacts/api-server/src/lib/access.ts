@@ -293,7 +293,10 @@ export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess>
     throw new HttpError(401, "Authentication required");
   }
 
-  if (!isPlatformRole(claimRole)) {
+  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
+  const isPlatformAdmin = isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail);
+
+  if (!isPlatformAdmin) {
     throw new HttpError(403, "Platform administrator access required");
   }
 
