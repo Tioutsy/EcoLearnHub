@@ -41,34 +41,18 @@ test("Sprint 12.2 — Controlled Company Pilot Passes Test Suite", async (t) => 
   const testRunId = Date.now().toString().slice(-6);
   const platformAdminId = `admin-test-${testRunId}`;
 
-  // Helper to ensure clean, isolated test courses without prerequisites exist
-  const catRes: any = await db.execute(sql`SELECT id FROM "categories" LIMIT 1`);
-  const catRows = catRes.rows || catRes;
-  const categoryId = catRows[0]?.id || 1;
-
+  // Helper to ensure clean, isolated test courses from existing canonical catalogue without prerequisites
   const [testCourse1] = await db
-    .insert(coursesTable)
-    .values({
-      title: `Pilot Test ESG Course 1 (${testRunId})`,
-      slug: `pilot-test-esg-1-${testRunId}`,
-      courseCode: `PILOT-101-${testRunId}`,
-      description: "Test pilot course 1",
-      categoryId,
-      isPublished: true,
-    })
-    .returning();
+    .select()
+    .from(coursesTable)
+    .where(eq(coursesTable.id, 1))
+    .limit(1);
 
   const [testCourse2] = await db
-    .insert(coursesTable)
-    .values({
-      title: `Pilot Test ESG Course 2 (${testRunId})`,
-      slug: `pilot-test-esg-2-${testRunId}`,
-      courseCode: `PILOT-102-${testRunId}`,
-      description: "Test pilot course 2",
-      categoryId,
-      isPublished: true,
-    })
-    .returning();
+    .select()
+    .from(coursesTable)
+    .where(eq(coursesTable.id, 3))
+    .limit(1);
 
   // ── Scenario 1: Code normalization ──────────────────────────────────────────
   await t.test("1. normalizePilotCode normalizes diverse user inputs correctly", () => {
@@ -249,6 +233,7 @@ test("Sprint 12.2 — Controlled Company Pilot Passes Test Suite", async (t) => 
       companyName: `Revoke Test ${testRunId}`,
       intendedContactName: "Bob Smith",
       intendedContactEmail: `bob.${testRunId}@test.mu`,
+      permittedCourseIds: [testCourse1.id],
     });
 
     await revokePilotPass(platformAdminId, p2.pilotPass.id, "Test revocation");
@@ -278,6 +263,7 @@ test("Sprint 12.2 — Controlled Company Pilot Passes Test Suite", async (t) => 
       companyName: `Race Corp ${testRunId}`,
       intendedContactName: "Alice Runner",
       intendedContactEmail: `alice.${testRunId}@race.mu`,
+      permittedCourseIds: [testCourse1.id],
     });
 
     const attempts = [1, 2].map((idx) =>
@@ -320,6 +306,7 @@ test("Sprint 12.2 — Controlled Company Pilot Passes Test Suite", async (t) => 
       intendedContactName: "Exp User",
       intendedContactEmail: `exp.${testRunId}@expired.mu`,
       durationDays: 30,
+      permittedCourseIds: [testCourse1.id],
     });
 
     const expRedemption = await db.transaction(async (tx) => {
@@ -391,6 +378,7 @@ test("Sprint 12.2 — Controlled Company Pilot Passes Test Suite", async (t) => 
       companyName: `Revoke Sub Corp ${testRunId}`,
       intendedContactName: "Mark Revoke",
       intendedContactEmail: `mark.${testRunId}@revoke.mu`,
+      permittedCourseIds: [testCourse1.id],
     });
 
     const p3Redeem = await db.transaction(async (tx) => {

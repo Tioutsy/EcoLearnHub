@@ -955,6 +955,93 @@ export async function ensureSchemaModifications() {
         await db.execute(sql`CREATE INDEX IF NOT EXISTS "idx_pilot_notifications_pass_id" ON "pilot_notifications" ("pilot_pass_id");`);
         await db.execute(sql`CREATE INDEX IF NOT EXISTS "idx_upgrade_request_audit_logs_request_id" ON "upgrade_request_audit_logs" ("upgrade_request_id");`);
       }
+    },
+    {
+      name: "Sprint 12.3.1 Remove unauthorised pilot courses and restore canonical catalogue",
+      check: async () => {
+        const res = await db.execute(sql`
+          SELECT 1 FROM "courses" 
+          WHERE "id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
+             OR "course_code" LIKE 'PILOT-%'
+             OR "slug" LIKE 'pilot-test-%'
+             OR "slug" LIKE 'sprint-12-3-module-%'
+          LIMIT 1;
+        `);
+        return res.rows.length === 0;
+      },
+      execute: async () => {
+        await db.execute(sql`
+          -- 1. Re-map any test enrollments on unauthorised courses to canonical course 1 (ELH-01)
+          UPDATE "enrollments"
+          SET "course_id" = 1
+          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
+             OR "course_id" IN (
+               SELECT "id" FROM "courses" 
+               WHERE "course_code" LIKE 'PILOT-%' 
+                  OR "slug" LIKE 'pilot-test-%' 
+                  OR "slug" LIKE 'sprint-12-3-module-%'
+             );
+
+          -- 2. Re-map any certificates on unauthorised courses to canonical course 1 (ELH-01)
+          UPDATE "certificates"
+          SET "course_id" = 1
+          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
+             OR "course_id" IN (
+               SELECT "id" FROM "courses" 
+               WHERE "course_code" LIKE 'PILOT-%' 
+                  OR "slug" LIKE 'pilot-test-%' 
+                  OR "slug" LIKE 'sprint-12-3-module-%'
+             );
+
+          -- 3. Re-map any quiz questions or attempts if any exist
+          UPDATE "quiz_questions"
+          SET "course_id" = 1
+          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
+             OR "course_id" IN (
+               SELECT "id" FROM "courses" 
+               WHERE "course_code" LIKE 'PILOT-%' 
+                  OR "slug" LIKE 'pilot-test-%' 
+                  OR "slug" LIKE 'sprint-12-3-module-%'
+             );
+
+          UPDATE "quiz_attempts"
+          SET "course_id" = 1
+          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
+             OR "course_id" IN (
+               SELECT "id" FROM "courses" 
+               WHERE "course_code" LIKE 'PILOT-%' 
+                  OR "slug" LIKE 'pilot-test-%' 
+                  OR "slug" LIKE 'sprint-12-3-module-%'
+             );
+
+          -- 4. Repair pilot passes permitted_course_ids referencing unauthorised courses to canonical course 1 (ELH-01)
+          UPDATE "company_pilot_passes"
+          SET "permitted_course_ids" = ARRAY[1]::integer[]
+          WHERE 596 = ANY("permitted_course_ids")
+             OR 597 = ANY("permitted_course_ids")
+             OR 599 = ANY("permitted_course_ids")
+             OR 600 = ANY("permitted_course_ids")
+             OR 603 = ANY("permitted_course_ids")
+             OR 604 = ANY("permitted_course_ids")
+             OR 606 = ANY("permitted_course_ids")
+             OR 607 = ANY("permitted_course_ids")
+             OR 608 = ANY("permitted_course_ids")
+             OR 609 = ANY("permitted_course_ids")
+             OR 610 = ANY("permitted_course_ids")
+             OR 611 = ANY("permitted_course_ids")
+             OR 612 = ANY("permitted_course_ids")
+             OR 613 = ANY("permitted_course_ids")
+             OR 614 = ANY("permitted_course_ids")
+             OR 615 = ANY("permitted_course_ids");
+
+          -- 5. Delete unauthorised courses
+          DELETE FROM "courses"
+          WHERE "id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
+             OR "course_code" LIKE 'PILOT-%'
+             OR "slug" LIKE 'pilot-test-%'
+             OR "slug" LIKE 'sprint-12-3-module-%';
+        `);
+      }
     }
   ];
 

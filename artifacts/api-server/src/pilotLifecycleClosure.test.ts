@@ -46,21 +46,13 @@ describe("Sprint 12.3: Pilot Lifecycle Closure, Conversion Readiness & Commercia
   let basePilotPassId: number;
 
   before(async () => {
-    // 1. Ensure test course exists
-    const catRes: any = await db.execute(sql`SELECT id FROM "categories" LIMIT 1`);
-    const catRows = catRes.rows || catRes;
-    const categoryId = catRows[0]?.id || 1;
-
+    // 1. Ensure test course exists by querying canonical catalogue
     const [course] = await db
-      .insert(coursesTable)
-      .values({
-        title: "Sprint 12.3 Test ESG Module",
-        slug: `sprint-12-3-module-${Date.now()}`,
-        description: "Module for lifecycle and conversion testing",
-        categoryId,
-        isPublished: true,
-      })
-      .returning();
+      .select()
+      .from(coursesTable)
+      .where(eq(coursesTable.isPublished, true))
+      .orderBy(coursesTable.id)
+      .limit(1);
     testCourseId = course.id;
 
     // 2. Ensure test subscription plans and bands exist
@@ -182,6 +174,7 @@ describe("Sprint 12.3: Pilot Lifecycle Closure, Conversion Readiness & Commercia
       intendedContactName: "Bob Admin",
       intendedContactEmail: `bob_${Date.now()}@test.mu`,
       durationDays: 5,
+      permittedCourseIds: [testCourseId],
     });
 
     const redeemed = await redeemPilotPass({
@@ -590,6 +583,7 @@ describe("Sprint 12.3: Pilot Lifecycle Closure, Conversion Readiness & Commercia
       intendedContactEmail: `carol_${Date.now()}@insights.mu`,
       durationDays: 30,
       learnerSeatLimit: 10,
+      permittedCourseIds: [testCourseId],
     });
     insightsPassId = pilotPass.id;
 
@@ -687,6 +681,7 @@ describe("Sprint 12.3: Pilot Lifecycle Closure, Conversion Readiness & Commercia
       intendedContactName: "Dave Fresh",
       intendedContactEmail: `dave_${Date.now()}@unredeemed.mu`,
       durationDays: 30,
+      permittedCourseIds: [testCourseId],
     });
 
     const insights = await getPilotEngagementInsights(pilotPass.id);

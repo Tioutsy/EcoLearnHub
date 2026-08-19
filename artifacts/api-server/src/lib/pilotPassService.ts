@@ -150,7 +150,34 @@ export async function createPilotPass(
   const durationDays = input.durationDays && input.durationDays > 0 ? input.durationDays : 30;
   const learnerSeatLimit = input.learnerSeatLimit && input.learnerSeatLimit > 0 ? input.learnerSeatLimit : 10;
   const administratorSeatLimit = input.administratorSeatLimit && input.administratorSeatLimit > 0 ? input.administratorSeatLimit : 1;
-  const permittedCourseIds = Array.isArray(input.permittedCourseIds) ? input.permittedCourseIds : [];
+
+  // Sprint 12.3.1: Validate permittedCourseIds
+  if (!input.permittedCourseIds || !Array.isArray(input.permittedCourseIds) || input.permittedCourseIds.length === 0) {
+    throw new HttpError(400, "At least one permitted canonical course must be selected");
+  }
+
+  // Ensure all elements are positive integers and deduplicate
+  const rawCourseIds = input.permittedCourseIds;
+  if (!rawCourseIds.every((id: any) => typeof id === "number" && Number.isInteger(id) && id > 0)) {
+    throw new HttpError(400, "Invalid course ID format in permittedCourseIds");
+  }
+
+  const sanitizedCourseIds = Array.from(new Set(rawCourseIds as number[]));
+  if (sanitizedCourseIds.length === 0) {
+    throw new HttpError(400, "At least one permitted canonical course must be selected");
+  }
+
+  // Validate that all course IDs exist in canonical catalogue and are published
+  const existingCourses = await db
+    .select({ id: coursesTable.id })
+    .from(coursesTable)
+    .where(and(inArray(coursesTable.id, sanitizedCourseIds), eq(coursesTable.isPublished, true)));
+
+  if (existingCourses.length !== sanitizedCourseIds.length) {
+    throw new HttpError(400, "One or more selected courses do not exist or are not published in the canonical catalogue");
+  }
+
+  const permittedCourseIds = sanitizedCourseIds;
 
   const { canonicalCode, codeHash, codeLastFour } = generatePilotPassCode();
 
@@ -927,7 +954,7 @@ export async function convertPilotToPaid(
       await tx.insert(pilotPassAuditLogsTable).values({
         pilotPassId: pilotPass.id,
         action: "converted",
-        performedBy: input.performedBy,
+        performedBy: input.performedBy || (input as any).performedByUserId || "platform_admin",
         details: JSON.stringify({
           planCode: plan.code,
           bandCode: band.code,

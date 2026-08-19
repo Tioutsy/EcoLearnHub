@@ -324,6 +324,64 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
     });
   }
 
+  // 12. Sprint 12.3.1: Catalogue Integrity Protection Checks
+  // A. Check for non-existent or unpublished course IDs in company_pilot_passes.permitted_course_ids
+  const pilotPassesWithCourses = await db.execute(sql`
+    SELECT id, company_name, permitted_course_ids 
+    FROM company_pilot_passes 
+    WHERE permitted_course_ids IS NOT NULL AND cardinality(permitted_course_ids) > 0
+  `);
+
+  const allPublishedCourses = await db.execute(sql`
+    SELECT id FROM courses WHERE is_published = true
+  `);
+  const publishedCourseIdSet = new Set((allPublishedCourses.rows as any[]).map(r => r.id));
+
+  for (const pass of pilotPassesWithCourses.rows as any[]) {
+    if (pass.permitted_course_ids && Array.isArray(pass.permitted_course_ids)) {
+      const invalidIds = pass.permitted_course_ids.filter((cid: number) => !publishedCourseIdSet.has(cid));
+      if (invalidIds.length > 0) {
+        issues.push({
+          type: "critical",
+          message: `Pilot pass ID ${pass.id} references invalid or unpublished course IDs: ${invalidIds.join(", ")}`,
+          details: { passId: pass.id, invalidIds }
+        });
+      }
+    }
+  }
+
+  // B. Check for duplicate course codes in courses table
+  const duplicateCourseCodes = await db.execute(sql`
+    SELECT course_code, count(*) as count 
+    FROM courses 
+    WHERE course_code IS NOT NULL 
+    GROUP BY course_code 
+    HAVING count(*) > 1
+  `);
+  if (duplicateCourseCodes.rows.length > 0) {
+    issues.push({
+      type: "critical",
+      message: "Duplicate course_code values found in courses table.",
+      details: duplicateCourseCodes.rows
+    });
+  }
+
+  // C. Check that no unauthorised pilot-specific test courses exist in courses table
+  const unauthorizedCourses = await db.execute(sql`
+    SELECT id, course_code, title, slug 
+    FROM courses 
+    WHERE course_code LIKE 'PILOT-%' 
+       OR slug LIKE 'pilot-test-%' 
+       OR slug LIKE 'sprint-12-3-module-%'
+  `);
+  if (unauthorizedCourses.rows.length > 0) {
+    issues.push({
+      type: "critical",
+      message: "Unauthorised pilot test courses found in canonical courses table.",
+      details: unauthorizedCourses.rows
+    });
+  }
+
   const isValid = !issues.some(i => i.type === "critical");
   logger.info({ valid: isValid, issueCount: issues.length }, "Database integrity checks completed");
 

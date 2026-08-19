@@ -305,6 +305,10 @@ export default function PlatformAdminPilotPasses() {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (selectedCourseIds.length === 0) {
+      toast.error("Please select at least one permitted course for the pilot pass");
+      return;
+    }
     createMutation.mutate({
       companyName,
       intendedContactName: contactName,
@@ -530,7 +534,7 @@ export default function PlatformAdminPilotPasses() {
 
                         <TableCell>
                           <div className="text-xs text-muted-foreground">
-                            {pass.permittedCourseIds?.length ? `${pass.permittedCourseIds.length} Courses Selected` : "Full Catalog (All)"}
+                            {pass.permittedCourseIds?.length ? `${pass.permittedCourseIds.length} Course${pass.permittedCourseIds.length > 1 ? "s" : ""}` : "No courses"}
                           </div>
                         </TableCell>
 
@@ -834,29 +838,43 @@ export default function PlatformAdminPilotPasses() {
                 </div>
               </div>
 
-              {/* Permitted Courses Selection */}
+              {/* Permitted Courses Selection (Sprint 12.3.1: Explicit Canonical Selection) */}
               <div className="space-y-2 pt-2 border-t">
-                <Label>Permitted Pilot Courses ({selectedCourseIds.length ? `${selectedCourseIds.length} Selected` : "All Courses Included"})</Label>
-                <div className="max-h-40 overflow-y-auto space-y-1.5 p-2 rounded-lg border bg-muted/20 text-sm">
-                  {courses?.map((c) => (
-                    <label key={c.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/40 p-1 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedCourseIds.includes(c.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCourseIds([...selectedCourseIds, c.id]);
-                          } else {
-                            setSelectedCourseIds(selectedCourseIds.filter((id) => id !== c.id));
-                          }
-                        }}
-                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                      />
-                      <span className="truncate">{c.courseCode ? `[${c.courseCode}] ` : ""}{c.title}</span>
-                    </label>
-                  ))}
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-1 font-medium">
+                    Permitted Pilot Courses <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    {selectedCourseIds.length} Selected
+                  </span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">Leave unchecked to include the standard full course catalog.</p>
+                <div className="max-h-48 overflow-y-auto space-y-1.5 p-2 rounded-lg border bg-muted/20 text-sm">
+                  {courses && courses.length > 0 ? (
+                    courses.map((c) => (
+                      <label key={c.id} className="flex items-center gap-2.5 cursor-pointer hover:bg-muted/50 p-1.5 rounded transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={selectedCourseIds.includes(c.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedCourseIds([...selectedCourseIds, c.id]);
+                            } else {
+                              setSelectedCourseIds(selectedCourseIds.filter((id) => id !== c.id));
+                            }
+                          }}
+                          className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                        />
+                        <span className="truncate font-medium text-xs">
+                          {c.courseCode ? <span className="text-emerald-700 dark:text-emerald-400 font-mono mr-1.5">[{c.courseCode}]</span> : null}
+                          {c.title}
+                        </span>
+                      </label>
+                    ))
+                  ) : (
+                    <div className="text-xs text-muted-foreground py-2 text-center">Loading catalogue courses...</div>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground">Select the specific canonical courses permitted during this pilot pass (at least 1 required).</p>
               </div>
 
               <div className="space-y-1.5 pt-2 border-t">
