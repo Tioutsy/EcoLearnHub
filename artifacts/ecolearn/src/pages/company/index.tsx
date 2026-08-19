@@ -39,6 +39,24 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Area,
   AreaChart,
   Bar,
@@ -189,6 +207,68 @@ export default function CompanyDashboard() {
     }
   };
 
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [selectedPlanCode, setSelectedPlanCode] = useState("COMPLETE");
+  const [selectedBandCode, setSelectedBandCode] = useState("UP_TO_25");
+  const [billingInterval, setBillingInterval] = useState<"MONTHLY" | "YEARLY">("MONTHLY");
+  const [billingContactName, setBillingContactName] = useState("");
+  const [billingContactEmail, setBillingContactEmail] = useState("");
+  const [companyNote, setCompanyNote] = useState("");
+  const [isSubmittingUpgrade, setIsSubmittingUpgrade] = useState(false);
+
+  const handleOpenUpgradeModal = () => {
+    if (company) {
+      setBillingContactName(company.name ? `${company.name} Administrator` : "");
+    }
+    setIsUpgradeModalOpen(true);
+  };
+
+  const handleSubmitUpgrade = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!billingContactName || !billingContactEmail) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter billing contact name and email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingUpgrade(true);
+    try {
+      await customFetch("/api/company/upgrade-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          selectedPlanCode,
+          selectedEmployeeBandCode: selectedBandCode,
+          billingInterval,
+          billingContactName,
+          billingContactEmail,
+          companyNote,
+        }),
+      });
+
+      toast({
+        title: "Upgrade Request Submitted",
+        description: "Your request has been received. Our enterprise team will contact you to confirm payment and activate your commercial subscription.",
+      });
+
+      setIsUpgradeModalOpen(false);
+      // Refresh pilot status
+      const updated = await customFetch<any>("/api/company/pilot-status");
+      setPilotStatus(updated);
+    } catch (err: any) {
+      toast({
+        title: "Submission Failed",
+        description: err?.message || "Could not submit upgrade request.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingUpgrade(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="bg-primary/5 border-b py-8">
@@ -237,38 +317,119 @@ export default function CompanyDashboard() {
         {/* Sprint 11A: AI Training Insights Card */}
         <TrainingInsightsCard className="mb-8" />
 
-        {/* Pilot Pass Active / Expired Banner */}
-        {pilotStatus?.isPilot && (
-          <div className={cn("border rounded-2xl p-6 mb-8 backdrop-blur-md", pilotStatus.isReadOnly ? "bg-red-500/10 border-red-500/30 text-red-950 dark:text-red-200" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-100")}>
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className={cn("text-xs font-bold px-2.5 py-0.5 rounded-md border", pilotStatus.isReadOnly ? "bg-red-500/20 text-red-800 dark:text-red-300 border-red-500/30" : "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/30")}>
-                    {pilotStatus.isReadOnly ? "Pilot Expired (Read-Only 60 Days)" : "Company Pilot Pass Active"}
-                  </span>
-                  <span className="text-xs text-muted-foreground font-mono font-medium">
-                    {pilotStatus.learnerSeatLimit} Learner Seats Included
-                  </span>
+        {/* Sprint 12.3: 5 Distinct Pilot Lifecycle Banner States */}
+        {pilotStatus?.isPilot && pilotStatus.effectiveStatus !== "CONVERTED" && (
+          <>
+            {pilotStatus.effectiveStatus === "CONVERSION_PENDING" ? (
+              <div className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-950 dark:text-indigo-200 rounded-2xl p-6 mb-8 backdrop-blur-md">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-800 dark:text-indigo-300 border border-indigo-500/30">
+                        Upgrade Request Received
+                      </span>
+                      <span className="text-xs text-muted-foreground font-mono font-medium">
+                        {pilotStatus.upgradeRequest?.selectedPlanCode || "Complete"} Plan
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-bold font-serif text-indigo-950 dark:text-indigo-100">
+                      Commercial Conversion Pending
+                    </h2>
+                    <p className="text-sm text-indigo-900/80 dark:text-indigo-300/80">
+                      Your commercial plan upgrade request has been received. Your team's learning records are preserved. Full ongoing access will be activated once payment is confirmed.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="px-4 py-2 bg-indigo-500/20 border border-indigo-500/30 rounded-xl text-xs font-semibold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-indigo-600" />
+                      Awaiting Payment Confirmation
+                    </div>
+                  </div>
                 </div>
-                <h2 className="text-xl font-bold font-serif">
-                  {pilotStatus.isReadOnly
-                    ? "Your 30-Day Pilot Pass Has Expired"
-                    : `Your company is using a 30-day ELEVIO Skills pilot.`}
-                </h2>
-                <p className="text-sm opacity-90">
-                  {pilotStatus.isReadOnly
-                    ? "Your organisation is in read-only retention. Employee invitations and new course starts are paused. Upgrade now to preserve full learning access."
-                    : `${pilotStatus.daysRemaining} days remaining · ${pilotStatus.activeLearners} of ${pilotStatus.learnerSeatLimit} learner seats used.`}
-                </p>
               </div>
-
-              <div className="flex items-center gap-3">
-                <Button asChild className="bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm">
-                  <Link href="/pricing">Upgrade to Paid Subscription <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
-                </Button>
+            ) : pilotStatus.effectiveStatus === "EXPIRED" || pilotStatus.effectiveStatus === "REVOKED" ? (
+              <div className="bg-rose-500/10 border border-rose-500/30 text-rose-950 dark:text-rose-200 rounded-2xl p-6 mb-8 backdrop-blur-md">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-rose-500/20 text-rose-800 dark:text-rose-300 border border-rose-500/30">
+                        Pilot Expired (Read-Only 60-Day Retention)
+                      </span>
+                      <span className="text-xs text-muted-foreground font-mono font-medium">
+                        {pilotStatus.learnerSeatLimit} Seats · All Records Preserved
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-bold font-serif text-rose-950 dark:text-rose-100">
+                      Your Company Pilot Has Ended
+                    </h2>
+                    <p className="text-sm text-rose-900/80 dark:text-rose-300/80">
+                      Course access and employee invitations are paused, but your company’s learning records, certificates, and compliance reports remain securely preserved. Request an upgrade now to unlock full commercial access.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button onClick={handleOpenUpgradeModal} className="bg-rose-700 hover:bg-rose-800 text-white shadow-sm">
+                      Request an Upgrade <ArrowRight className="ml-1.5 h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" asChild className="border-rose-300 dark:border-rose-800">
+                      <Link href="/company/training-evidence"><ClipboardCheck className="mr-1.5 h-4 w-4" /> View Training Records</Link>
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            ) : pilotStatus.effectiveStatus === "EXPIRING_SOON" ? (
+              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 rounded-2xl p-6 mb-8 backdrop-blur-md">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                        Pilot Ending in {pilotStatus.daysRemaining} {pilotStatus.daysRemaining === 1 ? "Day" : "Days"}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-mono font-medium">
+                        {pilotStatus.activeLearners} of {pilotStatus.learnerSeatLimit} seats active
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-bold font-serif text-amber-950 dark:text-amber-100">
+                      Your Company Pilot Ends Soon
+                    </h2>
+                    <p className="text-sm text-amber-900/80 dark:text-amber-300/80">
+                      Your company pilot ends in {pilotStatus.daysRemaining} days. All team progress and certificates will be preserved when you upgrade. Request an upgrade to ensure uninterrupted learning.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button onClick={handleOpenUpgradeModal} className="bg-amber-700 hover:bg-amber-800 text-white shadow-sm">
+                      Request an Upgrade <ArrowRight className="ml-1.5 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-100 rounded-2xl p-6 mb-8 backdrop-blur-md">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                        Company Pilot Pass Active
+                      </span>
+                      <span className="text-xs text-muted-foreground font-mono font-medium">
+                        {pilotStatus.learnerSeatLimit} Learner Seats Included
+                      </span>
+                    </div>
+                    <h2 className="text-xl font-bold font-serif">
+                      Your Company is Using an ELEVIO Skills Pilot
+                    </h2>
+                    <p className="text-sm opacity-90">
+                      {pilotStatus.daysRemaining} days remaining · {pilotStatus.activeLearners} of {pilotStatus.learnerSeatLimit} learner seats used. All progress transfers automatically upon conversion.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button onClick={handleOpenUpgradeModal} className="bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm">
+                      Request an Upgrade <ArrowRight className="ml-1.5 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Your Learning Access Subscription Banner */}
@@ -698,6 +859,116 @@ export default function CompanyDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Commercial Upgrade Request Modal (Sprint 12.3 Phase 3) */}
+      <Dialog open={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl">Request Commercial Upgrade</DialogTitle>
+            <DialogDescription>
+              Select your desired plan and employee band. All existing employee accounts, completions, certificates, and compliance reports will be seamlessly preserved upon conversion.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitUpgrade} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="plan-select">Subscription Plan</Label>
+                <Select value={selectedPlanCode} onValueChange={setSelectedPlanCode}>
+                  <SelectTrigger id="plan-select">
+                    <SelectValue placeholder="Select Plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="COMPLETE">Complete (All Courses + Certs)</SelectItem>
+                    <SelectItem value="PROFESSIONAL">Professional (Multi-Course)</SelectItem>
+                    <SelectItem value="ESSENTIAL">Essential (Core Course)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="band-select">Employee Band</Label>
+                <Select value={selectedBandCode} onValueChange={setSelectedBandCode}>
+                  <SelectTrigger id="band-select">
+                    <SelectValue placeholder="Select Band" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="UP_TO_25">Up to 25 Employees</SelectItem>
+                    <SelectItem value="FROM_26_TO_50">26 to 50 Employees</SelectItem>
+                    <SelectItem value="FROM_51_TO_80">51 to 80 Employees</SelectItem>
+                    <SelectItem value="FROM_81_TO_120">81 to 120 Employees</SelectItem>
+                    <SelectItem value="OVER_120">Over 120 (Enterprise Custom)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="billing-interval">Billing Frequency</Label>
+              <Select value={billingInterval} onValueChange={(v: "MONTHLY" | "YEARLY") => setBillingInterval(v)}>
+                <SelectTrigger id="billing-interval">
+                  <SelectValue placeholder="Select Frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MONTHLY">Monthly Billing</SelectItem>
+                  <SelectItem value="YEARLY">Yearly Billing (10% Discount Applied)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="billing-name">Billing Contact Name *</Label>
+                <Input
+                  id="billing-name"
+                  value={billingContactName}
+                  onChange={(e) => setBillingContactName(e.target.value)}
+                  placeholder="e.g. Jean Dupont"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="billing-email">Billing Email *</Label>
+                <Input
+                  id="billing-email"
+                  type="email"
+                  value={billingContactEmail}
+                  onChange={(e) => setBillingContactEmail(e.target.value)}
+                  placeholder="billing@company.mu"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="company-notes">Additional Notes / Purchase Order Info</Label>
+              <Textarea
+                id="company-notes"
+                value={companyNote}
+                onChange={(e) => setCompanyNote(e.target.value)}
+                placeholder="Optional billing address, VAT registration, or special requirements..."
+                rows={2}
+              />
+            </div>
+
+            <div className="bg-muted/50 border rounded-xl p-3 text-xs text-muted-foreground">
+              <p>
+                <strong>Security Guarantee:</strong> Submitting this request will not interrupt current pilot access or delete any learner records. Our team will verify and issue an invoice for payment confirmation.
+              </p>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsUpgradeModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmittingUpgrade} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+                {isSubmittingUpgrade ? "Submitting..." : "Submit Upgrade Request"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }

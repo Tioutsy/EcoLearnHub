@@ -1498,7 +1498,7 @@ router.get("/training-insights", async (req: any, res: any): Promise<void> => {
   }
 });
 
-// GET /company/pilot-status — Company pilot pass status, days remaining, and read-only state
+// GET /company/pilot-status — Company pilot pass status, days remaining, and read-only state (Sprint 12.3)
 router.get("/pilot-status", async (req, res): Promise<void> => {
   try {
     const access = await getCompanyAccess(req);
@@ -1507,40 +1507,20 @@ router.get("/pilot-status", async (req, res): Promise<void> => {
       return;
     }
 
-    const [pilotPass] = await db
-      .select()
-      .from(companyPilotPassesTable)
-      .where(eq(companyPilotPassesTable.companyId, access.companyId))
-      .limit(1);
+    const { resolveCompanyPilotEntitlement } = await import("../lib/pilotPassService");
+    const entitlement = await resolveCompanyPilotEntitlement(access.companyId);
 
-    if (!pilotPass) {
-      res.json({ isPilot: false });
+    if (!entitlement.isPilot || !entitlement.pilotPass) {
+      res.json({ isPilot: false, effectiveStatus: "NONE" });
       return;
     }
 
-    const now = new Date();
-    let daysRemaining = pilotPass.durationDays;
-    let isExpired = pilotPass.status === "expired";
-    let isRevoked = pilotPass.status === "revoked";
-    let isConverted = pilotPass.status === "converted";
-
-    if (pilotPass.status === "active" && pilotPass.expiresAt) {
-      const msLeft = new Date(pilotPass.expiresAt).getTime() - now.getTime();
-      daysRemaining = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
-      isExpired = msLeft <= 0;
-    }
-
-    const employees = await db
-      .select()
-      .from(employeesTable)
-      .where(eq(employeesTable.companyId, access.companyId));
-
-    const activeLearners = employees.filter((e) => e.status === "active" && e.role !== "admin").length;
-    const isReadOnly = (isExpired || isRevoked) && !isConverted;
+    const pilotPass = entitlement.pilotPass;
 
     res.json({
       isPilot: true,
       status: pilotPass.status,
+      effectiveStatus: entitlement.effectiveStatus,
       durationDays: pilotPass.durationDays,
       learnerSeatLimit: pilotPass.learnerSeatLimit,
       administratorSeatLimit: pilotPass.administratorSeatLimit,
@@ -1548,17 +1528,75 @@ router.get("/pilot-status", async (req, res): Promise<void> => {
       startsAt: pilotPass.startsAt,
       expiresAt: pilotPass.expiresAt,
       retentionEndsAt: pilotPass.retentionEndsAt,
-      daysRemaining,
-      isExpired,
-      isRevoked,
-      isConverted,
-      isReadOnly,
-      activeLearners,
-      seatsUsed: activeLearners,
+      daysRemaining: entitlement.daysRemaining,
+      isExpired: entitlement.isExpired,
+      isRevoked: entitlement.isRevoked,
+      isConverted: entitlement.isConverted,
+      isReadOnly: entitlement.isReadOnly,
+      expiringSoon: entitlement.expiringSoon,
+      conversionPending: entitlement.conversionPending,
+      upgradeAvailable: entitlement.upgradeAvailable,
+      activeLearners: entitlement.activeLearners,
+      seatsUsed: entitlement.activeLearners,
+      upgradeRequest: entitlement.upgradeRequest,
     });
   } catch (err: any) {
     if (!sendHttpError(res, err)) {
       res.status(500).json({ error: "Failed to retrieve pilot status" });
+    }
+  }
+});
+
+// POST /company/upgrade-requests — Company Administrator submits commercial upgrade request (Sprint 12.3 Phase 3)
+router.post("/upgrade-requests", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const {
+      selectedPlanCode,
+      selectedEmployeeBandCode,
+      billingInterval,
+      billingContactName,
+      billingContactEmail,
+      companyNote,
+    } = req.body;
+
+    if (!selectedPlanCode || !selectedEmployeeBandCode || !billingContactName || !billingContactEmail) {
+      res.status(400).json({ error: "Missing required upgrade request fields" });
+      return;
+    }
+
+    const { createUpgradeRequest } = await import("../lib/pilotPassService");
+    const request = await createUpgradeRequest(access.companyId, access.userId, {
+      selectedPlanCode,
+      selectedEmployeeBandCode,
+      billingInterval: billingInterval || "MONTHLY",
+      billingContactName,
+      billingContactEmail,
+      companyNote,
+    });
+
+    res.json({
+      success: true,
+      message: "Upgrade request submitted successfully. Our team will verify and contact you for payment confirmation.",
+      upgradeRequest: request,
+    });
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err?.message || "Failed to submit upgrade request" });
+    }
+  }
+});
+
+// GET /company/upgrade-request — Retrieve company's active upgrade request (Sprint 12.3 Phase 3)
+router.get("/upgrade-request", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { getCompanyUpgradeRequest } = await import("../lib/pilotPassService");
+    const request = await getCompanyUpgradeRequest(access.companyId);
+    res.json(request);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to retrieve company upgrade request" });
     }
   }
 });

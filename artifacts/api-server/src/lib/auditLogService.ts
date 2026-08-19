@@ -10,11 +10,40 @@ export interface LogAuditEventParams {
   metadata?: Record<string, unknown> | string | null;
 }
 
+function sanitizeAuditMetadata(meta: any): string | null {
+  if (!meta) return null;
+
+  if (typeof meta === "object") {
+    const clean: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(meta)) {
+      const lower = key.toLowerCase();
+      if (
+        lower.includes("secret") ||
+        lower.includes("password") ||
+        lower.includes("token") ||
+        lower.includes("cookie") ||
+        lower.includes("codehash") ||
+        lower.includes("rawcode")
+      ) {
+        clean[key] = "[REDACTED]";
+      } else if (typeof value === "string") {
+        clean[key] = value.slice(0, 500); // bound string length
+      } else {
+        clean[key] = value;
+      }
+    }
+    return JSON.stringify(clean).slice(0, 4000);
+  }
+
+  if (typeof meta === "string") {
+    return meta.slice(0, 4000);
+  }
+
+  return String(meta).slice(0, 4000);
+}
+
 export async function logAuditEvent(params: LogAuditEventParams): Promise<any> {
-  const metadataString =
-    typeof params.metadata === "object" && params.metadata !== null
-      ? JSON.stringify(params.metadata)
-      : params.metadata ?? null;
+  const metadataString = sanitizeAuditMetadata(params.metadata);
 
   const [entry] = await db
     .insert(auditLogsTable)
@@ -24,7 +53,7 @@ export async function logAuditEvent(params: LogAuditEventParams): Promise<any> {
       actorRole: params.actorRole,
       action: params.action,
       targetType: params.targetType,
-      targetId: params.targetId !== undefined && params.targetId !== null ? String(params.targetId) : null,
+      targetId: params.targetId !== undefined && params.targetId !== null ? String(params.targetId).slice(0, 255) : null,
       metadata: metadataString,
     })
     .returning();

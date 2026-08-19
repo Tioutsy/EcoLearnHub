@@ -48,8 +48,15 @@ import {
   XCircle,
   Building2,
   BookOpen,
+  TrendingUp,
+  CheckCircle2,
+  DollarSign,
+  CreditCard,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface PilotPassItem {
   id: number;
@@ -119,6 +126,17 @@ export default function PlatformAdminPilotPasses() {
   const [convertPlan, setConvertPlan] = useState("COMPLETE");
   const [convertBand, setConvertBand] = useState("UP_TO_25");
 
+  // Sprint 12.3: Insights Drawer State
+  const [insightsPassId, setInsightsPassId] = useState<number | null>(null);
+
+  // Sprint 12.3: Commercial Payment Confirmation Modal State
+  const [paymentModalRequest, setPaymentModalRequest] = useState<any | null>(null);
+  const [paymentReference, setPaymentReference] = useState("");
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split("T")[0]);
+  const [paymentAmountMUR, setPaymentAmountMUR] = useState(1950);
+  const [paymentMethod, setPaymentMethod] = useState("MANUAL_INVOICE");
+  const [paymentInternalNote, setPaymentInternalNote] = useState("");
+
   // Fetch Pilot Passes
   const { data: passes, isLoading } = useQuery<PilotPassItem[]>({
     queryKey: ["/api/platform-admin/pilot-passes"],
@@ -129,6 +147,70 @@ export default function PlatformAdminPilotPasses() {
   const { data: courses } = useQuery<CourseItem[]>({
     queryKey: ["/api/courses"],
     queryFn: () => customFetch<CourseItem[]>("/api/courses"),
+  });
+
+  // Fetch Upgrade Requests (Sprint 12.3 Phase 3)
+  const { data: upgradeRequests, isLoading: isLoadingUpgradeRequests } = useQuery<any[]>({
+    queryKey: ["/api/platform-admin/upgrade-requests"],
+    queryFn: () => customFetch<any[]>("/api/platform-admin/upgrade-requests"),
+  });
+
+  // Fetch Engagement Insights (Sprint 12.3 Phase 4)
+  const { data: insightsData, isLoading: isLoadingInsights } = useQuery<any>({
+    queryKey: ["/api/platform-admin/pilot-passes/insights", insightsPassId],
+    queryFn: () => customFetch<any>(`/api/platform-admin/pilot-passes/${insightsPassId}/insights`),
+    enabled: Boolean(insightsPassId),
+  });
+
+  // Mark Awaiting Payment Mutation
+  const markAwaitingPaymentMutation = useMutation({
+    mutationFn: (id: number) =>
+      customFetch(`/api/platform-admin/upgrade-requests/${id}/mark-awaiting-payment`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/upgrade-requests"] });
+      toast.success("Upgrade request marked awaiting payment");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update request");
+    },
+  });
+
+  // Confirm Payment Mutation
+  const confirmPaymentMutation = useMutation({
+    mutationFn: (data: any) =>
+      customFetch(`/api/platform-admin/upgrade-requests/${data.id}/confirm-payment`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/upgrade-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/pilot-passes"] });
+      setPaymentModalRequest(null);
+      setPaymentReference("");
+      setPaymentInternalNote("");
+      toast.success("Payment recorded manually! Request is now authorized for conversion.");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to confirm payment");
+    },
+  });
+
+  // Convert Upgrade Request Mutation
+  const convertUpgradeRequestMutation = useMutation({
+    mutationFn: (id: number) =>
+      customFetch(`/api/platform-admin/upgrade-requests/${id}/convert`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/upgrade-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/pilot-passes"] });
+      toast.success("Company converted to paid commercial subscription successfully!");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to convert upgrade request");
+    },
   });
 
   // Create Mutation
@@ -454,6 +536,18 @@ export default function PlatformAdminPilotPasses() {
 
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            {pass.companyId && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-xs"
+                                onClick={() => setInsightsPassId(pass.id)}
+                              >
+                                <TrendingUp className="h-3.5 w-3.5 mr-1" />
+                                Insights
+                              </Button>
+                            )}
+
                             {(isIssued || isActive || isExpired) && !isRevoked && !isConverted && (
                               <Button
                                 size="sm"
@@ -504,6 +598,147 @@ export default function PlatformAdminPilotPasses() {
                 )}
               </TableBody>
             </Table>
+          </div>
+        </div>
+
+        {/* ── Sprint 12.3: COMMERCIAL UPGRADE REQUESTS SECTION ──────────────── */}
+        <div className="space-y-4 pt-6 border-t">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold font-serif flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-emerald-700" />
+                Commercial Upgrade Requests & Conversions
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Review self-serve upgrade requests submitted by pilot companies. Confirm manual payment before executing commercial conversions.
+              </p>
+            </div>
+            <Badge variant="outline" className="font-mono text-xs">
+              {upgradeRequests?.length || 0} Total Requests
+            </Badge>
+          </div>
+
+          <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Requested Plan & Band</TableHead>
+                    <TableHead>Billing Contact</TableHead>
+                    <TableHead>Requested At</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Payment Info</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingUpgradeRequests ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell colSpan={7}><Skeleton className="h-10 w-full" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : (!upgradeRequests || upgradeRequests.length === 0) ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        No commercial upgrade requests submitted yet.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    upgradeRequests.map((req) => (
+                      <TableRow key={req.id}>
+                        <TableCell className="font-medium">
+                          <div className="font-semibold">{req.companyName}</div>
+                          <div className="text-xs text-muted-foreground font-mono">Req ID #{req.id}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                            {req.selectedPlanCode}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {req.selectedEmployeeBandCode} · {req.billingInterval}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">{req.billingContactName}</div>
+                          <div className="text-xs text-muted-foreground">{req.billingContactEmail}</div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {req.requestedAt ? new Date(req.requestedAt).toLocaleString() : "N/A"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            className={cn(
+                              "font-mono text-xs",
+                              req.status === "REQUESTED" && "bg-blue-500/10 text-blue-800 border-blue-500/30",
+                              req.status === "AWAITING_PAYMENT" && "bg-amber-500/10 text-amber-800 border-amber-500/30",
+                              req.status === "PAYMENT_CONFIRMED" && "bg-emerald-500/10 text-emerald-800 border-emerald-500/30",
+                              req.status === "CONVERTED" && "bg-purple-500/10 text-purple-800 border-purple-500/30",
+                              req.status === "CANCELLED" && "bg-rose-500/10 text-rose-800 border-rose-500/30"
+                            )}
+                          >
+                            {req.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {req.paymentReference ? (
+                            <div>
+                              <div className="font-mono font-semibold">{req.paymentReference}</div>
+                              <div className="text-muted-foreground">{req.paymentMethod} {req.paymentAmountMUR ? `· MUR ${req.paymentAmountMUR.toLocaleString()}` : ""}</div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground italic">Not Recorded</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {req.status === "REQUESTED" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs"
+                                onClick={() => markAwaitingPaymentMutation.mutate(req.id)}
+                                disabled={markAwaitingPaymentMutation.isPending}
+                              >
+                                Mark Awaiting Payment
+                              </Button>
+                            )}
+
+                            {(req.status === "REQUESTED" || req.status === "AWAITING_PAYMENT") && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-50 text-xs"
+                                onClick={() => {
+                                  setPaymentModalRequest(req);
+                                  setPaymentReference(`INV-${req.companyId}-${Date.now().toString().slice(-4)}`);
+                                  setPaymentAmountMUR(1950);
+                                  setPaymentDate(new Date().toISOString().split("T")[0]);
+                                }}
+                              >
+                                Record Payment
+                              </Button>
+                            )}
+
+                            {req.status === "PAYMENT_CONFIRMED" && (
+                              <Button
+                                size="sm"
+                                className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold"
+                                onClick={() => convertUpgradeRequestMutation.mutate(req.id)}
+                                disabled={convertUpgradeRequestMutation.isPending}
+                              >
+                                Convert to Paid Plan
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
 
@@ -826,6 +1061,209 @@ export default function PlatformAdminPilotPasses() {
                 {convertMutation.isPending ? "Converting..." : "Upgrade to Paid Plan"}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── Sprint 12.3: ENGAGEMENT & FUNNEL INSIGHTS DIALOG ──────────────── */}
+        <Dialog open={Boolean(insightsPassId)} onOpenChange={(open) => !open && setInsightsPassId(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="font-serif text-xl flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-emerald-700" />
+                Pilot Engagement & Funnel Insights
+              </DialogTitle>
+              <DialogDescription>
+                Live funnel metrics for <strong>{insightsData?.companyName || "Pilot Company"}</strong>.
+              </DialogDescription>
+            </DialogHeader>
+
+            {isLoadingInsights ? (
+              <div className="space-y-3 py-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-28 w-full" />
+              </div>
+            ) : insightsData ? (
+              <div className="space-y-5 py-2">
+                {/* Follow-up Classification Header */}
+                <div className="p-4 rounded-xl border bg-muted/30 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs uppercase font-semibold text-muted-foreground tracking-wider">Follow-Up Classification</div>
+                    <div className="text-lg font-bold text-foreground mt-0.5">
+                      {insightsData.followUpClassification.replace(/_/g, " ")}
+                    </div>
+                  </div>
+                  <Badge
+                    className={cn(
+                      "font-mono text-xs px-3 py-1",
+                      insightsData.followUpClassification === "UPGRADE_REQUESTED" && "bg-purple-500/20 text-purple-900 dark:text-purple-300 border-purple-500/40",
+                      insightsData.followUpClassification === "HIGH_ENGAGEMENT" && "bg-emerald-500/20 text-emerald-900 dark:text-emerald-300 border-emerald-500/40",
+                      insightsData.followUpClassification === "ENGAGED" && "bg-blue-500/20 text-blue-900 dark:text-blue-300 border-blue-500/40",
+                      insightsData.followUpClassification === "LOW_ENGAGEMENT" && "bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-500/40",
+                      insightsData.followUpClassification === "NOT_STARTED" && "bg-slate-500/20 text-slate-900 dark:text-slate-300 border-slate-500/40"
+                    )}
+                  >
+                    {insightsData.followUpClassification}
+                  </Badge>
+                </div>
+
+                {/* Funnel Metrics Grid */}
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 rounded-xl border bg-card shadow-sm">
+                    <div className="text-xs text-muted-foreground font-medium">Invited Learners</div>
+                    <div className="text-2xl font-bold text-foreground mt-1">{insightsData.invitedLearners}</div>
+                  </div>
+                  <div className="p-3 rounded-xl border bg-card shadow-sm">
+                    <div className="text-xs text-muted-foreground font-medium">Activated Learners</div>
+                    <div className="text-2xl font-bold text-emerald-700 mt-1">{insightsData.activatedLearners} / {insightsData.learnerSeatLimit}</div>
+                  </div>
+                  <div className="p-3 rounded-xl border bg-card shadow-sm">
+                    <div className="text-xs text-muted-foreground font-medium">Started Learning</div>
+                    <div className="text-2xl font-bold text-blue-700 mt-1">{insightsData.startedLearners}</div>
+                  </div>
+                  <div className="p-3 rounded-xl border bg-card shadow-sm">
+                    <div className="text-xs text-muted-foreground font-medium">Completing Learners</div>
+                    <div className="text-2xl font-bold text-indigo-700 mt-1">{insightsData.completingLearners}</div>
+                  </div>
+                  <div className="p-3 rounded-xl border bg-card shadow-sm">
+                    <div className="text-xs text-muted-foreground font-medium">Total Completions</div>
+                    <div className="text-2xl font-bold text-purple-700 mt-1">{insightsData.totalCourseCompletions}</div>
+                  </div>
+                  <div className="p-3 rounded-xl border bg-card shadow-sm">
+                    <div className="text-xs text-muted-foreground font-medium">Avg Completion %</div>
+                    <div className="text-2xl font-bold text-amber-700 mt-1">{insightsData.averageCompletionPercentage}%</div>
+                  </div>
+                </div>
+
+                {/* Key Lifecycle Timestamps */}
+                <div className="p-3 rounded-xl border bg-card text-xs space-y-1.5 text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>Contact Administrator:</span>
+                    <strong className="text-foreground">{insightsData.companyAdministratorName} ({insightsData.companyAdministratorEmail})</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Pilot Lifecycle State:</span>
+                    <strong className="text-foreground font-mono">{insightsData.effectiveStatus}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Last Meaningful Activity:</span>
+                    <strong className="text-foreground">{insightsData.lastMeaningfulActivityAt ? new Date(insightsData.lastMeaningfulActivityAt).toLocaleString() : "None"}</strong>
+                  </div>
+                  {insightsData.upgradeRequest && (
+                    <div className="flex justify-between pt-1 border-t text-purple-800 dark:text-purple-300 font-semibold">
+                      <span>Commercial Upgrade Request:</span>
+                      <span>Status: {insightsData.upgradeRequest.status} ({insightsData.upgradeRequest.selectedPlanCode})</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            <DialogFooter>
+              <Button onClick={() => setInsightsPassId(null)}>Close Insights</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── Sprint 12.3: RECORD CONFIRMED PAYMENT MODAL ───────────────────── */}
+        <Dialog open={Boolean(paymentModalRequest)} onOpenChange={(open) => !open && setPaymentModalRequest(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-serif text-lg flex items-center gap-2 text-emerald-800">
+                <DollarSign className="h-5 w-5 text-emerald-600" />
+                Record Confirmed Payment
+              </DialogTitle>
+              <DialogDescription>
+                Record manual bank transfer or invoice settlement for <strong>{paymentModalRequest?.companyName}</strong>.
+              </DialogDescription>
+            </DialogHeader>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!paymentReference.trim()) {
+                  toast.error("Payment reference is required");
+                  return;
+                }
+                confirmPaymentMutation.mutate({
+                  id: paymentModalRequest.id,
+                  paymentReference,
+                  paymentDate,
+                  amountMUR: paymentAmountMUR,
+                  paymentMethod,
+                  paymentInternalNote,
+                });
+              }}
+              className="space-y-4 py-2"
+            >
+              <div className="space-y-1.5">
+                <Label htmlFor="paymentRef">Payment Reference / Bank Transfer Ref *</Label>
+                <Input
+                  id="paymentRef"
+                  value={paymentReference}
+                  onChange={(e) => setPaymentReference(e.target.value)}
+                  placeholder="e.g. MCB-FT-8839219"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="paymentAmt">Amount (MUR)</Label>
+                  <Input
+                    id="paymentAmt"
+                    type="number"
+                    value={paymentAmountMUR}
+                    onChange={(e) => setPaymentAmountMUR(Number(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="paymentDate">Payment Date</Label>
+                  <Input
+                    id="paymentDate"
+                    type="date"
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="paymentMethod">Payment Method</Label>
+                <select
+                  id="paymentMethod"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full p-2 border rounded-md text-sm bg-background"
+                >
+                  <option value="MANUAL_INVOICE">Bank Transfer (Manual Invoice)</option>
+                  <option value="JUICE_MCB">MCB Juice / Mobile Pay</option>
+                  <option value="CREDIT_CARD">Credit / Debit Card</option>
+                  <option value="CHEQUE">Corporate Cheque</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="paymentNote">Internal Sales / Verification Note</Label>
+                <Textarea
+                  id="paymentNote"
+                  placeholder="e.g. Invoice #1042 settled via direct bank transfer to SBM account."
+                  value={paymentInternalNote}
+                  onChange={(e) => setPaymentInternalNote(e.target.value)}
+                  rows={2}
+                />
+              </div>
+
+              <DialogFooter className="pt-2">
+                <Button type="button" variant="outline" onClick={() => setPaymentModalRequest(null)}>Cancel</Button>
+                <Button
+                  type="submit"
+                  disabled={confirmPaymentMutation.isPending}
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white"
+                >
+                  {confirmPaymentMutation.isPending ? "Recording..." : "Record Payment & Authorize Conversion"}
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>

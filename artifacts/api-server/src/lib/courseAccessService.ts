@@ -115,19 +115,12 @@ export async function evaluateCourseAccess(
   const subscription = activeSub;
   const companyPlanCode = subscription.planCode;
 
-  // 3b. Pilot Pass Verification (Expiry & Permitted Course Gating)
-  const [pilotPass] = await db
-    .select()
-    .from(companyPilotPassesTable)
-    .where(eq(companyPilotPassesTable.companyId, accessContext.companyId))
-    .limit(1);
+  // 3b. Pilot Pass Verification (Expiry & Permitted Course Gating via central resolver)
+  const { resolveCompanyPilotEntitlement } = await import("./pilotPassService");
+  const pilotEntitlement = await resolveCompanyPilotEntitlement(accessContext.companyId);
 
-  if (pilotPass && pilotPass.status !== "converted") {
-    const now = new Date();
-    const isExpired = pilotPass.status === "expired" || (pilotPass.expiresAt && now.getTime() > new Date(pilotPass.expiresAt).getTime());
-    const isRevoked = pilotPass.status === "revoked";
-
-    if (isExpired || isRevoked) {
+  if (pilotEntitlement.isPilot && !pilotEntitlement.isConverted) {
+    if (pilotEntitlement.isExpired || pilotEntitlement.isRevoked) {
       return {
         allowed: false,
         reason: "SUBSCRIPTION_INACTIVE",
@@ -136,8 +129,8 @@ export async function evaluateCourseAccess(
       };
     }
 
-    if (pilotPass.permittedCourseIds && pilotPass.permittedCourseIds.length > 0) {
-      if (!pilotPass.permittedCourseIds.includes(courseId)) {
+    if (pilotEntitlement.permittedCourseIds && pilotEntitlement.permittedCourseIds.length > 0) {
+      if (!pilotEntitlement.permittedCourseIds.includes(courseId)) {
         return {
           allowed: false,
           reason: "PLAN_UPGRADE_REQUIRED",

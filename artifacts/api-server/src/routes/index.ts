@@ -38,12 +38,15 @@ import workplaceActionsRouter from "./workplaceActions";
 import onboardingRouter from "./onboarding";
 import authMeRouter from "./authMe";
 import platformAdminPilotsRouter from "./platformAdminPilots";
+import platformAdminUpgradeRequestsRouter from "./platformAdminUpgradeRequests";
+import internalJobsRouter from "./internalJobs";
 
 const router: IRouter = Router();
 
 router.use("/auth", authMeRouter);
 router.use("/me", authMeRouter);
 router.use("/onboarding", onboardingRouter);
+router.use("/internal/jobs", internalJobsRouter);
 
 router.use(healthRouter);
 router.use(workplaceActionsRouter);
@@ -80,6 +83,7 @@ router.use("/admin", adminRouter);
 router.use("/recycling", recyclingRouter);
 router.use("/platform-admin", platformAdminRouter);
 router.use("/platform-admin", platformAdminHealthRouter);
+router.use("/platform-admin", platformAdminUpgradeRequestsRouter);
 router.use("/platform-admin/pilot-passes", platformAdminPilotsRouter);
 router.use("/platform-admin/pilots", pilotsRouter);
 router.use("/pilots", pilotsRouter);

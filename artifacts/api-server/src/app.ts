@@ -16,6 +16,9 @@ import { sql } from "drizzle-orm";
 
 const app: Express = express();
 
+// Trust reverse proxy for hosting platforms (e.g. Render / Cloudflare)
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,

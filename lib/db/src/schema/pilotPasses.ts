@@ -75,3 +75,109 @@ export const insertPilotPassAuditLogSchema = createInsertSchema(pilotPassAuditLo
 
 export type InsertPilotPassAuditLog = z.infer<typeof insertPilotPassAuditLogSchema>;
 export type PilotPassAuditLog = typeof pilotPassAuditLogsTable.$inferSelect;
+
+// ── Company Upgrade Requests (Sprint 12.3) ───────────────────────────────────
+export const companyUpgradeRequestsTable = pgTable(
+  "company_upgrade_requests",
+  {
+    id: serial("id").primaryKey(),
+    companyId: integer("company_id").notNull().references(() => companiesTable.id, { onDelete: "cascade" }),
+    pilotPassId: integer("pilot_pass_id").references(() => companyPilotPassesTable.id, { onDelete: "set null" }),
+    selectedPlanCode: text("selected_plan_code").notNull(), // 'COMPLETE' | 'PROFESSIONAL' | 'ESSENTIAL'
+    selectedEmployeeBandCode: text("selected_employee_band_code").notNull(), // 'UP_TO_25' | 'FROM_26_TO_50' | 'FROM_51_TO_100' | 'FROM_101_TO_250' | 'CUSTOM_ENTERPRISE'
+    billingInterval: text("billing_interval").notNull().default("MONTHLY"), // 'MONTHLY' | 'YEARLY'
+    billingContactName: text("billing_contact_name").notNull(),
+    billingContactEmail: text("billing_contact_email").notNull(),
+    companyNote: text("company_note"),
+    status: text("status").notNull().default("REQUESTED"), // 'REQUESTED' | 'AWAITING_PAYMENT' | 'PAYMENT_UNDER_REVIEW' | 'PAYMENT_CONFIRMED' | 'CONVERTED' | 'CANCELLED' | 'REJECTED'
+    requestedByUserId: text("requested_by_user_id").notNull(),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).notNull().defaultNow(),
+    paymentReference: text("payment_reference"),
+    paymentDate: timestamp("payment_date", { withTimezone: true }),
+    paymentAmountMUR: integer("payment_amount_mur"),
+    paymentMethod: text("payment_method"), // 'BANK_TRANSFER' | 'CREDIT_CARD' | 'MANUAL_INVOICE'
+    paymentInternalNote: text("payment_internal_note"),
+    paymentConfirmedByPlatformAdminId: text("payment_confirmed_by_platform_admin_id"),
+    paymentConfirmedAt: timestamp("payment_confirmed_at", { withTimezone: true }),
+    convertedSubscriptionId: integer("converted_subscription_id").references(() => companySubscriptionsTable.id, { onDelete: "set null" }),
+    convertedAt: timestamp("converted_at", { withTimezone: true }),
+    convertedBy: text("converted_by"),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    cancelledBy: text("cancelled_by"),
+    cancellationReason: text("cancellation_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    idxUpgradeCompanyStatus: index("idx_company_upgrade_requests_company_status").on(t.companyId, t.status),
+    idxUpgradeStatus: index("idx_company_upgrade_requests_status").on(t.status),
+  })
+);
+
+export const insertCompanyUpgradeRequestSchema = createInsertSchema(companyUpgradeRequestsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCompanyUpgradeRequest = z.infer<typeof insertCompanyUpgradeRequestSchema>;
+export type CompanyUpgradeRequest = typeof companyUpgradeRequestsTable.$inferSelect;
+
+// ── Pilot Expiry & Milestone Notifications (Sprint 12.3) ─────────────────────
+export const pilotNotificationsTable = pgTable(
+  "pilot_notifications",
+  {
+    id: serial("id").primaryKey(),
+    pilotPassId: integer("pilot_pass_id").notNull().references(() => companyPilotPassesTable.id, { onDelete: "cascade" }),
+    companyId: integer("company_id").notNull().references(() => companiesTable.id, { onDelete: "cascade" }),
+    notificationType: text("notification_type").notNull(), // '7_DAYS_WARNING' | '3_DAYS_WARNING' | '1_DAY_WARNING' | 'EXPIRED' | 'EXTENDED' | 'CONVERTED'
+    recipientEmail: text("recipient_email").notNull(),
+    recipientName: text("recipient_name"),
+    milestoneCycleKey: text("milestone_cycle_key").notNull().unique(), // e.g. `${passId}-${type}-${expiresAtDateIso}`
+    scheduledFor: timestamp("scheduled_for", { withTimezone: true }).notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    deliveryStatus: text("delivery_status").notNull().default("PENDING"), // 'PENDING' | 'SENT' | 'FAILED' | 'SKIPPED'
+    providerReference: text("provider_reference"),
+    sanitizedError: text("sanitized_error"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uidxPilotNotificationCycle: unique("uidx_pilot_notifications_milestone_cycle").on(t.milestoneCycleKey),
+    idxPilotNotificationStatus: index("idx_pilot_notifications_status").on(t.deliveryStatus),
+    idxPilotNotificationPass: index("idx_pilot_notifications_pass_id").on(t.pilotPassId),
+  })
+);
+
+export const insertPilotNotificationSchema = createInsertSchema(pilotNotificationsTable).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPilotNotification = z.infer<typeof insertPilotNotificationSchema>;
+export type PilotNotification = typeof pilotNotificationsTable.$inferSelect;
+
+// ── Upgrade Request Audit Logs (Sprint 12.3) ─────────────────────────────────
+export const upgradeRequestAuditLogsTable = pgTable(
+  "upgrade_request_audit_logs",
+  {
+    id: serial("id").primaryKey(),
+    upgradeRequestId: integer("upgrade_request_id").notNull().references(() => companyUpgradeRequestsTable.id, { onDelete: "cascade" }),
+    fromStatus: text("from_status"),
+    toStatus: text("to_status").notNull(),
+    action: text("action").notNull(), // 'requested' | 'status_changed' | 'payment_confirmed' | 'converted' | 'cancelled'
+    performedBy: text("performed_by").notNull(),
+    details: text("details"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    idxUpgradeAuditRequestId: index("idx_upgrade_request_audit_logs_request_id").on(t.upgradeRequestId),
+  })
+);
+
+export const insertUpgradeRequestAuditLogSchema = createInsertSchema(upgradeRequestAuditLogsTable).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertUpgradeRequestAuditLog = z.infer<typeof insertUpgradeRequestAuditLogSchema>;
+export type UpgradeRequestAuditLog = typeof upgradeRequestAuditLogsTable.$inferSelect;
