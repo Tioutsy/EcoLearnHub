@@ -78,7 +78,7 @@ const queryClient = new QueryClient();
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? "";
 
-const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+const clerkProxyUrl = (import.meta.env.VITE_CLERK_PROXY_URL || "").trim() || undefined;
 const basePath = (import.meta.env.BASE_URL || "").replace(/\/$/, "");
 
 function stripBase(path: string): string {
@@ -373,7 +373,6 @@ function ClerkQueryClientCacheInvalidator() {
 
 function ClerkApiTokenBridge({ children }: { children: ReactNode }) {
   const { getToken, isLoaded } = useAuth();
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) {
@@ -381,19 +380,17 @@ function ClerkApiTokenBridge({ children }: { children: ReactNode }) {
     }
 
     setAuthTokenGetter(async () => {
-      return await getToken();
+      try {
+        return await getToken();
+      } catch {
+        return null;
+      }
     });
-
-    setIsReady(true);
 
     return () => {
       setAuthTokenGetter(null);
     };
   }, [getToken, isLoaded]);
-
-  if (!isReady) {
-    return null;
-  }
 
   return <>{children}</>;
 }
@@ -426,9 +423,12 @@ function ClerkProviderWithRoutes() {
                 <Redirect to="/sign-in" />
               </Show>
             </Route>
-            <Route path="/sign-in/*?" component={SignInPage} />
-            <Route path="/sign-up/*?" component={SignUpPage} />
-            <Route path="/profile/*?" component={AccountProfilePage} />
+            <Route path="/sign-in" component={SignInPage} />
+            <Route path="/sign-in/:rest*" component={SignInPage} />
+            <Route path="/sign-up" component={SignUpPage} />
+            <Route path="/sign-up/:rest*" component={SignUpPage} />
+            <Route path="/profile" component={AccountProfilePage} />
+            <Route path="/profile/:rest*" component={AccountProfilePage} />
             <Route path="/join" component={JoinCompanyPage} />
             <Route path="/accept-invitation" component={JoinCompanyPage} />
             <Route path="/courses" component={Courses} />
