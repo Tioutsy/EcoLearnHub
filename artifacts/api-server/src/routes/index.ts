@@ -37,6 +37,7 @@ import trainingActionsRouter from "./trainingActions";
 import workplaceActionsRouter from "./workplaceActions";
 import onboardingRouter from "./onboarding";
 import authMeRouter from "./authMe";
+import platformAdminPilotsRouter from "./platformAdminPilots";
 
 const router: IRouter = Router();
 
@@ -79,6 +80,7 @@ router.use("/admin", adminRouter);
 router.use("/recycling", recyclingRouter);
 router.use("/platform-admin", platformAdminRouter);
 router.use("/platform-admin", platformAdminHealthRouter);
+router.use("/platform-admin/pilot-passes", platformAdminPilotsRouter);
 router.use("/platform-admin/pilots", pilotsRouter);
 router.use("/pilots", pilotsRouter);
 router.use("/manager/training", managerTrainingRouter);

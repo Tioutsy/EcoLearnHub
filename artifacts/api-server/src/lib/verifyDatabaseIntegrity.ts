@@ -54,7 +54,7 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
   };
 
   // 1. Verify Expected Tables
-  const requiredTables = ["learning_paths", "challenges", "challenge_participants", "badge_definitions", "employee_badges", "employee_invitations"];
+  const requiredTables = ["learning_paths", "challenges", "challenge_participants", "badge_definitions", "employee_badges", "employee_invitations", "company_pilot_passes", "pilot_pass_audit_logs"];
   for (const table of requiredTables) {
     const exists = await checkTableExists(table);
     if (!exists) {

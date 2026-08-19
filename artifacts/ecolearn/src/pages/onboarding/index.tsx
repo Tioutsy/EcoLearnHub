@@ -110,6 +110,13 @@ export default function OnboardingPage() {
   const [selectedPlanCode, setSelectedPlanCode] = useState<PlanCode>("ESSENTIAL");
   const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
 
+  // Pilot Pass State
+  const [showPilotSection, setShowPilotSection] = useState<boolean>(false);
+  const [pilotCodeInput, setPilotCodeInput] = useState<string>("");
+  const [isVerifyingPilot, setIsVerifyingPilot] = useState<boolean>(false);
+  const [pilotValidation, setPilotValidation] = useState<any>(null);
+  const [pilotError, setPilotError] = useState<string | null>(null);
+
   // Status & Async State
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -257,6 +264,59 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleVerifyPilot = async () => {
+    if (!pilotCodeInput.trim()) {
+      setPilotError("Please enter a pilot pass code");
+      return;
+    }
+    setIsVerifyingPilot(true);
+    setPilotError(null);
+    try {
+      const res = await customFetch<{ valid: boolean; error?: string; message: string; pilotPass?: any }>("/api/onboarding/validate-pilot-pass", {
+        method: "POST",
+        body: JSON.stringify({ code: pilotCodeInput }),
+      });
+      if (res.valid && res.pilotPass) {
+        setPilotValidation(res.pilotPass);
+        if (res.pilotPass.companyName && !companyName) {
+          setCompanyName(res.pilotPass.companyName);
+        }
+      } else {
+        setPilotError(res.message || "Invalid or unredeemable pilot pass code");
+        setPilotValidation(null);
+      }
+    } catch (err: any) {
+      setPilotError(err.message || "Failed to verify pilot pass code");
+      setPilotValidation(null);
+    } finally {
+      setIsVerifyingPilot(false);
+    }
+  };
+
+  const handleRedeemPilot = async () => {
+    if (!pilotCodeInput.trim()) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    try {
+      const res = await customFetch<{ success: boolean; redirectUrl?: string }>("/api/onboarding/redeem-pilot-pass", {
+        method: "POST",
+        body: JSON.stringify({
+          code: pilotCodeInput,
+          companyName: companyName.trim() || pilotValidation?.companyName,
+          industry,
+          adminName: user?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || undefined,
+        }),
+      });
+      if (res.success) {
+        setLocation(res.redirectUrl || "/company");
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to activate pilot workspace");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoaded && !isSignedIn) {
     return (
       <Layout>
@@ -388,26 +448,126 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="pt-4 flex justify-end">
-              <Button
-                onClick={handleSaveCompanyDetails}
-                disabled={isSubmitting || !companyName.trim()}
-                size="lg"
-                className="bg-emerald-600 hover:bg-emerald-700 gap-2 min-w-[200px]"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Continue to Plan Selection</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </>
+            {/* Pilot Pass Section */}
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
+                  <Sparkles className="h-4 w-4 text-emerald-600" />
+                  Have a company pilot pass?
+                </div>
+                {!showPilotSection && !pilotValidation && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPilotSection(true)}
+                    className="border-emerald-300 text-emerald-800 hover:bg-emerald-100/60"
+                  >
+                    Enter Code
+                  </Button>
                 )}
-              </Button>
+              </div>
+
+              {(showPilotSection || pilotValidation) && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g. ELEVIO-PILOT-A7K9-Q2MP"
+                      value={pilotCodeInput}
+                      onChange={(e) => {
+                        setPilotCodeInput(e.target.value);
+                        setPilotError(null);
+                      }}
+                      className="font-mono bg-white uppercase text-sm"
+                      disabled={isVerifyingPilot || isSubmitting || Boolean(pilotValidation)}
+                    />
+                    {!pilotValidation ? (
+                      <Button
+                        type="button"
+                        onClick={handleVerifyPilot}
+                        disabled={isVerifyingPilot || !pilotCodeInput.trim()}
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white shrink-0"
+                      >
+                        {isVerifyingPilot ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setPilotValidation(null);
+                          setPilotCodeInput("");
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Change
+                      </Button>
+                    )}
+                  </div>
+
+                  {pilotError && (
+                    <div className="text-xs text-red-600 flex items-center gap-1.5 font-medium">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {pilotError}
+                    </div>
+                  )}
+
+                  {pilotValidation && (
+                    <div className="p-3 bg-emerald-100/70 border border-emerald-300 rounded-lg text-emerald-950 text-xs space-y-1.5">
+                      <div className="font-semibold flex items-center gap-1.5 text-emerald-900">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                        Valid Pilot Pass for {pilotValidation.companyName}
+                      </div>
+                      <div className="text-emerald-800">
+                        Includes <strong>{pilotValidation.durationDays} days</strong> of complimentary platform access with <strong>{pilotValidation.learnerSeatLimit} learner seats</strong>.
+                      </div>
+                      <div className="pt-1">
+                        <Button
+                          type="button"
+                          onClick={handleRedeemPilot}
+                          disabled={isSubmitting}
+                          className="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-medium shadow-sm"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Activating Pilot...
+                            </>
+                          ) : (
+                            <>
+                              Activate Pilot Workspace (No Payment Required) <ArrowRight className="ml-2 h-4 w-4" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+
+            {!pilotValidation && (
+              <div className="pt-4 flex justify-end">
+                <Button
+                  onClick={handleSaveCompanyDetails}
+                  disabled={isSubmitting || !companyName.trim()}
+                  size="lg"
+                  className="bg-emerald-600 hover:bg-emerald-700 gap-2 min-w-[200px]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Continue to Plan Selection</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

@@ -79,6 +79,7 @@ const EMPTY_EDIT_FORM = {
 
 type ManagedEmployee = Employee & {
   jobTitle?: string | null;
+  status?: string;
   invitationStatus?: string;
   invitationSentAt?: string | null;
   invitationAcceptedAt?: string | null;

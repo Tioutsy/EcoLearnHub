@@ -30,4 +30,4 @@ export * from "./pilotLearningPlans";
 export * from "./pilotFeedback";
 export * from "./pilotIssues";
 export * from "./employeeInvitations";
-
+export * from "./pilotPasses";

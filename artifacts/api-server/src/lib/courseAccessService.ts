@@ -4,6 +4,7 @@ import {
   companySubscriptionsTable,
   subscriptionPlansTable,
   planCourseEntitlementsTable,
+  companyPilotPassesTable,
 } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import { CompanyAccess } from "./access";
@@ -113,6 +114,39 @@ export async function evaluateCourseAccess(
 
   const subscription = activeSub;
   const companyPlanCode = subscription.planCode;
+
+  // 3b. Pilot Pass Verification (Expiry & Permitted Course Gating)
+  const [pilotPass] = await db
+    .select()
+    .from(companyPilotPassesTable)
+    .where(eq(companyPilotPassesTable.companyId, accessContext.companyId))
+    .limit(1);
+
+  if (pilotPass && pilotPass.status !== "converted") {
+    const now = new Date();
+    const isExpired = pilotPass.status === "expired" || (pilotPass.expiresAt && now.getTime() > new Date(pilotPass.expiresAt).getTime());
+    const isRevoked = pilotPass.status === "revoked";
+
+    if (isExpired || isRevoked) {
+      return {
+        allowed: false,
+        reason: "SUBSCRIPTION_INACTIVE",
+        requiredPlanCode,
+        requiredPlanName,
+      };
+    }
+
+    if (pilotPass.permittedCourseIds && pilotPass.permittedCourseIds.length > 0) {
+      if (!pilotPass.permittedCourseIds.includes(courseId)) {
+        return {
+          allowed: false,
+          reason: "PLAN_UPGRADE_REQUIRED",
+          requiredPlanCode,
+          requiredPlanName,
+        };
+      }
+    }
+  }
 
   // 4. Commercial Plan Entitlement Check
   const hasCommercialEntitlement = entitlements.some(e => e.planCode === companyPlanCode) || companyPlanCode === "COMPLETE";

@@ -8,6 +8,8 @@ import {
   savePlanSelection,
   confirmOrderReview,
 } from "../lib/companyOnboardingService";
+import { validatePilotPassCode, redeemPilotPassInTransaction } from "../lib/pilotPassService";
+import { db } from "@workspace/db";
 
 const router = Router();
 
@@ -192,6 +194,66 @@ router.post("/first-training", async (req, res): Promise<void> => {
   } catch (err: any) {
     if (!sendHttpError(res, err)) {
       res.status(400).json({ error: err.message || "Failed to assign starter course" });
+    }
+  }
+});
+
+// POST /api/onboarding/validate-pilot-pass — Check code validity and preview entitlement
+router.post("/validate-pilot-pass", async (req, res): Promise<void> => {
+  try {
+    const { code } = req.body;
+    const { email } = extractAuthUser(req);
+
+    if (!code) {
+      res.status(400).json({ valid: false, error: "MISSING_CODE", message: "Pilot code is required" });
+      return;
+    }
+
+    const validation = await validatePilotPassCode(code, email);
+    res.json(validation);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ valid: false, error: "VALIDATION_FAILED", message: err.message || "Failed to validate pilot pass" });
+    }
+  }
+});
+
+// POST /api/onboarding/redeem-pilot-pass — Atomic redemption and onboarding completion
+router.post("/redeem-pilot-pass", async (req, res): Promise<void> => {
+  try {
+    const { userId, email } = extractAuthUser(req);
+    if (!userId || !email) {
+      res.status(401).json({ error: "Authentication required to redeem pilot pass" });
+      return;
+    }
+
+    const { code, companyName, adminName, industry } = req.body;
+    if (!code) {
+      res.status(400).json({ error: "Pilot code is required" });
+      return;
+    }
+
+    const result = await db.transaction(async (tx) => {
+      return await redeemPilotPassInTransaction(tx, {
+        rawCode: code,
+        userId,
+        userEmail: email,
+        adminName: adminName || "Company Administrator",
+        companyName,
+        industry,
+      });
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Pilot pass redeemed and company workspace activated successfully",
+      company: result.company,
+      pilotPass: result.pilotPass,
+      redirectUrl: "/company",
+    });
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to redeem pilot pass" });
     }
   }
 });

@@ -6,6 +6,7 @@ import {
   companySubscriptionsTable,
   employeeBandsTable,
   subscriptionPlansTable,
+  companyPilotPassesTable,
 } from "@workspace/db";
 import { eq, and, sql, gt } from "drizzle-orm";
 import { HttpError } from "./access";
@@ -88,10 +89,36 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
     .limit(1);
 
   const subscriptionStatus = sub?.status ?? "NONE";
-  const isSubscriptionActive = subscriptionStatus === "ACTIVE";
+  let isSubscriptionActive = subscriptionStatus === "ACTIVE";
+
+  // Check if company has a pilot pass
+  const [pilotPass] = await db
+    .select()
+    .from(companyPilotPassesTable)
+    .where(eq(companyPilotPassesTable.companyId, companyId))
+    .limit(1);
+
+  let pilotExpired = false;
+  let pilotRevoked = false;
+  let pilotActive = false;
+
+  if (pilotPass && pilotPass.status !== "converted") {
+    pilotActive = true;
+    const now = new Date();
+    pilotExpired = pilotPass.status === "expired" || (pilotPass.expiresAt ? now.getTime() > new Date(pilotPass.expiresAt).getTime() : false);
+    pilotRevoked = pilotPass.status === "revoked";
+    if (pilotExpired || pilotRevoked) {
+      isSubscriptionActive = false;
+    } else {
+      isSubscriptionActive = true;
+    }
+  }
 
   // Derive seat limit
-  const maxSeats = getBandMaxSeats(sub?.bandCode ?? null, company.maxEmployees ?? sub?.bandMax);
+  let maxSeats = getBandMaxSeats(sub?.bandCode ?? null, company.maxEmployees ?? sub?.bandMax);
+  if (pilotActive && pilotPass) {
+    maxSeats = pilotPass.learnerSeatLimit + pilotPass.administratorSeatLimit;
+  }
 
   // Count active employees (only 'active' status consumes a seat)
   const [activeEmpCountRes] = await db
@@ -122,13 +149,25 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
 
   if (!isSubscriptionActive) {
     canInvite = false;
-    reason = subscriptionStatus === "PENDING"
-      ? "Subscription payment confirmation is pending. Complete payment to invite team members."
-      : "An active paid subscription is required to issue employee invitations.";
+    if (pilotActive && pilotRevoked) {
+      reason = "Company pilot pass has been revoked.";
+    } else if (pilotActive && pilotExpired) {
+      reason = "Company pilot pass has expired. Upgrade to a paid subscription to invite team members.";
+    } else if (subscriptionStatus === "PENDING") {
+      reason = "Subscription payment confirmation is pending. Complete payment to invite team members.";
+    } else {
+      reason = "An active paid subscription is required to issue employee invitations.";
+    }
   } else if (reservedSeats >= maxSeats) {
     canInvite = false;
-    reason = `Employee seat limit reached (${reservedSeats} of ${maxSeats} seats reserved). Upgrade your subscription band to invite more team members.`;
+    reason = pilotActive
+      ? `Pilot learner seat limit reached (${reservedSeats} of ${maxSeats} seats reserved). Upgrade to a paid subscription to invite more team members.`
+      : `Employee seat limit reached (${reservedSeats} of ${maxSeats} seats reserved). Upgrade your subscription band to invite more team members.`;
   }
+
+  const finalSubStatus = (!isSubscriptionActive && pilotActive)
+    ? (pilotExpired ? "EXPIRED" : pilotRevoked ? "CANCELLED" : "INACTIVE")
+    : subscriptionStatus;
 
   return {
     companyId: company.id,
@@ -138,7 +177,7 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
     reservedSeats,
     maxSeats,
     remainingSeats,
-    subscriptionStatus,
+    subscriptionStatus: finalSubStatus,
     subscriptionPlanCode: sub?.planCode ?? null,
     subscriptionPlanName: sub?.planName ?? null,
     bandCode: sub?.bandCode ?? null,
@@ -151,24 +190,24 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
 export async function verifyCanInvite(companyId: number): Promise<SeatUsageSummary> {
   const usage = await getCompanySeatUsage(companyId);
 
-  if (usage.subscriptionStatus !== "ACTIVE") {
+  if (!usage.canInvite) {
+    if (usage.reservedSeats >= usage.maxSeats) {
+      throw new HttpError(
+        403,
+        JSON.stringify({
+          code: "SEAT_LIMIT_REACHED",
+          message: usage.reason || "Seat limit reached for current subscription band.",
+          reservedSeats: usage.reservedSeats,
+          maxSeats: usage.maxSeats,
+        })
+      );
+    }
+
     throw new HttpError(
       402,
       JSON.stringify({
         code: "SUBSCRIPTION_INACTIVE",
         message: usage.reason || "Active paid subscription is required.",
-      })
-    );
-  }
-
-  if (usage.reservedSeats >= usage.maxSeats) {
-    throw new HttpError(
-      403,
-      JSON.stringify({
-        code: "SEAT_LIMIT_REACHED",
-        message: usage.reason || "Seat limit reached for current subscription band.",
-        reservedSeats: usage.reservedSeats,
-        maxSeats: usage.maxSeats,
       })
     );
   }

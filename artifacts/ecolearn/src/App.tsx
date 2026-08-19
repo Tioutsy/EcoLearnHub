@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ClerkProvider, SignIn, SignUp, UserProfile, Show, useAuth, useClerk } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { Layout } from '@/components/layout/Layout';
-import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wouter';
+import { Switch, Route, Link, useLocation, Router as WouterRouter, Redirect } from 'wouter';
 import { QueryClientProvider, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -73,6 +73,7 @@ import PlatformAdminCourses from "@/pages/platform-admin/courses";
 import AdminCoursePreview from "@/pages/platform-admin/preview";
 import PlatformAdminSdgMapping from "@/pages/platform-admin/sdgMapping";
 import PlatformAdminSubscriptions from "@/pages/platform-admin/subscriptions";
+import PlatformAdminPilotPasses from "@/pages/platform-admin/pilot-passes";
 
 const queryClient = new QueryClient();
 
@@ -476,6 +477,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/admin" component={AdminPanel} />
             <Route path="/admin/recycling" component={AdminRecycling} />
             <Route path="/platform-admin" component={PlatformAdminOverview} />
+            <Route path="/platform-admin/pilot-passes" component={PlatformAdminPilotPasses} />
             <Route path="/platform-admin/organisations" component={PlatformAdminOrganisations} />
             <Route path="/platform-admin/accounts" component={PlatformAdminAccounts} />
             <Route path="/platform-admin/activity" component={PlatformAdminActivity} />

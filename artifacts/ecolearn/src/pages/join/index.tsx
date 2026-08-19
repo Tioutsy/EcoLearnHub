@@ -78,7 +78,7 @@ export default function JoinCompanyPage() {
       const isToken = !secret.startsWith("ELH-") && secret.length > 20;
       const payload = isToken ? { token: secret } : { code: secret };
 
-      const res = await customFetch("/api/employee-invitations/validate", {
+      const res = await customFetch<ValidatedInvitation>("/api/employee-invitations/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -285,7 +285,8 @@ export default function JoinCompanyPage() {
                     Sign up with your work email (<strong>{invitation.email}</strong>):
                   </div>
                   <SignUp
-                    routing="virtual"
+                    routing="path"
+                    path="/sign-up"
                     signInUrl="/sign-in"
                     forceRedirectUrl={`/join?code=${encodeURIComponent(inputCode)}`}
                   />
@@ -296,7 +297,8 @@ export default function JoinCompanyPage() {
                     Sign in to link your account to {invitation.companyName}:
                   </div>
                   <SignIn
-                    routing="virtual"
+                    routing="path"
+                    path="/sign-in"
                     signUpUrl="/sign-up"
                     forceRedirectUrl={`/join?code=${encodeURIComponent(inputCode)}`}
                   />

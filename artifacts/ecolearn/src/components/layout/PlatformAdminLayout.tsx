@@ -55,6 +55,7 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
 
   const sidebarLinks = [
     { href: "/platform-admin", label: "Overview", icon: LayoutDashboard },
+    { href: "/platform-admin/pilot-passes", label: "Pilot Passes", icon: Leaf },
     { href: "/platform-admin/organisations", label: "Organisations", icon: FolderOpen },
     { href: "/platform-admin/accounts", label: "Accounts", icon: Target },
     { href: "/platform-admin/activity", label: "Activity", icon: Route },

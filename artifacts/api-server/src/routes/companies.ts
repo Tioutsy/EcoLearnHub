@@ -8,6 +8,7 @@ import {
   coursesTable,
   enrollmentsTable,
   courseAssignmentsTable,
+  companyPilotPassesTable,
 } from "@workspace/db";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import {
@@ -1493,6 +1494,97 @@ router.get("/training-insights", async (req: any, res: any): Promise<void> => {
     if (!sendHttpError(res, err)) {
       req.log?.error({ err: err?.message }, "Failed to generate company training insights");
       res.status(500).json({ error: err?.message || "We couldn't generate company training insights right now." });
+    }
+  }
+});
+
+// GET /company/pilot-status — Company pilot pass status, days remaining, and read-only state
+router.get("/pilot-status", async (req, res): Promise<void> => {
+  try {
+    const access = await getCompanyAccess(req);
+    if (!access.companyId) {
+      res.status(403).json({ error: "No company associated with user account" });
+      return;
+    }
+
+    const [pilotPass] = await db
+      .select()
+      .from(companyPilotPassesTable)
+      .where(eq(companyPilotPassesTable.companyId, access.companyId))
+      .limit(1);
+
+    if (!pilotPass) {
+      res.json({ isPilot: false });
+      return;
+    }
+
+    const now = new Date();
+    let daysRemaining = pilotPass.durationDays;
+    let isExpired = pilotPass.status === "expired";
+    let isRevoked = pilotPass.status === "revoked";
+    let isConverted = pilotPass.status === "converted";
+
+    if (pilotPass.status === "active" && pilotPass.expiresAt) {
+      const msLeft = new Date(pilotPass.expiresAt).getTime() - now.getTime();
+      daysRemaining = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+      isExpired = msLeft <= 0;
+    }
+
+    const employees = await db
+      .select()
+      .from(employeesTable)
+      .where(eq(employeesTable.companyId, access.companyId));
+
+    const activeLearners = employees.filter((e) => e.status === "active" && e.role !== "admin").length;
+    const isReadOnly = (isExpired || isRevoked) && !isConverted;
+
+    res.json({
+      isPilot: true,
+      status: pilotPass.status,
+      durationDays: pilotPass.durationDays,
+      learnerSeatLimit: pilotPass.learnerSeatLimit,
+      administratorSeatLimit: pilotPass.administratorSeatLimit,
+      permittedCourseIds: pilotPass.permittedCourseIds,
+      startsAt: pilotPass.startsAt,
+      expiresAt: pilotPass.expiresAt,
+      retentionEndsAt: pilotPass.retentionEndsAt,
+      daysRemaining,
+      isExpired,
+      isRevoked,
+      isConverted,
+      isReadOnly,
+      activeLearners,
+      seatsUsed: activeLearners,
+    });
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: "Failed to retrieve pilot status" });
+    }
+  }
+});
+
+// POST /company/convert-pilot — Self-serve / admin initiated conversion to a paid subscription
+router.post("/convert-pilot", async (req, res): Promise<void> => {
+  try {
+    const access = await requireCompanyAdmin(req);
+    const { planCode, employeeBandCode, billingInterval } = req.body;
+
+    const { convertPilotToPaid } = await import("../lib/pilotPassService");
+    const result = await convertPilotToPaid(access.companyId, {
+      planCode: planCode || "COMPLETE",
+      employeeBandCode: employeeBandCode || "UP_TO_25",
+      billingInterval: billingInterval || "MONTHLY",
+      performedBy: access.userId,
+    });
+
+    res.json({
+      success: true,
+      message: "Company converted to paid subscription successfully",
+      subscription: result.subscription,
+    });
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to convert pilot to paid subscription" });
     }
   }
 });
