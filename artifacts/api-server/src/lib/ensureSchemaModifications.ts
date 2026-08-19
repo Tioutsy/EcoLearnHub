@@ -957,92 +957,302 @@ export async function ensureSchemaModifications() {
       }
     },
     {
-      name: "Sprint 12.3.1 Remove unauthorised pilot courses and restore canonical catalogue",
+      name: "sprint_12_3_1_remediation_audit_log_schema",
       check: async () => {
-        const res = await db.execute(sql`
-          SELECT 1 FROM "courses" 
-          WHERE "id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-             OR "course_code" LIKE 'PILOT-%'
-             OR "slug" LIKE 'pilot-test-%'
-             OR "slug" LIKE 'sprint-12-3-module-%'
-          LIMIT 1;
+        const res: any = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_name = 'catalogue_remediation_audit_logs'
+          );
         `);
-        return res.rows.length === 0;
+        const rows = res.rows || res;
+        const exists = rows[0]?.exists === true;
+        if (!exists) return false;
+
+        const colRes: any = await db.execute(sql`
+          SELECT column_name FROM information_schema.columns 
+          WHERE table_name = 'catalogue_remediation_audit_logs';
+        `);
+        const cols = (colRes.rows || colRes).map((r: any) => r.column_name);
+        const trgRes: any = await db.execute(sql`
+          SELECT 1 FROM pg_trigger WHERE tgname = 'trg_prevent_catalogue_audit_log_mutation';
+        `);
+        const triggerExists = (trgRes.rows || trgRes).length > 0;
+        return cols.includes("batch_id") && cols.includes("source") && triggerExists;
       },
       execute: async () => {
         await db.execute(sql`
-          -- 1. Re-map any test enrollments on unauthorised courses to canonical course 1 (ELH-01)
-          UPDATE "enrollments"
-          SET "course_id" = 1
-          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-             OR "course_id" IN (
-               SELECT "id" FROM "courses" 
-               WHERE "course_code" LIKE 'PILOT-%' 
-                  OR "slug" LIKE 'pilot-test-%' 
-                  OR "slug" LIKE 'sprint-12-3-module-%'
-             );
+          CREATE TABLE IF NOT EXISTS "catalogue_remediation_audit_logs" (
+            "id" serial PRIMARY KEY,
+            "batch_id" text NOT NULL DEFAULT 'batch-sprint-12-3-1',
+            "entity_type" text NOT NULL,
+            "entity_id" integer,
+            "original_data" jsonb NOT NULL,
+            "action_taken" text NOT NULL,
+            "reason" text NOT NULL,
+            "source" text NOT NULL DEFAULT 'system:remediation',
+            "performed_by" text NOT NULL DEFAULT 'system:remediation',
+            "created_at" timestamp with time zone NOT NULL DEFAULT NOW()
+          );
 
-          -- 2. Re-map any certificates on unauthorised courses to canonical course 1 (ELH-01)
-          UPDATE "certificates"
-          SET "course_id" = 1
-          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-             OR "course_id" IN (
-               SELECT "id" FROM "courses" 
-               WHERE "course_code" LIKE 'PILOT-%' 
-                  OR "slug" LIKE 'pilot-test-%' 
-                  OR "slug" LIKE 'sprint-12-3-module-%'
-             );
+          DO $$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'catalogue_remediation_audit_logs' AND column_name = 'batch_id') THEN
+              ALTER TABLE "catalogue_remediation_audit_logs" ADD COLUMN "batch_id" text NOT NULL DEFAULT 'batch-sprint-12-3-1';
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'catalogue_remediation_audit_logs' AND column_name = 'source') THEN
+              ALTER TABLE "catalogue_remediation_audit_logs" ADD COLUMN "source" text NOT NULL DEFAULT 'system:remediation';
+            END IF;
+          END $$;
 
-          -- 3. Re-map any quiz questions or attempts if any exist
-          UPDATE "quiz_questions"
-          SET "course_id" = 1
-          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-             OR "course_id" IN (
-               SELECT "id" FROM "courses" 
-               WHERE "course_code" LIKE 'PILOT-%' 
-                  OR "slug" LIKE 'pilot-test-%' 
-                  OR "slug" LIKE 'sprint-12-3-module-%'
-             );
+          CREATE INDEX IF NOT EXISTS "idx_catalogue_remediation_batch_id" ON "catalogue_remediation_audit_logs" ("batch_id");
+          CREATE INDEX IF NOT EXISTS "idx_catalogue_remediation_entity_type" ON "catalogue_remediation_audit_logs" ("entity_type");
+          CREATE INDEX IF NOT EXISTS "idx_catalogue_remediation_action_taken" ON "catalogue_remediation_audit_logs" ("action_taken");
 
-          UPDATE "quiz_attempts"
-          SET "course_id" = 1
-          WHERE "course_id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-             OR "course_id" IN (
-               SELECT "id" FROM "courses" 
-               WHERE "course_code" LIKE 'PILOT-%' 
-                  OR "slug" LIKE 'pilot-test-%' 
-                  OR "slug" LIKE 'sprint-12-3-module-%'
-             );
+          CREATE OR REPLACE FUNCTION prevent_catalogue_audit_log_mutation()
+          RETURNS TRIGGER AS $$
+          BEGIN
+            RAISE EXCEPTION 'catalogue_remediation_audit_logs is append-only: UPDATE and DELETE operations are forbidden at database level.';
+          END;
+          $$ LANGUAGE plpgsql;
 
-          -- 4. Repair pilot passes permitted_course_ids referencing unauthorised courses to canonical course 1 (ELH-01)
-          UPDATE "company_pilot_passes"
-          SET "permitted_course_ids" = ARRAY[1]::integer[]
-          WHERE 596 = ANY("permitted_course_ids")
-             OR 597 = ANY("permitted_course_ids")
-             OR 599 = ANY("permitted_course_ids")
-             OR 600 = ANY("permitted_course_ids")
-             OR 603 = ANY("permitted_course_ids")
-             OR 604 = ANY("permitted_course_ids")
-             OR 606 = ANY("permitted_course_ids")
-             OR 607 = ANY("permitted_course_ids")
-             OR 608 = ANY("permitted_course_ids")
-             OR 609 = ANY("permitted_course_ids")
-             OR 610 = ANY("permitted_course_ids")
-             OR 611 = ANY("permitted_course_ids")
-             OR 612 = ANY("permitted_course_ids")
-             OR 613 = ANY("permitted_course_ids")
-             OR 614 = ANY("permitted_course_ids")
-             OR 615 = ANY("permitted_course_ids");
+          DROP TRIGGER IF EXISTS trg_prevent_catalogue_audit_log_mutation ON "catalogue_remediation_audit_logs";
+          CREATE TRIGGER trg_prevent_catalogue_audit_log_mutation
+          BEFORE UPDATE OR DELETE ON "catalogue_remediation_audit_logs"
+          FOR EACH ROW EXECUTE FUNCTION prevent_catalogue_audit_log_mutation();
+        `);
+      }
+    },
+    {
+      name: "sprint_12_3_1_amend_unauthorised_course_remediation",
+      check: async () => {
+        const authorisedCodes = [
+          'ELH-01', 'ELH-02', 'ELH-03', 'ELH-04', 'ELH-05', 'ELH-06', 'ELH-07', 'ELH-08', 'ELH-09', 'ELH-10',
+          'ELH-11', 'ELH-12', 'ELH-13', 'ELH-14', 'ELH-15', 'ELH-16', 'ELH-17', 'ELH-18', 'ELH-19', 'ELH-20',
+          'ELH-21', 'ELH-22', 'ELH-23', 'ELH-24', 'ELH-25', 'ELH-26', 'ELH-27', 'ELH-28', 'ELH-29', 'ELH-30',
+          'ELH-31', 'ELH-32', 'ELH-33', 'ELH-34'
+        ];
 
-          -- 5. Delete unauthorised courses
-          DELETE FROM "courses"
-          WHERE "id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-             OR "course_code" LIKE 'PILOT-%'
-             OR "slug" LIKE 'pilot-test-%'
-             OR "slug" LIKE 'sprint-12-3-module-%';
+        const enrRes: any = await db.execute(sql`
+          SELECT count(*) as count FROM "enrollments"
+          WHERE "course_id" NOT IN (
+            SELECT "id" FROM "courses" 
+            WHERE "course_code" = ANY(ARRAY[
+              'ELH-01', 'ELH-02', 'ELH-03', 'ELH-04', 'ELH-05', 'ELH-06', 'ELH-07', 'ELH-08', 'ELH-09', 'ELH-10',
+              'ELH-11', 'ELH-12', 'ELH-13', 'ELH-14', 'ELH-15', 'ELH-16', 'ELH-17', 'ELH-18', 'ELH-19', 'ELH-20',
+              'ELH-21', 'ELH-22', 'ELH-23', 'ELH-24', 'ELH-25', 'ELH-26', 'ELH-27', 'ELH-28', 'ELH-29', 'ELH-30',
+              'ELH-31', 'ELH-32', 'ELH-33', 'ELH-34'
+            ]) AND "is_published" = true
+          );
+        `);
+        const enrCount = Number((enrRes.rows || enrRes)[0]?.count || 0);
+
+        const certRes: any = await db.execute(sql`
+          SELECT count(*) as count FROM "certificates"
+          WHERE "course_id" NOT IN (
+            SELECT "id" FROM "courses" 
+            WHERE "course_code" = ANY(ARRAY[
+              'ELH-01', 'ELH-02', 'ELH-03', 'ELH-04', 'ELH-05', 'ELH-06', 'ELH-07', 'ELH-08', 'ELH-09', 'ELH-10',
+              'ELH-11', 'ELH-12', 'ELH-13', 'ELH-14', 'ELH-15', 'ELH-16', 'ELH-17', 'ELH-18', 'ELH-19', 'ELH-20',
+              'ELH-21', 'ELH-22', 'ELH-23', 'ELH-24', 'ELH-25', 'ELH-26', 'ELH-27', 'ELH-28', 'ELH-29', 'ELH-30',
+              'ELH-31', 'ELH-32', 'ELH-33', 'ELH-34'
+            ]) AND "is_published" = true
+          );
+        `);
+        const certCount = Number((certRes.rows || certRes)[0]?.count || 0);
+
+        const course234Res: any = await db.execute(sql`
+          SELECT count(*) as count FROM "courses" WHERE "id" = 234;
+        `);
+        const course234Count = Number((course234Res.rows || course234Res)[0]?.count || 0);
+
+        const nonCanonicalCourseRes: any = await db.execute(sql`
+          SELECT count(*) as count FROM "courses"
+          WHERE "course_code" IS NULL 
+             OR NOT ("course_code" = ANY(ARRAY[
+              'ELH-01', 'ELH-02', 'ELH-03', 'ELH-04', 'ELH-05', 'ELH-06', 'ELH-07', 'ELH-08', 'ELH-09', 'ELH-10',
+              'ELH-11', 'ELH-12', 'ELH-13', 'ELH-14', 'ELH-15', 'ELH-16', 'ELH-17', 'ELH-18', 'ELH-19', 'ELH-20',
+              'ELH-21', 'ELH-22', 'ELH-23', 'ELH-24', 'ELH-25', 'ELH-26', 'ELH-27', 'ELH-28', 'ELH-29', 'ELH-30',
+              'ELH-31', 'ELH-32', 'ELH-33', 'ELH-34'
+            ]))
+             OR "is_published" = false;
+        `);
+        const nonCanonicalCount = Number((nonCanonicalCourseRes.rows || nonCanonicalCourseRes)[0]?.count || 0);
+
+        return enrCount === 0 && certCount === 0 && course234Count === 0 && nonCanonicalCount === 0;
+      },
+      execute: async () => {
+        await db.execute(sql`
+          DO $$
+          DECLARE
+            authorised_codes text[] := ARRAY[
+              'ELH-01', 'ELH-02', 'ELH-03', 'ELH-04', 'ELH-05', 'ELH-06', 'ELH-07', 'ELH-08', 'ELH-09', 'ELH-10',
+              'ELH-11', 'ELH-12', 'ELH-13', 'ELH-14', 'ELH-15', 'ELH-16', 'ELH-17', 'ELH-18', 'ELH-19', 'ELH-20',
+              'ELH-21', 'ELH-22', 'ELH-23', 'ELH-24', 'ELH-25', 'ELH-26', 'ELH-27', 'ELH-28', 'ELH-29', 'ELH-30',
+              'ELH-31', 'ELH-32', 'ELH-33', 'ELH-34'
+            ];
+            valid_ids integer[];
+            enr_record RECORD;
+            cert_record RECORD;
+            pass_record RECORD;
+            draft_record RECORD;
+            quiz_record RECORD;
+            prereq_record RECORD;
+            pruned_ids integer[];
+            cid integer;
+            now_ts timestamp with time zone := NOW();
+            batch_tag text := 'batch-sprint-12-3-1';
+          BEGIN
+            SELECT ARRAY_AGG(id) INTO valid_ids
+            FROM "courses"
+            WHERE "course_code" = ANY(authorised_codes)
+              AND "is_published" = true;
+
+            IF valid_ids IS NULL THEN
+              valid_ids := ARRAY[]::integer[];
+            END IF;
+
+            -- Snapshot and delete obsolete draft courses (including ID 234)
+            FOR draft_record IN 
+              SELECT * FROM "courses" 
+              WHERE "id" = 234 OR ("is_published" = false AND ("course_code" IS NULL OR NOT ("course_code" = ANY(authorised_codes))))
+            LOOP
+              FOR quiz_record IN SELECT * FROM "quiz_questions" WHERE "course_id" = draft_record.id LOOP
+                INSERT INTO "catalogue_remediation_audit_logs" (
+                  "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+                ) VALUES (
+                  batch_tag, 'quiz_question', quiz_record.id, row_to_json(quiz_record)::jsonb,
+                  'deleted_obsolete_draft_quiz', 'Quiz question attached to obsolete draft course ID ' || draft_record.id,
+                  'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+                );
+                DELETE FROM "quiz_questions" WHERE "id" = quiz_record.id;
+              END LOOP;
+
+              FOR prereq_record IN SELECT * FROM "course_prerequisites" WHERE "course_id" = draft_record.id OR "prerequisite_course_id" = draft_record.id LOOP
+                INSERT INTO "catalogue_remediation_audit_logs" (
+                  "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+                ) VALUES (
+                  batch_tag, 'course_prerequisite', prereq_record.course_id, row_to_json(prereq_record)::jsonb,
+                  'deleted_obsolete_draft_prereq', 'Prerequisite relation attached to obsolete draft course ID ' || draft_record.id,
+                  'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+                );
+                DELETE FROM "course_prerequisites" 
+                WHERE "course_id" = prereq_record.course_id 
+                  AND "prerequisite_course_id" = prereq_record.prerequisite_course_id;
+              END LOOP;
+
+              INSERT INTO "catalogue_remediation_audit_logs" (
+                "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+              ) VALUES (
+                batch_tag, 'course', draft_record.id, row_to_json(draft_record)::jsonb,
+                'deleted_obsolete_draft', 'Obsolete draft course ID ' || draft_record.id || ' superseded by canonical course ELH-23',
+                'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+              );
+
+              DELETE FROM "courses" WHERE "id" = draft_record.id;
+            END LOOP;
+
+            -- Delete orphan enrollments (snapshot first)
+            FOR enr_record IN 
+              SELECT * FROM "enrollments" 
+              WHERE NOT ("course_id" = ANY(valid_ids))
+            LOOP
+              INSERT INTO "catalogue_remediation_audit_logs" (
+                "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+              ) VALUES (
+                batch_tag, 'enrollment', enr_record.id, row_to_json(enr_record)::jsonb,
+                'deleted_orphan', 'Enrollment referenced non-canonical or non-existent course ID ' || enr_record.course_id,
+                'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+              );
+
+              DELETE FROM "enrollments" WHERE "id" = enr_record.id;
+            END LOOP;
+
+            -- Delete non-canonical certificates (snapshot first)
+            FOR cert_record IN 
+              SELECT * FROM "certificates" 
+              WHERE NOT ("course_id" = ANY(valid_ids))
+            LOOP
+              INSERT INTO "catalogue_remediation_audit_logs" (
+                "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+              ) VALUES (
+                batch_tag, 'certificate', cert_record.id, row_to_json(cert_record)::jsonb,
+                'revoked_certificate', 'Certificate was issued for non-canonical course ID ' || cert_record.course_id || ' and has been revoked',
+                'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+              );
+
+              DELETE FROM "certificates" WHERE "id" = cert_record.id;
+            END LOOP;
+
+            -- Prune and suspend pilot passes
+            FOR pass_record IN 
+              SELECT * FROM "company_pilot_passes"
+            LOOP
+              pruned_ids := ARRAY[]::integer[];
+              
+              IF pass_record.permitted_course_ids IS NOT NULL AND cardinality(pass_record.permitted_course_ids) > 0 THEN
+                FOREACH cid IN ARRAY pass_record.permitted_course_ids
+                LOOP
+                  IF cid = ANY(valid_ids) THEN
+                    pruned_ids := array_append(pruned_ids, cid);
+                  END IF;
+                END LOOP;
+              END IF;
+
+              IF cardinality(pruned_ids) = 0 OR pruned_ids IS NULL THEN
+                IF pass_record.status != 'suspended' AND pass_record.status != 'revoked' AND pass_record.status != 'converted' THEN
+                  INSERT INTO "catalogue_remediation_audit_logs" (
+                    "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+                  ) VALUES (
+                    batch_tag, 'pilot_pass', pass_record.id, row_to_json(pass_record)::jsonb,
+                    'suspended_pilot_pass', 'Pilot pass has 0 valid canonical courses remaining. Suspended and flagged for Platform Admin review.',
+                    'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+                  );
+
+                  UPDATE "company_pilot_passes"
+                  SET "permitted_course_ids" = ARRAY[]::integer[],
+                      "status" = 'suspended',
+                      "internal_sales_note" = CASE 
+                        WHEN "internal_sales_note" IS NULL OR "internal_sales_note" = '' 
+                        THEN '[REQUIRES REVIEW - NO VALID COURSES REMAINING]'
+                        WHEN "internal_sales_note" LIKE '%[REQUIRES REVIEW - NO VALID COURSES REMAINING]%'
+                        THEN "internal_sales_note"
+                        ELSE '[REQUIRES REVIEW - NO VALID COURSES REMAINING] ' || "internal_sales_note"
+                      END,
+                      "updated_at" = now_ts
+                  WHERE "id" = pass_record.id;
+                ELSE
+                  UPDATE "company_pilot_passes"
+                  SET "permitted_course_ids" = ARRAY[]::integer[],
+                      "updated_at" = now_ts
+                  WHERE "id" = pass_record.id;
+                END IF;
+
+              ELSIF pruned_ids != pass_record.permitted_course_ids THEN
+                INSERT INTO "catalogue_remediation_audit_logs" (
+                  "batch_id", "entity_type", "entity_id", "original_data", "action_taken", "reason", "source", "performed_by", "created_at"
+                ) VALUES (
+                  batch_tag, 'pilot_pass', pass_record.id, row_to_json(pass_record)::jsonb,
+                  'pruned_courses', 'Removed non-canonical course IDs from pilot pass. Kept valid courses: ' || array_to_string(pruned_ids, ', '),
+                  'system:sprint-12-3-1-cleanup', 'system:remediation', now_ts
+                );
+
+                UPDATE "company_pilot_passes"
+                SET "permitted_course_ids" = pruned_ids,
+                    "updated_at" = now_ts
+                WHERE "id" = pass_record.id;
+              END IF;
+            END LOOP;
+
+            DELETE FROM "courses"
+            WHERE "course_code" LIKE 'PILOT-%'
+               OR "slug" LIKE 'pilot-test-%'
+               OR "slug" LIKE 'sprint-12-3-module-%';
+          END $$;
         `);
       }
     }
+
   ];
 
   const summary = {

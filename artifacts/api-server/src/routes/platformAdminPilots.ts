@@ -6,6 +6,8 @@ import {
   getPilotPassDetails,
   extendPilotPass,
   revokePilotPass,
+  reactivateSuspendedPilotPass,
+  cancelSuspendedPilotPass,
   convertPilotToPaid,
 } from "../lib/pilotPassService";
 
@@ -130,6 +132,53 @@ router.post("/:id/revoke", async (req, res): Promise<void> => {
   } catch (err: any) {
     if (!sendHttpError(res, err)) {
       res.status(400).json({ error: err.message || "Failed to revoke pilot pass" });
+    }
+  }
+});
+
+// POST /api/platform-admin/pilot-passes/:id/reactivate — Assign valid courses and reactivate a suspended pass
+router.post("/:id/reactivate", async (req, res): Promise<void> => {
+  try {
+    const access = await requirePlatformAdmin(req);
+    const id = parseInt(req.params.id, 10);
+    const { permittedCourseIds, reason } = req.body;
+
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid pilot pass ID" });
+      return;
+    }
+
+    const updated = await reactivateSuspendedPilotPass(
+      access.userId,
+      id,
+      Array.isArray(permittedCourseIds) ? permittedCourseIds.map((cid: any) => parseInt(cid, 10)) : [],
+      reason
+    );
+    res.json(updated);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to reactivate suspended pilot pass" });
+    }
+  }
+});
+
+// POST /api/platform-admin/pilot-passes/:id/cancel — Explicitly cancel a suspended pass
+router.post("/:id/cancel", async (req, res): Promise<void> => {
+  try {
+    const access = await requirePlatformAdmin(req);
+    const id = parseInt(req.params.id, 10);
+    const { reason } = req.body;
+
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid pilot pass ID" });
+      return;
+    }
+
+    const updated = await cancelSuspendedPilotPass(access.userId, id, reason);
+    res.json(updated);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to cancel suspended pilot pass" });
     }
   }
 });

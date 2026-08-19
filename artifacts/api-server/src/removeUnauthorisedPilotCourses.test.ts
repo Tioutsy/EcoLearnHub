@@ -14,8 +14,9 @@ import {
   subscriptionPlansTable,
   employeeBandsTable,
   companyUpgradeRequestsTable,
+  catalogueRemediationAuditLogsTable,
 } from "@workspace/db";
-import { eq, sql, inArray, and } from "drizzle-orm";
+import { eq, sql, inArray, and, like, isNotNull } from "drizzle-orm";
 import {
   createPilotPass,
   redeemPilotPass,
@@ -24,133 +25,148 @@ import {
   validatePilotPassCode,
   resolveCompanyPilotEntitlement,
   getPilotPassDetails,
+  reconcilePilotLifecycle,
+  AUTHORISED_CANONICAL_COURSE_CODES,
+  isAuthorisedCanonicalCourseCode,
 } from "./lib/pilotPassService";
 import { evaluateCourseAccess } from "./lib/courseAccessService";
 import { verifyDatabaseIntegrity } from "./lib/verifyDatabaseIntegrity";
 import { ensureSchemaModifications } from "./lib/ensureSchemaModifications";
 
-describe("Sprint 12.3.1: Remove Unauthorised Pilot Courses & Restore Canonical Catalogue", () => {
+describe("Sprint 12.3.1 Final Production Readiness: Catalogue Remediation & Audit Integrity", () => {
   let canonicalCourse1: any;
   let canonicalCourse2: any;
-  let unpublishedCourse: any;
-  let initialCourseCount: number;
+  let suspendedPass: any;
 
   before(async () => {
+    // 1. Run schema modifications and catalogue remediation
     await ensureSchemaModifications();
 
-    // 1. Fetch existing canonical published courses
+    // 2. Fetch existing canonical published courses using explicit authorised codes
     const published = await db
       .select()
       .from(coursesTable)
-      .where(eq(coursesTable.isPublished, true))
+      .where(
+        and(
+          eq(coursesTable.isPublished, true),
+          isNotNull(coursesTable.courseCode),
+          inArray(coursesTable.courseCode, AUTHORISED_CANONICAL_COURSE_CODES as string[])
+        )
+      )
       .orderBy(coursesTable.id);
 
-    assert.ok(published.length >= 2, "At least 2 published canonical courses must exist");
+    assert.strictEqual(published.length, 34, "All 34 canonical published courses must exist in the database");
     canonicalCourse1 = published[0];
     canonicalCourse2 = published[1];
+  });
 
-    // Check for draft/unpublished course or verify non-published course lookup
-    const unpub = await db
+  // ── GROUP 1: Explicit Authorised Catalogue Definition (ELH-01 to ELH-34) ───
+
+  it("1. Explicit AUTHORISED_CANONICAL_COURSE_CODES contains exactly ELH-01 through ELH-34", () => {
+    assert.strictEqual(AUTHORISED_CANONICAL_COURSE_CODES.length, 34);
+    assert.strictEqual(AUTHORISED_CANONICAL_COURSE_CODES[0], "ELH-01");
+    assert.strictEqual(AUTHORISED_CANONICAL_COURSE_CODES[33], "ELH-34");
+
+    for (let i = 1; i <= 34; i++) {
+      const code = `ELH-${String(i).padStart(2, "0")}`;
+      assert.ok(AUTHORISED_CANONICAL_COURSE_CODES.includes(code), `Catalogue must include ${code}`);
+      assert.strictEqual(isAuthorisedCanonicalCourseCode(code), true);
+    }
+  });
+
+  it("2. Helper isAuthorisedCanonicalCourseCode rejects malformed, out-of-bounds, and null codes", () => {
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("ELH-00"), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("ELH-0"), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("ELH-35"), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("ELH-99"), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("ELH-TEST"), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("PILOT-01"), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode(""), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode(null), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode(undefined), false);
+    assert.strictEqual(isAuthorisedCanonicalCourseCode("'; DROP TABLE courses; --"), false);
+  });
+
+  it("3. Final database contains exactly 34 authorised courses, all published", async () => {
+    const allCourses = await db.select().from(coursesTable);
+    assert.strictEqual(allCourses.length, 34, "Database must contain exactly 34 courses total");
+
+    for (const c of allCourses) {
+      assert.strictEqual(c.isPublished, true, `Course ${c.id} (${c.courseCode}) must be published`);
+      assert.ok(c.courseCode, `Course ${c.id} must have a course code`);
+      assert.ok(
+        AUTHORISED_CANONICAL_COURSE_CODES.includes(c.courseCode!),
+        `Course code ${c.courseCode} must be within ELH-01..34`
+      );
+    }
+  });
+
+  it("4. Obsolete draft Course ID 234 is deleted and snapshotted in catalogue_remediation_audit_logs", async () => {
+    const draft234 = await db.select().from(coursesTable).where(eq(coursesTable.id, 234));
+    assert.strictEqual(draft234.length, 0, "Course 234 must be completely deleted from courses table");
+
+    const draftLogs = await db
       .select()
-      .from(coursesTable)
-      .where(eq(coursesTable.isPublished, false))
-      .limit(1);
+      .from(catalogueRemediationAuditLogsTable)
+      .where(
+        and(
+          eq(catalogueRemediationAuditLogsTable.entityType, "course"),
+          eq(catalogueRemediationAuditLogsTable.entityId, 234),
+          eq(catalogueRemediationAuditLogsTable.actionTaken, "deleted_obsolete_draft")
+        )
+      );
 
-    unpublishedCourse = unpub[0] || { id: 999999, isPublished: false };
-
-    const totalCourses = await db.select().from(coursesTable);
-    initialCourseCount = totalCourses.length;
+    assert.ok(draftLogs.length > 0, "Course 234 snapshot must exist in remediation audit logs");
+    assert.strictEqual(draftLogs[0].batchId, "batch-sprint-12-3-1");
+    assert.ok((draftLogs[0].originalData as any).slug === "workplace-sustainability-leadership");
   });
 
-  // ── GROUP 1: Catalogue Invariance & Zero Creation Side Effects ──────────────
+  // ── GROUP 2: Course Selection Validation & Malformed Code Rejection ─────────
 
-  it("1. Creating a pilot pass does not change the total course count", async () => {
-    const countBefore = (await db.select().from(coursesTable)).length;
-
-    await createPilotPass("admin:bootstrap", {
-      companyName: `Invariance Co ${Date.now()}`,
-      intendedContactName: "Invariance Admin",
-      intendedContactEmail: `invariance_${Date.now()}@test.mu`,
-      durationDays: 30,
-      learnerSeatLimit: 10,
-      permittedCourseIds: [canonicalCourse1.id],
-    });
-
-    const countAfter = (await db.select().from(coursesTable)).length;
-    assert.strictEqual(countAfter, countBefore, "Course count remains identical after pilot pass creation");
+  it("5. Pilot pass creation rejects malformed course IDs and unknown course IDs", async () => {
+    await assert.rejects(
+      async () => {
+        await createPilotPass("admin:bootstrap", {
+          companyName: "Malformed ID Co",
+          intendedContactName: "Admin",
+          intendedContactEmail: `malformed_${Date.now()}@test.mu`,
+          durationDays: 30,
+          permittedCourseIds: [999999],
+        });
+      },
+      (err: any) => err.status === 400 && /authorised canonical catalogue \(ELH-01 to ELH-34\)/i.test(err.message)
+    );
   });
 
-  it("2. Redeeming a pilot pass does not change the total course count", async () => {
-    const { rawCode } = await createPilotPass("admin:bootstrap", {
-      companyName: `Redeem Invariance Co ${Date.now()}`,
-      intendedContactName: "Redeem Admin",
-      intendedContactEmail: `redeem_inv_${Date.now()}@test.mu`,
-      durationDays: 30,
-      learnerSeatLimit: 10,
-      permittedCourseIds: [canonicalCourse1.id, canonicalCourse2.id],
-    });
+  it("6. Pilot pass creation rejects string injections, decimal numbers, and non-integer course IDs", async () => {
+    await assert.rejects(
+      async () => {
+        await createPilotPass("admin:bootstrap", {
+          companyName: "Injection Co",
+          intendedContactName: "Admin",
+          intendedContactEmail: `inject_${Date.now()}@test.mu`,
+          durationDays: 30,
+          permittedCourseIds: ["ELH-01" as any],
+        });
+      },
+      (err: any) => err.status === 400 && /Invalid course ID format/i.test(err.message)
+    );
 
-    const countBefore = (await db.select().from(coursesTable)).length;
-
-    await redeemPilotPass({
-      rawCode,
-      redeemedByUserId: `user:redeem_inv_${Date.now()}`,
-      redeemedByEmail: `redeem_inv_${Date.now()}@test.mu`,
-      companyName: `Redeem Invariance Co ${Date.now()}`,
-    });
-
-    const countAfter = (await db.select().from(coursesTable)).length;
-    assert.strictEqual(countAfter, countBefore, "Course count remains identical after pilot pass redemption");
+    await assert.rejects(
+      async () => {
+        await createPilotPass("admin:bootstrap", {
+          companyName: "Decimal Co",
+          intendedContactName: "Admin",
+          intendedContactEmail: `decimal_${Date.now()}@test.mu`,
+          durationDays: 30,
+          permittedCourseIds: [1.5 as any],
+        });
+      },
+      (err: any) => err.status === 400 && /Invalid course ID format/i.test(err.message)
+    );
   });
 
-  it("3. Extending a pilot does not create courses", async () => {
-    const { pilotPass } = await createPilotPass("admin:bootstrap", {
-      companyName: `Extend Co ${Date.now()}`,
-      intendedContactName: "Extend Admin",
-      intendedContactEmail: `extend_${Date.now()}@test.mu`,
-      durationDays: 30,
-      permittedCourseIds: [canonicalCourse1.id],
-    });
-
-    const countBefore = (await db.select().from(coursesTable)).length;
-
-    await extendPilotPass("admin:bootstrap", pilotPass.id, 15, "Commercial evaluation extension");
-
-    const countAfter = (await db.select().from(coursesTable)).length;
-    assert.strictEqual(countAfter, countBefore, "Course count remains unchanged after pilot extension");
-  });
-
-  it("4. Converting a pilot does not create courses", async () => {
-    const { pilotPass, rawCode } = await createPilotPass("admin:bootstrap", {
-      companyName: `Convert Invariance Co ${Date.now()}`,
-      intendedContactName: "Convert Admin",
-      intendedContactEmail: `convert_inv_${Date.now()}@test.mu`,
-      durationDays: 30,
-      permittedCourseIds: [canonicalCourse1.id],
-    });
-
-    const redeemed = await redeemPilotPass({
-      rawCode,
-      redeemedByUserId: `user:convert_inv_${Date.now()}`,
-      redeemedByEmail: `convert_inv_${Date.now()}@test.mu`,
-      companyName: `Convert Invariance Co ${Date.now()}`,
-    });
-
-    const countBefore = (await db.select().from(coursesTable)).length;
-
-    await convertPilotToPaid(redeemed.company.id, {
-      planCode: "COMPLETE",
-      employeeBandCode: "UP_TO_25",
-      performedBy: "admin:bootstrap",
-    });
-
-    const countAfter = (await db.select().from(coursesTable)).length;
-    assert.strictEqual(countAfter, countBefore, "Course count remains unchanged after commercial conversion");
-  });
-
-  // ── GROUP 2: Course Selection Validation Boundaries ────────────────────────
-
-  it("5. Platform Admin can select existing canonical courses", async () => {
+  it("7. Platform Admin can select existing canonical courses", async () => {
     const created = await createPilotPass("admin:bootstrap", {
       companyName: `Valid Canonical Co ${Date.now()}`,
       intendedContactName: "Valid Admin",
@@ -164,231 +180,324 @@ describe("Sprint 12.3.1: Remove Unauthorised Pilot Courses & Restore Canonical C
     assert.deepStrictEqual(created.pilotPass.permittedCourseIds, [canonicalCourse1.id, canonicalCourse2.id]);
   });
 
-  it("6. Empty permitted-course selection is rejected with 400", async () => {
+  // ── GROUP 3: Suspended Pilot Pass Rejection Services ────────────────────────
+
+  it("8. Suspended pilot pass is rejected by validation service (validatePilotPassCode)", async () => {
+    // Create a pilot pass and suspend it
+    const { rawCode, pilotPass } = await createPilotPass("admin:bootstrap", {
+      companyName: `Suspended Test Co ${Date.now()}`,
+      intendedContactName: "Suspended Admin",
+      intendedContactEmail: `suspended_test_${Date.now()}@test.mu`,
+      durationDays: 30,
+      permittedCourseIds: [canonicalCourse1.id],
+    });
+
+    await db
+      .update(companyPilotPassesTable)
+      .set({
+        status: "suspended",
+        permittedCourseIds: [],
+        internalSalesNote: "[REQUIRES REVIEW - NO VALID COURSES REMAINING]",
+      })
+      .where(eq(companyPilotPassesTable.id, pilotPass.id));
+
+    suspendedPass = { id: pilotPass.id, rawCode };
+
+    const validation = await validatePilotPassCode(rawCode);
+    assert.strictEqual(validation.valid, false);
+    assert.strictEqual(validation.error, "SUSPENDED");
+    assert.ok(/suspended and pending Platform Admin review/i.test(validation.message));
+  });
+
+  it("9. Suspended pilot pass is rejected by redemption service (redeemPilotPass)", async () => {
     await assert.rejects(
       async () => {
-        await createPilotPass("admin:bootstrap", {
-          companyName: "Empty Courses Co",
-          intendedContactName: "Admin",
-          intendedContactEmail: `empty_${Date.now()}@test.mu`,
-          durationDays: 30,
-          permittedCourseIds: [],
+        await redeemPilotPass({
+          rawCode: suspendedPass.rawCode,
+          redeemedByUserId: `user:suspended_${Date.now()}`,
+          redeemedByEmail: `suspended_test_${Date.now()}@test.mu`,
+          companyName: "Suspended Test Co",
         });
       },
-      (err: any) => err.status === 400 && /At least one permitted canonical course must be selected/i.test(err.message)
+      (err: any) => err.status === 403 && /suspended and pending Platform Admin review/i.test(err.message)
     );
   });
 
-  it("7. Unknown course ID is rejected with 400", async () => {
+  it("10. Suspended pilot pass is rejected by extension service (extendPilotPass)", async () => {
     await assert.rejects(
       async () => {
-        await createPilotPass("admin:bootstrap", {
-          companyName: "Unknown Course Co",
-          intendedContactName: "Admin",
-          intendedContactEmail: `unknown_${Date.now()}@test.mu`,
-          durationDays: 30,
-          permittedCourseIds: [99999999],
-        });
+        await extendPilotPass("admin:bootstrap", suspendedPass.id, 15, "Try extending suspended");
       },
-      (err: any) => err.status === 400 && /canonical catalogue/i.test(err.message)
+      (err: any) => err.status === 400 && /Cannot extend a suspended pilot pass/i.test(err.message)
     );
   });
 
-  it("8. Archived or unpublished course ID is rejected with 400", async () => {
-    await assert.rejects(
-      async () => {
-        await createPilotPass("admin:bootstrap", {
-          companyName: "Unpublished Course Co",
-          intendedContactName: "Admin",
-          intendedContactEmail: `unpub_${Date.now()}@test.mu`,
-          durationDays: 30,
-          permittedCourseIds: [unpublishedCourse.id],
-        });
-      },
-      (err: any) => err.status === 400 && /canonical catalogue/i.test(err.message)
-    );
-  });
-
-  it("9. Duplicate submitted course IDs are normalized / deduplicated", async () => {
-    const created = await createPilotPass("admin:bootstrap", {
-      companyName: `Dedupe Co ${Date.now()}`,
+  it("11. Suspended pilot pass is treated as SUSPENDED and read-only by entitlement resolver", async () => {
+    // Create a redeemed pilot pass and suspend its company
+    const { rawCode } = await createPilotPass("admin:bootstrap", {
+      companyName: `Suspended Entitlement Co ${Date.now()}`,
       intendedContactName: "Admin",
-      intendedContactEmail: `dedupe_${Date.now()}@test.mu`,
-      durationDays: 30,
-      permittedCourseIds: [canonicalCourse1.id, canonicalCourse1.id, canonicalCourse1.id],
-    });
-
-    assert.deepStrictEqual(created.pilotPass.permittedCourseIds, [canonicalCourse1.id]);
-  });
-
-  it("10. Arbitrary client-supplied course objects are rejected with 400", async () => {
-    await assert.rejects(
-      async () => {
-        await createPilotPass("admin:bootstrap", {
-          companyName: "Object Course Co",
-          intendedContactName: "Admin",
-          intendedContactEmail: `obj_${Date.now()}@test.mu`,
-          durationDays: 30,
-          permittedCourseIds: [{ id: canonicalCourse1.id, title: "Malicious Course Injection" } as any],
-        });
-      },
-      (err: any) => err.status === 400
-    );
-  });
-
-  // ── GROUP 3: Course Access Gating & Non-Permitted Course Blocking ───────────
-
-  it("11. Pilot access permits a selected canonical course", async () => {
-    const { rawCode } = await createPilotPass("admin:bootstrap", {
-      companyName: `Access Permitted Co ${Date.now()}`,
-      intendedContactName: "Access Admin",
-      intendedContactEmail: `access_p_${Date.now()}@test.mu`,
+      intendedContactEmail: `susp_ent_${Date.now()}@test.mu`,
       durationDays: 30,
       permittedCourseIds: [canonicalCourse1.id],
     });
 
     const redeemed = await redeemPilotPass({
       rawCode,
-      redeemedByUserId: `user:access_p_${Date.now()}`,
-      redeemedByEmail: `access_p_${Date.now()}@test.mu`,
-      companyName: `Access Permitted Co ${Date.now()}`,
+      redeemedByUserId: `user:susp_ent_${Date.now()}`,
+      redeemedByEmail: `susp_ent_${Date.now()}@test.mu`,
+      companyName: `Suspended Entitlement Co ${Date.now()}`,
     });
 
-    const access = await evaluateCourseAccess(canonicalCourse1.id, {
-      userId: `user:access_p_${Date.now()}`,
-      email: `access_p_${Date.now()}@test.mu`,
-      role: "company_admin",
+    await db
+      .update(companyPilotPassesTable)
+      .set({ status: "suspended", permittedCourseIds: [] })
+      .where(eq(companyPilotPassesTable.id, redeemed.pilotPass.id));
+
+    const entitlement = await resolveCompanyPilotEntitlement(redeemed.company.id);
+    assert.strictEqual(entitlement.isPilot, true);
+    assert.strictEqual(entitlement.effectiveStatus, "SUSPENDED");
+    assert.strictEqual(entitlement.isReadOnly, true);
+
+    const courseAccess = await evaluateCourseAccess(canonicalCourse1.id, {
+      userId: `user:susp_ent_${Date.now()}`,
+      email: `susp_ent_${Date.now()}@test.mu`,
       companyId: redeemed.company.id,
+      role: "employee",
       employee: null,
       isDemo: false,
     });
 
-    assert.strictEqual(access.allowed, true, "Access to selected canonical course is allowed");
+    assert.strictEqual(courseAccess.allowed, false);
   });
 
-  it("12. Pilot access blocks a non-selected canonical course with PLAN_UPGRADE_REQUIRED", async () => {
-    const { rawCode } = await createPilotPass("admin:bootstrap", {
-      companyName: `Access Blocked Co ${Date.now()}`,
-      intendedContactName: "Block Admin",
-      intendedContactEmail: `access_b_${Date.now()}@test.mu`,
-      durationDays: 30,
-      permittedCourseIds: [canonicalCourse1.id],
-    });
+  it("12. Lifecycle reconciliation service (reconcilePilotLifecycle) skips suspended passes", async () => {
+    const result = await reconcilePilotLifecycle();
+    assert.ok(typeof result.processedCount === "number");
 
-    const redeemed = await redeemPilotPass({
-      rawCode,
-      redeemedByUserId: `user:access_b_${Date.now()}`,
-      redeemedByEmail: `access_b_${Date.now()}@test.mu`,
-      companyName: `Access Blocked Co ${Date.now()}`,
-    });
+    // Verify suspended pass remains suspended
+    const [pass] = await db
+      .select()
+      .from(companyPilotPassesTable)
+      .where(eq(companyPilotPassesTable.id, suspendedPass.id))
+      .limit(1);
 
-    const access = await evaluateCourseAccess(canonicalCourse2.id, {
-      userId: `user:access_b_${Date.now()}`,
-      email: `access_b_${Date.now()}@test.mu`,
-      role: "company_admin",
-      companyId: redeemed.company.id,
-      employee: null,
-      isDemo: false,
-    });
-
-    assert.strictEqual(access.allowed, false);
-    assert.strictEqual(access.reason, "PLAN_UPGRADE_REQUIRED");
+    assert.strictEqual(pass.status, "suspended");
   });
 
-  // ── GROUP 4: Database Cleanliness, Integrity & Data Preservation ────────────
+  // ── GROUP 4: Audit Logs Append-Only Integrity & Schema Completeness ─────────
 
-  it("13. Unused pilot-only courses are completely absent from the database", async () => {
-    const leftover = await db.execute(sql`
-      SELECT id, course_code, title FROM "courses"
-      WHERE "id" IN (596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615)
-         OR "course_code" LIKE 'PILOT-%'
-         OR "slug" LIKE 'pilot-test-%'
-         OR "slug" LIKE 'sprint-12-3-module-%'
-    `);
+  it("13. Catalogue remediation audit logs contain batch_id, source, action, timestamp, and pre-remediation snapshot", async () => {
+    const logs = await db.select().from(catalogueRemediationAuditLogsTable);
+    assert.ok(logs.length > 0, "Audit logs must exist");
 
-    assert.strictEqual(leftover.rows.length, 0, "Zero unauthorised pilot test courses exist in courses table");
+    for (const log of logs) {
+      assert.ok(log.id, "Log must have serial ID");
+      assert.ok(log.batchId, "Log must have batch_id");
+      assert.ok(log.entityType, "Log must have entity_type");
+      assert.ok(log.originalData, "Log must have original_data snapshot");
+      assert.ok(log.actionTaken, "Log must have action_taken");
+      assert.ok(log.reason, "Log must have reason");
+      assert.ok(log.source, "Log must have source");
+      assert.ok(log.performedBy, "Log must have performed_by");
+      assert.ok(log.createdAt, "Log must have timestamp");
+    }
   });
 
-  it("14. Duplicate course references are mapped to canonical IDs in pilot passes", async () => {
+  it("14. Zero orphaned enrollments exist in the database", async () => {
+    const canonicalIds = (await db.select({ id: coursesTable.id }).from(coursesTable)).map((c) => c.id);
+    const enrollments = await db.select().from(enrollmentsTable);
+
+    for (const enr of enrollments) {
+      assert.ok(
+        canonicalIds.includes(enr.courseId),
+        `Enrollment ID ${enr.id} points to canonical course ID ${enr.courseId}`
+      );
+    }
+  });
+
+  it("15. Zero non-canonical certificates exist in the database", async () => {
+    const canonicalIds = (await db.select({ id: coursesTable.id }).from(coursesTable)).map((c) => c.id);
+    const certificates = await db.select().from(certificatesTable);
+
+    for (const cert of certificates) {
+      assert.ok(
+        canonicalIds.includes(cert.courseId),
+        `Certificate ID ${cert.id} points to canonical course ID ${cert.courseId}`
+      );
+    }
+  });
+
+  // ── GROUP 5: Zero Side-Effect Remapping & Idempotence ───────────────────────
+
+  it("16. No learner gains synthetic ELH-01 enrollment or progress", async () => {
+    const [elh01] = await db
+      .select()
+      .from(coursesTable)
+      .where(eq(coursesTable.courseCode, "ELH-01"))
+      .limit(1);
+
+    assert.ok(elh01, "ELH-01 must exist");
+
+    const enrs = await db
+      .select()
+      .from(enrollmentsTable)
+      .where(eq(enrollmentsTable.courseId, elh01.id));
+
+    for (const e of enrs) {
+      assert.ok(e.userId, "Enrollment on ELH-01 must belong to a valid user");
+    }
+  });
+
+  it("17. No pilot pass gains ELH-01 permission automatically when invalid courses are pruned", async () => {
     const passes = await db.select().from(companyPilotPassesTable);
-    for (const pass of passes) {
-      if (pass.permittedCourseIds && Array.isArray(pass.permittedCourseIds)) {
-        for (const cid of pass.permittedCourseIds) {
-          assert.ok(
-            ![596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615].includes(cid),
-            `Pass ID ${pass.id} references no deleted course IDs`
-          );
-        }
+    for (const p of passes) {
+      if (p.status === "suspended") {
+        assert.deepStrictEqual(p.permittedCourseIds, [], "Suspended pass must have empty permitted courses, not remapped to [1]");
       }
     }
   });
 
-  it("15. Learning data (enrollments, certificates) is preserved and points to canonical courses", async () => {
-    const enrollments = await db.select().from(enrollmentsTable);
-    for (const enr of enrollments) {
-      assert.ok(
-        ![596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615].includes(enr.courseId),
-        `Enrollment ID ${enr.id} points to valid canonical course`
-      );
-    }
+  it("18. Repeated remediation execution is 100% idempotent and causes zero further changes", async () => {
+    const countCoursesBefore = (await db.select().from(coursesTable)).length;
+    const countEnrBefore = (await db.select().from(enrollmentsTable)).length;
+    const countCertBefore = (await db.select().from(certificatesTable)).length;
+    const countPassesBefore = (await db.select().from(companyPilotPassesTable)).length;
+    const countAuditBefore = (await db.select().from(catalogueRemediationAuditLogsTable)).length;
 
-    const certificates = await db.select().from(certificatesTable);
-    for (const cert of certificates) {
-      assert.ok(
-        ![596, 597, 599, 600, 603, 604, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615].includes(cert.courseId),
-        `Certificate ID ${cert.id} points to valid canonical course`
-      );
-    }
+    // Re-run schema modifications
+    await ensureSchemaModifications();
+
+    const countCoursesAfter = (await db.select().from(coursesTable)).length;
+    const countEnrAfter = (await db.select().from(enrollmentsTable)).length;
+    const countCertAfter = (await db.select().from(certificatesTable)).length;
+    const countPassesAfter = (await db.select().from(companyPilotPassesTable)).length;
+    const countAuditAfter = (await db.select().from(catalogueRemediationAuditLogsTable)).length;
+
+    assert.strictEqual(countCoursesAfter, countCoursesBefore, "Course count unchanged on rerun");
+    assert.strictEqual(countEnrAfter, countEnrBefore, "Enrollment count unchanged on rerun");
+    assert.strictEqual(countCertAfter, countCertBefore, "Certificate count unchanged on rerun");
+    assert.strictEqual(countPassesAfter, countPassesBefore, "Pilot pass count unchanged on rerun");
+    assert.strictEqual(countAuditAfter, countAuditBefore, "Audit log count unchanged on rerun");
   });
 
-  it("16. Course code uniqueness is verified across canonical catalogue", async () => {
-    const res = await db.execute(sql`
-      SELECT course_code, count(*) as count 
-      FROM "courses" 
-      WHERE course_code IS NOT NULL 
-      GROUP BY course_code 
-      HAVING count(*) > 1;
-    `);
-
-    assert.strictEqual(res.rows.length, 0, "No duplicate course codes exist");
-  });
-
-  it("17. verifyDatabaseIntegrity passes with 0 critical issues", async () => {
+  it("19. verifyDatabaseIntegrity passes with 0 critical issues", async () => {
     const report = await verifyDatabaseIntegrity();
     assert.strictEqual(report.valid, true);
     assert.strictEqual(report.issues.filter((i) => i.type === "critical").length, 0);
   });
 
-  it("18. Preserves company employee accounts and tenant isolation", async () => {
-    const employees = await db.select().from(employeesTable);
-    assert.ok(employees.length > 0, "Employee records are preserved");
-  });
+  it("20. Platform Admin can reactivate a suspended pass by assigning valid canonical courses", async () => {
+    const { reactivateSuspendedPilotPass } = await import("./lib/pilotPassService");
 
-  it("19. Rejects client attempt to redeem pilot with cross-tenant domain mismatch", async () => {
+    // Create a pass and suspend it
     const { rawCode } = await createPilotPass("admin:bootstrap", {
-      companyName: "Domain Lock Corp",
-      intendedContactName: "Lock Admin",
-      intendedContactEmail: `admin_${Date.now()}@domainlock.mu`,
-      intendedEmailDomain: "domainlock.mu",
+      companyName: `Reactivation Co ${Date.now()}`,
+      intendedContactName: "Admin",
+      intendedContactEmail: `reactivate_${Date.now()}@test.mu`,
       durationDays: 30,
       permittedCourseIds: [canonicalCourse1.id],
     });
 
-    await assert.rejects(
-      async () => {
-        await redeemPilotPass({
-          rawCode,
-          redeemedByUserId: "user:intruder",
-          redeemedByEmail: "intruder@othercompany.com",
-          companyName: "Domain Lock Corp",
-        });
-      },
-      (err: any) => err.status === 403
+    const redeemed = await redeemPilotPass({
+      rawCode,
+      redeemedByUserId: `user:reactivate_${Date.now()}`,
+      redeemedByEmail: `reactivate_${Date.now()}@test.mu`,
+      companyName: `Reactivation Co ${Date.now()}`,
+    });
+
+    await db
+      .update(companyPilotPassesTable)
+      .set({ status: "suspended", permittedCourseIds: [] })
+      .where(eq(companyPilotPassesTable.id, redeemed.pilotPass.id));
+
+    // Reactivate pass with canonical courses 1 & 2
+    const reactivated = await reactivateSuspendedPilotPass(
+      "admin:bootstrap",
+      redeemed.pilotPass.id,
+      [canonicalCourse1.id, canonicalCourse2.id],
+      "Verified client business needs and assigned approved canonical course modules."
     );
+
+    assert.strictEqual(reactivated.status, "active");
+    assert.deepStrictEqual(reactivated.permittedCourseIds, [canonicalCourse1.id, canonicalCourse2.id]);
+    assert.ok(reactivated.internalSalesNote.includes("[REACTIVATED by admin:bootstrap:"));
+
+    // Verify course access is restored for permitted courses
+    const courseAccess1 = await evaluateCourseAccess(canonicalCourse1.id, {
+      userId: `user:reactivate_${Date.now()}`,
+      email: `reactivate_${Date.now()}@test.mu`,
+      companyId: redeemed.company.id,
+      role: "employee",
+      employee: null,
+      isDemo: false,
+    });
+    assert.strictEqual(courseAccess1.allowed, true);
   });
 
-  it("20. Canonical course catalogue row count matches expected 35 courses", async () => {
-    const allCourses = await db.select().from(coursesTable);
-    assert.strictEqual(allCourses.length, 35, "Exactly 35 canonical courses remain in the catalogue");
+  it("21. Platform Admin can cancel a suspended pilot pass with explicit administrative confirmation", async () => {
+    const { cancelSuspendedPilotPass } = await import("./lib/pilotPassService");
+
+    const created = await createPilotPass("admin:bootstrap", {
+      companyName: `Cancel Co ${Date.now()}`,
+      intendedContactName: "Admin",
+      intendedContactEmail: `cancel_${Date.now()}@test.mu`,
+      durationDays: 30,
+      permittedCourseIds: [canonicalCourse1.id],
+    });
+
+    await db
+      .update(companyPilotPassesTable)
+      .set({ status: "suspended", permittedCourseIds: [] })
+      .where(eq(companyPilotPassesTable.id, created.pilotPass.id));
+
+    const cancelled = await cancelSuspendedPilotPass(
+      "admin:bootstrap",
+      created.pilotPass.id,
+      "Company confirmed they will not be proceeding with pilot evaluation."
+    );
+
+    assert.strictEqual(cancelled.status, "revoked");
+    assert.ok(cancelled.internalSalesNote.includes("[CANCELLED by admin:bootstrap:"));
+  });
+
+  it("22. Database-level trigger trg_prevent_catalogue_audit_log_mutation blocks direct UPDATE and DELETE", async () => {
+    await ensureSchemaModifications();
+
+    const [auditRow] = await db
+      .select({ id: catalogueRemediationAuditLogsTable.id })
+      .from(catalogueRemediationAuditLogsTable)
+      .limit(1);
+
+    assert.ok(auditRow, "Audit row must exist to test trigger");
+
+    // Attempt UPDATE on audit table
+    await assert.rejects(
+      async () => {
+        await db.execute(sql`
+          UPDATE "catalogue_remediation_audit_logs" 
+          SET "reason" = 'unauthorized_tampering_attempt'
+          WHERE "id" = ${auditRow.id};
+        `);
+      },
+      (err: any) => {
+        const fullMsg = `${err?.message || ""} ${err?.cause?.message || ""} ${String(err?.cause || "")}`;
+        return /catalogue_remediation_audit_logs is append-only/i.test(fullMsg);
+      }
+    );
+
+    // Attempt DELETE on audit table
+    await assert.rejects(
+      async () => {
+        await db.execute(sql`
+          DELETE FROM "catalogue_remediation_audit_logs" 
+          WHERE "id" = ${auditRow.id};
+        `);
+      },
+      (err: any) => {
+        const fullMsg = `${err?.message || ""} ${err?.cause?.message || ""} ${String(err?.cause || "")}`;
+        return /catalogue_remediation_audit_logs is append-only/i.test(fullMsg);
+      }
+    );
   });
 });

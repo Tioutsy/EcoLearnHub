@@ -120,7 +120,12 @@ export async function evaluateCourseAccess(
   const pilotEntitlement = await resolveCompanyPilotEntitlement(accessContext.companyId);
 
   if (pilotEntitlement.isPilot && !pilotEntitlement.isConverted) {
-    if (pilotEntitlement.isExpired || pilotEntitlement.isRevoked) {
+    if (
+      pilotEntitlement.isExpired ||
+      pilotEntitlement.isRevoked ||
+      pilotEntitlement.effectiveStatus === "SUSPENDED" ||
+      pilotEntitlement.isReadOnly
+    ) {
       return {
         allowed: false,
         reason: "SUBSCRIPTION_INACTIVE",
@@ -129,15 +134,13 @@ export async function evaluateCourseAccess(
       };
     }
 
-    if (pilotEntitlement.permittedCourseIds && pilotEntitlement.permittedCourseIds.length > 0) {
-      if (!pilotEntitlement.permittedCourseIds.includes(courseId)) {
-        return {
-          allowed: false,
-          reason: "PLAN_UPGRADE_REQUIRED",
-          requiredPlanCode,
-          requiredPlanName,
-        };
-      }
+    if (!pilotEntitlement.permittedCourseIds || !pilotEntitlement.permittedCourseIds.includes(courseId)) {
+      return {
+        allowed: false,
+        reason: "PLAN_UPGRADE_REQUIRED",
+        requiredPlanCode,
+        requiredPlanName,
+      };
     }
   }
 

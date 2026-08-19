@@ -366,19 +366,37 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
     });
   }
 
-  // C. Check that no unauthorised pilot-specific test courses exist in courses table
-  const unauthorizedCourses = await db.execute(sql`
-    SELECT id, course_code, title, slug 
-    FROM courses 
-    WHERE course_code LIKE 'PILOT-%' 
-       OR slug LIKE 'pilot-test-%' 
-       OR slug LIKE 'sprint-12-3-module-%'
+  // D. Check for orphaned enrollments pointing to non-canonical or non-existent courses
+  const orphanedEnrollments = await db.execute(sql`
+    SELECT e.id, e.course_id, e.user_id 
+    FROM enrollments e
+    WHERE e.course_id NOT IN (
+      SELECT id FROM courses 
+      WHERE course_code IS NOT NULL AND course_code LIKE 'ELH-%' AND is_published = true
+    )
   `);
-  if (unauthorizedCourses.rows.length > 0) {
+  if (orphanedEnrollments.rows.length > 0) {
     issues.push({
       type: "critical",
-      message: "Unauthorised pilot test courses found in canonical courses table.",
-      details: unauthorizedCourses.rows
+      message: "Orphaned enrollments found pointing to non-canonical or unpublished courses.",
+      details: orphanedEnrollments.rows
+    });
+  }
+
+  // E. Check for orphaned certificates pointing to non-canonical or non-existent courses
+  const orphanedCertificates = await db.execute(sql`
+    SELECT c.id, c.course_id, c.user_id, c.unique_code 
+    FROM certificates c
+    WHERE c.course_id NOT IN (
+      SELECT id FROM courses 
+      WHERE course_code IS NOT NULL AND course_code LIKE 'ELH-%' AND is_published = true
+    )
+  `);
+  if (orphanedCertificates.rows.length > 0) {
+    issues.push({
+      type: "critical",
+      message: "Orphaned certificates found pointing to non-canonical or unpublished courses.",
+      details: orphanedCertificates.rows
     });
   }
 
@@ -390,3 +408,4 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
     issues
   };
 }
+

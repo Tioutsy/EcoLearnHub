@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, varchar, unique, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, varchar, unique, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { companiesTable } from "./companies";
@@ -181,3 +181,32 @@ export const insertUpgradeRequestAuditLogSchema = createInsertSchema(upgradeRequ
 
 export type InsertUpgradeRequestAuditLog = z.infer<typeof insertUpgradeRequestAuditLogSchema>;
 export type UpgradeRequestAuditLog = typeof upgradeRequestAuditLogsTable.$inferSelect;
+
+export const catalogueRemediationAuditLogsTable = pgTable(
+  "catalogue_remediation_audit_logs",
+  {
+    id: serial("id").primaryKey(),
+    batchId: text("batch_id").notNull().default("batch-sprint-12-3-1"),
+    entityType: text("entity_type").notNull(), // 'enrollment' | 'certificate' | 'pilot_pass' | 'course'
+    entityId: integer("entity_id"),
+    originalData: jsonb("original_data").notNull(),
+    actionTaken: text("action_taken").notNull(), // 'deleted_orphan' | 'revoked_certificate' | 'pruned_courses' | 'suspended_pilot_pass' | 'deleted_obsolete_draft'
+    reason: text("reason").notNull(),
+    source: text("source").notNull().default("system:remediation"),
+    performedBy: text("performed_by").notNull().default("system:remediation"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    idxRemediationBatchId: index("idx_catalogue_remediation_batch_id").on(t.batchId),
+    idxRemediationEntityType: index("idx_catalogue_remediation_entity_type").on(t.entityType),
+    idxRemediationActionTaken: index("idx_catalogue_remediation_action_taken").on(t.actionTaken),
+  })
+);
+
+export const insertCatalogueRemediationAuditLogSchema = createInsertSchema(catalogueRemediationAuditLogsTable).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCatalogueRemediationAuditLog = z.infer<typeof insertCatalogueRemediationAuditLogSchema>;
+export type CatalogueRemediationAuditLog = typeof catalogueRemediationAuditLogsTable.$inferSelect;

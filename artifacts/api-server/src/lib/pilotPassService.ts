@@ -21,7 +21,7 @@ import {
   PilotNotification,
   UpgradeRequestAuditLog,
 } from "@workspace/db";
-import { eq, and, or, desc, sql, ilike, inArray, gte, lte, isNull } from "drizzle-orm";
+import { eq, and, or, desc, sql, ilike, inArray, gte, lte, isNull, isNotNull, like } from "drizzle-orm";
 import crypto from "crypto";
 import { logger } from "./logger";
 import { HttpError } from "./access";
@@ -33,6 +33,15 @@ export interface NormalizedPilotCode {
 }
 
 const CROCKFORD_CHARS = "23456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+export const AUTHORISED_CANONICAL_COURSE_CODES: readonly string[] = Object.freeze(
+  Array.from({ length: 34 }, (_, i) => `ELH-${String(i + 1).padStart(2, "0")}`)
+);
+
+export function isAuthorisedCanonicalCourseCode(code: string | null | undefined): boolean {
+  if (!code || typeof code !== "string") return false;
+  return AUTHORISED_CANONICAL_COURSE_CODES.includes(code);
+}
 
 /**
  * Normalizes any entered code format (e.g. "elevio-pilot-a7k9-q2mp", "A7K9Q2MP", "a7k9-q2mp")
@@ -167,14 +176,21 @@ export async function createPilotPass(
     throw new HttpError(400, "At least one permitted canonical course must be selected");
   }
 
-  // Validate that all course IDs exist in canonical catalogue and are published
+  // Validate that all course IDs exist in canonical catalogue, are published, and have an explicit authorised canonical course code (ELH-01 to ELH-34)
   const existingCourses = await db
-    .select({ id: coursesTable.id })
+    .select({ id: coursesTable.id, courseCode: coursesTable.courseCode })
     .from(coursesTable)
-    .where(and(inArray(coursesTable.id, sanitizedCourseIds), eq(coursesTable.isPublished, true)));
+    .where(
+      and(
+        inArray(coursesTable.id, sanitizedCourseIds),
+        eq(coursesTable.isPublished, true),
+        isNotNull(coursesTable.courseCode),
+        inArray(coursesTable.courseCode, AUTHORISED_CANONICAL_COURSE_CODES as string[])
+      )
+    );
 
   if (existingCourses.length !== sanitizedCourseIds.length) {
-    throw new HttpError(400, "One or more selected courses do not exist or are not published in the canonical catalogue");
+    throw new HttpError(400, "One or more selected courses do not exist, are draft/unpublished, or are not in the authorised canonical catalogue (ELH-01 to ELH-34)");
   }
 
   const permittedCourseIds = sanitizedCourseIds;
@@ -408,7 +424,10 @@ export async function extendPilotPass(
       throw new HttpError(404, "Pilot pass not found");
     }
 
-    if (pass.status === "revoked" || pass.status === "converted") {
+    if (pass.status === "revoked" || pass.status === "converted" || pass.status === "suspended") {
+      if (pass.status === "suspended") {
+        throw new HttpError(400, "Cannot extend a suspended pilot pass with no valid courses. Please update permitted courses before extending.");
+      }
       throw new HttpError(400, `Cannot extend pilot pass in '${pass.status}' status`);
     }
 
@@ -534,6 +553,183 @@ export async function revokePilotPass(
 }
 
 /**
+ * Reactivate a suspended pilot pass after explicit Platform Admin review and assignment
+ * of a valid permitted course subset from the canonical catalogue (ELH-01 through ELH-34).
+ */
+export async function reactivateSuspendedPilotPass(
+  platformAdminUserId: string,
+  pilotPassId: number,
+  permittedCourseIds: number[],
+  reason: string
+): Promise<any> {
+  if (!permittedCourseIds || !Array.isArray(permittedCourseIds) || permittedCourseIds.length === 0) {
+    throw new HttpError(400, "At least one canonical course must be assigned to reactivate a suspended pilot pass");
+  }
+
+  if (!reason || !reason.trim()) {
+    throw new HttpError(400, "A reactivation reason or administrative note is required");
+  }
+
+  // Validate courses against explicit canonical catalogue
+  const validCanonicalCourses = await db
+    .select({ id: coursesTable.id, code: coursesTable.courseCode, isPublished: coursesTable.isPublished })
+    .from(coursesTable)
+    .where(
+      and(
+        inArray(coursesTable.id, permittedCourseIds),
+        inArray(coursesTable.courseCode, [...AUTHORISED_CANONICAL_COURSE_CODES]),
+        eq(coursesTable.isPublished, true)
+      )
+    );
+
+  if (validCanonicalCourses.length !== permittedCourseIds.length) {
+    throw new HttpError(400, "One or more selected courses are not valid published canonical courses (ELH-01 through ELH-34)");
+  }
+
+  return await db.transaction(async (tx) => {
+    const [pass] = await tx
+      .select()
+      .from(companyPilotPassesTable)
+      .where(eq(companyPilotPassesTable.id, pilotPassId))
+      .limit(1);
+
+    if (!pass) {
+      throw new HttpError(404, "Pilot pass not found");
+    }
+
+    if (pass.status !== "suspended") {
+      throw new HttpError(400, `Only suspended pilot passes can be reactivated. Current status is ${pass.status}`);
+    }
+
+    const now = new Date();
+    const isRedeemed = !!pass.redeemedAt && !!pass.companyId;
+    let newStatus = isRedeemed ? "active" : "created";
+    
+    let effectiveExpiresAt = pass.expiresAt;
+    if (isRedeemed && (!pass.expiresAt || pass.expiresAt < now)) {
+      effectiveExpiresAt = new Date(now.getTime() + (pass.durationDays || 30) * 24 * 60 * 60 * 1000);
+    }
+
+    // Clean up internal sales note
+    const cleanedNote = (pass.internalSalesNote || "")
+      .replace(/\[REQUIRES REVIEW - NO VALID COURSES REMAINING\]\s*/g, "")
+      .trim();
+    const updatedNote = `[REACTIVATED by ${platformAdminUserId}: ${reason.trim()}] ${cleanedNote}`.trim();
+
+    const [updated] = await tx
+      .update(companyPilotPassesTable)
+      .set({
+        status: newStatus,
+        permittedCourseIds,
+        internalSalesNote: updatedNote,
+        expiresAt: effectiveExpiresAt,
+        updatedAt: now,
+      })
+      .where(eq(companyPilotPassesTable.id, pilotPassId))
+      .returning();
+
+    if (pass.companyId && newStatus === "active") {
+      await tx
+        .update(companySubscriptionsTable)
+        .set({
+          status: "TRIAL",
+          accessEndsAt: effectiveExpiresAt,
+        })
+        .where(eq(companySubscriptionsTable.companyId, pass.companyId));
+    }
+
+    await tx.insert(pilotPassAuditLogsTable).values({
+      pilotPassId,
+      action: "reactivated",
+      performedBy: platformAdminUserId,
+      details: JSON.stringify({
+        reason: reason.trim(),
+        assignedCourseIds: permittedCourseIds,
+        previousStatus: "suspended",
+        newStatus,
+      }),
+    });
+
+    const { codeHash: _, ...rest } = updated;
+    return {
+      ...rest,
+      maskedCode: maskPilotCode(updated.codeLastFour),
+    };
+  });
+}
+
+/**
+ * Cancel a suspended pilot pass if the pilot company will not proceed.
+ */
+export async function cancelSuspendedPilotPass(
+  platformAdminUserId: string,
+  pilotPassId: number,
+  reason: string
+): Promise<any> {
+  if (!reason || !reason.trim()) {
+    throw new HttpError(400, "A cancellation reason is required");
+  }
+
+  return await db.transaction(async (tx) => {
+    const [pass] = await tx
+      .select()
+      .from(companyPilotPassesTable)
+      .where(eq(companyPilotPassesTable.id, pilotPassId))
+      .limit(1);
+
+    if (!pass) {
+      throw new HttpError(404, "Pilot pass not found");
+    }
+
+    const now = new Date();
+    const cleanedNote = (pass.internalSalesNote || "")
+      .replace(/\[REQUIRES REVIEW - NO VALID COURSES REMAINING\]\s*/g, "")
+      .trim();
+    const updatedNote = `[CANCELLED by ${platformAdminUserId}: ${reason.trim()}] ${cleanedNote}`.trim();
+
+    const [updated] = await tx
+      .update(companyPilotPassesTable)
+      .set({
+        status: "revoked",
+        internalSalesNote: updatedNote,
+        revokedAt: now,
+        revokedBy: platformAdminUserId,
+        revocationReason: reason.trim(),
+        updatedAt: now,
+      })
+      .where(eq(companyPilotPassesTable.id, pilotPassId))
+      .returning();
+
+    if (pass.companyId) {
+      await tx
+        .update(companySubscriptionsTable)
+        .set({
+          status: "CANCELLED",
+          accessEndsAt: now,
+        })
+        .where(eq(companySubscriptionsTable.companyId, pass.companyId));
+    }
+
+    await tx.insert(pilotPassAuditLogsTable).values({
+      pilotPassId,
+      action: "cancelled",
+      performedBy: platformAdminUserId,
+      details: JSON.stringify({
+        reason: reason.trim(),
+        previousStatus: pass.status,
+        newStatus: "revoked",
+      }),
+    });
+
+    const { codeHash: _, ...rest } = updated;
+    return {
+      ...rest,
+      maskedCode: maskPilotCode(updated.codeLastFour),
+    };
+  });
+}
+
+/**
  * Validates a pilot pass code safely without leaking information about unrelated tenants.
  */
 export async function validatePilotPassCode(
@@ -578,6 +774,9 @@ export async function validatePilotPassCode(
   }
   if (pass.status === "revoked") {
     return { valid: false, error: "REVOKED", message: "This pilot pass has been revoked" };
+  }
+  if (pass.status === "suspended") {
+    return { valid: false, error: "SUSPENDED", message: "This pilot pass is suspended and pending Platform Admin review" };
   }
 
   if (claimantEmail && claimantEmail.trim()) {
@@ -654,6 +853,9 @@ export async function redeemPilotPassInTransaction(
     }
     if (pass.status === "revoked") {
       throw new HttpError(403, "This pilot pass has been revoked");
+    }
+    if (pass.status === "suspended") {
+      throw new HttpError(403, "This pilot pass is suspended and pending Platform Admin review");
     }
     throw new HttpError(400, `Pilot pass is not available (status: ${pass.status})`);
   }
@@ -979,7 +1181,8 @@ export type PilotEntitlementStatus =
   | "EXPIRED"
   | "REVOKED"
   | "CONVERSION_PENDING"
-  | "CONVERTED";
+  | "CONVERTED"
+  | "SUSPENDED";
 
 export interface CompanyPilotEntitlementResult {
   isPilot: boolean;
@@ -1074,8 +1277,9 @@ export async function resolveCompanyPilotEntitlement(
     }
   }
 
-  const isReadOnly = (isExpired || isRevoked) && !isConverted;
-  const expiringSoon = !isExpired && !isRevoked && !isConverted && daysRemaining > 0 && daysRemaining <= 7;
+  let isSuspended = pilotPass.status === "suspended";
+  let isReadOnly = (isExpired || isRevoked || isSuspended) && !isConverted;
+  const expiringSoon = !isExpired && !isRevoked && !isSuspended && !isConverted && daysRemaining > 0 && daysRemaining <= 7;
   const conversionPending = !!upgradeReq && (upgradeReq.status === "AWAITING_PAYMENT" || upgradeReq.status === "PAYMENT_UNDER_REVIEW");
 
   let effectiveStatus: PilotEntitlementStatus = "ACTIVE";
@@ -1083,6 +1287,8 @@ export async function resolveCompanyPilotEntitlement(
     effectiveStatus = "CONVERTED";
   } else if (isRevoked) {
     effectiveStatus = "REVOKED";
+  } else if (isSuspended) {
+    effectiveStatus = "SUSPENDED";
   } else if (conversionPending) {
     effectiveStatus = "CONVERSION_PENDING";
   } else if (isExpired) {

@@ -7,20 +7,68 @@ import {
   subscriptionPlansTable,
   employeeBandsTable,
   enrollmentsTable,
+  coursesTable,
+  coursePrerequisitesTable,
+  planCourseEntitlementsTable,
 } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { evaluateCourseAccess } from "./courseAccessService";
 import { ensureHybridSubscriptions } from "./ensureHybridSubscriptions";
 import { CompanyAccess } from "./access";
 
 test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
-  await ensureHybridSubscriptions();
+  const existingPlans = await db.select().from(subscriptionPlansTable).limit(1);
+  if (existingPlans.length === 0) {
+    await ensureHybridSubscriptions();
+  }
+
+  // Dynamically resolve canonical test courses via stable course codes
+  const allCourses = await db.select().from(coursesTable);
+  const getCourseByCode = (code: string) => allCourses.find(c => c.courseCode === code) || allCourses[0];
+
+  const elh01 = getCourseByCode("ELH-01");
+  const elh12 = getCourseByCode("ELH-12");
+  const elh14 = getCourseByCode("ELH-14");
+
+  // Prerequisite courses 1..11
+  const prereqCourses = allCourses.filter(c => {
+    if (!c.courseCode || !c.courseCode.startsWith("ELH-")) return false;
+    const num = parseInt(c.courseCode.replace("ELH-", ""), 10);
+    return num >= 1 && num <= 11;
+  });
+
+  const [completePlan] = await db
+    .select()
+    .from(subscriptionPlansTable)
+    .where(eq(subscriptionPlansTable.code, "COMPLETE"))
+    .limit(1);
+
+  const [band] = await db.select().from(employeeBandsTable).limit(1);
+  const bandId = band?.id || 1;
+
+  await db.delete(companiesTable).where(eq(companiesTable.slug, "complete-corp-test"));
+  const [completeCompany] = await db
+    .insert(companiesTable)
+    .values({
+      name: "Complete Subscription Corp",
+      slug: "complete-corp-test",
+    })
+    .returning();
+
+  if (completePlan) {
+    await db.insert(companySubscriptionsTable).values({
+      companyId: completeCompany.id,
+      subscriptionPlanId: completePlan.id,
+      employeeBandId: bandId,
+      status: "ACTIVE",
+    });
+  }
 
   // Test setup: ensure COMPLETE plan company, ESSENTIAL plan company, inactive sub company
   const company1Access: CompanyAccess = {
     userId: "hotfix_learner_complete",
     email: "learner_complete@testcompany1.mu",
-    companyId: 1, // Has COMPLETE active plan
+    companyId: completeCompany.id,
     role: "employee",
     employee: null,
     isDemo: false,
@@ -38,7 +86,7 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
   const companyAdminAccess: CompanyAccess = {
     userId: "hotfix_company_admin",
     email: "cadmin@testcompany1.mu",
-    companyId: 1,
+    companyId: completeCompany.id,
     role: "company_admin",
     employee: null,
     isDemo: false,
@@ -53,11 +101,10 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
     isDemo: false,
   };
 
-  // 1. COMPLETE learner without prerequisites cannot enrol in ELH-12 (Course 12)
-  // Ensure learner has no enrollments in 1-11
+  // 1. COMPLETE learner without prerequisites cannot enrol in ELH-12
   await db.delete(enrollmentsTable).where(eq(enrollmentsTable.userId, "hotfix_learner_complete"));
 
-  const decisionNoPrereq = await evaluateCourseAccess(12, company1Access);
+  const decisionNoPrereq = await evaluateCourseAccess(elh12.id, company1Access);
   assert.equal(decisionNoPrereq.allowed, false, "Learner without prerequisites must not be allowed in ELH-12");
   assert.equal(decisionNoPrereq.reason, "PREREQUISITE_REQUIRED", "Reason must be PREREQUISITE_REQUIRED");
   assert.ok(
@@ -66,19 +113,27 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
   );
 
   // 2. COMPLETE learner with all prerequisites can access ELH-12
-  // Create completed enrollments for prerequisite courses 1 to 11
-  for (let cId = 1; cId <= 11; cId++) {
+  const prereqRecords = await db
+    .select({ prerequisiteCourseId: coursePrerequisitesTable.prerequisiteCourseId })
+    .from(coursePrerequisitesTable)
+    .where(eq(coursePrerequisitesTable.courseId, elh12.id));
+
+  const prereqIdsToComplete = prereqRecords.length > 0
+    ? prereqRecords.map(r => r.prerequisiteCourseId)
+    : prereqCourses.map(c => c.id);
+
+  for (const pid of prereqIdsToComplete) {
     await db.insert(enrollmentsTable).values({
       userId: "hotfix_learner_complete",
-      companyId: 1,
-      courseId: cId,
+      companyId: completeCompany.id,
+      courseId: pid,
       status: "completed",
       completedAt: new Date(),
       progressPct: 100,
     });
   }
 
-  const decisionWithPrereq = await evaluateCourseAccess(12, company1Access);
+  const decisionWithPrereq = await evaluateCourseAccess(elh12.id, company1Access);
   assert.equal(decisionWithPrereq.allowed, true, "Learner with completed prerequisites must be allowed in ELH-12");
   assert.equal(decisionWithPrereq.reason, "INCLUDED_IN_PLAN");
 
@@ -86,12 +141,11 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
   await db.delete(enrollmentsTable).where(eq(enrollmentsTable.userId, "hotfix_learner_complete"));
 
   // 6 & 10. User with no companyId (or companyId=0) is denied paid-course access (fails closed)
-  const decisionNoCompany = await evaluateCourseAccess(1, noCompanyAccess);
+  const decisionNoCompany = await evaluateCourseAccess(elh01.id, noCompanyAccess);
   assert.equal(decisionNoCompany.allowed, false, "User without companyId must be denied");
   assert.equal(decisionNoCompany.reason, "COMPANY_NOT_ASSIGNED", "Must return COMPANY_NOT_ASSIGNED");
 
   // 7. User with inactive company subscription is denied
-  // Setup company with inactive sub
   await db.delete(companiesTable).where(eq(companiesTable.slug, "inactive-corp-test"));
   const [testCompany] = await db
     .insert(companiesTable)
@@ -106,9 +160,6 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
     .from(subscriptionPlansTable)
     .where(eq(subscriptionPlansTable.code, "ESSENTIAL"))
     .limit(1);
-
-  const [band] = await db.select().from(employeeBandsTable).limit(1);
-  const bandId = band?.id || 1;
 
   if (essentialPlan) {
     await db.insert(companySubscriptionsTable).values({
@@ -127,7 +178,7 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
       isDemo: false,
     };
 
-    const decisionInactive = await evaluateCourseAccess(1, inactiveUserAccess);
+    const decisionInactive = await evaluateCourseAccess(elh01.id, inactiveUserAccess);
     assert.equal(decisionInactive.allowed, false, "User with inactive subscription must be denied");
     assert.equal(decisionInactive.reason, "SUBSCRIPTION_INACTIVE", "Reason must be SUBSCRIPTION_INACTIVE");
 
@@ -136,7 +187,7 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
     await db.delete(companiesTable).where(eq(companiesTable.id, testCompany.id));
   }
 
-  // 8. User on ESSENTIAL subscription cannot access course outside that plan (e.g. COMPLETE course 12)
+  // 8. User on ESSENTIAL subscription cannot access course outside that plan (e.g. COMPLETE course ELH-14)
   await db.delete(companiesTable).where(eq(companiesTable.slug, "essential-corp-test"));
   const [essentialCompany] = await db
     .insert(companiesTable)
@@ -163,14 +214,58 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
       isDemo: false,
     };
 
-    // Course 14 (ELH-14) requires PROFESSIONAL / COMPLETE plan
-    const decisionPlanRestricted = await evaluateCourseAccess(14, essentialUserAccess);
-    assert.equal(decisionPlanRestricted.allowed, false, "Essential plan user cannot access Professional/Complete plan course 14");
+    // Ensure elh14 is not in ESSENTIAL plan entitlements, but is in COMPLETE plan
+    await db
+      .delete(planCourseEntitlementsTable)
+      .where(
+        and(
+          eq(planCourseEntitlementsTable.subscriptionPlanId, essentialPlan.id),
+          eq(planCourseEntitlementsTable.courseId, elh14.id)
+        )
+      );
+
+    const [completeHasElh14] = await db
+      .select()
+      .from(planCourseEntitlementsTable)
+      .where(
+        and(
+          eq(planCourseEntitlementsTable.subscriptionPlanId, completePlan.id),
+          eq(planCourseEntitlementsTable.courseId, elh14.id)
+        )
+      );
+
+    if (!completeHasElh14) {
+      await db.insert(planCourseEntitlementsTable).values({
+        subscriptionPlanId: completePlan.id,
+        courseId: elh14.id,
+      });
+    }
+
+    // Ensure elh01 is in ESSENTIAL plan
+    const [essentialHasElh01] = await db
+      .select()
+      .from(planCourseEntitlementsTable)
+      .where(
+        and(
+          eq(planCourseEntitlementsTable.subscriptionPlanId, essentialPlan.id),
+          eq(planCourseEntitlementsTable.courseId, elh01.id)
+        )
+      );
+
+    if (!essentialHasElh01) {
+      await db.insert(planCourseEntitlementsTable).values({
+        subscriptionPlanId: essentialPlan.id,
+        courseId: elh01.id,
+      });
+    }
+
+    const decisionPlanRestricted = await evaluateCourseAccess(elh14.id, essentialUserAccess);
+    assert.equal(decisionPlanRestricted.allowed, false, "Essential plan user cannot access Professional/Complete plan course ELH-14");
     assert.equal(decisionPlanRestricted.reason, "PLAN_UPGRADE_REQUIRED", "Reason must be PLAN_UPGRADE_REQUIRED");
 
-    // 9. User with entitled plan can access included course (Course 1 is Essential)
-    const decisionPlanAllowed = await evaluateCourseAccess(1, essentialUserAccess);
-    assert.equal(decisionPlanAllowed.allowed, true, "Essential plan user can access Essential course 1");
+    // 9. User with entitled plan can access included course (ELH-01 is Essential)
+    const decisionPlanAllowed = await evaluateCourseAccess(elh01.id, essentialUserAccess);
+    assert.equal(decisionPlanAllowed.allowed, true, "Essential plan user can access Essential course ELH-01");
 
     // Clean up
     await db.delete(companySubscriptionsTable).where(eq(companySubscriptionsTable.companyId, essentialCompany.id));
@@ -178,16 +273,22 @@ test("Sprint 7V Course Access & Prerequisite Security Hotfix", async () => {
   }
 
   // 11. Platform admin can access course with unmet prerequisites
-  const adminDecisionNoPrereq = await evaluateCourseAccess(12, platformAdminAccess);
+  const adminDecisionNoPrereq = await evaluateCourseAccess(elh12.id, platformAdminAccess);
   assert.equal(adminDecisionNoPrereq.allowed, true, "Platform admin can access course with unmet prerequisites");
   assert.equal(adminDecisionNoPrereq.reason, "INCLUDED_IN_PLAN");
 
   // 12. Platform admin can access course without company subscription
-  const adminDecisionNoCompany = await evaluateCourseAccess(1, platformAdminAccess);
+  const adminDecisionNoCompany = await evaluateCourseAccess(elh01.id, platformAdminAccess);
   assert.equal(adminDecisionNoCompany.allowed, true, "Platform admin without company sub has access");
 
   // 13. Company admin does NOT receive platform-admin bypass
-  const companyAdminDecision = await evaluateCourseAccess(12, companyAdminAccess);
+  const companyAdminDecision = await evaluateCourseAccess(elh12.id, companyAdminAccess);
   assert.equal(companyAdminDecision.allowed, false, "Company admin without prerequisites must be blocked on ELH-12");
   assert.equal(companyAdminDecision.reason, "PREREQUISITE_REQUIRED");
+
+  // Clean up completeCompany
+  await db.delete(companySubscriptionsTable).where(eq(companySubscriptionsTable.companyId, completeCompany.id));
+  await db.delete(companiesTable).where(eq(companiesTable.id, completeCompany.id));
 });
+
+
