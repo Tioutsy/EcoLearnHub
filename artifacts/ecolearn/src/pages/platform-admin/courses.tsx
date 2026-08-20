@@ -685,6 +685,29 @@ export default function PlatformAdminCourses() {
     });
   };
 
+  const handleMoveQuizOption = (oIdx: number, direction: "up" | "down") => {
+    const targetIdx = direction === "up" ? oIdx - 1 : oIdx + 1;
+    if (targetIdx < 0 || targetIdx >= quizOptions.length) return;
+
+    const nextOptions = [...quizOptions];
+    const tempOpt = nextOptions[oIdx];
+    nextOptions[oIdx] = nextOptions[targetIdx];
+    nextOptions[targetIdx] = tempOpt;
+    setQuizOptions(nextOptions);
+
+    const nextFeedback = [...quizOptionFeedback];
+    const tempFb = nextFeedback[oIdx] || "";
+    nextFeedback[oIdx] = nextFeedback[targetIdx] || "";
+    nextFeedback[targetIdx] = tempFb;
+    setQuizOptionFeedback(nextFeedback);
+
+    if (quizCorrectOption === oIdx) {
+      setQuizCorrectOption(targetIdx);
+    } else if (quizCorrectOption === targetIdx) {
+      setQuizCorrectOption(oIdx);
+    }
+  };
+
   const handleSaveQuestion = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCourseId) return;
@@ -1486,7 +1509,7 @@ export default function PlatformAdminCourses() {
                         )}
 
                         {block.type === "multiple_choice" && (
-                          <div className="space-y-2 border-l-2 pl-3 border-indigo-200">
+                          <div className="space-y-3 border-l-2 pl-3 border-indigo-200">
                             <div>
                               <Label className="text-xs">In-lesson Practice MCQ Question</Label>
                               <Input
@@ -1496,10 +1519,20 @@ export default function PlatformAdminCourses() {
                                 className="mt-1 text-xs"
                               />
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-2">
+                              <Label className="text-[11px] font-semibold text-slate-700">Options (Select radio for correct answer, use arrows to reorder)</Label>
                               {block.mcqOptions?.map((opt, oIdx) => (
-                                <div key={oIdx}>
-                                  <Label className="text-[10px]">Option {oIdx + 1}</Label>
+                                <div key={oIdx} className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                  <div className="flex items-center gap-1.5 shrink-0" title="Select as correct option">
+                                    <input
+                                      type="radio"
+                                      name={`mcq-correct-${block.id}`}
+                                      checked={block.mcqCorrectIndex === oIdx}
+                                      onChange={() => handleUpdateBlockField(index, "mcqCorrectIndex", oIdx)}
+                                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                    />
+                                    <span className="text-xs font-semibold text-slate-700">#{oIdx + 1}</span>
+                                  </div>
                                   <Input
                                     value={opt}
                                     onChange={(e) => {
@@ -1507,37 +1540,82 @@ export default function PlatformAdminCourses() {
                                       newOpts[oIdx] = e.target.value;
                                       handleUpdateBlockField(index, "mcqOptions", newOpts);
                                     }}
-                                    className="text-xs"
+                                    placeholder={`Option ${oIdx + 1}`}
+                                    className="text-xs flex-1 bg-white"
                                   />
+                                  <div className="flex items-center gap-0.5 shrink-0">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 text-slate-500 hover:text-slate-800"
+                                      title="Move Option Up"
+                                      disabled={oIdx === 0}
+                                      onClick={() => {
+                                        const nextOpts = [...(block.mcqOptions || [])];
+                                        const temp = nextOpts[oIdx];
+                                        nextOpts[oIdx] = nextOpts[oIdx - 1];
+                                        nextOpts[oIdx - 1] = temp;
+
+                                        let newCorrectIndex = block.mcqCorrectIndex;
+                                        if (block.mcqCorrectIndex === oIdx) {
+                                          newCorrectIndex = oIdx - 1;
+                                        } else if (block.mcqCorrectIndex === oIdx - 1) {
+                                          newCorrectIndex = oIdx;
+                                        }
+
+                                        const nextBlocks = [...blocks];
+                                        nextBlocks[index] = { ...nextBlocks[index], mcqOptions: nextOpts, mcqCorrectIndex: newCorrectIndex };
+                                        setBlocks(nextBlocks);
+                                      }}
+                                    >
+                                      <ArrowUp className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 text-slate-500 hover:text-slate-800"
+                                      title="Move Option Down"
+                                      disabled={oIdx === (block.mcqOptions?.length || 0) - 1}
+                                      onClick={() => {
+                                        const nextOpts = [...(block.mcqOptions || [])];
+                                        const temp = nextOpts[oIdx];
+                                        nextOpts[oIdx] = nextOpts[oIdx + 1];
+                                        nextOpts[oIdx + 1] = temp;
+
+                                        let newCorrectIndex = block.mcqCorrectIndex;
+                                        if (block.mcqCorrectIndex === oIdx) {
+                                          newCorrectIndex = oIdx + 1;
+                                        } else if (block.mcqCorrectIndex === oIdx + 1) {
+                                          newCorrectIndex = oIdx;
+                                        }
+
+                                        const nextBlocks = [...blocks];
+                                        nextBlocks[index] = { ...nextBlocks[index], mcqOptions: nextOpts, mcqCorrectIndex: newCorrectIndex };
+                                        setBlocks(nextBlocks);
+                                      }}
+                                    >
+                                      <ArrowDown className="h-3 w-3" />
+                                    </Button>
+                                  </div>
                                 </div>
                               ))}
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
-                              <div>
-                                <Label className="text-xs">Correct Option Index (0-based)</Label>
-                                <Input
-                                  type="number"
-                                  value={block.mcqCorrectIndex || 0}
-                                  onChange={(e) => handleUpdateBlockField(index, "mcqCorrectIndex", Number(e.target.value))}
-                                  min={0}
-                                  max={3}
-                                  className="text-xs"
-                                />
-                              </div>
-                              <div className="col-span-2">
-                                <Label className="text-xs">Correct Option Explanation</Label>
-                                <Input
-                                  value={block.mcqCorrectExplanation || ""}
-                                  onChange={(e) => handleUpdateBlockField(index, "mcqCorrectExplanation", e.target.value)}
-                                  className="text-xs"
-                                />
-                              </div>
+                            <div>
+                              <Label className="text-xs">Correct Option Explanation</Label>
+                              <Input
+                                value={block.mcqCorrectExplanation || ""}
+                                onChange={(e) => handleUpdateBlockField(index, "mcqCorrectExplanation", e.target.value)}
+                                placeholder="Explanation shown on correct selection"
+                                className="text-xs mt-1"
+                              />
                             </div>
                           </div>
                         )}
 
                         {block.type === "decision_scenario" && (
-                          <div className="space-y-2 border-l-2 pl-3 border-emerald-200">
+                          <div className="space-y-3 border-l-2 pl-3 border-emerald-200">
                             <div>
                               <Label className="text-xs">Scenario Introduction</Label>
                               <Input
@@ -1555,46 +1633,110 @@ export default function PlatformAdminCourses() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-xs font-semibold">Choices (Minimum 2)</Label>
+                              <div className="flex items-center justify-between">
+                                <Label className="text-xs font-semibold text-slate-800">Choices (Minimum 2 - use arrows to change order)</Label>
+                              </div>
                               {block.decisionChoices?.map((choice, cIdx) => (
-                                <div key={cIdx} className="grid grid-cols-6 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
-                                  <div className="col-span-3">
-                                    <Label className="text-[10px]">Choice {cIdx + 1} Label</Label>
-                                    <Input
-                                      value={choice.label}
-                                      onChange={(e) => {
-                                        const next = [...(block.decisionChoices || [])];
-                                        next[cIdx] = { ...choice, label: e.target.value };
-                                        handleUpdateBlockField(index, "decisionChoices", next);
-                                      }}
-                                      className="text-xs"
-                                    />
-                                  </div>
-                                  <div className="col-span-1 flex items-center pt-4">
-                                    <label className="flex items-center gap-1 text-[11px]">
-                                      <input
-                                        type="checkbox"
-                                        checked={choice.correct}
-                                        onChange={(e) => {
+                                <div key={cIdx} className="bg-slate-50/80 p-3 rounded-lg border border-slate-200 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">
+                                      Choice {cIdx + 1}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-slate-500 hover:text-slate-800"
+                                        title="Move Choice Up"
+                                        disabled={cIdx === 0}
+                                        onClick={() => {
                                           const next = [...(block.decisionChoices || [])];
-                                          next[cIdx] = { ...choice, correct: e.target.checked };
+                                          const temp = next[cIdx];
+                                          next[cIdx] = next[cIdx - 1];
+                                          next[cIdx - 1] = temp;
                                           handleUpdateBlockField(index, "decisionChoices", next);
                                         }}
-                                      />
-                                      Correct
-                                    </label>
+                                      >
+                                        <ArrowUp className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-slate-500 hover:text-slate-800"
+                                        title="Move Choice Down"
+                                        disabled={cIdx === (block.decisionChoices?.length || 0) - 1}
+                                        onClick={() => {
+                                          const next = [...(block.decisionChoices || [])];
+                                          const temp = next[cIdx];
+                                          next[cIdx] = next[cIdx + 1];
+                                          next[cIdx + 1] = temp;
+                                          handleUpdateBlockField(index, "decisionChoices", next);
+                                        }}
+                                      >
+                                        <ArrowDown className="h-3 w-3" />
+                                      </Button>
+                                      {(block.decisionChoices?.length || 0) > 2 && (
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
+                                          title="Delete Choice"
+                                          onClick={() => {
+                                            const next = (block.decisionChoices || []).filter((_, i) => i !== cIdx);
+                                            handleUpdateBlockField(index, "decisionChoices", next);
+                                          }}
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="col-span-2">
-                                    <Label className="text-[10px]">Feedback message</Label>
-                                    <Input
-                                      value={choice.feedback}
-                                      onChange={(e) => {
-                                        const next = [...(block.decisionChoices || [])];
-                                        next[cIdx] = { ...choice, feedback: e.target.value };
-                                        handleUpdateBlockField(index, "decisionChoices", next);
-                                      }}
-                                      className="text-xs"
-                                    />
+
+                                  <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
+                                    <div className="md:col-span-6">
+                                      <Label className="text-[10px] text-muted-foreground">Choice Label</Label>
+                                      <Input
+                                        value={choice.label}
+                                        onChange={(e) => {
+                                          const next = [...(block.decisionChoices || [])];
+                                          next[cIdx] = { ...choice, label: e.target.value };
+                                          handleUpdateBlockField(index, "decisionChoices", next);
+                                        }}
+                                        className="text-xs mt-0.5 bg-white"
+                                        placeholder="e.g. Switch off the lights"
+                                      />
+                                    </div>
+                                    <div className="md:col-span-2 flex items-center pt-4">
+                                      <label className="flex items-center gap-1.5 text-xs font-medium cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={choice.correct}
+                                          onChange={(e) => {
+                                            const next = [...(block.decisionChoices || [])];
+                                            next[cIdx] = { ...choice, correct: e.target.checked };
+                                            handleUpdateBlockField(index, "decisionChoices", next);
+                                          }}
+                                          className="h-4 w-4 rounded text-emerald-600 focus:ring-emerald-500"
+                                        />
+                                        <span className={choice.correct ? "text-emerald-700 font-semibold" : "text-slate-600"}>Correct</span>
+                                      </label>
+                                    </div>
+                                    <div className="md:col-span-4">
+                                      <Label className="text-[10px] text-muted-foreground">Feedback message</Label>
+                                      <Input
+                                        value={choice.feedback}
+                                        onChange={(e) => {
+                                          const next = [...(block.decisionChoices || [])];
+                                          next[cIdx] = { ...choice, feedback: e.target.value };
+                                          handleUpdateBlockField(index, "decisionChoices", next);
+                                        }}
+                                        className="text-xs mt-0.5 bg-white"
+                                        placeholder="Feedback shown on selection"
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                               ))}
@@ -1606,6 +1748,7 @@ export default function PlatformAdminCourses() {
                                   const nextChoices = [...(block.decisionChoices || []), { label: "New Choice", correct: false, feedback: "Feedback..." }];
                                   handleUpdateBlockField(index, "decisionChoices", nextChoices);
                                 }}
+                                className="mt-1"
                               >
                                 <Plus className="h-3 w-3 mr-1" /> Add Choice
                               </Button>
@@ -2228,17 +2371,25 @@ export default function PlatformAdminCourses() {
                         </div>
 
                         {/* Options Inputs */}
-                        <div className="space-y-3 pt-2">
-                          <Label className="text-xs font-semibold">Options (Select the correct one on the left radio button)</Label>
+                        <div className="space-y-2.5 pt-2">
+                          <Label className="text-xs font-semibold text-slate-800">
+                            Answer Options (Select the correct option via radio, use arrows to reorder)
+                          </Label>
                           {quizOptions.map((opt, oIdx) => (
-                            <div key={oIdx} className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                name="correct-option-radio"
-                                checked={quizCorrectOption === oIdx}
-                                onChange={() => setQuizCorrectOption(oIdx)}
-                                className="h-4 w-4 text-primary"
-                              />
+                            <div key={oIdx} className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                              <div className="flex items-center gap-1.5 shrink-0" title="Select as correct option">
+                                <input
+                                  type="radio"
+                                  id={`quiz-opt-${oIdx}`}
+                                  name="correct-option-radio"
+                                  checked={quizCorrectOption === oIdx}
+                                  onChange={() => setQuizCorrectOption(oIdx)}
+                                  className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                />
+                                <Label htmlFor={`quiz-opt-${oIdx}`} className="text-xs font-bold text-slate-700 cursor-pointer">
+                                  #{oIdx + 1}
+                                </Label>
+                              </div>
                               <Input
                                 value={opt}
                                 onChange={(e) => {
@@ -2247,9 +2398,33 @@ export default function PlatformAdminCourses() {
                                   setQuizOptions(next);
                                 }}
                                 placeholder={`Option Choice ${oIdx + 1}`}
-                                required={oIdx < 2} // Require at least 2 options
-                                className="text-xs"
+                                required={oIdx < 2}
+                                className="text-xs flex-1 bg-white"
                               />
+                              <div className="flex items-center gap-0.5 shrink-0">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-slate-500 hover:text-slate-900"
+                                  title="Move Option Up"
+                                  disabled={oIdx === 0}
+                                  onClick={() => handleMoveQuizOption(oIdx, "up")}
+                                >
+                                  <ArrowUp className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-slate-500 hover:text-slate-900"
+                                  title="Move Option Down"
+                                  disabled={oIdx === quizOptions.length - 1}
+                                  onClick={() => handleMoveQuizOption(oIdx, "down")}
+                                >
+                                  <ArrowDown className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
