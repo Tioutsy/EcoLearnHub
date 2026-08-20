@@ -1696,7 +1696,19 @@ router.get("/organisations", async (req, res): Promise<void> => {
       }
     }
 
-    const companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
+    const rawCompanies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
+    const companies = rawCompanies.filter((c) => {
+      const name = (c.name || "").toLowerCase();
+      const slug = (c.slug || "").toLowerCase();
+      const isTestOrSprint =
+        name.includes("sprint") ||
+        slug.includes("sprint") ||
+        name.includes("mock") ||
+        slug.includes("mock") ||
+        (name.includes("test company") && !name.includes("infracare"));
+      return !isTestOrSprint;
+    });
+
     const employees = await db.select().from(employeesTable);
 
     const userCountMap = new Map<number, number>();

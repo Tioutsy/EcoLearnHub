@@ -1,5 +1,5 @@
 import { db } from "@workspace/db";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, or } from "drizzle-orm";
 import { logger } from "./logger";
 import { detectAndResolveDuplicateCompanySubscriptions } from "./subscriptionDiagnostics";
 
@@ -1416,9 +1416,40 @@ export async function ensureSchemaModifications() {
     logger.warn({ err: err?.message }, "Non-fatal warning during migrateCompanyLists on startup");
   }
 
+  // Clean up sprint/mock artifacts from previous recovery tasks
+  try {
+    const { companiesTable, employeesTable, companySubscriptionsTable } = await import("@workspace/db");
+    
+    // Find all mock/sprint companies
+    const mockCompanies = await db
+      .select({ id: companiesTable.id, name: companiesTable.name })
+      .from(companiesTable)
+      .where(
+        and(
+          or(
+            sql`lower(${companiesTable.name}) LIKE '%sprint%'`,
+            sql`lower(${companiesTable.slug}) LIKE '%sprint%'`,
+            sql`lower(${companiesTable.name}) LIKE '%mock%'`,
+            sql`lower(${companiesTable.slug}) LIKE '%mock%'`
+          ),
+          sql`lower(${companiesTable.name}) NOT LIKE '%infracare%'`,
+          sql`lower(${companiesTable.slug}) NOT LIKE '%infracare%'`
+        )
+      );
+
+    for (const m of mockCompanies) {
+      await db.delete(companySubscriptionsTable).where(eq(companySubscriptionsTable.companyId, m.id));
+      await db.delete(employeesTable).where(eq(employeesTable.companyId, m.id));
+      await db.delete(companiesTable).where(eq(companiesTable.id, m.id));
+      logger.info({ id: m.id, name: m.name }, "Purged test/sprint artifact company from database");
+    }
+  } catch (purgeErr: any) {
+    logger.warn({ err: purgeErr?.message }, "Non-fatal notice during test company purge");
+  }
+
   // Ensure Infracare company & admin exist
   try {
-    const { companiesTable, employeesTable } = await import("@workspace/db");
+    const { companiesTable, employeesTable, companySubscriptionsTable, subscriptionPlansTable, employeeBandsTable } = await import("@workspace/db");
     const existing = await db
       .select({ id: companiesTable.id })
       .from(companiesTable)
@@ -1435,7 +1466,6 @@ export async function ensureSchemaModifications() {
           industry: "Facilities & Infrastructure",
           maxEmployees: 250,
         })
-        .onConflictDoNothing()
         .returning();
       compId = newComp?.id;
     }
@@ -1452,6 +1482,35 @@ export async function ensureSchemaModifications() {
           profileCompleted: true,
         })
         .onConflictDoNothing();
+
+      // Ensure active Complete subscription
+      const [completePlan] = await db
+        .select({ id: subscriptionPlansTable.id })
+        .from(subscriptionPlansTable)
+        .where(eq(subscriptionPlansTable.code, "COMPLETE"))
+        .limit(1);
+
+      const [topBand] = await db
+        .select({ id: employeeBandsTable.id })
+        .from(employeeBandsTable)
+        .where(eq(employeeBandsTable.code, "OVER_120"))
+        .limit(1);
+
+      if (completePlan && topBand) {
+        await db
+          .insert(companySubscriptionsTable)
+          .values({
+            companyId: compId,
+            subscriptionPlanId: completePlan.id,
+            employeeBandId: topBand.id,
+            status: "ACTIVE",
+            currency: "MUR",
+            agreedMonthlyAmount: "0.00",
+            agreedYearlyAmount: "0.00",
+            pricingSource: "TEST_EXEMPTION",
+          })
+          .onConflictDoNothing({ target: companySubscriptionsTable.companyId });
+      }
     }
   } catch (err: any) {
     logger.warn({ err: err?.message }, "Non-fatal Infracare initialization notice");
