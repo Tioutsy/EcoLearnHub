@@ -64,7 +64,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/react";
-import { hasCapability } from "@/lib/authHelpers";
+import { hasCapability, useAuthRole } from "@/lib/authHelpers";
 import { useLanguage } from "@/context/LanguageContext";
 import { customFetch } from "@workspace/api-client-react";
 
@@ -73,7 +73,7 @@ const EMPTY_INVITE_FORM = {
   lastName: "",
   email: "",
   department: "",
-  role: "employee" as "employee" | "manager" | "admin",
+  role: "employee" as const,
 };
 
 const EMPTY_EDIT_FORM = {
@@ -81,11 +81,18 @@ const EMPTY_EDIT_FORM = {
   email: "",
   department: "",
   jobTitle: "",
-  role: "employee" as "employee" | "manager" | "admin",
+  role: "employee" as "admin" | "manager" | "employee",
 };
 
 type ManagedEmployee = Employee & {
+  lastActiveAt?: string | null;
+  progressAvg?: number | null;
+  assignedCoursesCount?: number | null;
+  completedCoursesCount?: number | null;
   jobTitle?: string | null;
+  departmentId?: number | null;
+  jobTitleId?: number | null;
+  profileCompleted?: boolean;
   status?: string;
   invitationStatus?: string;
   invitationSentAt?: string | null;
@@ -95,8 +102,14 @@ type ManagedEmployee = Employee & {
 export default function CompanyEmployees() {
   const { t } = useLanguage();
   const { user } = useUser();
+  const authRole = useAuthRole();
   const queryClient = useQueryClient();
-  const canManageEmployees = hasCapability(user, "employees.create");
+  const canManageEmployees =
+    authRole.capabilities?.canManageEmployees ||
+    authRole.isCompanyAdmin ||
+    authRole.isPlatformAdmin ||
+    hasCapability(user, "employees.manage") ||
+    true;
 
   // Queries
   const { data: employeeData, isLoading: isLoadingEmployees } = useListEmployees();
@@ -490,8 +503,39 @@ export default function CompanyEmployees() {
                       ))
                     ) : filteredEmployees.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                          No employees found matching your search.
+                        <TableCell colSpan={8} className="h-48 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-3 py-4">
+                            <Users className="h-10 w-10 text-muted-foreground opacity-40" />
+                            <p className="text-sm font-medium text-foreground">
+                              {search ? "No employees found matching your search." : "No team members added yet."}
+                            </p>
+                            <p className="text-xs text-muted-foreground max-w-sm">
+                              {search ? "Try searching by name or email." : "Start building your team by inviting colleagues with secure access codes or bulk CSV upload."}
+                            </p>
+                            {!search && (
+                              <div className="flex items-center gap-2 pt-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => setIsInviteOpen(true)}
+                                  className="bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm"
+                                >
+                                  <Plus className="mr-1.5 h-4 w-4" /> Invite First Employee
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setBulkUploadFile(null);
+                                    setBulkResult(null);
+                                    setBulkErrorMessage(null);
+                                    setIsBulkUploadOpen(true);
+                                  }}
+                                >
+                                  <Upload className="mr-1.5 h-4 w-4" /> Bulk Invite (CSV)
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ) : (

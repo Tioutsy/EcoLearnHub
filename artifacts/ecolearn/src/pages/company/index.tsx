@@ -34,6 +34,7 @@ import {
   Trophy,
   FileSpreadsheet,
   Recycle,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -304,6 +305,11 @@ export default function CompanyDashboard() {
               <Button onClick={downloadEsgReport} disabled={esgDownloading}>
                 <FileText className="mr-2 h-4 w-4" />
                 {esgDownloading ? "Downloading..." : "ESG Training Report"}
+              </Button>
+              <Button className="bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm" asChild>
+                <Link href="/company/employees">
+                  <UserPlus className="mr-2 h-4 w-4" /> Invite Employees
+                </Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/company/employees"><Users className="mr-2 h-4 w-4" /> Manage Employees</Link>

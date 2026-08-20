@@ -78,7 +78,7 @@ export function getUserRoleLabel(user: any): string {
 
 export function hasCapability(user: any, capability: string): boolean {
   if (user?.capabilities && typeof user.capabilities === "object") {
-    if (capability === "employees.manage") return Boolean(user.capabilities.canManageEmployees);
+    if (capability === "employees.manage" || capability === "employees.create" || capability === "employees.view") return Boolean(user.capabilities.canManageEmployees);
     if (capability === "company.manage") return Boolean(user.capabilities.canManageCompany);
     if (capability === "reports.team") return Boolean(user.capabilities.canViewReports);
     if (capability === "courses.assign") return Boolean(user.capabilities.canAssignCourses);
