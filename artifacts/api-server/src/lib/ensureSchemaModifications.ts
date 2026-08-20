@@ -1407,4 +1407,12 @@ export async function ensureSchemaModifications() {
 
   // Run diagnostics after all columns and tables are guaranteed to exist
   await detectAndResolveDuplicateCompanySubscriptions();
+
+  // Run company lists migration & seed default lists for any company without lists
+  try {
+    const { migrateCompanyLists } = await import("./migrateCompanyLists");
+    await migrateCompanyLists();
+  } catch (err: any) {
+    logger.warn({ err: err?.message }, "Non-fatal warning during migrateCompanyLists on startup");
+  }
 }

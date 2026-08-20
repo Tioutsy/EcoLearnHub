@@ -239,11 +239,72 @@ export async function deactivateDepartment(
   });
 }
 
+export const DEFAULT_COMPANY_DEPARTMENTS = [
+  "Management & Administration",
+  "Operations & Logistics",
+  "Sustainability & ESG",
+  "Engineering & Facilities",
+  "Human Resources",
+  "Finance & Commercial",
+  "General",
+];
+
+export const DEFAULT_COMPANY_JOB_TITLES = [
+  "Director / Executive",
+  "Department Manager",
+  "Team Lead / Supervisor",
+  "Sustainability Officer",
+  "Operations Specialist",
+  "Technical Specialist",
+  "Administrator / Coordinator",
+  "Staff Member",
+];
+
+export async function ensureDefaultCompanyLists(companyId: number): Promise<void> {
+  const existingDepts = await db
+    .select({ id: departmentsTable.id })
+    .from(departmentsTable)
+    .where(eq(departmentsTable.companyId, companyId))
+    .limit(1);
+
+  if (existingDepts.length === 0) {
+    for (const name of DEFAULT_COMPANY_DEPARTMENTS) {
+      await db
+        .insert(departmentsTable)
+        .values({
+          companyId,
+          name,
+          status: "active",
+        })
+        .onConflictDoNothing();
+    }
+  }
+
+  const existingTitles = await db
+    .select({ id: jobTitlesTable.id })
+    .from(jobTitlesTable)
+    .where(eq(jobTitlesTable.companyId, companyId))
+    .limit(1);
+
+  if (existingTitles.length === 0) {
+    for (const name of DEFAULT_COMPANY_JOB_TITLES) {
+      await db
+        .insert(jobTitlesTable)
+        .values({
+          companyId,
+          name,
+          status: "active",
+        })
+        .onConflictDoNothing();
+    }
+  }
+}
+
 export async function listCompanyDepartments(
   companyId: number,
   includeArchived = false
 ): Promise<(Department & { memberCount: number })[]> {
-  const query = db
+  let depts = await db
     .select()
     .from(departmentsTable)
     .where(
@@ -256,7 +317,21 @@ export async function listCompanyDepartments(
     )
     .orderBy(departmentsTable.name);
 
-  const depts = await query;
+  if (depts.length === 0) {
+    await ensureDefaultCompanyLists(companyId);
+    depts = await db
+      .select()
+      .from(departmentsTable)
+      .where(
+        includeArchived
+          ? eq(departmentsTable.companyId, companyId)
+          : and(
+              eq(departmentsTable.companyId, companyId),
+              eq(departmentsTable.status, "active")
+            )
+      )
+      .orderBy(departmentsTable.name);
+  }
 
   const employees = await db
     .select({
@@ -439,7 +514,7 @@ export async function listCompanyJobTitles(
   companyId: number,
   includeArchived = false
 ): Promise<(JobTitle & { memberCount: number })[]> {
-  const query = db
+  let titles = await db
     .select()
     .from(jobTitlesTable)
     .where(
@@ -452,7 +527,21 @@ export async function listCompanyJobTitles(
     )
     .orderBy(jobTitlesTable.name);
 
-  const titles = await query;
+  if (titles.length === 0) {
+    await ensureDefaultCompanyLists(companyId);
+    titles = await db
+      .select()
+      .from(jobTitlesTable)
+      .where(
+        includeArchived
+          ? eq(jobTitlesTable.companyId, companyId)
+          : and(
+              eq(jobTitlesTable.companyId, companyId),
+              eq(jobTitlesTable.status, "active")
+            )
+      )
+      .orderBy(jobTitlesTable.name);
+  }
 
   const employees = await db
     .select({

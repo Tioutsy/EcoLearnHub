@@ -1,6 +1,7 @@
 import { db, companiesTable, employeesTable, departmentsTable, jobTitlesTable } from "@workspace/db";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import { logger } from "./logger";
+import { ensureDefaultCompanyLists } from "./companyListService";
 
 export interface MigrationSummary {
   companiesProcessed: number;
@@ -26,6 +27,9 @@ export async function migrateCompanyLists(): Promise<MigrationSummary> {
 
   for (const comp of companies) {
     const companyId = comp.id;
+
+    // 0. Ensure default company lists exist
+    await ensureDefaultCompanyLists(companyId);
 
     // 1. Fetch all employees for this company
     const employees = await db
