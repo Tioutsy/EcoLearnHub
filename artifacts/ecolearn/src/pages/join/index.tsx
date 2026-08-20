@@ -384,9 +384,7 @@ export default function JoinCompanyPage() {
                     Sign up with your work email (<strong>{invitation.email}</strong>):
                   </div>
                   <SignUp
-                    routing="path"
-                    path="/sign-up"
-                    signInUrl="/sign-in"
+                    routing="hash"
                     forceRedirectUrl={`/join?code=${encodeURIComponent(inputCode)}`}
                   />
                 </div>
@@ -396,9 +394,7 @@ export default function JoinCompanyPage() {
                     Sign in to link your account to {invitation.companyName}:
                   </div>
                   <SignIn
-                    routing="path"
-                    path="/sign-in"
-                    signUpUrl="/sign-up"
+                    routing="hash"
                     forceRedirectUrl={`/join?code=${encodeURIComponent(inputCode)}`}
                   />
                 </div>
