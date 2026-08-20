@@ -1,9 +1,21 @@
 import { PlatformAdminLayout } from "@/components/layout/PlatformAdminLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { customFetch } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Building2, Plus, Search, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
@@ -21,10 +33,48 @@ interface OrganisationItem {
 }
 
 export default function PlatformAdminOrganisations() {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: orgs, isLoading } = useQuery<OrganisationItem[]>({
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newOrgName, setNewOrgName] = useState("");
+  const [newOrgIndustry, setNewOrgIndustry] = useState("");
+  const [newOrgSeats, setNewOrgSeats] = useState(25);
+  const [newOrgAdminEmail, setNewOrgAdminEmail] = useState("");
+  const [newOrgAdminName, setNewOrgAdminName] = useState("");
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const { data: orgs, isLoading, refetch } = useQuery<OrganisationItem[]>({
     queryKey: ["/api/platform-admin/organisations"],
     queryFn: () => customFetch<OrganisationItem[]>("/api/platform-admin/organisations"),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      return await customFetch("/api/platform-admin/organisations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newOrgName,
+          industry: newOrgIndustry,
+          maxEmployees: newOrgSeats,
+          adminEmail: newOrgAdminEmail,
+          adminName: newOrgAdminName,
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/organisations"] });
+      refetch();
+      setIsCreateOpen(false);
+      setNewOrgName("");
+      setNewOrgIndustry("");
+      setNewOrgAdminEmail("");
+      setNewOrgAdminName("");
+      setCreateError(null);
+    },
+    onError: (err: any) => {
+      setCreateError(err?.message || "Failed to create client organisation");
+    },
   });
 
   const filteredOrgs = (orgs ?? []).filter((o) =>
@@ -35,9 +85,109 @@ export default function PlatformAdminOrganisations() {
   return (
     <PlatformAdminLayout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold font-serif">Client Organisations</h2>
-          <p className="text-muted-foreground">Search and inspect all client organisations registered on ELEVIO SKILLS.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold font-serif">Client Organisations</h2>
+            <p className="text-muted-foreground">Search, inspect, and register client organisations on ELEVIO SKILLS.</p>
+          </div>
+
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shrink-0">
+                <Plus className="h-4 w-4" />
+                Add Organisation
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Register Client Organisation</DialogTitle>
+                <DialogDescription>
+                  Manually provision a client workspace with allocated employee capacity and administrator access.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-2">
+                {createError && (
+                  <div className="p-3 text-xs bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 rounded border border-red-200">
+                    {createError}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="orgName">Organisation Name *</Label>
+                  <Input
+                    id="orgName"
+                    placeholder="e.g. Infracare"
+                    value={newOrgName}
+                    onChange={(e) => setNewOrgName(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="orgIndustry">Industry / Sector</Label>
+                  <Input
+                    id="orgIndustry"
+                    placeholder="e.g. Facilities Management"
+                    value={newOrgIndustry}
+                    onChange={(e) => setNewOrgIndustry(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="orgSeats">Max Allocated Seats</Label>
+                  <Input
+                    id="orgSeats"
+                    type="number"
+                    min={1}
+                    max={1000}
+                    value={newOrgSeats}
+                    onChange={(e) => setNewOrgSeats(parseInt(e.target.value) || 25)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="adminEmail">Primary Administrator Email</Label>
+                  <Input
+                    id="adminEmail"
+                    type="email"
+                    placeholder="e.g. infracare.mu@gmail.com"
+                    value={newOrgAdminEmail}
+                    onChange={(e) => setNewOrgAdminEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="adminName">Administrator Full Name</Label>
+                  <Input
+                    id="adminName"
+                    placeholder="e.g. Infracare Administrator"
+                    value={newOrgAdminName}
+                    onChange={(e) => setNewOrgAdminName(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  disabled={!newOrgName.trim() || createMutation.isPending}
+                  onClick={() => createMutation.mutate()}
+                >
+                  {createMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating…
+                    </>
+                  ) : (
+                    "Create Workspace"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="flex items-center gap-4">

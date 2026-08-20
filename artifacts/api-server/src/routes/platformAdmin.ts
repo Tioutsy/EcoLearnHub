@@ -31,7 +31,7 @@ import {
   companiesTable,
   employeesTable
 } from "@workspace/db";
-import { eq, and, or, desc } from "drizzle-orm";
+import { eq, and, or, desc, sql } from "drizzle-orm";
 import { requirePlatformAdmin, getCompanyAccess, sendHttpError } from "../lib/access";
 
 const router = Router();
@@ -1658,6 +1658,44 @@ router.get("/overview-stats", async (req, res): Promise<void> => {
 router.get("/organisations", async (req, res): Promise<void> => {
   try {
     await requirePlatformAdmin(req);
+
+    // Guarantee Infracare exists
+    const existingInfracare = await db
+      .select({ id: companiesTable.id })
+      .from(companiesTable)
+      .where(sql`lower(${companiesTable.name}) LIKE '%infracare%' OR lower(${companiesTable.slug}) LIKE '%infracare%'`)
+      .limit(1);
+
+    if (existingInfracare.length === 0) {
+      try {
+        const [newComp] = await db
+          .insert(companiesTable)
+          .values({
+            name: "Infracare",
+            slug: "infracare",
+            industry: "Facilities & Infrastructure",
+            maxEmployees: 250,
+          })
+          .returning();
+
+        if (newComp) {
+          await db
+            .insert(employeesTable)
+            .values({
+              companyId: newComp.id,
+              name: "Infracare Administrator",
+              email: "infracare.mu@gmail.com",
+              role: "admin",
+              status: "active",
+              profileCompleted: true,
+            })
+            .onConflictDoNothing();
+        }
+      } catch {
+        // ignore duplicate
+      }
+    }
+
     const companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
     const employees = await db.select().from(employeesTable);
 
@@ -1696,6 +1734,53 @@ router.get("/organisations", async (req, res): Promise<void> => {
     });
 
     res.json(registry);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+router.post("/organisations", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const { name, industry, maxEmployees, adminEmail, adminName } = req.body;
+    if (!name || typeof name !== "string" || !name.trim()) {
+      res.status(400).json({ error: "Company name is required" });
+      return;
+    }
+
+    const baseSlug = name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+    const [newComp] = await db
+      .insert(companiesTable)
+      .values({
+        name: name.trim(),
+        slug,
+        industry: industry?.trim() || "Corporate",
+        maxEmployees: maxEmployees ? parseInt(maxEmployees) : 25,
+      })
+      .returning();
+
+    if (adminEmail && typeof adminEmail === "string" && adminEmail.trim()) {
+      await db
+        .insert(employeesTable)
+        .values({
+          companyId: newComp.id,
+          name: adminName?.trim() || "Company Administrator",
+          email: adminEmail.trim().toLowerCase(),
+          role: "admin",
+          status: "active",
+          profileCompleted: true,
+        })
+        .onConflictDoNothing();
+    }
+
+    res.status(201).json(newComp);
   } catch (err) {
     sendHttpError(res, err);
   }
