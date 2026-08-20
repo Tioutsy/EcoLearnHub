@@ -1415,4 +1415,45 @@ export async function ensureSchemaModifications() {
   } catch (err: any) {
     logger.warn({ err: err?.message }, "Non-fatal warning during migrateCompanyLists on startup");
   }
+
+  // Ensure Infracare company & admin exist
+  try {
+    const { companiesTable, employeesTable } = await import("@workspace/db");
+    const existing = await db
+      .select({ id: companiesTable.id })
+      .from(companiesTable)
+      .where(sql`lower(${companiesTable.name}) LIKE '%infracare%' OR lower(${companiesTable.slug}) LIKE '%infracare%'`)
+      .limit(1);
+
+    let compId = existing[0]?.id;
+    if (!compId) {
+      const [newComp] = await db
+        .insert(companiesTable)
+        .values({
+          name: "Infracare",
+          slug: "infracare",
+          industry: "Facilities & Infrastructure",
+          maxEmployees: 250,
+        })
+        .onConflictDoNothing()
+        .returning();
+      compId = newComp?.id;
+    }
+
+    if (compId) {
+      await db
+        .insert(employeesTable)
+        .values({
+          companyId: compId,
+          name: "Infracare Administrator",
+          email: "infracare.mu@gmail.com",
+          role: "admin",
+          status: "active",
+          profileCompleted: true,
+        })
+        .onConflictDoNothing();
+    }
+  } catch (err: any) {
+    logger.warn({ err: err?.message }, "Non-fatal Infracare initialization notice");
+  }
 }
