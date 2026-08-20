@@ -18,11 +18,11 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
   if (!isLoaded) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-[1720px] mx-auto">
           <Skeleton className="h-10 w-48 mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <Skeleton className="h-64 rounded-xl" />
-            <div className="md:col-span-3">
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <Skeleton className="h-64 w-full lg:w-64 shrink-0 rounded-xl" />
+            <div className="flex-1 w-full">
               <Skeleton className="h-96 rounded-xl" />
             </div>
           </div>
@@ -69,15 +69,15 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 max-w-[1720px] mx-auto">
         <div className="mb-8">
           <p className="text-sm font-medium text-primary mb-1">Platform Admin Portal</p>
           <h1 className="text-3xl font-bold font-serif">Elevio Administrator</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Side Nav */}
-          <aside className="space-y-1">
+          <aside className="w-full lg:w-64 shrink-0 space-y-1">
             {sidebarLinks.map((link) => {
               const active = location === link.href || (link.href !== "/platform-admin" && location.startsWith(link.href));
               return (
@@ -98,7 +98,7 @@ export function PlatformAdminLayout({ children }: PlatformAdminLayoutProps) {
           </aside>
 
           {/* Main Content */}
-          <main className="md:col-span-3 min-w-0">
+          <main className="flex-1 min-w-0 w-full">
             {children}
           </main>
         </div>
