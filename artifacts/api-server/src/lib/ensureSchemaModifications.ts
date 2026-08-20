@@ -1439,11 +1439,16 @@ export async function ensureSchemaModifications() {
 
       DELETE FROM "companies" 
       WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%';
+
+      DELETE FROM "quiz_attempts" WHERE "course_id" NOT IN (SELECT "id" FROM "courses") OR "course_id" = 539;
+      DELETE FROM "course_assignments" WHERE "course_id" NOT IN (SELECT "id" FROM "courses") OR "course_id" = 539;
+      DELETE FROM "enrollments" WHERE "course_id" NOT IN (SELECT "id" FROM "courses") OR "course_id" = 539;
+      DELETE FROM "courses" WHERE "id" = 539 OR "slug" LIKE '%539%' OR "course_code" LIKE '%539%';
     `);
 
-    logger.info("Purged all legacy non-Infracare organisations from database.");
+    logger.info("Purged all legacy non-Infracare organisations and test courses from database.");
   } catch (purgeErr: any) {
-    logger.warn({ err: purgeErr?.message }, "Notice during organisation table purge");
+    logger.warn({ err: purgeErr?.message }, "Notice during organisation/course table purge");
   }
 
   // Ensure Infracare company & admin exist

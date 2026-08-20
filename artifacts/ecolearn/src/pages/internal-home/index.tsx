@@ -104,12 +104,12 @@ export default function InternalHome() {
   // Learner Calculations
   const activeEnrollments = useMemo(() => {
     const list = (enrollments || []) as LmsEnrollment[];
-    return list.filter((e) => (e.progressPct ?? 0) < 100);
+    return list.filter((e) => (e.progressPct ?? 0) < 100 && (e.courseName || e.courseTitle) && e.courseId !== 539);
   }, [enrollments]);
 
   const completedEnrollments = useMemo(() => {
     const list = (enrollments || []) as LmsEnrollment[];
-    return list.filter((e) => (e.progressPct ?? 0) >= 100);
+    return list.filter((e) => (e.progressPct ?? 0) >= 100 && (e.courseName || e.courseTitle) && e.courseId !== 539);
   }, [enrollments]);
 
   const inProgressList = useMemo(() => {

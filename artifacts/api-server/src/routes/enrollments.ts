@@ -74,6 +74,9 @@ router.get("/", async (req, res): Promise<void> => {
         employeeId: enrollmentsTable.employeeId,
         courseId: enrollmentsTable.courseId,
         courseName: coursesTable.title,
+        courseTitle: coursesTable.title,
+        courseCode: coursesTable.courseCode,
+        courseSlug: coursesTable.slug,
         courseThumbnail: coursesTable.thumbnailUrl,
         status: enrollmentsTable.status,
         progressPct: enrollmentsTable.progressPct,
@@ -83,7 +86,7 @@ router.get("/", async (req, res): Promise<void> => {
         createdAt: enrollmentsTable.createdAt,
       })
       .from(enrollmentsTable)
-      .leftJoin(coursesTable, eq(enrollmentsTable.courseId, coursesTable.id))
+      .innerJoin(coursesTable, eq(enrollmentsTable.courseId, coursesTable.id))
       .where(or(...clauses))
       .orderBy(sql`${enrollmentsTable.createdAt} DESC`);
 
