@@ -475,10 +475,13 @@ router.get("/employee-invitations", async (req, res): Promise<void> => {
 router.post("/employee-invitations", async (req, res): Promise<void> => {
   try {
     const access = await requireCompanyAdmin(req);
+    const rawOrigin = typeof req.headers.origin === "string" ? req.headers.origin : null;
     const origin =
-      typeof req.headers.origin === "string"
-        ? req.headers.origin
-        : process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ?? "http://localhost:5173";
+      process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ||
+      process.env.RENDER_EXTERNAL_URL?.replace(/\/$/, "") ||
+      (rawOrigin && !rawOrigin.includes("localhost") ? rawOrigin : null) ||
+      rawOrigin ||
+      "http://localhost:5173";
 
     const result = await createEmployeeInvitation(
       access.companyId,
@@ -512,10 +515,13 @@ router.post("/employee-invitations/:id/resend", async (req, res): Promise<void> 
       return;
     }
 
+    const rawOrigin = typeof req.headers.origin === "string" ? req.headers.origin : null;
     const origin =
-      typeof req.headers.origin === "string"
-        ? req.headers.origin
-        : process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ?? "http://localhost:5173";
+      process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ||
+      process.env.RENDER_EXTERNAL_URL?.replace(/\/$/, "") ||
+      (rawOrigin && !rawOrigin.includes("localhost") ? rawOrigin : null) ||
+      rawOrigin ||
+      "http://localhost:5173";
 
     const result = await resendEmployeeInvitation(access.companyId, id, origin);
     res.json(result);

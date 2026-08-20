@@ -319,7 +319,13 @@ export async function createEmployeeInvitation(
     return { invitation: inserted, companyName: company.name };
   });
 
-  const baseUrl = originBaseUrl || process.env.PUBLIC_APP_URL || process.env.APP_URL || "";
+  const baseUrl =
+    (originBaseUrl && !originBaseUrl.includes("localhost") ? originBaseUrl : null) ||
+    process.env.PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    originBaseUrl ||
+    "http://localhost:5173";
   const invitationLink = `${baseUrl}/join?token=${encodeURIComponent(rawToken)}`;
 
   // 4. Dispatch email delivery only after transaction commits successfully
@@ -333,6 +339,7 @@ export async function createEmployeeInvitation(
       deduplicationKey: `invite_${invitation.id}_${invitation.tokenHash.substring(0, 10)}`,
       templateData: {
         companyName,
+        actionUrl: invitationLink,
         invitationLink,
         accessCode: displayCode,
         intendedRole,
@@ -425,7 +432,13 @@ export async function resendEmployeeInvitation(
     return { updated: resendUpdated, companyName: company?.name ?? "Elevio Member" };
   });
 
-  const baseUrl = originBaseUrl || process.env.PUBLIC_APP_URL || process.env.APP_URL || "";
+  const baseUrl =
+    (originBaseUrl && !originBaseUrl.includes("localhost") ? originBaseUrl : null) ||
+    process.env.PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    originBaseUrl ||
+    "http://localhost:5173";
   const invitationLink = `${baseUrl}/join?token=${encodeURIComponent(rawToken)}`;
 
   let emailSent = false;
@@ -438,6 +451,7 @@ export async function resendEmployeeInvitation(
       deduplicationKey: `invite_resend_${updated.id}_${updated.tokenHash.substring(0, 10)}`,
       templateData: {
         companyName,
+        actionUrl: invitationLink,
         invitationLink,
         accessCode: displayCode,
         intendedRole: updated.intendedRole,
