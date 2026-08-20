@@ -49,7 +49,8 @@ export class ResendProvider implements NotificationProvider {
 
   async sendEmail(input: ProviderEmailInput): Promise<ProviderDeliveryResult> {
     try {
-      const from = input.fromEmail ? `${input.fromName || "Elevio"} <${input.fromEmail}>` : "Elevio <no-reply@elevio.mu>";
+      const defaultFrom = process.env.RESEND_FROM_EMAIL || "Elevio <onboarding@resend.dev>";
+      const from = input.fromEmail ? `${input.fromName || "Elevio"} <${input.fromEmail}>` : defaultFrom;
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -67,6 +68,7 @@ export class ResendProvider implements NotificationProvider {
 
       if (!res.ok) {
         const errData = (await res.json().catch(() => ({}))) as Record<string, any>;
+        logger.warn({ to: input.to, status: res.status, errData, from }, "Resend API rejected email dispatch");
         return {
           success: false,
           providerName: "ResendProvider",

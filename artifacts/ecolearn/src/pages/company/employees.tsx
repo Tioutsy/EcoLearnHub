@@ -739,6 +739,18 @@ export default function CompanyEmployees() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  title="Copy Direct Join Link"
+                                  onClick={() => {
+                                    const baseUrl = window.location.origin;
+                                    const link = `${baseUrl}/join?code=${encodeURIComponent(inv.displayCode)}`;
+                                    copyToClipboard(link, "link");
+                                  }}
+                                >
+                                  <Copy className="h-3.5 w-3.5 mr-1" /> Link
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   title="Copy Access Code"
                                   onClick={() => copyToClipboard(inv.displayCode, "code")}
                                 >
