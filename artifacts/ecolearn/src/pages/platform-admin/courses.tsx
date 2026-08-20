@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { PlatformAdminLayout } from "@/components/layout/PlatformAdminLayout";
 import {
@@ -13,7 +13,8 @@ import {
   usePlatformAdminListQuizQuestions,
   usePlatformAdminCreateQuizQuestion,
   usePlatformAdminUpdateQuizQuestion,
-  usePlatformAdminReorderQuizQuestions
+  usePlatformAdminReorderQuizQuestions,
+  customFetch,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   ArrowLeft,
   Edit,
@@ -38,7 +54,13 @@ import {
   CheckCircle,
   XCircle,
   Info,
-  Award
+  Award,
+  Search,
+  Filter,
+  Globe,
+  EyeOff,
+  RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -94,6 +116,27 @@ export default function PlatformAdminCourses() {
   const [viewMode, setViewMode] = useState<"list" | "edit">("list");
   const [activeTab, setActiveTab] = useState<"metadata" | "lessons" | "quiz">("metadata");
   const [editingCourseId, setEditingCourseId] = useState<number | null>(null);
+
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft" | "review">("all");
+  const [levelFilter, setLevelFilter] = useState<string>("all");
+
+  // Create Course Modal State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newSlug, setNewSlug] = useState("");
+  const [newCourseCode, setNewCourseCode] = useState("");
+  const [newLevel, setNewLevel] = useState("Beginner");
+  const [newDuration, setNewDuration] = useState(20);
+  const [newDescription, setNewDescription] = useState("");
+  const [newFullDescription, setNewFullDescription] = useState("");
+  const [newStatus, setNewStatus] = useState<"draft" | "published">("draft");
+
+  // Delete Course Confirmation State
+  const [courseToDelete, setCourseToDelete] = useState<any | null>(null);
+  const [isDeletingCourse, setIsDeletingCourse] = useState(false);
 
   // Lesson Block Editor States
   const [selectedLessonForBlocks, setSelectedLessonForBlocks] = useState<any | null>(null);
@@ -157,7 +200,8 @@ export default function PlatformAdminCourses() {
     mutation: {
       onSuccess: () => {
         toast.success("Course settings saved successfully");
-        queryClient.invalidateQueries({ queryKey: ["listCourses"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/courses"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
         setViewMode("list");
         resetForm();
       },
@@ -212,34 +256,46 @@ export default function PlatformAdminCourses() {
         setShowQuizDialog(false);
         resetQuizForm();
       },
-      onError: (err: any) => toast.error(err.message || "Failed to create question")
+      onError: (err: any) => toast.error(err.message || "Failed to create quiz question")
     }
   });
 
   const updateQuestionMutation = usePlatformAdminUpdateQuizQuestion({
     mutation: {
       onSuccess: () => {
-        toast.success("Quiz question updated");
+        toast.success("Quiz question updated successfully");
         refetchQuiz();
         setShowQuizDialog(false);
         resetQuizForm();
       },
-      onError: (err: any) => toast.error(err.message || "Failed to update question")
+      onError: (err: any) => toast.error(err.message || "Failed to update quiz question")
     }
   });
 
   const reorderQuestionsMutation = usePlatformAdminReorderQuizQuestions({
     mutation: {
       onSuccess: () => {
-        toast.success("Questions reordered");
+        toast.success("Quiz questions reordered successfully");
         refetchQuiz();
       },
-      onError: (err: any) => toast.error(err.message || "Failed to reorder questions")
+      onError: (err: any) => toast.error(err.message || "Failed to reorder quiz questions")
     }
   });
 
   const resetForm = () => {
     setEditingCourseId(null);
+    setCourseTitle("");
+    setCourseSlug("");
+    setDescription("");
+    setFullDescription("");
+    setDurationMinutes(20);
+    setPriceUsd("1400.00");
+    setThumbnailUrl("");
+    setPassingScore(80);
+    setStatus("draft");
+    setBadgeName("");
+    setBadgeDescription("");
+    setLearningObjectives("");
     setLevel("beginner");
     setIntendedRoles("");
     setVersion(1);
@@ -249,7 +305,6 @@ export default function PlatformAdminCourses() {
     setSelectedSectors([]);
     setSelectedPrereqs([]);
     setSelectedSdg([]);
-    setSelectedLessonForBlocks(null);
   };
 
   const handleEditClick = (course: any) => {
@@ -257,59 +312,272 @@ export default function PlatformAdminCourses() {
     setCourseTitle(course.title || "");
     setCourseSlug(course.slug || "");
     setDescription(course.description || "");
-    setFullDescription(course.fullDescription || "");
+    setFullDescription(course.fullDescription || course.description || "");
     setDurationMinutes(course.durationMinutes || 20);
-    setPriceUsd(course.priceUsd || "1400.00");
+    setPriceUsd(String(course.priceUsd || "0.00"));
     setThumbnailUrl(course.thumbnailUrl || "");
     setPassingScore(course.passingScore || 80);
     setStatus(course.status || "draft");
     setBadgeName(course.badgeName || "");
     setBadgeDescription(course.badgeDescription || "");
-    setLearningObjectives(course.learningObjectives?.join("\n") || "");
-
+    setLearningObjectives(
+      Array.isArray(course.learningObjectives)
+        ? course.learningObjectives.join("\n")
+        : course.learningObjectives || ""
+    );
     setLevel(course.level || "beginner");
-    setIntendedRoles(course.intendedRoles?.join(", ") || "");
+    setIntendedRoles(
+      Array.isArray(course.intendedRoles)
+        ? course.intendedRoles.join("\n")
+        : course.intendedRoles || ""
+    );
     setVersion(course.version || 1);
-    setReviewDate(course.reviewDate ? new Date(course.reviewDate).toISOString().split('T')[0] : "");
+    setReviewDate(course.reviewDate ? course.reviewDate.split("T")[0] : "");
     setRecommendedNextCourseId(course.recommendedNextCourseId || "");
     setIncludesCertificate(course.includesCertificate !== false);
-    setSelectedSectors(course.sectors || []);
-    setSelectedPrereqs(course.prerequisites || []);
-    setSelectedSdg(course.sdgContributions || []);
+
+    setSelectedSectors(course.sectors?.map((s: any) => s.id) || []);
+    setSelectedPrereqs(course.prerequisites?.map((p: any) => p.id) || []);
+    setSelectedSdg(course.sdgContributions?.map((sdg: any) => sdg.id) || []);
+
     setViewMode("edit");
     setActiveTab("metadata");
+  };
+
+  // Creation Handlers
+  const handleNewTitleChange = (val: string) => {
+    setNewTitle(val);
+    const slugified = val.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    setNewSlug(slugified);
+  };
+
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) {
+      toast.error("Please enter a course title");
+      return;
+    }
+    setIsCreatingCourse(true);
+    try {
+      const payload = {
+        title: newTitle.trim(),
+        slug: newSlug.trim() || newTitle.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+        courseCode: newCourseCode.trim() || undefined,
+        level: newLevel,
+        durationMinutes: Number(newDuration) || 20,
+        description: newDescription.trim(),
+        fullDescription: newFullDescription.trim() || newDescription.trim(),
+        status: newStatus,
+      };
+
+      const res = await customFetch<any>("/api/platform-admin/courses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      toast.success(`Course '${res.title}' created successfully!`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/courses"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+
+      // Reset form
+      setNewTitle("");
+      setNewSlug("");
+      setNewCourseCode("");
+      setNewDescription("");
+      setNewFullDescription("");
+      setNewLevel("Beginner");
+      setNewDuration(20);
+      setNewStatus("draft");
+      setIsCreateModalOpen(false);
+
+      // Open newly created course directly in editor
+      handleEditClick(res);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create course");
+    } finally {
+      setIsCreatingCourse(false);
+    }
+  };
+
+  // Toggle Publish Status
+  const handleTogglePublishStatus = async (course: any, targetStatus: "published" | "draft") => {
+    try {
+      await updateMetadataMutation.mutateAsync({
+        id: course.id,
+        data: {
+          status: targetStatus,
+        } as any,
+      });
+      await queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/courses"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      if (targetStatus === "draft") {
+        toast.success(`Course '${course.title}' unpublished and moved to Draft.`);
+      } else {
+        toast.success(`Course '${course.title}' published successfully!`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update course status");
+    }
+  };
+
+  // Delete Course Handler
+  const handleDeleteCourse = async () => {
+    if (!courseToDelete) return;
+    setIsDeletingCourse(true);
+    try {
+      await customFetch(`/api/platform-admin/courses/${courseToDelete.id}`, {
+        method: "DELETE",
+      });
+      toast.success(`Course '${courseToDelete.title}' has been deleted.`);
+      await queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/courses"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      setCourseToDelete(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete course");
+    } finally {
+      setIsDeletingCourse(false);
+    }
+  };
+
+  // Lesson Form Helpers
+  const handleOpenLessonCreate = () => {
+    setEditingLesson(null);
+    setLessonTitle("");
+    setLessonDuration(5);
+    setShowLessonDialog(true);
+  };
+
+  const handleOpenLessonEdit = (lesson: any) => {
+    setEditingLesson(lesson);
+    setLessonTitle(lesson.title);
+    setLessonDuration(lesson.durationMinutes);
+    setShowLessonDialog(true);
+  };
+
+  const handleSaveLesson = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCourseId) return;
+
+    if (editingLesson) {
+      updateLessonMutation.mutate({
+        id: editingLesson.id,
+        data: {
+          title: lessonTitle,
+          durationMinutes: Number(lessonDuration)
+        }
+      });
+    } else {
+      createLessonMutation.mutate({
+        id: editingCourseId,
+        data: {
+          title: lessonTitle,
+          durationMinutes: Number(lessonDuration),
+          content: "Enter content here..."
+        }
+      });
+    }
+  };
+
+  const handleToggleLessonArchive = (lesson: any) => {
+    updateLessonMutation.mutate({
+      id: lesson.id,
+      data: {
+        title: lesson.title,
+        durationMinutes: lesson.durationMinutes,
+        isArchived: !lesson.isArchived
+      } as any
+    });
+  };
+
+  // Lesson Block Helpers
+  const handleOpenBlockEditor = (lesson: any) => {
+    setSelectedLessonForBlocks(lesson);
+    const existing = lesson.contentBlocks || [];
+    setBlocks(Array.isArray(existing) ? existing : []);
+    setIsPreviewMode(false);
+  };
+
+  const handleSaveBlocks = () => {
+    if (!selectedLessonForBlocks) return;
+    updateLessonMutation.mutate({
+      id: selectedLessonForBlocks.id,
+      data: {
+        title: selectedLessonForBlocks.title,
+        durationMinutes: selectedLessonForBlocks.durationMinutes,
+        contentBlocks: blocks
+      } as any
+    });
+    setSelectedLessonForBlocks(null);
+  };
+
+  const handleAddBlock = (type: ContentBlockType) => {
+    const newBlock: ContentBlock = {
+      id: `block-${Date.now()}`,
+      type,
+      position: blocks.length + 1,
+      headingText: type === "heading" ? "New Section Heading" : undefined,
+      bodyText: ["short_text", "key_message", "workplace_example", "mauritian_example", "practical_action"].includes(type)
+        ? "Enter content description here..."
+        : undefined,
+      expandableTitle: type === "expandable" ? "Click to learn more" : undefined,
+      expandableContent: type === "expandable" ? "Detailed additional information here..." : undefined,
+      mcqQuestion: type === "multiple_choice" ? "What is the primary action required?" : undefined,
+      mcqOptions: type === "multiple_choice" ? ["Option A", "Option B", "Option C"] : undefined,
+      mcqCorrectIndex: type === "multiple_choice" ? 0 : undefined,
+      decisionIntro: type === "decision_scenario" ? "Workplace Decision Scenario:" : undefined,
+      decisionPrompt: type === "decision_scenario" ? "What is the best course of action?" : undefined,
+      decisionChoices: type === "decision_scenario" ? [
+        { label: "Option 1", correct: true, feedback: "Explanation for why this is correct." },
+        { label: "Option 2", correct: false, feedback: "Explanation for why this is incorrect." }
+      ] : undefined,
+      commitmentInstruction: type === "commitment" ? "Select your action commitment for this module:" : undefined,
+      commitmentOptions: type === "commitment" ? [
+        { value: "action-1", label: "I will implement this practice in my department", description: "Take direct initiative." }
+      ] : undefined
+    };
+    setBlocks([...blocks, newBlock]);
+  };
+
+  const handleUpdateBlock = (index: number, updated: ContentBlock) => {
+    const next = [...blocks];
+    next[index] = updated;
+    setBlocks(next);
+  };
+
+  const handleUpdateBlockField = (index: number, field: keyof ContentBlock, value: any) => {
+    const next = [...blocks];
+    next[index] = { ...next[index], [field]: value };
+    setBlocks(next);
+  };
+
+  const handleRemoveBlock = (index: number) => {
+    const next = blocks.filter((_, i) => i !== index);
+    const reIndexed = next.map((b, i) => ({ ...b, position: i + 1 }));
+    setBlocks(reIndexed);
+  };
+
+  const handleMoveBlock = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === blocks.length - 1) return;
+
+    const next = [...blocks];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const temp = next[index];
+    next[index] = next[targetIndex];
+    next[targetIndex] = temp;
+
+    const reIndexed = next.map((b, i) => ({ ...b, position: i + 1 }));
+    setBlocks(reIndexed);
   };
 
   const handleSaveMetadata = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCourseId) return;
 
-    // A course cannot be its own prerequisite
     if (selectedPrereqs.includes(editingCourseId)) {
       toast.error("A course cannot be its own prerequisite");
       return;
-    }
-
-    // Validate SDG categories
-    for (const id of selectedSdg) {
-      const mapping = sdgs.find((s: any) => s.id === id);
-      if (mapping) {
-        const category = mapping.contributionCategory;
-        const permitted = ["education_awareness", "capacity_building"];
-        if (!permitted.includes(category)) {
-          toast.error(`Invalid SDG Contribution category '${category}'. Courses may only link to Education & Awareness or Capacity Building mappings.`);
-          return;
-        }
-      }
-    }
-
-    // Status publication warning
-    const activeLessons = lessons.filter((l: any) => !l.isArchived);
-    const activeQuiz = quizQuestions.filter((q: any) => !q.isArchived);
-    if (status === "published" && (activeLessons.length === 0 || activeQuiz.length === 0)) {
-      if (!confirm("Warning: You are publishing a course with no active lessons or quiz questions. Are you sure you want to proceed?")) {
-        return;
-      }
     }
 
     const payload = {
@@ -327,22 +595,21 @@ export default function PlatformAdminCourses() {
       status,
       badgeName: badgeName || null,
       badgeDescription: badgeDescription || null,
-      intendedRoles: intendedRoles.split(",").map(r => r.trim()).filter(Boolean),
+      intendedRoles: intendedRoles.split("\n").map(r => r.trim()).filter(Boolean),
       version: Number(version),
       reviewDate: reviewDate ? new Date(reviewDate).toISOString() : null,
       recommendedNextCourseId: recommendedNextCourseId === "" ? null : Number(recommendedNextCourseId),
       sectors: selectedSectors,
       prerequisites: selectedPrereqs,
-      sdgContributions: selectedSdg
+      sdgContributions: selectedSdg,
     };
 
     updateMetadataMutation.mutate({
       id: editingCourseId,
-      data: payload
+      data: payload as any,
     });
   };
 
-  // Reorder Handlers
   const handleMoveLesson = (index: number, direction: "up" | "down") => {
     if (!editingCourseId) return;
     const activeList = lessons.filter((l: any) => !l.isArchived);
@@ -357,7 +624,7 @@ export default function PlatformAdminCourses() {
 
     reorderLessonsMutation.mutate({
       id: editingCourseId,
-      data: reordered.map((l: any) => l.id)
+      data: reordered.map((l: any) => l.id),
     });
   };
 
@@ -375,127 +642,8 @@ export default function PlatformAdminCourses() {
 
     reorderQuestionsMutation.mutate({
       id: editingCourseId,
-      data: reordered.map((q: any) => q.id)
+      data: reordered.map((q: any) => q.id),
     });
-  };
-
-  // Lesson Save / Edit Handler
-  const handleOpenLessonCreate = () => {
-    setEditingLesson(null);
-    setLessonTitle("");
-    setLessonDuration(5);
-    setShowLessonDialog(true);
-  };
-
-  const handleOpenLessonEdit = (lesson: any) => {
-    setEditingLesson(lesson);
-    setLessonTitle(lesson.title);
-    setLessonDuration(lesson.durationMinutes || 5);
-    setShowLessonDialog(true);
-  };
-
-  const handleSaveLesson = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingCourseId) return;
-
-    if (editingLesson) {
-      updateLessonMutation.mutate({
-        id: editingLesson.id,
-        data: {
-          title: lessonTitle,
-          durationMinutes: Number(lessonDuration)
-        } as any
-      });
-    } else {
-      createLessonMutation.mutate({
-        id: editingCourseId,
-        data: {
-          title: lessonTitle,
-          durationMinutes: Number(lessonDuration)
-        } as any
-      });
-    }
-  };
-
-  const handleToggleLessonArchive = (lesson: any) => {
-    updateLessonMutation.mutate({
-      id: lesson.id,
-      data: {
-        isArchived: !lesson.isArchived
-      } as any
-    });
-  };
-
-  // Block Editing Mode Handlers
-  const handleOpenBlockEditor = (lesson: any) => {
-    setSelectedLessonForBlocks(lesson);
-    setBlocks(lesson.contentBlocks || []);
-    setIsPreviewMode(false);
-  };
-
-  const handleSaveBlocks = () => {
-    if (!selectedLessonForBlocks) return;
-    updateLessonMutation.mutate({
-      id: selectedLessonForBlocks.id,
-      data: {
-        contentBlocks: blocks
-      } as any
-    });
-    setSelectedLessonForBlocks(null);
-  };
-
-  const handleAddBlock = (type: ContentBlockType) => {
-    const newBlock: ContentBlock = {
-      id: `blk-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      type,
-      position: blocks.length + 1
-    };
-
-    if (type === "decision_scenario") {
-      newBlock.decisionIntro = "Choose carefully:";
-      newBlock.decisionPrompt = "What would you do in this situation?";
-      newBlock.decisionChoices = [
-        { label: "Option A", correct: true, feedback: "Feedback for A" },
-        { label: "Option B", correct: false, feedback: "Feedback for B" }
-      ];
-    } else if (type === "commitment") {
-      newBlock.commitmentInstruction = "Choose one commit:";
-      newBlock.commitmentOptions = [
-        { value: "action-1", label: "Commit 1", description: "Details..." }
-      ];
-    } else if (type === "multiple_choice") {
-      newBlock.mcqQuestion = "Is this correct?";
-      newBlock.mcqOptions = ["Yes", "No"];
-      newBlock.mcqCorrectIndex = 0;
-      newBlock.mcqCorrectExplanation = "Correct!";
-      newBlock.mcqIncorrectExplanation = "Try again.";
-    }
-
-    setBlocks([...blocks, newBlock]);
-  };
-
-  const handleRemoveBlock = (index: number) => {
-    const next = blocks.filter((_, i) => i !== index);
-    setBlocks(next.map((b, idx) => ({ ...b, position: idx + 1 })));
-  };
-
-  const handleMoveBlock = (index: number, direction: "up" | "down") => {
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === blocks.length - 1) return;
-
-    const next = [...blocks];
-    const target = direction === "up" ? index - 1 : index + 1;
-    const temp = next[index]!;
-    next[index] = next[target]!;
-    next[target] = temp;
-
-    setBlocks(next.map((b, idx) => ({ ...b, position: idx + 1 })));
-  };
-
-  const handleUpdateBlockField = (index: number, field: keyof ContentBlock, value: any) => {
-    const next = [...blocks];
-    next[index] = { ...next[index]!, [field]: value };
-    setBlocks(next);
   };
 
   // Quiz Form Helpers
@@ -525,6 +673,18 @@ export default function PlatformAdminCourses() {
     setShowQuizDialog(true);
   };
 
+  const handleToggleQuestionArchive = (q: any) => {
+    updateQuestionMutation.mutate({
+      id: q.id,
+      data: {
+        question: q.question,
+        options: q.options,
+        correctOption: q.correctOption,
+        isArchived: !q.isArchived
+      } as any
+    });
+  };
+
   const handleSaveQuestion = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCourseId) return;
@@ -541,23 +701,14 @@ export default function PlatformAdminCourses() {
     if (editingQuestion) {
       updateQuestionMutation.mutate({
         id: editingQuestion.id,
-        data: payload as any
+        data: payload
       });
     } else {
       createQuestionMutation.mutate({
         id: editingCourseId,
-        data: payload as any
+        data: payload
       });
     }
-  };
-
-  const handleToggleQuestionArchive = (q: any) => {
-    updateQuestionMutation.mutate({
-      id: q.id,
-      data: {
-        isArchived: !q.isArchived
-      } as any
-    });
   };
 
   // Data helpers
@@ -566,16 +717,187 @@ export default function PlatformAdminCourses() {
   const sdgs = sdgQuery.data || [];
   const editingCourseTitle = courses.find((c: any) => c.id === editingCourseId)?.title || "";
 
+  // Available unique levels
+  const availableLevels = useMemo(() => {
+    const set = new Set<string>();
+    courses.forEach((c: any) => {
+      if (c.level && typeof c.level === "string") {
+        set.add(c.level);
+      }
+    });
+    return Array.from(set);
+  }, [courses]);
+
+  // Counts for status pills
+  const publishedCount = courses.filter((c: any) => (c.status || "").toLowerCase() === "published").length;
+  const draftCount = courses.filter((c: any) => (c.status || "draft").toLowerCase() === "draft").length;
+  const reviewCount = courses.filter((c: any) => (c.status || "").toLowerCase() === "review").length;
+
+  // Filtered Courses
+  const filteredCourses = useMemo(() => {
+    return courses.filter((c: any) => {
+      // Status filter
+      if (statusFilter !== "all") {
+        const cStatus = (c.status || "draft").toLowerCase();
+        if (statusFilter === "draft" && cStatus !== "draft") return false;
+        if (statusFilter === "published" && cStatus !== "published") return false;
+        if (statusFilter === "review" && cStatus !== "review") return false;
+      }
+
+      // Level filter
+      if (levelFilter !== "all") {
+        if ((c.level || "").toLowerCase() !== levelFilter.toLowerCase()) return false;
+      }
+
+      // Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const titleMatch = (c.title || "").toLowerCase().includes(q);
+        const slugMatch = (c.slug || "").toLowerCase().includes(q);
+        const codeMatch = (c.courseCode || "").toLowerCase().includes(q);
+        if (!titleMatch && !slugMatch && !codeMatch) return false;
+      }
+
+      return true;
+    });
+  }, [courses, statusFilter, levelFilter, searchQuery]);
+
   return (
     <PlatformAdminLayout>
       {viewMode === "list" ? (
         // List Courses
         <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold font-serif">Global Content Management</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Create, review, and structure global courses, lessons, and compliance quiz parameters.
-            </p>
+          {/* Header with Title and Create Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold font-serif">Global Content Management</h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Create, review, and structure global courses, lessons, and compliance quiz parameters.
+              </p>
+            </div>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-2 self-start sm:self-auto font-medium"
+            >
+              <Plus className="h-4 w-4" /> Create New Course
+            </Button>
+          </div>
+
+          {/* Filtering & Search Control Bar */}
+          <div className="bg-card border rounded-xl p-4 shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              {/* Search Box */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by course title, code or slug..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Level Filter Dropdown */}
+              <div className="flex items-center gap-2">
+                <Label className="text-xs font-semibold text-muted-foreground shrink-0 flex items-center gap-1">
+                  <Filter className="h-3.5 w-3.5" /> Level:
+                </Label>
+                <Select value={levelFilter} onValueChange={setLevelFilter}>
+                  <SelectTrigger className="w-[200px] h-9 bg-background text-xs">
+                    <SelectValue placeholder="All Levels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels ({courses.length})</SelectItem>
+                    {availableLevels.map((lvl) => (
+                      <SelectItem key={lvl} value={lvl}>
+                        {lvl}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {(statusFilter !== "all" || levelFilter !== "all" || searchQuery) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter("all");
+                      setLevelFilter("all");
+                      setSearchQuery("");
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 h-9 px-2"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Reset
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Status Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t text-sm">
+              <span className="text-xs font-semibold text-muted-foreground mr-1">Status:</span>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("all")}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  statusFilter === "all"
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                All Courses <span className="ml-1 opacity-70">({courses.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("published")}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  statusFilter === "published"
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                }`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                Published <span className="ml-0.5 opacity-80">({publishedCount})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("draft")}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  statusFilter === "draft"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                }`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                Drafts <span className="ml-0.5 opacity-80">({draftCount})</span>
+              </button>
+              {reviewCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("review")}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                    statusFilter === "review"
+                      ? "bg-amber-600 text-white shadow-sm"
+                      : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                  }`}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                  In Review <span className="ml-0.5 opacity-80">({reviewCount})</span>
+                </button>
+              )}
+
+              <div className="ml-auto text-xs text-muted-foreground">
+                Showing <strong className="text-foreground">{filteredCourses.length}</strong> of {courses.length} courses
+              </div>
+            </div>
           </div>
 
           {coursesQuery.isLoading ? (
@@ -590,11 +912,25 @@ export default function PlatformAdminCourses() {
                 <span className="font-semibold">Failed to load courses:</span> {(coursesQuery.error as any)?.message || "API server connection failure"}
               </div>
             </div>
-          ) : courses.length === 0 ? (
+          ) : filteredCourses.length === 0 ? (
             <div className="border border-dashed rounded-lg p-12 text-center text-muted-foreground bg-card">
               <BookOpen className="h-8 w-full mb-2 opacity-50 text-slate-400" />
-              <p className="text-sm font-semibold">No courses found</p>
-              <p className="text-xs mt-0.5">Please check that database seeds are running correctly.</p>
+              <p className="text-sm font-semibold">No matching courses found</p>
+              <p className="text-xs mt-0.5 text-muted-foreground">
+                Try adjusting your search query, status, or level filter.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setLevelFilter("all");
+                  setSearchQuery("");
+                }}
+              >
+                Clear All Filters
+              </Button>
             </div>
           ) : (
             <div className="border rounded-lg overflow-x-auto bg-card shadow-sm">
@@ -610,11 +946,24 @@ export default function PlatformAdminCourses() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {courses.map((course: any) => (
-                    <TableRow key={course.id}>
-                      <TableCell className="font-semibold">{course.title}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{course.slug}</TableCell>
-                      <TableCell className="capitalize text-xs">{course.level}</TableCell>
+                  {filteredCourses.map((course: any) => (
+                    <TableRow key={course.id} className="hover:bg-slate-50/80 transition-colors">
+                      <TableCell className="font-semibold">
+                        <div className="flex items-center gap-2">
+                          <span>{course.title}</span>
+                          {course.courseCode && (
+                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono text-muted-foreground">
+                              {course.courseCode}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs font-mono text-muted-foreground">{course.slug}</TableCell>
+                      <TableCell className="text-xs">
+                        <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">
+                          {course.level || "General"}
+                        </span>
+                      </TableCell>
                       <TableCell className="text-xs text-muted-foreground">v{course.version || 1}</TableCell>
                       <TableCell>
                         <Badge
@@ -626,30 +975,71 @@ export default function PlatformAdminCourses() {
                               : "secondary"
                           }
                           className={
-                            course.status === "review" ? "border-amber-400 text-amber-600 bg-amber-50" : ""
+                            course.status === "published"
+                              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                              : course.status === "review"
+                              ? "border-amber-400 text-amber-600 bg-amber-50"
+                              : "bg-blue-50 text-blue-700 border-blue-200"
                           }
                         >
                           {course.status ? course.status.toUpperCase() : "DRAFT"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Preview Link */}
                           <Link href={`/platform-admin/preview/${course.id}`}>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="flex items-center gap-1 text-slate-600"
+                              className="h-8 px-2.5 flex items-center gap-1 text-slate-600 hover:text-slate-900"
                             >
-                              <Eye className="h-4 w-4" /> Preview
+                              <Eye className="h-3.5 w-3.5" /> Preview
                             </Button>
                           </Link>
+
+                          {/* Manage Course */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditClick(course)}
+                            className="h-8 px-2.5 flex items-center gap-1 text-primary hover:text-primary-hover border-primary/20 hover:bg-primary/5"
+                          >
+                            <Edit className="h-3.5 w-3.5" /> Manage
+                          </Button>
+
+                          {/* Quick Publish / Unpublish Toggle */}
+                          {course.status === "published" ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleTogglePublishStatus(course, "draft")}
+                              title="Unpublish course and return to Draft"
+                              className="h-8 px-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                            >
+                              <EyeOff className="h-3.5 w-3.5 mr-1" /> Unpublish
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleTogglePublishStatus(course, "published")}
+                              title="Publish course live to learners"
+                              className="h-8 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            >
+                              <Globe className="h-3.5 w-3.5 mr-1" /> Publish
+                            </Button>
+                          )}
+
+                          {/* Delete Course */}
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEditClick(course)}
-                            className="flex items-center gap-1 text-primary hover:text-primary-hover"
+                            onClick={() => setCourseToDelete(course)}
+                            title="Permanently delete course"
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                           >
-                            <Edit className="h-4 w-4" /> Manage Course
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </TableCell>
@@ -659,6 +1049,172 @@ export default function PlatformAdminCourses() {
               </Table>
             </div>
           )}
+
+          {/* CREATE NEW COURSE MODAL */}
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogContent className="max-w-xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 font-serif text-xl">
+                  <Sparkles className="h-5 w-5 text-emerald-600" /> Create New Course
+                </DialogTitle>
+                <DialogDescription>
+                  Define the core metadata for a new global sustainability training course. You can add lessons and quiz questions immediately after creating it.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleCreateCourse} className="space-y-4 py-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-course-title">Course Title *</Label>
+                  <Input
+                    id="new-course-title"
+                    required
+                    placeholder="e.g. Workplace Decarbonization & Net Zero"
+                    value={newTitle}
+                    onChange={(e) => handleNewTitleChange(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-course-slug">Slug *</Label>
+                    <Input
+                      id="new-course-slug"
+                      required
+                      placeholder="e.g. workplace-decarbonization"
+                      value={newSlug}
+                      onChange={(e) => setNewSlug(e.target.value)}
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-course-code">Course Code (Optional)</Label>
+                    <Input
+                      id="new-course-code"
+                      placeholder="e.g. ELH-35"
+                      value={newCourseCode}
+                      onChange={(e) => setNewCourseCode(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Level</Label>
+                    <Select value={newLevel} onValueChange={setNewLevel}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Beginner">Beginner</SelectItem>
+                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                        <SelectItem value="Advanced">Advanced</SelectItem>
+                        <SelectItem value="Applied Workplace Practice">Applied Workplace Practice</SelectItem>
+                        <SelectItem value="ESG and Compliance">ESG and Compliance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label>Initial Status</Label>
+                    <Select value={newStatus} onValueChange={(val: any) => setNewStatus(val)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft (Unpublished)</SelectItem>
+                        <SelectItem value="published">Published (Live)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-duration">Duration (Min)</Label>
+                    <Input
+                      id="new-duration"
+                      type="number"
+                      min={1}
+                      max={180}
+                      value={newDuration}
+                      onChange={(e) => setNewDuration(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-desc">Short Description / Overview</Label>
+                  <Textarea
+                    id="new-desc"
+                    rows={2}
+                    placeholder="Brief 1-2 sentence overview of what learners will gain..."
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                  />
+                </div>
+
+                <DialogFooter className="pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateModalOpen(false)}
+                    disabled={isCreatingCourse}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    disabled={isCreatingCourse || !newTitle.trim()}
+                  >
+                    {isCreatingCourse ? "Creating..." : "Create Course"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* DELETE COURSE CONFIRMATION DIALOG */}
+          <Dialog open={!!courseToDelete} onOpenChange={(open) => !open && setCourseToDelete(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-rose-600 font-serif">
+                  <Trash2 className="h-5 w-5" /> Delete Course
+                </DialogTitle>
+                <DialogDescription className="pt-2 text-slate-700">
+                  Are you sure you want to permanently delete{" "}
+                  <strong className="text-foreground">"{courseToDelete?.title}"</strong>?
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-xs text-rose-800 space-y-1 my-2">
+                <p className="font-semibold flex items-center gap-1">
+                  <AlertCircle className="h-3.5 w-3.5" /> Warning: Irreversible Action
+                </p>
+                <p>
+                  All associated lessons, content blocks, compliance quiz questions, and prerequisite dependencies will be permanently deleted from the database.
+                </p>
+              </div>
+
+              <DialogFooter className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCourseToDelete(null)}
+                  disabled={isDeletingCourse}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDeleteCourse}
+                  disabled={isDeletingCourse}
+                  className="bg-rose-600 hover:bg-rose-700 text-white"
+                >
+                  {isDeletingCourse ? "Deleting..." : "Delete Permanently"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       ) : selectedLessonForBlocks ? (
         // LESSON BLOCK EDITOR UI

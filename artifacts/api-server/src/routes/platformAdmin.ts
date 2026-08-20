@@ -1212,6 +1212,8 @@ router.get("/courses", async (req, res): Promise<void> => {
       .select({
         id: coursesTable.id,
         title: coursesTable.title,
+        slug: coursesTable.slug,
+        courseCode: coursesTable.courseCode,
         description: coursesTable.description,
         categoryId: coursesTable.categoryId,
         categoryName: categoriesTable.name,
@@ -1228,6 +1230,7 @@ router.get("/courses", async (req, res): Promise<void> => {
         passingScore: coursesTable.passingScore,
         createdAt: coursesTable.createdAt,
         status: coursesTable.status,
+        version: coursesTable.version,
       })
       .from(coursesTable)
       .leftJoin(categoriesTable, eq(coursesTable.categoryId, categoriesTable.id))
@@ -1245,6 +1248,123 @@ router.get("/courses", async (req, res): Promise<void> => {
     console.log("[DIAG] GET /platform-admin/courses - Response sent");
   } catch (err) {
     console.log("[DIAG] GET /platform-admin/courses - Error occurred:", err);
+    sendHttpError(res, err);
+  }
+});
+
+// =============================================================================
+// CREATE NEW COURSE
+// =============================================================================
+
+router.post("/courses", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const {
+      title,
+      slug,
+      courseCode,
+      description,
+      fullDescription,
+      level = "Beginner",
+      durationMinutes = 20,
+      priceUsd = "0.00",
+      thumbnailUrl,
+      learningObjectives,
+      includesCertificate = true,
+      passingScore = 80,
+      status = "draft",
+      badgeName,
+      badgeDescription,
+      intendedRoles,
+      categoryId = 1,
+    } = req.body;
+
+    if (!title || !String(title).trim()) {
+      res.status(400).json({ error: "Course title is required" });
+      return;
+    }
+
+    const finalSlug = (slug && String(slug).trim())
+      ? String(slug).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+      : String(title).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    if (!finalSlug) {
+      res.status(400).json({ error: "Invalid course title/slug" });
+      return;
+    }
+
+    const [existingSlug] = await db
+      .select({ id: coursesTable.id })
+      .from(coursesTable)
+      .where(eq(coursesTable.slug, finalSlug))
+      .limit(1);
+
+    if (existingSlug) {
+      res.status(400).json({ error: `A course with slug '${finalSlug}' already exists. Please choose a different title or slug.` });
+      return;
+    }
+
+    const [newCourse] = await db
+      .insert(coursesTable)
+      .values({
+        title: String(title).trim(),
+        slug: finalSlug,
+        courseCode: courseCode ? String(courseCode).trim() : null,
+        description: description ? String(description).trim() : "",
+        fullDescription: fullDescription ? String(fullDescription).trim() : description ? String(description).trim() : "",
+        level: String(level).trim() || "Beginner",
+        durationMinutes: Number(durationMinutes) || 20,
+        priceUsd: String(priceUsd || "0.00"),
+        thumbnailUrl: thumbnailUrl || "/images/courses/sustainability-intro.png",
+        learningObjectives: Array.isArray(learningObjectives) ? learningObjectives : (learningObjectives ? [learningObjectives] : []),
+        includesCertificate: Boolean(includesCertificate),
+        passingScore: Number(passingScore) || 80,
+        status: status === "published" ? "published" : "draft",
+        isPublished: status === "published",
+        badgeName: badgeName ? String(badgeName).trim() : `${title} Practitioner`,
+        badgeDescription: badgeDescription ? String(badgeDescription).trim() : `Awarded for completing ${title}`,
+        intendedRoles: Array.isArray(intendedRoles) ? intendedRoles : [],
+        categoryId: Number(categoryId) || 1,
+      })
+      .returning();
+
+    res.status(201).json(newCourse);
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
+// =============================================================================
+// DELETE COURSE
+// =============================================================================
+
+router.delete("/courses/:id", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const courseId = parseInt(req.params.id);
+    if (isNaN(courseId)) {
+      res.status(400).json({ error: "Invalid course ID" });
+      return;
+    }
+
+    await db.transaction(async (tx) => {
+      // 1. Delete associated lessons
+      await tx.delete(lessonsTable).where(eq(lessonsTable.courseId, courseId));
+      // 2. Delete quiz questions
+      await tx.delete(quizQuestionsTable).where(eq(quizQuestionsTable.courseId, courseId));
+      // 3. Delete course prerequisites
+      await tx.delete(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.courseId, courseId));
+      await tx.delete(coursePrerequisitesTable).where(eq(coursePrerequisitesTable.prerequisiteCourseId, courseId));
+      // 4. Delete sector mappings
+      await tx.delete(courseSectorsTable).where(eq(courseSectorsTable.courseId, courseId));
+      // 5. Delete SDG contribution mappings
+      await tx.delete(courseSdgContributionsTable).where(eq(courseSdgContributionsTable.courseId, courseId));
+      // 6. Delete the course record itself
+      await tx.delete(coursesTable).where(eq(coursesTable.id, courseId));
+    });
+
+    res.json({ success: true, deletedCourseId: courseId });
+  } catch (err) {
     sendHttpError(res, err);
   }
 });

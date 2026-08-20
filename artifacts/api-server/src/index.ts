@@ -35,6 +35,7 @@ import { ensureEthicsGovernanceCourse } from "./lib/ensureEthicsGovernanceCourse
 import { ensureEsgDataCourse } from "./lib/ensureEsgDataCourse";
 import { ensureEsgInMyJobCourse } from "./lib/ensureEsgInMyJobCourse";
 import { ensureAppliedCourseBadges } from "./lib/ensureAppliedCourseBadges";
+import { ensureWorkplaceSustainabilityLeadershipCourse } from "./lib/ensureWorkplaceSustainabilityLeadershipCourse";
 import { seedInitialSectors } from "./routes/platformAdmin";
 import { ensureCatalogueSkeletons } from "./lib/ensureCatalogueSkeletons";
 import { ensureCoreSustainabilityPath } from "./lib/ensureCoreSustainabilityPath";
@@ -145,6 +146,7 @@ async function start(): Promise<void> {
     await ensureEthicsGovernanceCourse();
     await ensureEsgDataCourse();
     await ensureEsgInMyJobCourse();
+    await ensureWorkplaceSustainabilityLeadershipCourse();
     await ensureAppliedCourseBadges();
     await ensureCoreSustainabilityPath();
     await ensureCategoriesAndAssignments();
