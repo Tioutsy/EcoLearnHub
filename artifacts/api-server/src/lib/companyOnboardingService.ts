@@ -429,6 +429,31 @@ export async function getResumableOnboardingStatus(userId: string): Promise<{
     };
   }
 
+  // Check if user is Platform Administrator (Owner Bootstrap)
+  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
+  let userEmail: string | null = null;
+  try {
+    const { clerkClient } = await import("@clerk/express");
+    const clerkUser = await clerkClient.users.getUser(userId);
+    userEmail =
+      clerkUser?.emailAddresses?.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress?.toLowerCase() ??
+      clerkUser?.emailAddresses?.[0]?.emailAddress?.toLowerCase() ??
+      null;
+  } catch {
+    // ignore
+  }
+
+  if (userEmail && userEmail === bootstrapEmail) {
+    return {
+      stage: "COMPLETED",
+      hasCompany: true,
+      role: "platform_admin",
+      nextStepUrl: "/platform-admin",
+      completedSteps: ["account_creation", "company_details", "plan_selection", "payment", "onboarding_completed"],
+      incompleteSteps: [],
+    };
+  }
+
   const [emp] = await db
     .select()
     .from(employeesTable)

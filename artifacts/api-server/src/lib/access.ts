@@ -206,11 +206,25 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
 
   const claimRole = getClaimRole(claims);
   const claimCompanyId = getClaimCompanyId(claims);
-  const email = getClaimEmail(claims);
+  let email = getClaimEmail(claims);
+
+  if (!email && userId) {
+    try {
+      const { clerkClient } = await import("@clerk/express");
+      const clerkUser = await clerkClient.users.getUser(userId);
+      email =
+        clerkUser?.emailAddresses?.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+        clerkUser?.emailAddresses?.[0]?.emailAddress ??
+        null;
+    } catch {
+      // ignore non-fatal Clerk fetch error
+    }
+  }
+
   const primaryCompany = await getPrimaryCompany();
 
   const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
-  const isPlatformAdmin = isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail);
+  const isPlatformAdmin = isPlatformRole(claimRole) || Boolean(email && email.toLowerCase() === bootstrapEmail);
 
   if (isPlatformAdmin) {
     const companyId = claimCompanyId ?? primaryCompany?.id ?? 0;
@@ -305,14 +319,27 @@ export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess>
   const userId = auth.userId ?? fallbackAuth?.userId ?? null;
   const claims = auth.sessionClaims ?? {};
   const claimRole = getClaimRole(claims);
-  const email = getClaimEmail(claims);
+  let email = getClaimEmail(claims);
+
+  if (!email && userId) {
+    try {
+      const { clerkClient } = await import("@clerk/express");
+      const clerkUser = await clerkClient.users.getUser(userId);
+      email =
+        clerkUser?.emailAddresses?.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+        clerkUser?.emailAddresses?.[0]?.emailAddress ??
+        null;
+    } catch {
+      // ignore
+    }
+  }
 
   if (!userId) {
     throw new HttpError(401, "Authentication required");
   }
 
   const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
-  const isPlatformAdmin = isPlatformRole(claimRole) || (email && email.toLowerCase() === bootstrapEmail);
+  const isPlatformAdmin = isPlatformRole(claimRole) || Boolean(email && email.toLowerCase() === bootstrapEmail);
 
   if (!isPlatformAdmin) {
     throw new HttpError(403, "Platform administrator access required");

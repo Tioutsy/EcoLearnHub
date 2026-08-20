@@ -149,7 +149,9 @@ export default function OnboardingPage() {
         }
 
         // Determine step from server-authoritative stage
-        if (res.stage === "COMPLETED") {
+        if (res.role === "platform_admin" || res.nextStepUrl === "/platform-admin") {
+          setLocation("/platform-admin");
+        } else if (res.stage === "COMPLETED") {
           setLocation("/home");
         } else if (res.stage === "CUSTOM_QUOTE_REQUIRED") {
           setStep(4);

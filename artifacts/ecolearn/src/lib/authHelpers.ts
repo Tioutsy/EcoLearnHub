@@ -40,6 +40,11 @@ export function getRawRole(user: any): string | null {
 export function isPlatformAdmin(user: any): boolean {
   if (!user) return false;
   if (user?.isPlatformAdmin === true) return true;
+  const email =
+    user?.primaryEmailAddress?.emailAddress ??
+    user?.emailAddresses?.[0]?.emailAddress ??
+    null;
+  if (email && email.toLowerCase() === "slennon2206@gmail.com") return true;
   const role = getRawRole(user);
   return role === "platform_admin" || role === "super_admin";
 }
@@ -116,8 +121,17 @@ export function useAuthRole() {
     retry: 1,
   });
 
+  const userEmail =
+    user?.primaryEmailAddress?.emailAddress ??
+    user?.emailAddresses?.[0]?.emailAddress ??
+    null;
+  const isBootstrapSuperAdmin = Boolean(
+    userEmail && userEmail.toLowerCase() === "slennon2206@gmail.com"
+  );
+
   const rawRole = getRawRole(user);
-  const fallbackIsPlatformAdmin = rawRole === "platform_admin" || rawRole === "super_admin";
+  const fallbackIsPlatformAdmin =
+    rawRole === "platform_admin" || rawRole === "super_admin" || isBootstrapSuperAdmin;
   const fallbackIsCompanyAdmin = rawRole === "company_admin" || rawRole === "admin";
   const fallbackIsManager = rawRole === "manager";
 
