@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Building2, Plus, Search, Loader2 } from "lucide-react";
+import { Building2, Plus, Search, Loader2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
@@ -74,6 +74,18 @@ export default function PlatformAdminOrganisations() {
     },
     onError: (err: any) => {
       setCreateError(err?.message || "Failed to create client organisation");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await customFetch(`/api/platform-admin/organisations/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/platform-admin/organisations"] });
+      refetch();
     },
   });
 
@@ -264,12 +276,27 @@ export default function PlatformAdminOrganisations() {
                         {org.createdAt ? new Date(org.createdAt).toLocaleDateString() : "N/A"}
                       </td>
                       <td className="p-4 text-right">
-                        <Link
-                          href={`/platform-admin/organisations/${org.id}`}
-                          className="text-xs font-medium text-primary hover:underline"
-                        >
-                          View Detail
-                        </Link>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/platform-admin/organisations/${org.id}`}
+                            className="text-xs font-medium text-primary hover:underline"
+                          >
+                            View Detail
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50"
+                            title="Delete organisation"
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to permanently delete "${org.name}"?`)) {
+                                deleteMutation.mutate(org.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

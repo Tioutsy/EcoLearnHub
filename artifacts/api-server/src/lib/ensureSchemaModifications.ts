@@ -1416,35 +1416,34 @@ export async function ensureSchemaModifications() {
     logger.warn({ err: err?.message }, "Non-fatal warning during migrateCompanyLists on startup");
   }
 
-  // Clean up sprint/mock artifacts from previous recovery tasks
+  // Purge all legacy test/sprint companies, keeping ONLY Infracare
   try {
-    const { companiesTable, employeesTable, companySubscriptionsTable } = await import("@workspace/db");
+    const { companiesTable, employeesTable, companySubscriptionsTable, subscriptionPlansTable, employeeBandsTable } = await import("@workspace/db");
     
-    // Find all mock/sprint companies
-    const mockCompanies = await db
-      .select({ id: companiesTable.id, name: companiesTable.name })
-      .from(companiesTable)
-      .where(
-        and(
-          or(
-            sql`lower(${companiesTable.name}) LIKE '%sprint%'`,
-            sql`lower(${companiesTable.slug}) LIKE '%sprint%'`,
-            sql`lower(${companiesTable.name}) LIKE '%mock%'`,
-            sql`lower(${companiesTable.slug}) LIKE '%mock%'`
-          ),
-          sql`lower(${companiesTable.name}) NOT LIKE '%infracare%'`,
-          sql`lower(${companiesTable.slug}) NOT LIKE '%infracare%'`
-        )
-      );
+    await db.execute(sql`
+      DELETE FROM "company_subscriptions" 
+      WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
 
-    for (const m of mockCompanies) {
-      await db.delete(companySubscriptionsTable).where(eq(companySubscriptionsTable.companyId, m.id));
-      await db.delete(employeesTable).where(eq(employeesTable.companyId, m.id));
-      await db.delete(companiesTable).where(eq(companiesTable.id, m.id));
-      logger.info({ id: m.id, name: m.name }, "Purged test/sprint artifact company from database");
-    }
+      DELETE FROM "employee_invitations" 
+      WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+
+      DELETE FROM "departments" 
+      WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+
+      DELETE FROM "job_titles" 
+      WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+
+      DELETE FROM "employees" 
+      WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%')
+        AND lower("email") != 'slennon2206@gmail.com';
+
+      DELETE FROM "companies" 
+      WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%';
+    `);
+
+    logger.info("Purged all legacy non-Infracare organisations from database.");
   } catch (purgeErr: any) {
-    logger.warn({ err: purgeErr?.message }, "Non-fatal notice during test company purge");
+    logger.warn({ err: purgeErr?.message }, "Notice during organisation table purge");
   }
 
   // Ensure Infracare company & admin exist

@@ -1798,6 +1798,30 @@ router.post("/organisations", async (req, res): Promise<void> => {
   }
 });
 
+router.delete("/organisations/:id", async (req, res): Promise<void> => {
+  try {
+    await requirePlatformAdmin(req);
+    const orgId = parseInt(req.params.id);
+    if (!orgId || isNaN(orgId)) {
+      res.status(400).json({ error: "Invalid organisation ID" });
+      return;
+    }
+
+    await db.execute(sql`
+      DELETE FROM "company_subscriptions" WHERE "company_id" = ${orgId};
+      DELETE FROM "employee_invitations" WHERE "company_id" = ${orgId};
+      DELETE FROM "departments" WHERE "company_id" = ${orgId};
+      DELETE FROM "job_titles" WHERE "company_id" = ${orgId};
+      DELETE FROM "employees" WHERE "company_id" = ${orgId};
+      DELETE FROM "companies" WHERE "id" = ${orgId};
+    `);
+
+    res.json({ success: true, message: `Organisation #${orgId} deleted successfully` });
+  } catch (err) {
+    sendHttpError(res, err);
+  }
+});
+
 router.get("/organisations/:id", async (req, res): Promise<void> => {
   try {
     await requirePlatformAdmin(req);
