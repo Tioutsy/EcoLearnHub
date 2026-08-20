@@ -43,7 +43,7 @@ export default function PlatformAdminOrganisations() {
   const [newOrgAdminName, setNewOrgAdminName] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
 
-  const { data: orgs, isLoading, refetch } = useQuery<OrganisationItem[]>({
+  const { data: orgs, isLoading, isError, error, refetch } = useQuery<OrganisationItem[]>({
     queryKey: ["/api/platform-admin/organisations"],
     queryFn: () => customFetch<OrganisationItem[]>("/api/platform-admin/organisations"),
   });
@@ -202,6 +202,18 @@ export default function PlatformAdminOrganisations() {
             />
           </div>
         </div>
+
+        {isError && (
+          <div className="p-4 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 rounded-xl border border-red-200 flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-sm">Failed to load client organisations</p>
+              <p className="text-xs text-red-600 dark:text-red-400">{(error as any)?.message || "Server returned an error"}</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </div>
+        )}
 
         {isLoading ? (
           <Skeleton className="h-64 rounded-xl" />

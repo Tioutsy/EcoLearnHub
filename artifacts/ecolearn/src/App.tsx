@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ClerkProvider, SignIn, SignUp, UserProfile, Show, useAuth, useClerk } from '@clerk/react';
+import { ClerkProvider, SignIn, SignUp, UserProfile, Show, useAuth, useClerk, useUser } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { Layout } from '@/components/layout/Layout';
 import { Switch, Route, Link, useLocation, Router as WouterRouter, Redirect } from 'wouter';
@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import {
   setBaseUrl,
   setAuthTokenGetter,
+  setCustomHeadersGetter,
   customFetch,
 } from "@workspace/api-client-react";
 
@@ -375,6 +376,7 @@ function ClerkQueryClientCacheInvalidator() {
 
 function ClerkApiTokenBridge({ children }: { children: ReactNode }) {
   const { getToken, isLoaded } = useAuth();
+  const { user } = useUser();
 
   useEffect(() => {
     if (!isLoaded) {
@@ -389,10 +391,22 @@ function ClerkApiTokenBridge({ children }: { children: ReactNode }) {
       }
     });
 
+    setCustomHeadersGetter(() => {
+      const email =
+        user?.primaryEmailAddress?.emailAddress ??
+        user?.emailAddresses?.[0]?.emailAddress ??
+        "";
+      const headers: Record<string, string> = {};
+      if (email) headers["x-user-email"] = email;
+      if (user?.id) headers["x-user-id"] = user.id;
+      return headers;
+    });
+
     return () => {
       setAuthTokenGetter(null);
+      setCustomHeadersGetter(null);
     };
-  }, [getToken, isLoaded]);
+  }, [getToken, isLoaded, user]);
 
   return <>{children}</>;
 }

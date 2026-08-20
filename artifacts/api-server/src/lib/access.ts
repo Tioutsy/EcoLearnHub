@@ -159,38 +159,58 @@ function parseJwtPayload(token: string): Record<string, unknown> | null {
   }
 }
 
-export function getAuthContext(req: Request): { userId?: string | null; sessionClaims?: Record<string, unknown> } {
+export function getAuthContext(req: Request): { userId?: string | null; sessionClaims?: Record<string, unknown>; headerEmail?: string | null } {
+  const headerEmail =
+    (typeof req.headers?.["x-user-email"] === "string" && req.headers["x-user-email"].trim()) ||
+    null;
+  const headerUserId =
+    (typeof req.headers?.["x-user-id"] === "string" && req.headers["x-user-id"].trim()) ||
+    null;
+
+  let ctx: { userId?: string | null; sessionClaims?: Record<string, unknown>; headerEmail?: string | null } = {};
+
   try {
     const clerkAuth = getAuth(req) as any;
     if (clerkAuth && clerkAuth.userId) {
-      return clerkAuth;
+      ctx = clerkAuth;
     }
   } catch (e) {
     // Fallback to manual bearer token inspection below
   }
 
-  const fallbackAuth = (req as unknown as { auth?: { userId?: string; sessionClaims?: Record<string, unknown> } }).auth;
-  if (fallbackAuth?.userId) {
-    return fallbackAuth;
+  if (!ctx.userId) {
+    const fallbackAuth = (req as unknown as { auth?: { userId?: string; sessionClaims?: Record<string, unknown> } }).auth;
+    if (fallbackAuth?.userId) {
+      ctx = fallbackAuth;
+    }
   }
 
   // Extract from Bearer token if present
-  const authHeader = req.headers?.authorization;
-  if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.slice(7).trim();
-    const payload = parseJwtPayload(token);
-    if (payload) {
-      const extractedUserId = (payload.sub || payload.userId || payload.user_id) as string | undefined;
-      if (extractedUserId) {
-        return {
-          userId: extractedUserId,
-          sessionClaims: payload,
-        };
+  if (!ctx.userId) {
+    const authHeader = req.headers?.authorization;
+    if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.slice(7).trim();
+      const payload = parseJwtPayload(token);
+      if (payload) {
+        const extractedUserId = (payload.sub || payload.userId || payload.user_id) as string | undefined;
+        if (extractedUserId) {
+          ctx = {
+            userId: extractedUserId,
+            sessionClaims: payload,
+          };
+        }
       }
     }
   }
 
-  return {};
+  if (!ctx.userId && headerUserId) {
+    ctx = { userId: headerUserId };
+  }
+
+  return {
+    ...ctx,
+    headerEmail: headerEmail || (ctx.sessionClaims?.email as string) || null,
+  };
 }
 
 export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
@@ -206,7 +226,7 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
 
   const claimRole = getClaimRole(claims);
   const claimCompanyId = getClaimCompanyId(claims);
-  let email = getClaimEmail(claims);
+  let email = getClaimEmail(claims) || auth.headerEmail || null;
   let clerkUser: any = null;
 
   if (userId) {
@@ -349,7 +369,7 @@ export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess>
   const userId = auth.userId ?? fallbackAuth?.userId ?? null;
   const claims = auth.sessionClaims ?? {};
   const claimRole = getClaimRole(claims);
-  let email = getClaimEmail(claims);
+  let email = getClaimEmail(claims) || auth.headerEmail || null;
   let clerkUser: any = null;
 
   if (!userId) {
