@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -10,6 +10,9 @@ export const employeesTable = pgTable("employees", {
   name: text("name").notNull(),
   department: text("department"),
   jobTitle: text("job_title"),
+  departmentId: integer("department_id"),
+  jobTitleId: integer("job_title_id"),
+  profileCompleted: boolean("profile_completed").notNull().default(false),
   role: text("role").notNull().default("employee"),
   status: text("status").notNull().default("active"), // "active" | "deactivated"
   invitationStatus: text("invitation_status").notNull().default("not_invited"),

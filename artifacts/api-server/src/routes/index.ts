@@ -40,6 +40,7 @@ import authMeRouter from "./authMe";
 import platformAdminPilotsRouter from "./platformAdminPilots";
 import platformAdminUpgradeRequestsRouter from "./platformAdminUpgradeRequests";
 import internalJobsRouter from "./internalJobs";
+import bulkInvitationsRouter from "./bulkInvitations";
 
 const router: IRouter = Router();
 
@@ -62,6 +63,7 @@ router.use("/progression", progressionRouter);
 router.use("/certificates", certificatesRouter);
 router.use("/company", companiesRouter);
 router.use("/companies", companiesRouter);
+router.use("/company", bulkInvitationsRouter);
 router.use("/invitations", invitationsRouter);
 router.use("/employee-invitations", invitationsRouter);
 router.use("/reminders", remindersRouter);

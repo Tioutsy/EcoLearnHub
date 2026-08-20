@@ -164,6 +164,23 @@ router.get("/company", async (req, res): Promise<void> => {
     return;
   }
 
+  // Infracare Complimentary Test Exemption Check
+  const [comp] = await db
+    .select({ name: companiesTable.name, slug: companiesTable.slug })
+    .from(companiesTable)
+    .where(eq(companiesTable.id, access.companyId))
+    .limit(1);
+
+  const isInfracare =
+    comp?.name?.toLowerCase().includes("infracare") ||
+    Boolean(comp?.slug && comp.slug.toLowerCase().includes("infracare"));
+
+  if (isInfracare) {
+    subscription.status = "ACTIVE";
+    subscription.agreedMonthlyAmount = "0.00";
+    subscription.agreedYearlyAmount = "0.00";
+  }
+
   // Fetch course entitlement IDs for this plan
   const courseEntitlements = await db
     .select({ courseId: planCourseEntitlementsTable.courseId })

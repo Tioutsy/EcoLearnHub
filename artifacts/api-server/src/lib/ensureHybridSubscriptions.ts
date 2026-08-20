@@ -336,6 +336,50 @@ export async function ensureHybridSubscriptions(): Promise<void> {
       }
     }
 
+    // 7. Special Test/Platform Evaluation Exemption: Ensure Infracare has free active Complete subscription
+    for (const comp of companies) {
+      const isInfraCare = comp.name?.toLowerCase().includes("infracare") || comp.slug?.toLowerCase().includes("infracare");
+      if (isInfraCare) {
+        const topBandId = bandIdMap.get("OVER_120") || bandIdMap.get("UP_TO_25")!;
+        const existingSub = await db
+          .select()
+          .from(companySubscriptionsTable)
+          .where(eq(companySubscriptionsTable.companyId, comp.id))
+          .limit(1)
+          .then(r => r[0]);
+
+        if (existingSub) {
+          await db
+            .update(companySubscriptionsTable)
+            .set({
+              subscriptionPlanId: completePlanId,
+              employeeBandId: topBandId,
+              status: "ACTIVE",
+              currency: "MUR",
+              agreedMonthlyAmount: "0.00",
+              agreedYearlyAmount: "0.00",
+              pricingSource: "TEST_EXEMPTION",
+            })
+            .where(eq(companySubscriptionsTable.id, existingSub.id));
+        } else {
+          await db
+            .insert(companySubscriptionsTable)
+            .values({
+              companyId: comp.id,
+              subscriptionPlanId: completePlanId,
+              employeeBandId: topBandId,
+              status: "ACTIVE",
+              currency: "MUR",
+              agreedMonthlyAmount: "0.00",
+              agreedYearlyAmount: "0.00",
+              pricingSource: "TEST_EXEMPTION",
+            })
+            .onConflictDoNothing({ target: companySubscriptionsTable.companyId });
+        }
+        logger.info({ companyId: comp.id, name: comp.name }, "Configured complimentary test exemption for Infracare (COMPLETE plan, Free of Charge, ACTIVE)");
+      }
+    }
+
     logger.info("Successfully ensured hybrid subscription plans, bands, prices, entitlements, and company migrations.");
   } catch (err) {
     logger.error({ err }, "Error in ensureHybridSubscriptions");

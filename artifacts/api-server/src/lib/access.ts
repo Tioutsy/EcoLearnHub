@@ -273,6 +273,24 @@ export async function requireActiveCompanySubscription(req: Request): Promise<Co
   return access;
 }
 
+export async function requireCompletedProfile(req: Request): Promise<CompanyAccess> {
+  const access = await getCompanyAccess(req);
+  if (access.role === "platform_admin" || access.role === "company_admin") {
+    return access;
+  }
+  if (access.employee && !access.employee.profileCompleted) {
+    throw new HttpError(
+      403,
+      JSON.stringify({
+        code: "PROFILE_INCOMPLETE",
+        message: "Please complete your department and job title profile before accessing training courses.",
+        redirectUrl: "/join?step=profile",
+      })
+    );
+  }
+  return access;
+}
+
 export async function requireCompanyAdmin(req: Request): Promise<CompanyAccess> {
   const access = await getCompanyAccess(req);
   if (access.role !== "company_admin" && access.role !== "platform_admin") {

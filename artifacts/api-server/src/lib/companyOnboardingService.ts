@@ -474,6 +474,29 @@ export async function getResumableOnboardingStatus(userId: string): Promise<{
     };
   }
 
+  // Infracare Complimentary Test Bypass Check
+  const isInfracare =
+    company.name?.toLowerCase().includes("infracare") ||
+    Boolean(company.slug && company.slug.toLowerCase().includes("infracare"));
+
+  if (isInfracare) {
+    return {
+      stage: "COMPLETED",
+      hasCompany: true,
+      role: "admin",
+      company,
+      subscription: {
+        status: "ACTIVE",
+        planCode: "COMPLETE",
+        planName: "Complete (Test Account)",
+        agreedMonthlyAmount: "0.00",
+      },
+      nextStepUrl: "/home",
+      completedSteps: ["account_creation", "company_details", "plan_selection", "payment", "onboarding_completed"],
+      incompleteSteps: [],
+    };
+  }
+
   // Admin: Check subscription
   const matchingSubs = await db
     .select({

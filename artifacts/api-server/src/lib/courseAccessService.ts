@@ -1,6 +1,7 @@
 import {
   db,
   coursesTable,
+  companiesTable,
   companySubscriptionsTable,
   subscriptionPlansTable,
   planCourseEntitlementsTable,
@@ -76,6 +77,21 @@ export async function evaluateCourseAccess(
       requiredPlanCode,
       requiredPlanName,
     };
+  }
+
+  // 3a. Infracare Complimentary Test Exemption Check
+  const [comp] = await db
+    .select({ name: companiesTable.name, slug: companiesTable.slug })
+    .from(companiesTable)
+    .where(eq(companiesTable.id, accessContext.companyId))
+    .limit(1);
+
+  const isInfracare =
+    comp?.name?.toLowerCase().includes("infracare") ||
+    Boolean(comp?.slug && comp.slug.toLowerCase().includes("infracare"));
+
+  if (isInfracare) {
+    return { allowed: true, reason: "INCLUDED_IN_PLAN" };
   }
 
   const matchingSubs = await db

@@ -66,6 +66,9 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
     "company_upgrade_requests",
     "pilot_notifications",
     "upgrade_request_audit_logs",
+    "job_titles",
+    "bulk_invitation_batches",
+    "invitation_email_queue",
   ];
   for (const table of requiredTables) {
     const exists = await checkTableExists(table);
@@ -89,7 +92,10 @@ export async function verifyDatabaseIntegrity(): Promise<IntegrityReport> {
     challenge_participants: ["company_id", "status", "points_awarded"],
     badge_definitions: ["code"],
     employee_badges: ["employee_id", "company_id", "badge_id"],
-    employee_invitations: ["company_id", "email", "token_hash", "display_code_hash", "display_code_last_four", "status", "expires_at"]
+    employee_invitations: ["company_id", "email", "token_hash", "display_code_hash", "display_code_last_four", "status", "expires_at"],
+    job_titles: ["company_id", "name", "status"],
+    bulk_invitation_batches: ["company_id", "uploaded_by_user_id", "file_name", "total_rows", "valid_rows", "skipped_rows", "status"],
+    invitation_email_queue: ["company_id", "invitation_id", "recipient_email", "status"]
   };
 
   for (const [table, cols] of Object.entries(requiredColumns)) {

@@ -61,6 +61,7 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
     .select({
       id: companiesTable.id,
       name: companiesTable.name,
+      slug: companiesTable.slug,
       maxEmployees: companiesTable.maxEmployees,
     })
     .from(companiesTable)
@@ -91,6 +92,15 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
   const subscriptionStatus = sub?.status ?? "NONE";
   let isSubscriptionActive = subscriptionStatus === "ACTIVE";
 
+  // Check if company is Infracare (Complimentary test bypass)
+  const isInfracare =
+    company.name?.toLowerCase().includes("infracare") ||
+    Boolean(company.slug && company.slug.toLowerCase().includes("infracare"));
+
+  if (isInfracare) {
+    isSubscriptionActive = true;
+  }
+
   // Check if company has a pilot pass
   const [pilotPass] = await db
     .select()
@@ -108,7 +118,7 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
     pilotExpired = pilotPass.status === "expired" || (pilotPass.expiresAt ? now.getTime() > new Date(pilotPass.expiresAt).getTime() : false);
     pilotRevoked = pilotPass.status === "revoked";
     if (pilotExpired || pilotRevoked) {
-      isSubscriptionActive = false;
+      isSubscriptionActive = isInfracare ? true : false;
     } else {
       isSubscriptionActive = true;
     }
@@ -118,6 +128,9 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
   let maxSeats = getBandMaxSeats(sub?.bandCode ?? null, company.maxEmployees ?? sub?.bandMax);
   if (pilotActive && pilotPass) {
     maxSeats = pilotPass.learnerSeatLimit + pilotPass.administratorSeatLimit;
+  }
+  if (isInfracare) {
+    maxSeats = Math.max(maxSeats, 250);
   }
 
   // Count active employees (only 'active' status consumes a seat)
@@ -147,7 +160,10 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
   let canInvite = true;
   let reason: string | null = null;
 
-  if (!isSubscriptionActive) {
+  if (isInfracare) {
+    canInvite = true;
+    reason = null;
+  } else if (!isSubscriptionActive) {
     canInvite = false;
     if (pilotActive && pilotRevoked) {
       reason = "Company pilot pass has been revoked.";
@@ -165,7 +181,9 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
       : `Employee seat limit reached (${reservedSeats} of ${maxSeats} seats reserved). Upgrade your subscription band to invite more team members.`;
   }
 
-  const finalSubStatus = (!isSubscriptionActive && pilotActive)
+  const finalSubStatus = isInfracare
+    ? "ACTIVE"
+    : (!isSubscriptionActive && pilotActive)
     ? (pilotExpired ? "EXPIRED" : pilotRevoked ? "CANCELLED" : "INACTIVE")
     : subscriptionStatus;
 
@@ -178,10 +196,10 @@ export async function getCompanySeatUsage(companyId: number): Promise<SeatUsageS
     maxSeats,
     remainingSeats,
     subscriptionStatus: finalSubStatus,
-    subscriptionPlanCode: sub?.planCode ?? null,
-    subscriptionPlanName: sub?.planName ?? null,
-    bandCode: sub?.bandCode ?? null,
-    bandLabel: sub?.bandLabel ?? null,
+    subscriptionPlanCode: isInfracare ? (sub?.planCode || "COMPLETE") : (sub?.planCode ?? null),
+    subscriptionPlanName: isInfracare ? (sub?.planName || "Complete (Test Account)") : (sub?.planName ?? null),
+    bandCode: isInfracare ? (sub?.bandCode || "OVER_120") : (sub?.bandCode ?? null),
+    bandLabel: isInfracare ? (sub?.bandLabel || "121+ employees") : (sub?.bandLabel ?? null),
     canInvite,
     reason,
   };

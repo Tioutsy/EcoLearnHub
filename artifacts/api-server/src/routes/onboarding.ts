@@ -9,6 +9,10 @@ import {
   confirmOrderReview,
 } from "../lib/companyOnboardingService";
 import { validatePilotPassCode, redeemPilotPassInTransaction } from "../lib/pilotPassService";
+import {
+  getEmployeeOnboardingProfile,
+  completeEmployeeProfile,
+} from "../lib/employeeProfileService";
 import { db } from "@workspace/db";
 
 const router = Router();
@@ -254,6 +258,71 @@ router.post("/redeem-pilot-pass", async (req, res): Promise<void> => {
   } catch (err: any) {
     if (!sendHttpError(res, err)) {
       res.status(400).json({ error: err.message || "Failed to redeem pilot pass" });
+    }
+  }
+});
+
+// GET /api/onboarding/employee-profile — Fetch onboarding profile state and company options
+router.get("/employee-profile", async (req, res): Promise<void> => {
+  try {
+    const { userId, email } = extractAuthUser(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    const profile = await getEmployeeOnboardingProfile(userId, email);
+    res.json(profile);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(500).json({ error: err.message || "Failed to retrieve employee profile" });
+    }
+  }
+});
+
+// POST /api/onboarding/complete-profile — Autonomous employee profile completion
+router.post("/complete-profile", async (req, res): Promise<void> => {
+  try {
+    const { userId, email } = extractAuthUser(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    const { firstName, surname, departmentId, jobTitleId } = req.body;
+
+    if (!firstName || !firstName.trim()) {
+      res.status(400).json({ error: "First name is required" });
+      return;
+    }
+    if (!surname || !surname.trim()) {
+      res.status(400).json({ error: "Surname is required" });
+      return;
+    }
+    if (!departmentId || isNaN(Number(departmentId))) {
+      res.status(400).json({ error: "Please select a valid department" });
+      return;
+    }
+    if (!jobTitleId || isNaN(Number(jobTitleId))) {
+      res.status(400).json({ error: "Please select a valid job title" });
+      return;
+    }
+
+    const result = await completeEmployeeProfile(
+      userId,
+      {
+        firstName: firstName.trim(),
+        surname: surname.trim(),
+        departmentId: Number(departmentId),
+        jobTitleId: Number(jobTitleId),
+      },
+      email
+    );
+
+    res.json(result);
+  } catch (err: any) {
+    if (!sendHttpError(res, err)) {
+      res.status(400).json({ error: err.message || "Failed to complete profile" });
     }
   }
 });

@@ -15,7 +15,7 @@ import {
   CreateCourseBody,
   UpdateCourseBody,
 } from "@workspace/api-zod";
-import { getCompanyAccess, CompanyAccess } from "../lib/access";
+import { getCompanyAccess, requireCompletedProfile, sendHttpError, HttpError, CompanyAccess } from "../lib/access";
 import { checkCourseEligibility } from "../lib/prerequisites";
 import { getRecommendedNextCourse } from "../lib/recommendationService";
 import { evaluateCourseAccess } from "../lib/courseAccessService";
@@ -281,12 +281,16 @@ router.get("/:id", async (req, res): Promise<void> => {
   let accessContext: CompanyAccess | null = null;
   let bypassFilter = false;
   try {
-    const access = await getCompanyAccess(req);
+    const access = await requireCompletedProfile(req);
     accessContext = access;
     if (access && access.role === "platform_admin") {
       bypassFilter = true;
     }
-  } catch (e) {
+  } catch (err: any) {
+    if (err instanceof HttpError && err.status === 403) {
+      sendHttpError(res, err);
+      return;
+    }
     // Guest access
   }
 

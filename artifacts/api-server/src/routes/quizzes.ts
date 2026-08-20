@@ -13,7 +13,7 @@ import {
 import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { SubmitQuizBody } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
-import { getCompanyAccess, sendHttpError } from "../lib/access";
+import { getCompanyAccess, requireCompletedProfile, sendHttpError, HttpError } from "../lib/access";
 import { syncEmployeeLearningStats } from "../lib/lmsData";
 import { awardCourseBadge, evaluateCourseMilestones } from "../lib/achievementsService";
 
@@ -39,9 +39,14 @@ router.get("/:courseId/quiz", async (req, res): Promise<void> => {
 
   let accessContext = null;
   try {
-    accessContext = await getCompanyAccess(req);
-  } catch (e) {
-    // Ignore auth errors for guest/learner accesses
+    const { requireCompletedProfile } = await import("../lib/access");
+    accessContext = await requireCompletedProfile(req);
+  } catch (err: any) {
+    if (err instanceof HttpError && err.status === 403) {
+      sendHttpError(res, err);
+      return;
+    }
+    // Ignore auth errors for guest accesses
   }
 
   const isPlatformAdmin = accessContext?.role === "platform_admin";
@@ -101,7 +106,7 @@ router.post("/:courseId/quiz/submit", async (req, res): Promise<void> => {
       return;
     }
 
-    const access = await getCompanyAccess(req);
+    const access = await requireCompletedProfile(req);
     const isPlatformAdmin = access.role === "platform_admin";
 
     const enrollmentClauses = [eq(enrollmentsTable.userId, access.userId)];

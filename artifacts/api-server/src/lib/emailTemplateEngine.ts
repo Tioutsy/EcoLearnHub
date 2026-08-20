@@ -47,16 +47,40 @@ export function renderEmailTemplate(
 
   switch (type) {
     case "invitation":
-    case "invitation_reminder":
-      subject = `Invitation: Activate Your ${companyName} Sustainability Account`;
-      ctaText = "Activate Account";
+    case "invitation_reminder": {
+      subject = `Invitation: Activate Your ${companyName} Sustainability Learning Account`;
+      ctaText = "Accept Invitation & Join";
+      const accessCode = escapeHtml(data.accessCode || "");
+      const expiryFormatted = data.expiresAt
+        ? new Date(data.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+        : "7 days from receipt";
+
       bodyContentHtml = `
-        <p>Hello ${recipientName},</p>
-        <p>You have been invited to join the corporate sustainability learning workspace for <strong>${companyName}</strong>.</p>
-        <p>Elevio provides short, practical workplace learning that helps employees learn, apply and improve.</p>
+        <p>Hello <strong>${recipientName}</strong>,</p>
+        <p>Your organisation, <strong>${companyName}</strong>, has invited you to join its corporate sustainability learning workspace on <strong>ELEVIO Skills</strong>.</p>
+        <p>ELEVIO delivers practical, accredited workplace modules designed to help your team understand ESG priorities, build sustainable workplace habits, and achieve real impact.</p>
+        
+        ${accessCode ? `
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 20px 0; text-align: center;">
+          <p style="margin: 0 0 6px 0; font-size: 13px; color: #166534; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Your Single-Use Access Code</p>
+          <p style="margin: 0; font-family: monospace; font-size: 22px; font-weight: 700; color: #047857; letter-spacing: 2px;">${accessCode}</p>
+          <p style="margin: 6px 0 0 0; font-size: 12px; color: #15803d;">Valid until: <strong>${expiryFormatted}</strong></p>
+        </div>
+        ` : ""}
+
+        <div style="background: #f8fafc; border-left: 4px solid #0f766e; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #475569;">
+          <p style="margin: 0 0 4px 0;"><strong>Important Security Notes:</strong></p>
+          <ul style="margin: 0; padding-left: 18px;">
+            <li>Please ensure you authenticate using the exact email address where you received this message.</li>
+            <li>This invitation and access code are individual, single-use, and must not be shared.</li>
+          </ul>
+        </div>
+        <p style="font-size: 13px; color: #64748b;">If you need assistance activating your account, please reach out to your company administrator or contact <a href="mailto:support@elevio.mu" style="color: #0f766e;">support@elevio.mu</a>.</p>
       `;
-      bodyContentText = `Hello ${recipientName},\n\nYou have been invited to join the corporate sustainability learning workspace for ${companyName}.\n\nActivate your account at: ${actionUrl}`;
+
+      bodyContentText = `Hello ${recipientName},\n\nYour organisation, ${companyName}, has invited you to join its corporate sustainability learning space on ELEVIO Skills.\n\n${accessCode ? `Access Code: ${accessCode}\nValid until: ${expiryFormatted}\n\n` : ""}Direct activation link: ${actionUrl}\n\nImportant: Please sign in with the exact email address where you received this message. This invitation is personal and must not be shared.\n\nNeed help? Contact support@elevio.mu`;
       break;
+    }
 
     case "invitation_expiry":
       subject = `Action Required: Invitation to ${companyName} Workspace Expiring`;

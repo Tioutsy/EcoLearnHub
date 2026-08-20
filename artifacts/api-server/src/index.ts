@@ -48,6 +48,7 @@ import { ensureHybridSubscriptions } from "./lib/ensureHybridSubscriptions";
 import { syncSequences } from "./lib/syncSequences";
 import { ensureSchemaModifications } from "./lib/ensureSchemaModifications";
 import { verifyDatabaseIntegrity } from "./lib/verifyDatabaseIntegrity";
+import { startInvitationDispatchWorker } from "./lib/invitationDispatchWorker";
 
 const defaultPort = 8086;
 const rawPort = process.env["PORT"];
@@ -150,6 +151,9 @@ async function start(): Promise<void> {
     await ensureHybridSubscriptions();
     await ensureInsightsMigrated();
     logger.info("Database initialization and course seeding completed.");
+
+    // Start background email outbox dispatch worker loop
+    startInvitationDispatchWorker();
   } catch (err) {
     logger.error({ err }, "Error during background database seeding sequence");
   }

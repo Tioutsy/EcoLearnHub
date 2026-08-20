@@ -30,8 +30,16 @@ router.get("/:enrollmentId", async (req, res): Promise<void> => {
     return;
   }
 
-  const { getCompanyAccess } = await import("../lib/access");
-  const access = await getCompanyAccess(req);
+  let access;
+  try {
+    const { requireCompletedProfile } = await import("../lib/access");
+    access = await requireCompletedProfile(req);
+  } catch (err: any) {
+    const { sendHttpError } = await import("../lib/access");
+    if (sendHttpError(res, err)) return;
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
 
   const isOwner =
     enrollment.userId === access.userId ||
@@ -105,8 +113,16 @@ router.patch("/:enrollmentId", async (req, res): Promise<void> => {
     return;
   }
 
-  const { getCompanyAccess } = await import("../lib/access");
-  const access = await getCompanyAccess(req);
+  let access;
+  try {
+    const { requireCompletedProfile } = await import("../lib/access");
+    access = await requireCompletedProfile(req);
+  } catch (err: any) {
+    const { sendHttpError } = await import("../lib/access");
+    if (sendHttpError(res, err)) return;
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
 
   const isOwner =
     enr.userId === access.userId ||

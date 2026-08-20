@@ -17,10 +17,14 @@ export const employeeInvitationsTable = pgTable(
     companyId: integer("company_id")
       .notNull()
       .references(() => companiesTable.id, { onDelete: "cascade" }),
+    batchId: integer("batch_id"),
     email: text("email").notNull(),
     firstName: text("first_name"),
     lastName: text("last_name"),
     department: text("department"),
+    jobTitle: text("job_title"),
+    departmentId: integer("department_id"),
+    jobTitleId: integer("job_title_id"),
     intendedRole: text("intended_role").notNull().default("employee"),
     tokenHash: text("token_hash").notNull(),
     displayCodeHash: text("display_code_hash").notNull(),
@@ -35,6 +39,7 @@ export const employeeInvitationsTable = pgTable(
   },
   (table) => ({
     companyIdIdx: index("idx_employee_invitations_company_id").on(table.companyId),
+    batchIdIdx: index("idx_employee_invitations_batch_id").on(table.batchId),
     tokenHashUidx: uniqueIndex("uidx_employee_invitations_token_hash").on(table.tokenHash),
     displayCodeHashUidx: uniqueIndex("uidx_employee_invitations_display_code_hash").on(table.displayCodeHash),
     statusIdx: index("idx_employee_invitations_status").on(table.status),

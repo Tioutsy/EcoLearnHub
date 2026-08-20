@@ -48,18 +48,25 @@ import {
   Clock,
   UserCheck,
   UserX,
+  Upload,
+  FileDown,
+  FileUp,
+  Loader2,
+  X,
+  Building2,
 } from "lucide-react";
 import { SmartRecommendationDialog } from "@/components/SmartRecommendationDialog";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/react";
 import { hasCapability } from "@/lib/authHelpers";
 import { useLanguage } from "@/context/LanguageContext";
+import { customFetch } from "@workspace/api-client-react";
 
 const EMPTY_INVITE_FORM = {
   firstName: "",
@@ -112,6 +119,21 @@ export default function CompanyEmployees() {
   // Local state
   const [activeTab, setActiveTab] = useState<"members" | "invitations">("members");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [bulkUploadFile, setBulkUploadFile] = useState<File | null>(null);
+  const [bulkDragActive, setBulkDragActive] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{
+    batchId: number;
+    totalRows: number;
+    validRows: number;
+    skippedRows: number;
+    queuedCount: number;
+    status: string;
+    skippedReport: { rowNumber: number; email: string; reasonCode: string; explanation: string }[];
+  } | null>(null);
+  const [bulkErrorMessage, setBulkErrorMessage] = useState<string | null>(null);
+  const bulkFileInputRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState<ManagedEmployee | null>(null);
   const [recommendingEmployee, setRecommendingEmployee] = useState<ManagedEmployee | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
@@ -122,6 +144,22 @@ export default function CompanyEmployees() {
   const [createdInvite, setCreatedInvite] = useState<CompanyInvitation | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  const { data: activeDepartments = [] } = useQuery<{ id: number; name: string }[]>({
+    queryKey: ["company", "departments"],
+    queryFn: async () => {
+      const res = await customFetch("/api/company/departments");
+      return (res as any) || [];
+    },
+  });
+
+  const { data: activeJobTitles = [] } = useQuery<{ id: number; name: string }[]>({
+    queryKey: ["company", "job-titles"],
+    queryFn: async () => {
+      const res = await customFetch("/api/company/job-titles");
+      return (res as any) || [];
+    },
+  });
 
   const employees = (employeeData ?? []) as ManagedEmployee[];
 
@@ -268,10 +306,28 @@ export default function CompanyEmployees() {
             </div>
             {canManageEmployees && (
               <div className="flex flex-wrap gap-2">
+                <Link href="/company/settings/lists">
+                  <Button variant="outline">
+                    <Building2 className="mr-2 h-4 w-4" /> Company Lists
+                  </Button>
+                </Link>
                 <Button variant="outline" onClick={() => setAssignOpen(true)}>
                   <ClipboardList className="mr-2 h-4 w-4" /> Assign Training
                 </Button>
                 <Button
+                  variant="outline"
+                  id="bulk-invite-btn"
+                  onClick={() => {
+                    setBulkUploadFile(null);
+                    setBulkResult(null);
+                    setBulkErrorMessage(null);
+                    setIsBulkUploadOpen(true);
+                  }}
+                >
+                  <Upload className="mr-2 h-4 w-4" /> Bulk Invite (CSV)
+                </Button>
+                <Button
+                  id="invite-employee-btn"
                   onClick={() => setIsInviteOpen(true)}
                   disabled={seatUsage?.canInvite === false}
                   className="bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm"
@@ -680,6 +736,252 @@ export default function CompanyEmployees() {
           )}
         </div>
       </div>
+
+      {/* MODAL 0: Bulk CSV Invitation Upload Dialog */}
+      <Dialog open={isBulkUploadOpen} onOpenChange={(open) => {
+        if (!open) { setBulkUploadFile(null); setBulkResult(null); setBulkErrorMessage(null); }
+        setIsBulkUploadOpen(open);
+      }}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-emerald-600" />
+              Bulk Employee Invitation (CSV)
+            </DialogTitle>
+          </DialogHeader>
+
+          {!bulkResult ? (
+            <div className="space-y-4 py-2">
+              {(activeDepartments.length === 0 || activeJobTitles.length === 0) && (
+                <div className="flex items-start gap-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 p-3 text-amber-800 dark:text-amber-300 text-xs">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Company lists not yet configured</p>
+                    <p className="mt-0.5">
+                      Invited employees will select their department and job title autonomously. We recommend setting up your company lists first.
+                    </p>
+                    <div className="mt-1.5">
+                      <Link href="/company/settings/lists" className="underline font-semibold hover:text-amber-950 dark:hover:text-amber-100">
+                        Configure Departments & Job Titles →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Download Template */}
+              <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                <div className="text-sm">
+                  <p className="font-medium">Download the official CSV template</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Columns: first_name, surname, email</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  id="download-csv-template-btn"
+                  onClick={() => {
+                    const csv = "first_name,surname,email\n";
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "elevio-bulk-invitation-template.csv";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  <FileDown className="mr-1.5 h-4 w-4" /> Template
+                </Button>
+              </div>
+
+              {/* Drop Zone */}
+              <div
+                id="bulk-csv-dropzone"
+                className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-colors cursor-pointer
+                  ${bulkDragActive ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30" : "border-border hover:border-emerald-400 hover:bg-muted/40"}
+                `}
+                onDragOver={(e) => { e.preventDefault(); setBulkDragActive(true); }}
+                onDragLeave={() => setBulkDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setBulkDragActive(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && (file.name.endsWith(".csv") || file.type === "text/csv")) {
+                    setBulkUploadFile(file);
+                    setBulkErrorMessage(null);
+                  } else {
+                    setBulkErrorMessage("Please upload a .csv file.");
+                  }
+                }}
+                onClick={() => bulkFileInputRef.current?.click()}
+              >
+                <input
+                  ref={bulkFileInputRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) { setBulkUploadFile(file); setBulkErrorMessage(null); }
+                  }}
+                />
+                {bulkUploadFile ? (
+                  <div className="flex items-center gap-3">
+                    <FileUp className="h-8 w-8 text-emerald-600" />
+                    <div className="text-left">
+                      <p className="font-medium text-foreground text-sm">{bulkUploadFile.name}</p>
+                      <p className="text-xs text-muted-foreground">{(bulkUploadFile.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button
+                      className="ml-2 text-muted-foreground hover:text-destructive"
+                      onClick={(e) => { e.stopPropagation(); setBulkUploadFile(null); }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-8 w-8 text-muted-foreground mb-3" />
+                    <p className="text-sm font-medium text-foreground">Drop your CSV file here</p>
+                    <p className="text-xs text-muted-foreground mt-1">or click to browse — .csv files only</p>
+                  </>
+                )}
+              </div>
+
+              {bulkErrorMessage && (
+                <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-destructive text-xs">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{bulkErrorMessage}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Results View */
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Total Rows", value: bulkResult.totalRows, color: "text-foreground" },
+                  { label: "Invited", value: bulkResult.validRows, color: "text-emerald-600" },
+                  { label: "Skipped", value: bulkResult.skippedRows, color: bulkResult.skippedRows > 0 ? "text-amber-600" : "text-foreground" },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-lg border bg-muted/30 p-3 text-center">
+                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {bulkResult.validRows > 0 && (
+                <div className="flex items-start gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-3 text-emerald-800 dark:text-emerald-300 text-sm">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>{bulkResult.validRows}</strong> employees have been sent individual invitations. They will receive a separate email with their access code.
+                  </span>
+                </div>
+              )}
+
+              {bulkResult.skippedRows > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Skipped Rows ({bulkResult.skippedRows}):</p>
+                  <div className="max-h-40 overflow-y-auto rounded-lg border divide-y text-xs">
+                    {bulkResult.skippedReport.slice(0, 30).map((r, i) => (
+                      <div key={i} className="flex items-start gap-2 px-3 py-2">
+                        <span className="text-muted-foreground shrink-0 font-mono">Row {r.rowNumber}</span>
+                        <span className="text-foreground font-medium shrink-0">{r.email}</span>
+                        <span className="text-muted-foreground truncate">{r.explanation}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    id="download-error-report-btn"
+                    onClick={() => {
+                      const rows = bulkResult.skippedReport;
+                      const csv = "row_number,email,reason_code,explanation\n" + rows.map(
+                        r => [r.rowNumber, r.email, r.reasonCode, `"${r.explanation.replace(/"/g, '""')}"`].join(",")
+                      ).join("\n");
+                      const blob = new Blob([csv], { type: "text/csv" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `elevio-batch-${bulkResult.batchId}-skipped-report.csv`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileDown className="mr-1.5 h-4 w-4" /> Download Full Skipped Report
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            {bulkResult ? (
+              <>
+                <Button variant="outline" onClick={() => {
+                  setBulkResult(null);
+                  setBulkUploadFile(null);
+                  setBulkErrorMessage(null);
+                }}>
+                  Upload Another File
+                </Button>
+                <Button onClick={() => {
+                  setIsBulkUploadOpen(false);
+                  setBulkResult(null);
+                  setBulkUploadFile(null);
+                  invalidateAll();
+                }} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+                  Done
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setIsBulkUploadOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  id="process-bulk-upload-btn"
+                  disabled={!bulkUploadFile || bulkUploading}
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white"
+                  onClick={async () => {
+                    if (!bulkUploadFile) return;
+                    setBulkUploading(true);
+                    setBulkErrorMessage(null);
+                    try {
+                      const text = await bulkUploadFile.text();
+                      const result = await customFetch<typeof bulkResult>("/api/company/bulk-invitations/upload", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ csvContent: text, fileName: bulkUploadFile.name }),
+                      });
+                      setBulkResult(result);
+                      invalidateAll();
+                    } catch (err: any) {
+                      let msg = err?.message || "Upload failed. Please check your file and try again.";
+                      try {
+                        const parsed = JSON.parse(msg);
+                        if (parsed.message) msg = parsed.message;
+                      } catch {}
+                      setBulkErrorMessage(msg);
+                    } finally {
+                      setBulkUploading(false);
+                    }
+                  }}
+                >
+                  {bulkUploading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing…</>
+                  ) : (
+                    <><Upload className="h-4 w-4 mr-2" /> Upload & Send Invitations</>
+                  )}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* MODAL 1: Invite Employee Dialog */}
       <InviteEmployeeDialog

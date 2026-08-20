@@ -3,14 +3,14 @@ import { db } from "@workspace/db";
 import { enrollmentsTable, coursesTable, lessonsTable, courseAssignmentsTable } from "@workspace/db";
 import { eq, and, or, inArray, sql } from "drizzle-orm";
 import { CreateEnrollmentBody } from "@workspace/api-zod";
-import { getCompanyAccess, sendHttpError } from "../lib/access";
+import { getCompanyAccess, requireCompletedProfile, sendHttpError } from "../lib/access";
 import { getAssignmentStatus } from "../lib/lms";
 
 const router = Router();
 
 router.get("/", async (req, res): Promise<void> => {
   try {
-    const access = await getCompanyAccess(req);
+    const access = await requireCompletedProfile(req);
     const clauses = [eq(enrollmentsTable.userId, access.userId)];
 
     if (access.email) {
@@ -61,8 +61,8 @@ router.get("/", async (req, res): Promise<void> => {
               });
           }
         }
-      } catch (syncErr) {
-        req.log?.warn({ err: syncErr }, "Non-fatal: Failed to sync course_assignments to enrollments");
+      } catch (err) {
+        // Non-blocking sync
       }
     }
 
@@ -85,25 +85,25 @@ router.get("/", async (req, res): Promise<void> => {
       .from(enrollmentsTable)
       .leftJoin(coursesTable, eq(enrollmentsTable.courseId, coursesTable.id))
       .where(or(...clauses))
-      .orderBy(enrollmentsTable.dueDate, enrollmentsTable.createdAt);
+      .orderBy(sql`${enrollmentsTable.createdAt} DESC`);
 
     res.json(
-      enrollments.map((enrollment) => ({
-        ...enrollment,
-        assignmentStatus: getAssignmentStatus(enrollment),
-      })),
+      enrollments.map((e) => ({
+        ...e,
+        assignmentStatus: getAssignmentStatus(e),
+      }))
     );
   } catch (err) {
     if (!sendHttpError(res, err)) {
-      req.log?.error({ err }, "Failed to list enrollments");
-      res.status(500).json({ error: "Failed to list enrollments" });
+      req.log?.error({ err }, "Failed to get enrollments");
+      res.status(500).json({ error: "Failed to get enrollments" });
     }
   }
 });
 
 router.post("/", async (req, res): Promise<void> => {
   try {
-    const access = await getCompanyAccess(req);
+    const access = await requireCompletedProfile(req);
     const parsed = CreateEnrollmentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: parsed.error.message });
@@ -236,7 +236,7 @@ router.post("/", async (req, res): Promise<void> => {
 
 router.get("/:id", async (req, res): Promise<void> => {
   try {
-    const access = await getCompanyAccess(req);
+    const access = await requireCompletedProfile(req);
     const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const id = parseInt(raw, 10);
     if (isNaN(id)) {
