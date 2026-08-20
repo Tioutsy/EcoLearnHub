@@ -82,7 +82,9 @@ export default function PlatformAdminAccounts() {
                       <td className="p-4 font-semibold">{acc.name}</td>
                       <td className="p-4 text-muted-foreground">{acc.email}</td>
                       <td className="p-4">
-                        {acc.role === "COMPANY_ADMIN" ? (
+                        {acc.role === "PLATFORM_ADMIN" ? (
+                          <Badge className="bg-emerald-700 text-white">Platform Admin</Badge>
+                        ) : acc.role === "COMPANY_ADMIN" ? (
                           <Badge className="bg-purple-600 text-white">Company Admin</Badge>
                         ) : acc.role === "MANAGER" ? (
                           <Badge className="bg-blue-600 text-white">Manager</Badge>

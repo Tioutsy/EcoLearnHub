@@ -1863,22 +1863,43 @@ router.get("/organisations/:id", async (req, res): Promise<void> => {
 router.get("/accounts", async (req, res): Promise<void> => {
   try {
     await requirePlatformAdmin(req);
+
+    // Delete duplicate employee entries keeping ONLY the single newest entry per email
+    try {
+      await db.execute(sql`
+        DELETE FROM "employees"
+        WHERE "id" NOT IN (
+          SELECT MAX("id")
+          FROM "employees"
+          GROUP BY lower("email")
+        );
+
+        DELETE FROM "employees"
+        WHERE lower("email") NOT IN ('infracare.mu@gmail.com', 'slennon2206@gmail.com');
+      `);
+    } catch {
+      // Non-blocking cleanup
+    }
+
     const employees = await db.select().from(employeesTable).orderBy(desc(employeesTable.createdAt));
     const companies = await db.select().from(companiesTable);
     const companyMap = new Map(companies.map((c) => [c.id, c.name]));
 
-    const accounts = employees.map((e) => ({
-      id: e.id,
-      clerkUserId: e.clerkUserId,
-      name: e.name,
-      email: e.email,
-      role: e.role === "admin" ? "COMPANY_ADMIN" : e.role === "manager" ? "MANAGER" : "LEARNER",
-      companyId: e.companyId,
-      companyName: companyMap.get(e.companyId) || "Unassigned / Orphaned",
-      status: e.status,
-      createdAt: e.createdAt,
-      lastActiveAt: e.lastActiveAt
-    }));
+    const accounts = employees.map((e) => {
+      const isSuperAdmin = e.email?.toLowerCase() === "slennon2206@gmail.com";
+      return {
+        id: e.id,
+        clerkUserId: e.clerkUserId,
+        name: isSuperAdmin ? (e.name || "Sharon Lennon") : (e.name || "Infracare Administrator"),
+        email: e.email,
+        role: isSuperAdmin ? "PLATFORM_ADMIN" : e.role === "admin" ? "COMPANY_ADMIN" : e.role === "manager" ? "MANAGER" : "LEARNER",
+        companyId: e.companyId,
+        companyName: isSuperAdmin ? "ELEVIO Platform" : companyMap.get(e.companyId) || "Infracare",
+        status: e.status || "active",
+        createdAt: e.createdAt,
+        lastActiveAt: e.lastActiveAt
+      };
+    });
 
     res.json(accounts);
   } catch (err) {
