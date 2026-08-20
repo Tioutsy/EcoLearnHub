@@ -7,11 +7,13 @@ import {
   planFeatureEntitlementsTable,
   companySubscriptionsTable,
   companiesTable,
+  employeesTable,
   coursesTable,
   categoriesTable,
 } from "@workspace/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 import { logger } from "./logger";
+import { ensureDefaultCompanyLists } from "./companyListService";
 
 export const PLANS_CONFIG = [
   {
@@ -336,48 +338,100 @@ export async function ensureHybridSubscriptions(): Promise<void> {
       }
     }
 
-    // 7. Special Test/Platform Evaluation Exemption: Ensure Infracare has free active Complete subscription
-    for (const comp of companies) {
-      const isInfraCare = comp.name?.toLowerCase().includes("infracare") || comp.slug?.toLowerCase().includes("infracare");
-      if (isInfraCare) {
-        const topBandId = bandIdMap.get("OVER_120") || bandIdMap.get("UP_TO_25")!;
-        const existingSub = await db
-          .select()
-          .from(companySubscriptionsTable)
-          .where(eq(companySubscriptionsTable.companyId, comp.id))
-          .limit(1)
-          .then(r => r[0]);
+    // 7. Special Test/Platform Evaluation Exemption: Ensure Infracare company exists and has free active Complete subscription
+    let infracareCompany = companies.find(
+      (comp) =>
+        comp.name?.toLowerCase().includes("infracare") ||
+        comp.slug?.toLowerCase().includes("infracare")
+    );
 
-        if (existingSub) {
-          await db
-            .update(companySubscriptionsTable)
-            .set({
-              subscriptionPlanId: completePlanId,
-              employeeBandId: topBandId,
-              status: "ACTIVE",
-              currency: "MUR",
-              agreedMonthlyAmount: "0.00",
-              agreedYearlyAmount: "0.00",
-              pricingSource: "TEST_EXEMPTION",
-            })
-            .where(eq(companySubscriptionsTable.id, existingSub.id));
-        } else {
-          await db
-            .insert(companySubscriptionsTable)
-            .values({
-              companyId: comp.id,
-              subscriptionPlanId: completePlanId,
-              employeeBandId: topBandId,
-              status: "ACTIVE",
-              currency: "MUR",
-              agreedMonthlyAmount: "0.00",
-              agreedYearlyAmount: "0.00",
-              pricingSource: "TEST_EXEMPTION",
-            })
-            .onConflictDoNothing({ target: companySubscriptionsTable.companyId });
-        }
-        logger.info({ companyId: comp.id, name: comp.name }, "Configured complimentary test exemption for Infracare (COMPLETE plan, Free of Charge, ACTIVE)");
+    if (!infracareCompany) {
+      const [newInfracare] = await db
+        .insert(companiesTable)
+        .values({
+          name: "Infracare",
+          slug: "infracare",
+          industry: "Facilities & Infrastructure",
+          maxEmployees: 250,
+        })
+        .returning();
+      infracareCompany = newInfracare;
+      logger.info({ companyId: newInfracare.id }, "Auto-provisioned Infracare company record in database");
+    }
+
+    if (infracareCompany) {
+      const topBandId = bandIdMap.get("OVER_120") || bandIdMap.get("UP_TO_25")!;
+      const existingSub = await db
+        .select()
+        .from(companySubscriptionsTable)
+        .where(eq(companySubscriptionsTable.companyId, infracareCompany.id))
+        .limit(1)
+        .then((r) => r[0]);
+
+      if (existingSub) {
+        await db
+          .update(companySubscriptionsTable)
+          .set({
+            subscriptionPlanId: completePlanId,
+            employeeBandId: topBandId,
+            status: "ACTIVE",
+            currency: "MUR",
+            agreedMonthlyAmount: "0.00",
+            agreedYearlyAmount: "0.00",
+            pricingSource: "TEST_EXEMPTION",
+          })
+          .where(eq(companySubscriptionsTable.id, existingSub.id));
+      } else {
+        await db
+          .insert(companySubscriptionsTable)
+          .values({
+            companyId: infracareCompany.id,
+            subscriptionPlanId: completePlanId,
+            employeeBandId: topBandId,
+            status: "ACTIVE",
+            currency: "MUR",
+            agreedMonthlyAmount: "0.00",
+            agreedYearlyAmount: "0.00",
+            pricingSource: "TEST_EXEMPTION",
+          })
+          .onConflictDoNothing({ target: companySubscriptionsTable.companyId });
       }
+
+      // Ensure standard default company lists for Infracare
+      await ensureDefaultCompanyLists(infracareCompany.id);
+
+      // Check if infracare.mu@gmail.com exists as an employee, and link/promote to admin
+      const [existingEmp] = await db
+        .select()
+        .from(employeesTable)
+        .where(
+          and(
+            eq(employeesTable.companyId, infracareCompany.id),
+            sql`lower(${employeesTable.email}) = 'infracare.mu@gmail.com'`
+          )
+        )
+        .limit(1);
+
+      if (!existingEmp) {
+        await db
+          .insert(employeesTable)
+          .values({
+            companyId: infracareCompany.id,
+            name: "Infracare Administrator",
+            email: "infracare.mu@gmail.com",
+            role: "admin",
+            status: "active",
+            profileCompleted: true,
+          })
+          .onConflictDoNothing();
+      } else if (existingEmp.role !== "admin" || existingEmp.status !== "active") {
+        await db
+          .update(employeesTable)
+          .set({ role: "admin", status: "active", profileCompleted: true })
+          .where(eq(employeesTable.id, existingEmp.id));
+      }
+
+      logger.info({ companyId: infracareCompany.id, name: infracareCompany.name }, "Configured complimentary test exemption for Infracare (COMPLETE plan, Free of Charge, ACTIVE)");
     }
 
     logger.info("Successfully ensured hybrid subscription plans, bands, prices, entitlements, and company migrations.");
