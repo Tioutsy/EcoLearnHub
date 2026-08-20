@@ -207,26 +207,56 @@ export async function getCompanyAccess(req: Request): Promise<CompanyAccess> {
   const claimRole = getClaimRole(claims);
   const claimCompanyId = getClaimCompanyId(claims);
   let email = getClaimEmail(claims);
+  let clerkUser: any = null;
 
-  if (!email && userId) {
+  if (userId) {
     try {
       const { clerkClient } = await import("@clerk/express");
-      const clerkUser = await clerkClient.users.getUser(userId);
-      email =
-        clerkUser?.emailAddresses?.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
-        clerkUser?.emailAddresses?.[0]?.emailAddress ??
-        null;
+      clerkUser = await clerkClient.users.getUser(userId);
+      if (!email && clerkUser) {
+        email =
+          clerkUser.emailAddresses?.find((e: any) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+          clerkUser.emailAddresses?.[0]?.emailAddress ??
+          null;
+      }
     } catch {
       // ignore non-fatal Clerk fetch error
     }
   }
 
+  const allUserEmails: string[] = [];
+  if (email) allUserEmails.push(email.toLowerCase());
+  if (clerkUser?.emailAddresses) {
+    for (const e of clerkUser.emailAddresses) {
+      if (e.emailAddress) allUserEmails.push(e.emailAddress.toLowerCase());
+    }
+  }
+
+  const bootstrapEnv = process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com";
+  const superAdminEmails = [
+    "slennon2206@gmail.com",
+    ...bootstrapEnv.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
+  ];
+
+  const isBootstrapMatch = allUserEmails.some((e) => superAdminEmails.includes(e));
+  const isPlatformAdmin =
+    isPlatformRole(claimRole) ||
+    isPlatformRole(clerkUser?.publicMetadata?.role as string | null) ||
+    isPlatformRole(clerkUser?.unsafeMetadata?.role as string | null) ||
+    isBootstrapMatch;
+
   const primaryCompany = await getPrimaryCompany();
 
-  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
-  const isPlatformAdmin = isPlatformRole(claimRole) || Boolean(email && email.toLowerCase() === bootstrapEmail);
-
   if (isPlatformAdmin) {
+    // If recognized as bootstrap super admin, ensure Clerk metadata has role set
+    if (userId && clerkUser && clerkUser.publicMetadata?.role !== "platform_admin") {
+      import("@clerk/express").then(({ clerkClient }) => {
+        clerkClient.users.updateUserMetadata(userId, {
+          publicMetadata: { role: "platform_admin" }
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+
     const companyId = claimCompanyId ?? primaryCompany?.id ?? 0;
     const employee = await findEmployeeForUser(userId, email);
     return {
@@ -320,29 +350,59 @@ export async function requirePlatformAdmin(req: Request): Promise<CompanyAccess>
   const claims = auth.sessionClaims ?? {};
   const claimRole = getClaimRole(claims);
   let email = getClaimEmail(claims);
-
-  if (!email && userId) {
-    try {
-      const { clerkClient } = await import("@clerk/express");
-      const clerkUser = await clerkClient.users.getUser(userId);
-      email =
-        clerkUser?.emailAddresses?.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
-        clerkUser?.emailAddresses?.[0]?.emailAddress ??
-        null;
-    } catch {
-      // ignore
-    }
-  }
+  let clerkUser: any = null;
 
   if (!userId) {
     throw new HttpError(401, "Authentication required");
   }
 
-  const bootstrapEmail = (process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com").toLowerCase();
-  const isPlatformAdmin = isPlatformRole(claimRole) || Boolean(email && email.toLowerCase() === bootstrapEmail);
+  if (userId) {
+    try {
+      const { clerkClient } = await import("@clerk/express");
+      clerkUser = await clerkClient.users.getUser(userId);
+      if (!email && clerkUser) {
+        email =
+          clerkUser.emailAddresses?.find((e: any) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+          clerkUser.emailAddresses?.[0]?.emailAddress ??
+          null;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const allUserEmails: string[] = [];
+  if (email) allUserEmails.push(email.toLowerCase());
+  if (clerkUser?.emailAddresses) {
+    for (const e of clerkUser.emailAddresses) {
+      if (e.emailAddress) allUserEmails.push(e.emailAddress.toLowerCase());
+    }
+  }
+
+  const bootstrapEnv = process.env.PLATFORM_ADMIN_BOOTSTRAP_EMAIL ?? "slennon2206@gmail.com";
+  const superAdminEmails = [
+    "slennon2206@gmail.com",
+    ...bootstrapEnv.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
+  ];
+
+  const isBootstrapMatch = allUserEmails.some((e) => superAdminEmails.includes(e));
+  const isPlatformAdmin =
+    isPlatformRole(claimRole) ||
+    isPlatformRole(clerkUser?.publicMetadata?.role as string | null) ||
+    isPlatformRole(clerkUser?.unsafeMetadata?.role as string | null) ||
+    isBootstrapMatch;
 
   if (!isPlatformAdmin) {
     throw new HttpError(403, "Platform administrator access required");
+  }
+
+  // Ensure metadata is stamped on Clerk profile
+  if (userId && clerkUser && clerkUser.publicMetadata?.role !== "platform_admin") {
+    import("@clerk/express").then(({ clerkClient }) => {
+      clerkClient.users.updateUserMetadata(userId, {
+        publicMetadata: { role: "platform_admin" }
+      }).catch(() => {});
+    }).catch(() => {});
   }
 
   return {
