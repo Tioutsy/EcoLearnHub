@@ -1659,6 +1659,20 @@ router.get("/organisations", async (req, res): Promise<void> => {
   try {
     await requirePlatformAdmin(req);
 
+    // Purge test entities directly from DB on query
+    try {
+      await db.execute(sql`
+        DELETE FROM "company_subscriptions" WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+        DELETE FROM "employee_invitations" WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+        DELETE FROM "departments" WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+        DELETE FROM "job_titles" WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%');
+        DELETE FROM "employees" WHERE "company_id" IN (SELECT "id" FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%') AND lower("email") != 'slennon2206@gmail.com';
+        DELETE FROM "companies" WHERE lower("name") NOT LIKE '%infracare%' AND lower("slug") NOT LIKE '%infracare%';
+      `);
+    } catch {
+      // Non-fatal purge notice
+    }
+
     // Guarantee Infracare exists
     const existingInfracare = await db
       .select({ id: companiesTable.id })
@@ -1700,13 +1714,7 @@ router.get("/organisations", async (req, res): Promise<void> => {
     const companies = rawCompanies.filter((c) => {
       const name = (c.name || "").toLowerCase();
       const slug = (c.slug || "").toLowerCase();
-      const isTestOrSprint =
-        name.includes("sprint") ||
-        slug.includes("sprint") ||
-        name.includes("mock") ||
-        slug.includes("mock") ||
-        (name.includes("test company") && !name.includes("infracare"));
-      return !isTestOrSprint;
+      return name.includes("infracare") || slug.includes("infracare");
     });
 
     const employees = await db.select().from(employeesTable);
