@@ -117,7 +117,8 @@ export async function processInvitationQueueChunk(
     options.originBaseUrl ||
     process.env.PUBLIC_APP_URL ||
     process.env.APP_URL ||
-    "https://app.elevio.mu";
+    process.env.RENDER_EXTERNAL_URL ||
+    "https://ecolearnhub.com";
 
   // 1. Recover any stale claims first
   const recoveredStale = await recoverStaleSendingJobs();

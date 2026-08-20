@@ -325,7 +325,7 @@ export async function createEmployeeInvitation(
     process.env.APP_URL ||
     process.env.RENDER_EXTERNAL_URL ||
     originBaseUrl ||
-    "http://localhost:5173";
+    "https://ecolearnhub.com";
   const invitationLink = `${baseUrl}/join?token=${encodeURIComponent(rawToken)}`;
 
   // 4. Dispatch email delivery only after transaction commits successfully
@@ -438,7 +438,7 @@ export async function resendEmployeeInvitation(
     process.env.APP_URL ||
     process.env.RENDER_EXTERNAL_URL ||
     originBaseUrl ||
-    "http://localhost:5173";
+    "https://ecolearnhub.com";
   const invitationLink = `${baseUrl}/join?token=${encodeURIComponent(rawToken)}`;
 
   let emailSent = false;

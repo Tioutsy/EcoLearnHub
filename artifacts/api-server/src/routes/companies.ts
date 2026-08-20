@@ -481,7 +481,7 @@ router.post("/employee-invitations", async (req, res): Promise<void> => {
       process.env.RENDER_EXTERNAL_URL?.replace(/\/$/, "") ||
       (rawOrigin && !rawOrigin.includes("localhost") ? rawOrigin : null) ||
       rawOrigin ||
-      "http://localhost:5173";
+      "https://ecolearnhub.com";
 
     const result = await createEmployeeInvitation(
       access.companyId,
@@ -521,7 +521,7 @@ router.post("/employee-invitations/:id/resend", async (req, res): Promise<void> 
       process.env.RENDER_EXTERNAL_URL?.replace(/\/$/, "") ||
       (rawOrigin && !rawOrigin.includes("localhost") ? rawOrigin : null) ||
       rawOrigin ||
-      "http://localhost:5173";
+      "https://ecolearnhub.com";
 
     const result = await resendEmployeeInvitation(access.companyId, id, origin);
     res.json(result);

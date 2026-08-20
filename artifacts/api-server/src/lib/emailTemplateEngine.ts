@@ -38,7 +38,7 @@ export function renderEmailTemplate(
   const courseTitle = escapeHtml(data.courseTitle || "Sustainability Course");
   const courseCode = escapeHtml(data.courseCode || "");
   const dueDate = data.dueDate ? new Date(data.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
-  const actionUrl = escapeHtml(data.actionUrl || data.invitationLink || data.link || process.env.PUBLIC_APP_URL || process.env.RENDER_EXTERNAL_URL || "https://elearn-hub.onrender.com");
+  const actionUrl = escapeHtml(data.actionUrl || data.invitationLink || data.link || process.env.PUBLIC_APP_URL || process.env.RENDER_EXTERNAL_URL || "https://ecolearnhub.com");
 
   let subject = "Elevio Notification";
   let bodyContentHtml = "";
