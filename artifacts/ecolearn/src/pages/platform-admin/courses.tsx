@@ -933,39 +933,39 @@ export default function PlatformAdminCourses() {
               </Button>
             </div>
           ) : (
-            <div className="border rounded-lg overflow-x-auto bg-card shadow-sm">
-              <Table>
-                <TableHeader>
+            <div className="border rounded-xl bg-card shadow-xs overflow-hidden">
+              <Table className="w-full">
+                <TableHeader className="bg-slate-50/75 border-b">
                   <TableRow>
-                    <TableHead>Course Title</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Level</TableHead>
-                    <TableHead>Version</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="py-3 px-4 text-xs font-semibold text-slate-700">Course</TableHead>
+                    <TableHead className="py-3 px-3 text-xs font-semibold text-slate-700 w-36">Level</TableHead>
+                    <TableHead className="py-3 px-3 text-xs font-semibold text-slate-700 w-28">Status</TableHead>
+                    <TableHead className="py-3 px-4 text-right text-xs font-semibold text-slate-700 w-56">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredCourses.map((course: any) => (
-                    <TableRow key={course.id} className="hover:bg-slate-50/80 transition-colors">
-                      <TableCell className="font-semibold">
-                        <div className="flex items-center gap-2">
-                          <span>{course.title}</span>
-                          {course.courseCode && (
-                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono text-muted-foreground">
-                              {course.courseCode}
-                            </Badge>
-                          )}
+                    <TableRow key={course.id} className="hover:bg-slate-50/80 transition-colors border-b last:border-0">
+                      <TableCell className="py-3 px-4">
+                        <div className="space-y-1">
+                          <div className="font-semibold text-slate-900 text-sm flex flex-wrap items-center gap-1.5">
+                            <span>{course.title}</span>
+                            {course.courseCode && (
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono text-muted-foreground bg-slate-50">
+                                {course.courseCode}
+                              </Badge>
+                            )}
+                            <span className="text-[11px] text-muted-foreground font-normal">v{course.version || 1}</span>
+                          </div>
+                          <p className="text-xs font-mono text-slate-500 truncate max-w-md">{course.slug}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">{course.slug}</TableCell>
-                      <TableCell className="text-xs">
-                        <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">
+                      <TableCell className="py-3 px-3 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
                           {course.level || "General"}
                         </span>
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">v{course.version || 1}</TableCell>
-                      <TableCell>
+                      <TableCell className="py-3 px-3 whitespace-nowrap">
                         <Badge
                           variant={
                             course.status === "published"
@@ -976,25 +976,25 @@ export default function PlatformAdminCourses() {
                           }
                           className={
                             course.status === "published"
-                              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                              ? "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10px] tracking-wide"
                               : course.status === "review"
-                              ? "border-amber-400 text-amber-600 bg-amber-50"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
+                              ? "border-amber-400 text-amber-600 bg-amber-50 font-semibold text-[10px]"
+                              : "bg-blue-50 text-blue-700 border-blue-200 font-semibold text-[10px]"
                           }
                         >
                           {course.status ? course.status.toUpperCase() : "DRAFT"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="py-3 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Preview Link */}
                           <Link href={`/platform-admin/preview/${course.id}`}>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 px-2.5 flex items-center gap-1 text-slate-600 hover:text-slate-900"
+                              className="h-8 px-2.5 text-xs text-slate-600 hover:text-slate-900 shadow-none"
                             >
-                              <Eye className="h-3.5 w-3.5" /> Preview
+                              <Eye className="h-3.5 w-3.5 mr-1" /> Preview
                             </Button>
                           </Link>
 
@@ -1003,9 +1003,9 @@ export default function PlatformAdminCourses() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditClick(course)}
-                            className="h-8 px-2.5 flex items-center gap-1 text-primary hover:text-primary-hover border-primary/20 hover:bg-primary/5"
+                            className="h-8 px-2.5 text-xs text-primary hover:text-primary-hover border-primary/20 hover:bg-primary/5 shadow-none"
                           >
-                            <Edit className="h-3.5 w-3.5" /> Manage
+                            <Edit className="h-3.5 w-3.5 mr-1" /> Manage
                           </Button>
 
                           {/* Quick Publish / Unpublish Toggle */}
@@ -1015,7 +1015,7 @@ export default function PlatformAdminCourses() {
                               size="sm"
                               onClick={() => handleTogglePublishStatus(course, "draft")}
                               title="Unpublish course and return to Draft"
-                              className="h-8 px-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                              className="h-8 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50"
                             >
                               <EyeOff className="h-3.5 w-3.5 mr-1" /> Unpublish
                             </Button>
@@ -1025,7 +1025,7 @@ export default function PlatformAdminCourses() {
                               size="sm"
                               onClick={() => handleTogglePublishStatus(course, "published")}
                               title="Publish course live to learners"
-                              className="h-8 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                              className="h-8 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                             >
                               <Globe className="h-3.5 w-3.5 mr-1" /> Publish
                             </Button>
@@ -1037,9 +1037,9 @@ export default function PlatformAdminCourses() {
                             size="sm"
                             onClick={() => setCourseToDelete(course)}
                             title="Permanently delete course"
-                            className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -1225,15 +1225,14 @@ export default function PlatformAdminCourses() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <h3 className="text-xl font-bold font-serif">Edit Content Blocks</h3>
-                <p className="text-xs text-muted-foreground">
-                  Lesson: <span className="font-semibold text-primary">{selectedLessonForBlocks.title}</span>
-                </p>
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Lesson Block Editor</span>
+                <h2 className="text-xl font-bold font-serif">{selectedLessonForBlocks.title}</h2>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Button
+                type="button"
                 variant={isPreviewMode ? "default" : "outline"}
                 size="sm"
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
@@ -1298,60 +1297,82 @@ export default function PlatformAdminCourses() {
                             {block.imageUrl ? (
                               <img src={block.imageUrl} alt={block.imageAlt} className="h-full w-full object-cover" />
                             ) : (
-                              <span className="text-xs text-muted-foreground">No image URL specified</span>
+                              <span className="text-xs text-muted-foreground">Image Placeholder</span>
                             )}
                           </div>
-                          {block.imageAlt && <p className="text-center text-xs text-muted-foreground">{block.imageAlt}</p>}
                         </div>
                       );
                     case "expandable":
                       return (
-                        <details key={block.id} className="bg-white border rounded-lg p-3 group cursor-pointer">
-                          <summary className="text-sm font-semibold flex justify-between items-center select-none text-slate-700">
-                            {block.expandableTitle || "Click to expand details"}
-                          </summary>
-                          <p className="text-xs text-slate-600 mt-2 leading-relaxed pt-2 border-t">{block.expandableContent}</p>
-                        </details>
+                        <div key={block.id} className="border border-slate-300 rounded-lg p-4 bg-white">
+                          <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <Plus className="h-4 w-4 text-primary" /> {block.expandableTitle || "Click to learn more"}
+                          </p>
+                          <p className="text-xs text-slate-600 mt-2 pl-6">{block.expandableContent || "Detailed content..."}</p>
+                        </div>
+                      );
+                    case "multiple_choice":
+                      return (
+                        <div key={block.id} className="border-2 border-indigo-100 bg-indigo-50/20 rounded-xl p-5 space-y-3">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-indigo-700">Practice Check</span>
+                          <h4 className="font-semibold text-slate-800 text-sm">{block.mcqQuestion || "Quiz question?"}</h4>
+                          <div className="space-y-1.5">
+                            {block.mcqOptions?.map((opt, oIdx) => (
+                              <div key={oIdx} className={`text-xs p-2.5 rounded-lg border flex items-center justify-between ${oIdx === block.mcqCorrectIndex ? "border-emerald-300 bg-emerald-50/60 font-medium" : "border-slate-200 bg-white"}`}>
+                                <span>{opt}</span>
+                                {oIdx === block.mcqCorrectIndex && <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />}
+                              </div>
+                            ))}
+                          </div>
+                          {block.mcqCorrectExplanation && (
+                            <p className="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200">
+                              <span className="font-semibold">Explanation:</span> {block.mcqCorrectExplanation}
+                            </p>
+                          )}
+                        </div>
                       );
                     case "decision_scenario":
                       return (
-                        <div key={block.id} className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 space-y-4">
-                          <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-600 block">Interactive Scenario</span>
-                          <p className="text-sm text-indigo-950 font-medium">{block.decisionIntro}</p>
-                          <p className="text-xs text-indigo-900">{block.decisionPrompt}</p>
-                          <div className="space-y-2">
+                        <div key={block.id} className="border-2 border-emerald-200 bg-emerald-50/10 rounded-xl p-5 space-y-3">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-800">Decision Scenario</span>
+                          <p className="text-xs text-muted-foreground">{block.decisionIntro || "Scenario context..."}</p>
+                          <h4 className="font-semibold text-slate-800 text-sm">{block.decisionPrompt || "What action will you take?"}</h4>
+                          <div className="space-y-2 mt-2">
                             {block.decisionChoices?.map((choice, cIdx) => (
-                              <Button key={cIdx} variant="outline" size="sm" className="w-full justify-start text-left text-xs p-3 h-auto whitespace-normal">
-                                {choice.label}
-                              </Button>
+                              <div key={cIdx} className={`p-3 rounded-lg border text-xs space-y-1 ${choice.correct ? "border-emerald-300 bg-emerald-50/50" : "border-slate-200 bg-white"}`}>
+                                <div className="font-medium flex items-center justify-between">
+                                  <span>{choice.label}</span>
+                                  {choice.correct ? <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-semibold">Recommended</span> : <span className="text-[10px] text-muted-foreground">Alternative</span>}
+                                </div>
+                                <p className="text-[11px] text-muted-foreground">{choice.feedback}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    case "commitment":
+                      return (
+                        <div key={block.id} className="border-2 border-teal-200 bg-teal-50/20 rounded-xl p-5 space-y-3">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-teal-800">Action Commitment</span>
+                          <p className="text-xs text-slate-700">{block.commitmentInstruction || "Select your personal commitment:"}</p>
+                          <div className="space-y-1.5">
+                            {block.commitmentOptions?.map((opt, kIdx) => (
+                              <div key={kIdx} className="p-2.5 rounded-lg border border-teal-200 bg-white text-xs flex items-center gap-2">
+                                <Award className="h-4 w-4 text-teal-600 shrink-0" />
+                                <div>
+                                  <span className="font-semibold text-slate-800">{opt.label}</span>
+                                  <p className="text-[10px] text-muted-foreground">{opt.description}</p>
+                                </div>
+                              </div>
                             ))}
                           </div>
                         </div>
                       );
                     case "reflection":
                       return (
-                        <div key={block.id} className="bg-rose-50 border border-rose-100 rounded-lg p-4 space-y-2">
-                          <Label className="text-xs font-semibold text-rose-800">Your Reflection Response</Label>
-                          <p className="text-xs text-rose-900 mb-2">{block.bodyText || "Reflect on this concept..."}</p>
-                          <Input size={30} className="bg-white text-xs" placeholder="Type reflection here..." disabled />
-                        </div>
-                      );
-                    case "commitment":
-                      return (
-                        <div key={block.id} className="bg-emerald-50/50 border border-emerald-100 rounded-lg p-5 space-y-3">
-                          <Label className="text-xs font-bold text-emerald-800 block mb-1">Make a Commitment</Label>
-                          <p className="text-xs text-emerald-900 font-medium">{block.commitmentInstruction}</p>
-                          <div className="space-y-2 pt-1">
-                            {block.commitmentOptions?.map((opt, oIdx) => (
-                              <div key={oIdx} className="flex items-start gap-2 bg-white p-3 border rounded-md shadow-xs">
-                                <input type="checkbox" className="mt-0.5" disabled />
-                                <div>
-                                  <p className="text-xs font-semibold text-slate-800">{opt.label}</p>
-                                  <p className="text-[10px] text-slate-500">{opt.description}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                        <div key={block.id} className="border border-rose-200 bg-rose-50/20 rounded-xl p-5 space-y-2">
+                          <span className="text-[10px] uppercase tracking-wider font-bold text-rose-700">Workplace Reflection</span>
+                          <p className="text-xs text-slate-700 leading-relaxed">{block.bodyText || "Reflect on how this applies in your organisation."}</p>
                         </div>
                       );
                     default:
@@ -1362,9 +1383,9 @@ export default function PlatformAdminCourses() {
             </div>
           ) : (
             // Edit Mode List
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
               {/* Blocks Canvas */}
-              <div className="lg:col-span-3 space-y-4">
+              <div className="xl:col-span-8 space-y-4">
                 {blocks.length === 0 ? (
                   <div className="border border-dashed rounded-xl p-12 text-center text-muted-foreground bg-card">
                     <BookOpen className="h-10 w-full mb-3 text-muted-foreground opacity-50" />
@@ -1419,22 +1440,22 @@ export default function PlatformAdminCourses() {
                         )}
 
                         {block.type === "image" && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-2">
                             <div>
                               <Label className="text-xs">Image URL</Label>
                               <Input
                                 value={block.imageUrl || ""}
                                 onChange={(e) => handleUpdateBlockField(index, "imageUrl", e.target.value)}
-                                placeholder="/images/lessons/photo.jpg"
+                                placeholder="https://..."
                                 className="mt-1 text-xs"
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Image Alt Label (SEO/A11y)</Label>
+                              <Label className="text-xs">Image Alt Text (Accessibility)</Label>
                               <Input
                                 value={block.imageAlt || ""}
                                 onChange={(e) => handleUpdateBlockField(index, "imageAlt", e.target.value)}
-                                placeholder="Describe the image content..."
+                                placeholder="Descriptive alt text..."
                                 className="mt-1 text-xs"
                               />
                             </div>
@@ -1444,16 +1465,16 @@ export default function PlatformAdminCourses() {
                         {block.type === "expandable" && (
                           <div className="space-y-2">
                             <div>
-                              <Label className="text-xs">Title (Always visible)</Label>
+                              <Label className="text-xs">Expandable Summary Title</Label>
                               <Input
                                 value={block.expandableTitle || ""}
                                 onChange={(e) => handleUpdateBlockField(index, "expandableTitle", e.target.value)}
-                                placeholder="Click to read more details..."
+                                placeholder="Click title text..."
                                 className="mt-1 text-xs"
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Expandable Content</Label>
+                              <Label className="text-xs">Hidden Content (Shown on click)</Label>
                               <Textarea
                                 value={block.expandableContent || ""}
                                 onChange={(e) => handleUpdateBlockField(index, "expandableContent", e.target.value)}
@@ -1538,54 +1559,64 @@ export default function PlatformAdminCourses() {
                               {block.decisionChoices?.map((choice, cIdx) => (
                                 <div key={cIdx} className="grid grid-cols-6 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
                                   <div className="col-span-3">
-                                    <Label className="text-[9px]">Label</Label>
+                                    <Label className="text-[10px]">Choice {cIdx + 1} Label</Label>
                                     <Input
                                       value={choice.label}
                                       onChange={(e) => {
-                                        const nextChoices = [...(block.decisionChoices || [])];
-                                        nextChoices[cIdx] = { ...choice, label: e.target.value };
-                                        handleUpdateBlockField(index, "decisionChoices", nextChoices);
+                                        const next = [...(block.decisionChoices || [])];
+                                        next[cIdx] = { ...choice, label: e.target.value };
+                                        handleUpdateBlockField(index, "decisionChoices", next);
                                       }}
-                                      className="text-xs h-7"
+                                      className="text-xs"
                                     />
                                   </div>
-                                  <div>
-                                    <Label className="text-[9px]">Correct</Label>
-                                    <select
-                                      value={String(choice.correct)}
-                                      onChange={(e) => {
-                                        const nextChoices = [...(block.decisionChoices || [])];
-                                        nextChoices[cIdx] = { ...choice, correct: e.target.value === "true" };
-                                        handleUpdateBlockField(index, "decisionChoices", nextChoices);
-                                      }}
-                                      className="flex h-7 w-full rounded-md border border-input bg-background px-2 py-0 text-xs shadow-xs"
-                                    >
-                                      <option value="true">Yes</option>
-                                      <option value="false">No</option>
-                                    </select>
+                                  <div className="col-span-1 flex items-center pt-4">
+                                    <label className="flex items-center gap-1 text-[11px]">
+                                      <input
+                                        type="checkbox"
+                                        checked={choice.correct}
+                                        onChange={(e) => {
+                                          const next = [...(block.decisionChoices || [])];
+                                          next[cIdx] = { ...choice, correct: e.target.checked };
+                                          handleUpdateBlockField(index, "decisionChoices", next);
+                                        }}
+                                      />
+                                      Correct
+                                    </label>
                                   </div>
                                   <div className="col-span-2">
-                                    <Label className="text-[9px]">Feedback</Label>
+                                    <Label className="text-[10px]">Feedback message</Label>
                                     <Input
                                       value={choice.feedback}
                                       onChange={(e) => {
-                                        const nextChoices = [...(block.decisionChoices || [])];
-                                        nextChoices[cIdx] = { ...choice, feedback: e.target.value };
-                                        handleUpdateBlockField(index, "decisionChoices", nextChoices);
+                                        const next = [...(block.decisionChoices || [])];
+                                        next[cIdx] = { ...choice, feedback: e.target.value };
+                                        handleUpdateBlockField(index, "decisionChoices", next);
                                       }}
-                                      className="text-xs h-7"
+                                      className="text-xs"
                                     />
                                   </div>
                                 </div>
                               ))}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const nextChoices = [...(block.decisionChoices || []), { label: "New Choice", correct: false, feedback: "Feedback..." }];
+                                  handleUpdateBlockField(index, "decisionChoices", nextChoices);
+                                }}
+                              >
+                                <Plus className="h-3 w-3 mr-1" /> Add Choice
+                              </Button>
                             </div>
                           </div>
                         )}
 
                         {block.type === "commitment" && (
-                          <div className="space-y-2 border-l-2 pl-3 border-amber-200">
+                          <div className="space-y-2 border-l-2 pl-3 border-teal-200">
                             <div>
-                              <Label className="text-xs">Instruction</Label>
+                              <Label className="text-xs">Commitment Header Instruction</Label>
                               <Input
                                 value={block.commitmentInstruction || ""}
                                 onChange={(e) => handleUpdateBlockField(index, "commitmentInstruction", e.target.value)}
@@ -1593,43 +1624,31 @@ export default function PlatformAdminCourses() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-xs font-semibold">Commitment Actions</Label>
-                              {block.commitmentOptions?.map((opt, oIdx) => (
-                                <div key={oIdx} className="grid grid-cols-3 gap-2 bg-slate-50 p-2 rounded border">
+                              <Label className="text-xs font-semibold">Commitment Options</Label>
+                              {block.commitmentOptions?.map((opt, kIdx) => (
+                                <div key={kIdx} className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
                                   <div>
-                                    <Label className="text-[9px]">Action Value Slug</Label>
-                                    <Input
-                                      value={opt.value}
-                                      onChange={(e) => {
-                                        const nextOpts = [...(block.commitmentOptions || [])];
-                                        nextOpts[oIdx] = { ...opt, value: e.target.value };
-                                        handleUpdateBlockField(index, "commitmentOptions", nextOpts);
-                                      }}
-                                      className="text-xs h-7"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label className="text-[9px]">Display Label</Label>
+                                    <Label className="text-[10px]">Commitment Label</Label>
                                     <Input
                                       value={opt.label}
                                       onChange={(e) => {
-                                        const nextOpts = [...(block.commitmentOptions || [])];
-                                        nextOpts[oIdx] = { ...opt, label: e.target.value };
-                                        handleUpdateBlockField(index, "commitmentOptions", nextOpts);
+                                        const next = [...(block.commitmentOptions || [])];
+                                        next[kIdx] = { ...opt, label: e.target.value };
+                                        handleUpdateBlockField(index, "commitmentOptions", next);
                                       }}
-                                      className="text-xs h-7"
+                                      className="text-xs"
                                     />
                                   </div>
                                   <div>
-                                    <Label className="text-[9px]">Description</Label>
+                                    <Label className="text-[10px]">Description</Label>
                                     <Input
                                       value={opt.description}
                                       onChange={(e) => {
-                                        const nextOpts = [...(block.commitmentOptions || [])];
-                                        nextOpts[oIdx] = { ...opt, description: e.target.value };
-                                        handleUpdateBlockField(index, "commitmentOptions", nextOpts);
+                                        const next = [...(block.commitmentOptions || [])];
+                                        next[kIdx] = { ...opt, description: e.target.value };
+                                        handleUpdateBlockField(index, "commitmentOptions", next);
                                       }}
-                                      className="text-xs h-7"
+                                      className="text-xs"
                                     />
                                   </div>
                                 </div>
@@ -1655,57 +1674,57 @@ export default function PlatformAdminCourses() {
               </div>
 
               {/* Sidebar Block Palette */}
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="py-3 bg-slate-50 border-b">
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider">Content Palette</CardTitle>
-                    <CardDescription className="text-[10px]">Insert layout components</CardDescription>
+              <div className="xl:col-span-4 space-y-4">
+                <Card className="border shadow-xs overflow-hidden">
+                  <CardHeader className="py-2.5 px-3.5 bg-slate-50 border-b">
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-700">Content Palette</CardTitle>
+                    <CardDescription className="text-[11px]">Insert layout components</CardDescription>
                   </CardHeader>
-                  <CardContent className="p-3 grid grid-cols-2 gap-2 text-xs">
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("heading")} className="justify-start gap-1">
-                      <FileText className="h-3.5 w-3.5" /> Heading
+                  <CardContent className="p-3 flex flex-col gap-1.5">
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("heading")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-slate-700 hover:bg-slate-50 shadow-none">
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-slate-500" /> <span className="truncate">Heading</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("short_text")} className="justify-start gap-1">
-                      <FileText className="h-3.5 w-3.5" /> Paragraph
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("short_text")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-slate-700 hover:bg-slate-50 shadow-none">
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-slate-500" /> <span className="truncate">Paragraph</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("key_message")} className="justify-start gap-1 text-emerald-600 border-emerald-200 bg-emerald-50/20">
-                      <AlertCircle className="h-3.5 w-3.5" /> Key Takeaway
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("key_message")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-emerald-700 border-emerald-200 bg-emerald-50/40 hover:bg-emerald-50 shadow-none">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> <span className="truncate">Key Takeaway</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("practical_action")} className="justify-start gap-1">
-                      <CheckCircle className="h-3.5 w-3.5" /> Green Action
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("practical_action")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-slate-700 hover:bg-slate-50 shadow-none">
+                      <CheckCircle className="h-3.5 w-3.5 shrink-0 text-slate-500" /> <span className="truncate">Green Action</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("workplace_example")} className="justify-start gap-1 text-blue-600 border-blue-200">
-                      <Info className="h-3.5 w-3.5" /> Job Example
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("workplace_example")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-blue-700 border-blue-200 bg-blue-50/30 hover:bg-blue-50 shadow-none">
+                      <Info className="h-3.5 w-3.5 shrink-0 text-blue-600" /> <span className="truncate">Job Example</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("mauritian_example")} className="justify-start gap-1 text-amber-700 border-amber-200 bg-amber-50/10">
-                      <Info className="h-3.5 w-3.5" /> Mauritius Info
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("mauritian_example")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-amber-800 border-amber-200 bg-amber-50/30 hover:bg-amber-50 shadow-none">
+                      <Info className="h-3.5 w-3.5 shrink-0 text-amber-600" /> <span className="truncate">Mauritius Info</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("image")} className="justify-start gap-1">
-                      <Eye className="h-3.5 w-3.5" /> Image Block
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("image")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-slate-700 hover:bg-slate-50 shadow-none">
+                      <Eye className="h-3.5 w-3.5 shrink-0 text-slate-500" /> <span className="truncate">Image Block</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("expandable")} className="justify-start gap-1">
-                      <Plus className="h-3.5 w-3.5" /> Click Reveal
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("expandable")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-slate-700 hover:bg-slate-50 shadow-none">
+                      <Plus className="h-3.5 w-3.5 shrink-0 text-slate-500" /> <span className="truncate">Click Reveal</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("reflection")} className="justify-start gap-1 text-rose-600 border-rose-200">
-                      <Edit className="h-3.5 w-3.5" /> reflection
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("reflection")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-rose-700 border-rose-200 bg-rose-50/30 hover:bg-rose-50 shadow-none">
+                      <Edit className="h-3.5 w-3.5 shrink-0 text-rose-600" /> <span className="truncate">Reflection</span>
                     </Button>
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader className="py-3 bg-slate-50 border-b">
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider">Interactive elements</CardTitle>
-                    <CardDescription className="text-[10px]">Add checks and decisions</CardDescription>
+                <Card className="border shadow-xs overflow-hidden">
+                  <CardHeader className="py-2.5 px-3.5 bg-slate-50 border-b">
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-700">Interactive Elements</CardTitle>
+                    <CardDescription className="text-[11px]">Add checks and decisions</CardDescription>
                   </CardHeader>
-                  <CardContent className="p-3 flex flex-col gap-2 text-xs">
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("multiple_choice")} className="justify-start gap-1 text-indigo-700 border-indigo-200">
-                      <HelpCircle className="h-3.5 w-3.5" /> Quick Practice MCQ
+                  <CardContent className="p-3 flex flex-col gap-1.5">
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("multiple_choice")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-indigo-700 border-indigo-200 bg-indigo-50/30 hover:bg-indigo-50 shadow-none">
+                      <HelpCircle className="h-3.5 w-3.5 shrink-0 text-indigo-600" /> <span className="truncate">Quick Practice MCQ</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("decision_scenario")} className="justify-start gap-1 text-indigo-700 border-indigo-200">
-                      <HelpCircle className="h-3.5 w-3.5" /> Interactive Decision
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("decision_scenario")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-emerald-700 border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50 shadow-none">
+                      <HelpCircle className="h-3.5 w-3.5 shrink-0 text-emerald-600" /> <span className="truncate">Interactive Decision</span>
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("commitment")} className="justify-start gap-1 text-emerald-700 border-emerald-200">
-                      <Award className="h-3.5 w-3.5" /> Commitment Checklist
+                    <Button type="button" variant="outline" size="sm" onClick={() => handleAddBlock("commitment")} className="w-full justify-start gap-2 h-8 px-2.5 text-xs text-teal-700 border-teal-200 bg-teal-50/30 hover:bg-teal-50 shadow-none">
+                      <Award className="h-3.5 w-3.5 shrink-0 text-teal-600" /> <span className="truncate">Commitment Checklist</span>
                     </Button>
                   </CardContent>
                 </Card>
